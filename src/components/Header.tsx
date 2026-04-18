@@ -39,9 +39,13 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40">
-      {/* Announcement bar */}
-      <div className="relative overflow-hidden bg-foreground text-background">
+    <header className={`sticky top-0 z-40 transition-colors duration-300 ${scrolled ? "bg-background shadow-[0_4px_20px_-12px_rgba(0,0,0,0.25)]" : "bg-transparent"}`}>
+      {/* Announcement bar — hides on scroll */}
+      <div
+        className={`relative overflow-hidden bg-foreground text-background transition-all duration-300 ${
+          scrolled ? "max-h-0 opacity-0" : "max-h-9 opacity-100"
+        }`}
+      >
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/30 to-transparent bg-[length:200%_100%] animate-[shimmer_4s_linear_infinite]" />
         <div className="relative mx-auto flex h-9 max-w-7xl items-center justify-between gap-4 px-4 text-[12px]">
           <p className="hidden sm:block">
@@ -61,7 +65,7 @@ export default function Header() {
       {/* Floating pill navbar */}
       <div
         className={`transition-all duration-300 ${
-          scrolled ? "px-2 pt-2 md:px-4 md:pt-3" : "px-3 pt-3 md:px-6 md:pt-4"
+          scrolled ? "px-2 py-2 md:px-4 md:py-2" : "px-3 pt-3 md:px-6 md:pt-4"
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 md:gap-3">
@@ -69,7 +73,11 @@ export default function Header() {
           <Link
             to="/"
             aria-label="HobbyShop"
-            className="group relative flex shrink-0 items-center justify-center rounded-2xl border border-border bg-background/90 px-4 py-2 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.18)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_40px_-10px_rgba(230,0,35,0.35)] md:rounded-3xl md:px-6 md:py-3"
+            className={`group relative flex shrink-0 items-center justify-center rounded-2xl px-4 py-2 transition-all hover:-translate-y-0.5 md:rounded-3xl md:px-6 md:py-3 ${
+              scrolled
+                ? "border border-transparent bg-transparent shadow-none"
+                : "border border-border bg-background/90 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.18)] backdrop-blur-xl hover:shadow-[0_12px_40px_-10px_rgba(230,0,35,0.35)]"
+            }`}
           >
             <span className="pointer-events-none absolute inset-0 -z-10 rounded-2xl bg-primary/10 opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100 md:rounded-3xl" />
             <img
@@ -82,7 +90,13 @@ export default function Header() {
           </Link>
 
           {/* Center action card */}
-          <div className="flex items-center gap-1 rounded-full border border-border bg-background/90 px-2 py-1.5 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.18)] backdrop-blur-xl md:gap-1 md:px-3 md:py-2">
+          <div
+            className={`flex items-center gap-1 rounded-full px-2 py-1.5 transition-all md:gap-1 md:px-3 md:py-2 ${
+              scrolled
+                ? "border border-transparent bg-transparent shadow-none"
+                : "border border-border bg-background/90 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.18)] backdrop-blur-xl"
+            }`}
+          >
             {/* Mobile menu */}
             <button
               onClick={() => setMobileOpen((v) => !v)}
