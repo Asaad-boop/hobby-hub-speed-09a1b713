@@ -1,7 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { zodValidator, fallback } from "@tanstack/zod-adapter";
-import { z } from "zod";
 import { products, newArrivals } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import { Filter, SlidersHorizontal, Store } from "lucide-react";
@@ -9,13 +7,21 @@ import { Filter, SlidersHorizontal, Store } from "lucide-react";
 const allProducts = [...products, ...newArrivals];
 const categories = ["All", ...Array.from(new Set(allProducts.map((p) => p.category)))];
 
-const searchSchema = z.object({
-  category: fallback(z.string(), "All").default("All"),
-  sort: fallback(z.enum(["popular", "price-asc", "price-desc", "rating"]), "popular").default("popular"),
-});
+type SortKey = "popular" | "price-asc" | "price-desc" | "rating";
+
+type ShopSearch = {
+  category: string;
+  sort: SortKey;
+};
+
+const VALID_SORTS: SortKey[] = ["popular", "price-asc", "price-desc", "rating"];
 
 export const Route = createFileRoute("/shop")({
-  validateSearch: zodValidator(searchSchema),
+  validateSearch: (raw: Record<string, unknown>): ShopSearch => {
+    const category = typeof raw.category === "string" ? raw.category : "All";
+    const sort = VALID_SORTS.includes(raw.sort as SortKey) ? (raw.sort as SortKey) : "popular";
+    return { category, sort };
+  },
   head: () => ({
     meta: [
       { title: "Shop All Products — HobbyShop" },
@@ -29,6 +35,7 @@ export const Route = createFileRoute("/shop")({
 
 function ShopPage() {
   const { category, sort } = Route.useSearch();
+  const navigate = useNavigate({ from: "/shop" });
 
   const filtered = useMemo(() => {
     let list = category === "All" ? allProducts : allProducts.filter((p) => p.category === category);
@@ -58,14 +65,13 @@ function ShopPage() {
       {/* Filter bar */}
       <div className="sticky top-0 z-10 -mx-4 mt-6 border-b border-border bg-background/90 px-4 py-3 backdrop-blur md:top-16">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          {/* Categories */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
             <Filter className="h-4 w-4 shrink-0 text-muted-foreground" />
             {categories.map((cat) => (
               <Link
                 key={cat}
                 to="/shop"
-                search={(prev) => ({ ...prev, category: cat })}
+                search={(prev: ShopSearch) => ({ ...prev, category: cat })}
                 className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                   category === cat
                     ? "bg-primary text-primary-foreground shadow-md"
@@ -77,16 +83,14 @@ function ShopPage() {
             ))}
           </div>
 
-          {/* Sort */}
           <div className="flex items-center gap-2">
             <SlidersHorizontal className="h-4 w-4 shrink-0 text-muted-foreground" />
             <select
               value={sort}
               onChange={(e) => {
-                const url = new URL(window.location.href);
-                url.searchParams.set("sort", e.target.value);
-                window.history.pushState({}, "", url.toString());
-                window.dispatchEvent(new PopStateEvent("popstate"));
+                navigate({
+                  search: (prev: ShopSearch) => ({ ...prev, sort: e.target.value as SortKey }),
+                });
               }}
               className="h-9 rounded-full border border-border bg-background px-3 text-xs font-semibold outline-none focus:border-primary"
             >
@@ -99,7 +103,6 @@ function ShopPage() {
         </div>
       </div>
 
-      {/* Grid */}
       {filtered.length === 0 ? (
         <div className="mt-16 text-center">
           <p className="text-muted-foreground">No products found in this category.</p>
