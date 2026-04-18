@@ -98,7 +98,7 @@ function ReelCard({
   return (
     <div
       ref={containerRef}
-      className="group relative aspect-[9/16] w-[78vw] max-w-[320px] shrink-0 snap-start overflow-hidden rounded-3xl border border-border bg-foreground shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-elevated)] sm:w-72 md:w-64 lg:w-72"
+      className="group relative aspect-[9/16] w-[72vw] max-w-[300px] shrink-0 snap-start overflow-hidden rounded-3xl border border-border bg-foreground shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-elevated)] xs:w-[60vw] sm:w-[44vw] sm:max-w-[260px] md:w-[30vw] md:max-w-[260px] lg:w-[22vw] lg:max-w-[280px] xl:w-[260px]"
     >
       <video
         ref={videoRef}
