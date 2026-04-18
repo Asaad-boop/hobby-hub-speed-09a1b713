@@ -67,7 +67,7 @@ export default function Footer() {
             <Heart className="ml-1 h-5 w-5 fill-primary text-primary" />
           </Link>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-            Curated gadgets, decor &amp; gifts shipped fast across Bangladesh. Free delivery over ৳1500 — Cash on
+            Curated gadgets, decor &amp; gifts shipped fast across Bangladesh. Free delivery over ৳1990 — Cash on
             Delivery nationwide.
           </p>
 
