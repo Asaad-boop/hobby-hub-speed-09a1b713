@@ -189,6 +189,9 @@ function FullscreenViewer({
   const [isDragging, setIsDragging] = useState(false);
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [likeBurst, setLikeBurst] = useState(false);
+  const [floatingHearts, setFloatingHearts] = useState<{ id: number; x: number; y: number }[]>([]);
+  const lastTapRef = useRef<{ t: number; x: number; y: number } | null>(null);
+  const heartIdRef = useRef(0);
   const touchStartRef = useRef<{ y: number; t: number } | null>(null);
   const mouseStartRef = useRef<{ y: number; t: number } | null>(null);
   const reel = reels[index];
