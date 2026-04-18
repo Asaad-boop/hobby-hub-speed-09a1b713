@@ -39,7 +39,7 @@ export default function Footer() {
       <div className="relative border-b border-border/60">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 py-6 sm:grid-cols-4 md:py-8">
           {[
-            { icon: Truck, label: "Free Delivery", desc: "Orders over ৳1500" },
+            { icon: Truck, label: "Free Delivery", desc: "Orders over ৳1990" },
             { icon: ShieldCheck, label: "100% Authentic", desc: "Verified products" },
             { icon: RotateCcw, label: "Easy Returns", desc: "7-day exchange" },
             { icon: CreditCard, label: "Cash on Delivery", desc: "Pay on arrival" },
