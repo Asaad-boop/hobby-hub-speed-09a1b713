@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Play, Volume2, VolumeX, ShoppingBag, Zap, Star, Video, Maximize2, X, ChevronUp, ChevronDown } from "lucide-react";
+import { Play, Volume2, VolumeX, ShoppingBag, Zap, Star, Video, Maximize2, X, ChevronUp, ChevronDown, Heart, Share2 } from "lucide-react";
+import { toast } from "sonner";
 import { products, newArrivals, type Product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import reelLamp from "@/assets/reel-lamp.mp4.asset.json";
@@ -186,6 +187,8 @@ function FullscreenViewer({
   const [index, setIndex] = useState(startIndex);
   const [dragY, setDragY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [liked, setLiked] = useState<Record<string, boolean>>({});
+  const [likeBurst, setLikeBurst] = useState(false);
   const touchStartRef = useRef<{ y: number; t: number } | null>(null);
   const mouseStartRef = useRef<{ y: number; t: number } | null>(null);
   const reel = reels[index];
