@@ -100,11 +100,11 @@ export default function Footer() {
         <div className="md:col-span-2">
           <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground">Shop</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/" className="transition hover:text-primary">All Products</Link></li>
-            <li><Link to="/" className="transition hover:text-primary">New Arrivals</Link></li>
-            <li><Link to="/" className="transition hover:text-primary">Best Sellers</Link></li>
-            <li><Link to="/" className="transition hover:text-primary">Flash Sale</Link></li>
-            <li><Link to="/" className="transition hover:text-primary">Gift Cards</Link></li>
+            <li><Link to="/shop" className="transition hover:text-primary">All Products</Link></li>
+            <li><Link to="/shop" search={{ category: "Home Decor", sort: "popular" }} className="transition hover:text-primary">Home Decor</Link></li>
+            <li><Link to="/shop" search={{ category: "Gadgets", sort: "popular" }} className="transition hover:text-primary">Gadgets</Link></li>
+            <li><Link to="/shop" search={{ category: "DIY Kits", sort: "popular" }} className="transition hover:text-primary">DIY Kits</Link></li>
+            <li><Link to="/wishlist" className="transition hover:text-primary">Wishlist</Link></li>
           </ul>
         </div>
 
@@ -112,11 +112,10 @@ export default function Footer() {
         <div className="md:col-span-2">
           <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground">Help</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/" className="transition hover:text-primary">About Us</Link></li>
-            <li><Link to="/" className="transition hover:text-primary">Contact</Link></li>
-            <li><Link to="/" className="transition hover:text-primary">Shipping</Link></li>
-            <li><Link to="/" className="transition hover:text-primary">Returns</Link></li>
-            <li><Link to="/" className="transition hover:text-primary">FAQ</Link></li>
+            <li><Link to="/about" className="transition hover:text-primary">About Us</Link></li>
+            <li><Link to="/contact" className="transition hover:text-primary">Contact</Link></li>
+            <li><Link to="/shipping" className="transition hover:text-primary">Shipping & Returns</Link></li>
+            <li><Link to="/faq" className="transition hover:text-primary">FAQ</Link></li>
           </ul>
         </div>
 
@@ -169,9 +168,9 @@ export default function Footer() {
             <span>in Bangladesh</span>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/" className="transition hover:text-primary">Privacy</Link>
+            <Link to="/privacy" className="transition hover:text-primary">Privacy</Link>
             <span className="opacity-40">•</span>
-            <Link to="/" className="transition hover:text-primary">Terms</Link>
+            <Link to="/terms" className="transition hover:text-primary">Terms</Link>
           </div>
         </div>
       </div>
