@@ -141,6 +141,9 @@ function Index() {
         </div>
       </section>
 
+      {/* Watch & Shop reels */}
+      <WatchAndShop />
+
       {/* Trending */}
       <section id="trending" className="mx-auto max-w-7xl px-4 py-10">
         <div className="mb-6 flex items-end justify-between">
