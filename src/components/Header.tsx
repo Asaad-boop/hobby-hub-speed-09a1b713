@@ -72,7 +72,7 @@ export default function Header() {
       {/* Main navbar */}
       <div
         className={`transition-all duration-500 ${
-          scrolled ? "py-2" : "py-3 md:py-4"
+          scrolled ? "py-1" : "py-1.5 md:py-2"
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 md:gap-6 md:px-6">
