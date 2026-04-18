@@ -115,18 +115,52 @@ function Index() {
       </section>
 
       {/* Categories */}
-      <section className="mx-auto max-w-7xl px-4 py-10">
-        <h2 className="mb-6 text-2xl font-bold">Shop by Category</h2>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-          {categories.map(({ name, icon: Icon }) => (
+      <section className="mx-auto max-w-7xl px-4 py-14">
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
+              <Sparkles className="h-3 w-3" /> Browse Collections
+            </span>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight md:text-4xl">
+              Shop by <span className="text-primary">Category</span>
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">Find exactly what you need across our curated collections</p>
+          </div>
+          <a href="#trending" className="hidden items-center gap-1 text-sm font-semibold text-primary hover:underline md:inline-flex">
+            View all <ArrowRight className="h-4 w-4" />
+          </a>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
+          {categories.map(({ name, icon: Icon, count, tone }) => (
             <button
               key={name}
-              className="group flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-card p-6 transition hover:-translate-y-1 hover:border-primary hover:shadow-[var(--shadow-elevated)]"
+              className="group relative overflow-hidden rounded-3xl border border-border bg-card p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[var(--shadow-elevated)]"
             >
-              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-muted text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
-                <Icon className="h-6 w-6" />
-              </span>
-              <span className="text-sm font-semibold">{name}</span>
+              {/* Decorative gradient blob */}
+              <div
+                className={`pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-gradient-to-br ${tone} opacity-10 blur-2xl transition-opacity duration-300 group-hover:opacity-30`}
+              />
+
+              <div className="relative flex items-start justify-between">
+                <span
+                  className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${tone} text-white shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
+                >
+                  <Icon className="h-6 w-6" />
+                </span>
+                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
+                  {count}
+                </span>
+              </div>
+
+              <div className="relative mt-5">
+                <h3 className="text-sm font-bold leading-tight text-foreground md:text-base">
+                  {name}
+                </h3>
+                <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary opacity-0 transition-all duration-300 group-hover:opacity-100">
+                  Shop now <ArrowRight className="h-3 w-3" />
+                </span>
+              </div>
             </button>
           ))}
         </div>
