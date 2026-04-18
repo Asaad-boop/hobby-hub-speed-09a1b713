@@ -132,7 +132,7 @@ function Index() {
         </div>
 
         {/* Mobile: 5 columns compact icon grid */}
-        <div className="grid grid-cols-5 gap-2 sm:hidden">
+        <div className="grid grid-cols-4 gap-2 sm:hidden">
           {categories.map(({ name, icon: Icon, tone }) => (
             <button
               key={name}
