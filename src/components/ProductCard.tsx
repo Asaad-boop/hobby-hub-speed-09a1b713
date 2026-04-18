@@ -1,14 +1,15 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Star, ShoppingBag, Zap, Heart, Eye } from "lucide-react";
-import { useState } from "react";
 import type { Product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
+import { useWishlist } from "@/lib/wishlist";
 import { toast } from "sonner";
 
 export default function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
+  const { has, toggle } = useWishlist();
   const navigate = useNavigate();
-  const [liked, setLiked] = useState(false);
+  const liked = has(product.id);
   const off = Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100);
   const lowStock = product.stock <= 8;
 
@@ -52,8 +53,8 @@ export default function ProductCard({ product }: { product: Product }) {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            setLiked((v) => !v);
-            toast.success(liked ? "Removed from wishlist" : "Added to wishlist");
+            const added = toggle(product);
+            toast.success(added ? "Added to wishlist" : "Removed from wishlist");
           }}
           aria-label="Add to wishlist"
           className="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-background/90 text-foreground shadow-md backdrop-blur transition hover:scale-110 hover:bg-background md:right-3 md:top-3 md:h-9 md:w-9"
