@@ -75,8 +75,8 @@ export default function Header() {
             aria-label="HobbyShop"
             className={`group relative flex shrink-0 items-center justify-center rounded-2xl px-4 py-2 transition-all hover:-translate-y-0.5 md:rounded-3xl md:px-6 md:py-3 ${
               scrolled
-                ? "border border-transparent bg-transparent shadow-none"
-                : "border border-border bg-background/90 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.18)] backdrop-blur-xl hover:shadow-[0_12px_40px_-10px_rgba(230,0,35,0.35)]"
+                ? "border border-border bg-background/95 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.18)] backdrop-blur-xl hover:shadow-[0_12px_40px_-10px_rgba(230,0,35,0.35)]"
+                : "border border-transparent bg-transparent shadow-none"
             }`}
           >
             <span className="pointer-events-none absolute inset-0 -z-10 rounded-2xl bg-primary/10 opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100 md:rounded-3xl" />
@@ -84,7 +84,7 @@ export default function Header() {
               src={logo}
               alt="HobbyShop"
               className={`w-auto transition-all duration-300 group-hover:scale-105 ${
-                scrolled ? "h-8 md:h-10" : "h-9 md:h-12"
+                scrolled ? "h-8 brightness-100 md:h-10" : "h-9 brightness-0 invert md:h-12"
               }`}
             />
           </Link>
@@ -93,8 +93,8 @@ export default function Header() {
           <div
             className={`flex items-center gap-1 rounded-full px-2 py-1.5 transition-all md:gap-1 md:px-3 md:py-2 ${
               scrolled
-                ? "border border-transparent bg-transparent shadow-none"
-                : "border border-border bg-background/90 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.18)] backdrop-blur-xl"
+                ? "border border-border bg-background/95 text-foreground shadow-[0_8px_30px_-10px_rgba(0,0,0,0.18)] backdrop-blur-xl"
+                : "border border-transparent bg-transparent text-background shadow-none"
             }`}
           >
             {/* Mobile menu */}
