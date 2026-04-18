@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, notFound, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { getProduct, products, newArrivals, testimonials } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
@@ -21,6 +21,10 @@ import {
   Share2,
   Clock,
   Users,
+  Flame,
+  Gift,
+  Sparkles,
+  ThumbsUp,
 } from "lucide-react";
 
 export const Route = createFileRoute("/product/$id")({
@@ -49,6 +53,33 @@ export const Route = createFileRoute("/product/$id")({
   ),
 });
 
+function CountdownTimer() {
+  const [time, setTime] = useState({ h: 5, m: 59, s: 59 });
+  useEffect(() => {
+    const t = setInterval(() => {
+      setTime((p) => {
+        let { h, m, s } = p;
+        s--;
+        if (s < 0) { s = 59; m--; }
+        if (m < 0) { m = 59; h--; }
+        if (h < 0) { h = 5; m = 59; s = 59; }
+        return { h, m, s };
+      });
+    }, 1000);
+    return () => clearInterval(t);
+  }, []);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return (
+    <div className="flex items-center gap-1.5 font-mono text-sm font-bold">
+      <span className="rounded-md bg-foreground px-2 py-1 text-background">{pad(time.h)}</span>
+      <span>:</span>
+      <span className="rounded-md bg-foreground px-2 py-1 text-background">{pad(time.m)}</span>
+      <span>:</span>
+      <span className="rounded-md bg-foreground px-2 py-1 text-background">{pad(time.s)}</span>
+    </div>
+  );
+}
+
 function ProductPage() {
   const { product } = Route.useLoaderData();
   const { add } = useCart();
@@ -57,6 +88,7 @@ function ProductPage() {
   const [activeImg, setActiveImg] = useState(product.image);
   const [qty, setQty] = useState(1);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [activeTab, setActiveTab] = useState<"desc" | "specs" | "ship">("desc");
   const allOthers = [...products, ...newArrivals].filter((p) => p.id !== product.id);
   const [bundle, setBundle] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = { [product.id]: true };
@@ -85,9 +117,7 @@ function ProductPage() {
     const url = typeof window !== "undefined" ? window.location.href : "";
     try {
       if (navigator.share) await navigator.share({ title: product.title, url });
-      else {
-        await navigator.clipboard.writeText(url);
-      }
+      else await navigator.clipboard.writeText(url);
     } catch {}
   };
 
@@ -99,9 +129,26 @@ function ProductPage() {
   ];
 
   const wished = wishHas(product.id);
+  const ratingBreakdown = [
+    { stars: 5, pct: 78 },
+    { stars: 4, pct: 16 },
+    { stars: 3, pct: 4 },
+    { stars: 2, pct: 1 },
+    { stars: 1, pct: 1 },
+  ];
 
   return (
     <div className="pb-28 md:pb-0">
+      {/* Top urgency bar */}
+      <div className="bg-primary text-primary-foreground">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-2 px-4 py-2 text-xs font-semibold sm:text-sm">
+          <Flame className="h-4 w-4 animate-pulse" />
+          <span>Flash Sale ends in</span>
+          <CountdownTimer />
+          <span className="hidden sm:inline">• Free Delivery on orders over ৳1500</span>
+        </div>
+      </div>
+
       {/* Breadcrumb */}
       <div className="border-b border-border bg-muted/30">
         <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-3 text-xs text-muted-foreground">
@@ -115,24 +162,29 @@ function ProductPage() {
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-6 md:grid-cols-2 md:py-10">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-6 md:grid-cols-2 md:gap-12 md:py-10">
         {/* Gallery */}
         <div className="md:sticky md:top-24 md:self-start">
-          <div className="group relative overflow-hidden rounded-3xl border border-border bg-muted">
-            <span className="absolute left-3 top-3 z-10 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground shadow-lg">
-              -{off}% OFF
-            </span>
+          <div className="group relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-muted to-muted/50 shadow-[var(--shadow-card)]">
+            <div className="absolute left-3 top-3 z-10 flex flex-col gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-extrabold text-primary-foreground shadow-lg">
+                <Flame className="h-3 w-3" /> -{off}% OFF
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-foreground px-3 py-1.5 text-xs font-bold text-background shadow-lg">
+                <BadgeCheck className="h-3 w-3" /> Best Seller
+              </span>
+            </div>
             <button
               onClick={() => wishToggle(product)}
               aria-label="Wishlist"
-              className="absolute right-3 top-3 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full bg-background/90 backdrop-blur transition hover:scale-110"
+              className="absolute right-3 top-3 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full bg-background/90 shadow-md backdrop-blur transition hover:scale-110"
             >
               <Heart className={`h-5 w-5 ${wished ? "fill-primary text-primary" : "text-foreground"}`} />
             </button>
             <button
               onClick={handleShare}
               aria-label="Share"
-              className="absolute right-3 top-16 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full bg-background/90 backdrop-blur transition hover:scale-110"
+              className="absolute right-3 top-16 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full bg-background/90 shadow-md backdrop-blur transition hover:scale-110"
             >
               <Share2 className="h-4 w-4" />
             </button>
@@ -141,8 +193,11 @@ function ProductPage() {
               alt={product.title}
               width={1024}
               height={1024}
-              className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+              className="aspect-square h-full w-full object-cover transition duration-700 group-hover:scale-110"
             />
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-background/90 px-3 py-1 text-[11px] font-semibold backdrop-blur">
+              <span className="inline-flex items-center gap-1"><Users className="h-3 w-3 text-primary" /> 47 people viewing now</span>
+            </div>
           </div>
           <div className="mt-3 grid grid-cols-4 gap-2">
             {[product.image, product.image, product.image, product.image].map((src, i) => (
@@ -150,154 +205,210 @@ function ProductPage() {
                 key={i}
                 onClick={() => setActiveImg(src)}
                 className={`overflow-hidden rounded-xl border-2 bg-muted transition ${
-                  activeImg === src ? "border-primary" : "border-border hover:border-primary/50"
+                  activeImg === src ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"
                 }`}
               >
                 <img src={src} alt="" className="aspect-square w-full object-cover" />
               </button>
             ))}
           </div>
-
-          {/* Trust row under gallery (desktop) */}
-          <div className="mt-5 hidden grid-cols-3 gap-3 md:grid">
-            <div className="rounded-2xl border border-border bg-card p-3 text-center">
-              <Truck className="mx-auto mb-1 h-5 w-5 text-primary" />
-              <p className="text-[11px] font-semibold">Fast Delivery</p>
-              <p className="text-[10px] text-muted-foreground">2-4 days</p>
-            </div>
-            <div className="rounded-2xl border border-border bg-card p-3 text-center">
-              <RotateCcw className="mx-auto mb-1 h-5 w-5 text-primary" />
-              <p className="text-[11px] font-semibold">7-Day Return</p>
-              <p className="text-[10px] text-muted-foreground">Easy exchange</p>
-            </div>
-            <div className="rounded-2xl border border-border bg-card p-3 text-center">
-              <ShieldCheck className="mx-auto mb-1 h-5 w-5 text-primary" />
-              <p className="text-[11px] font-semibold">100% Authentic</p>
-              <p className="text-[10px] text-muted-foreground">Quality assured</p>
-            </div>
-          </div>
         </div>
 
         {/* Info */}
         <div>
-          <span className="inline-block rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
-            {product.category}
-          </span>
-          <h1 className="mt-2 text-2xl font-extrabold tracking-tight md:text-4xl">{product.title}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-block rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
+              {product.category}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
+              <Sparkles className="h-3 w-3" /> Trending
+            </span>
+          </div>
+          <h1 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight md:text-4xl lg:text-5xl">
+            {product.title}
+          </h1>
 
           <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 font-semibold">
-              <Star className="h-3.5 w-3.5 fill-primary text-primary" /> {product.rating}
-            </span>
-            <span className="text-muted-foreground">({product.reviews} reviews)</span>
-            <span className="inline-flex items-center gap-1 text-muted-foreground">
-              <Users className="h-3.5 w-3.5" /> 200+ sold this week
+            <div className="flex items-center gap-0.5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+              ))}
+            </div>
+            <span className="font-bold">{product.rating}</span>
+            <Link to="/" hash="reviews" className="text-muted-foreground underline-offset-2 hover:underline">
+              ({product.reviews} reviews)
+            </Link>
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+              <ThumbsUp className="h-3 w-3" /> 98% recommend
             </span>
           </div>
 
-          <div className="mt-5 flex items-baseline gap-3">
-            <span className="text-4xl font-extrabold text-foreground">৳{product.price}</span>
-            <span className="text-lg text-muted-foreground line-through">৳{product.oldPrice}</span>
-            <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-bold text-primary-foreground">-{off}%</span>
+          {/* Price card */}
+          <div className="mt-5 rounded-3xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-5">
+            <div className="flex items-baseline gap-3">
+              <span className="text-5xl font-extrabold text-foreground">৳{product.price}</span>
+              <span className="text-xl text-muted-foreground line-through">৳{product.oldPrice}</span>
+              <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-extrabold text-primary-foreground">-{off}%</span>
+            </div>
+            <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary">
+              <Gift className="h-3.5 w-3.5" /> You save ৳{product.oldPrice - product.price}
+            </p>
           </div>
-          <p className="mt-1 text-sm font-semibold text-primary">You save ৳{product.oldPrice - product.price}</p>
 
           {/* Stock + urgency */}
-          <div className="mt-4 rounded-2xl border border-primary/30 bg-primary/5 p-3">
+          <div className="mt-4 rounded-2xl border-2 border-primary/30 bg-primary/5 p-4">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-primary">🔥 Only {product.stock} left in stock!</span>
+              <span className="inline-flex items-center gap-1 font-extrabold text-primary">
+                <Flame className="h-4 w-4 animate-pulse" /> Hurry! Only {product.stock} left
+              </span>
               <span className="inline-flex items-center gap-1 text-muted-foreground">
-                <Clock className="h-3 w-3" /> Order in 2h for today's dispatch
+                <Clock className="h-3 w-3" /> Order now for today's dispatch
               </span>
             </div>
-            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-background">
+            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-background">
               <div
-                className="h-full bg-primary transition-all"
+                className="h-full bg-gradient-to-r from-primary to-primary/70 transition-all"
                 style={{ width: `${Math.min(100, (product.stock / 25) * 100)}%` }}
               />
             </div>
           </div>
 
+          {/* Benefits */}
           <ul className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {product.benefits.map((b: string) => (
-              <li key={b} className="flex items-center gap-2 rounded-xl bg-muted/50 px-3 py-2 text-sm">
-                <Check className="h-4 w-4 shrink-0 text-primary" /> {b}
+              <li key={b} className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5 text-sm font-medium">
+                <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/15">
+                  <Check className="h-3 w-3 text-primary" />
+                </span>
+                {b}
               </li>
             ))}
           </ul>
 
-          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{product.description}</p>
-
           {/* Quantity */}
-          <div className="mt-6 flex items-center gap-4">
-            <span className="text-sm font-semibold">Quantity:</span>
-            <div className="inline-flex items-center rounded-full border border-border">
+          <div className="mt-6 flex flex-wrap items-center gap-4">
+            <span className="text-sm font-bold">Quantity:</span>
+            <div className="inline-flex items-center rounded-full border-2 border-border">
               <button
                 onClick={() => setQty((q) => Math.max(1, q - 1))}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-l-full hover:bg-muted"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-l-full hover:bg-muted"
                 aria-label="Decrease"
               >
                 <Minus className="h-4 w-4" />
               </button>
-              <span className="w-10 text-center text-sm font-bold">{qty}</span>
+              <span className="w-12 text-center text-base font-extrabold">{qty}</span>
               <button
                 onClick={() => setQty((q) => Math.min(product.stock, q + 1))}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-r-full hover:bg-muted"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-r-full hover:bg-muted"
                 aria-label="Increase"
               >
                 <Plus className="h-4 w-4" />
               </button>
             </div>
-            {qty > 1 && <span className="text-xs text-muted-foreground">Subtotal: ৳{product.price * qty} (save ৳{saved})</span>}
+            {qty > 1 && (
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
+                Subtotal ৳{product.price * qty} • Save ৳{saved}
+              </span>
+            )}
           </div>
 
           {/* CTA */}
-          <div className="mt-5 grid grid-cols-2 gap-3">
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <button
               onClick={() => add(product, qty)}
-              className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-foreground bg-background px-4 py-3.5 text-sm font-bold text-foreground transition hover:bg-foreground hover:text-background"
+              className="group inline-flex items-center justify-center gap-2 rounded-full border-2 border-foreground bg-background px-4 py-4 text-sm font-extrabold text-foreground transition hover:bg-foreground hover:text-background"
             >
-              <ShoppingBag className="h-4 w-4" /> Add to Cart
+              <ShoppingBag className="h-4 w-4 transition group-hover:scale-110" /> Add to Cart
             </button>
             <button
               onClick={handleBuyNow}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-3.5 text-sm font-bold text-primary-foreground shadow-[var(--shadow-card)] transition hover:opacity-90"
+              className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-primary px-4 py-4 text-sm font-extrabold text-primary-foreground shadow-[var(--shadow-card)] transition hover:shadow-2xl"
             >
-              <Zap className="h-4 w-4" /> Buy Now
+              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+              <Zap className="h-4 w-4 fill-current" /> Buy Now — ৳{product.price * qty}
             </button>
           </div>
 
           {/* Help */}
           <a
             href="tel:+8801700000000"
-            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-muted px-4 py-3 text-sm font-semibold transition hover:bg-muted/70"
+            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-muted px-4 py-3 text-sm font-bold transition hover:bg-muted/70"
           >
-            <Phone className="h-4 w-4 text-primary" /> Need help? Call us — 01700-000000
+            <Phone className="h-4 w-4 text-primary" /> Order by Call: 01700-000000
           </a>
 
-          {/* Badges */}
-          <div className="mt-5 flex flex-wrap gap-2 text-xs">
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1.5 font-semibold">
-              <Truck className="h-3.5 w-3.5 text-primary" /> COD Available
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1.5 font-semibold">
-              <BadgeCheck className="h-3.5 w-3.5 text-primary" /> Delivery 2-4 days
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1.5 font-semibold">
-              <ShieldCheck className="h-3.5 w-3.5 text-primary" /> 100% Authentic
-            </span>
+          {/* Trust badges */}
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            <div className="rounded-2xl border border-border bg-card p-3 text-center">
+              <Truck className="mx-auto mb-1 h-5 w-5 text-primary" />
+              <p className="text-[11px] font-bold">Cash on Delivery</p>
+              <p className="text-[10px] text-muted-foreground">All over BD</p>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-3 text-center">
+              <RotateCcw className="mx-auto mb-1 h-5 w-5 text-primary" />
+              <p className="text-[11px] font-bold">7-Day Return</p>
+              <p className="text-[10px] text-muted-foreground">Easy exchange</p>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-3 text-center">
+              <ShieldCheck className="mx-auto mb-1 h-5 w-5 text-primary" />
+              <p className="text-[11px] font-bold">100% Authentic</p>
+              <p className="text-[10px] text-muted-foreground">Quality assured</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Frequently Bought Together */}
+      {/* Tabbed details */}
       <section className="mx-auto max-w-7xl px-4 py-10">
-        <h2 className="mb-4 text-2xl font-extrabold">Frequently Bought Together</h2>
-        <div className="rounded-3xl border border-border bg-card p-4 md:p-6">
+        <div className="rounded-3xl border border-border bg-card overflow-hidden">
+          <div className="flex border-b border-border">
+            {[
+              { k: "desc", l: "Description" },
+              { k: "specs", l: "What's Inside" },
+              { k: "ship", l: "Shipping & Returns" },
+            ].map((t) => (
+              <button
+                key={t.k}
+                onClick={() => setActiveTab(t.k as any)}
+                className={`flex-1 px-4 py-4 text-sm font-bold transition ${
+                  activeTab === t.k ? "border-b-2 border-primary text-primary" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t.l}
+              </button>
+            ))}
+          </div>
+          <div className="p-6 text-sm leading-relaxed text-muted-foreground">
+            {activeTab === "desc" && <p>{product.description}</p>}
+            {activeTab === "specs" && (
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {product.benefits.map((b) => (
+                  <li key={b} className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> {b}</li>
+                ))}
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Premium packaging</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> User manual included</li>
+              </ul>
+            )}
+            {activeTab === "ship" && (
+              <div className="space-y-2">
+                <p>📦 <strong>Inside Dhaka:</strong> 1-2 days delivery (৳60)</p>
+                <p>🚚 <strong>Outside Dhaka:</strong> 2-4 days delivery (৳120)</p>
+                <p>💵 <strong>Cash on Delivery</strong> available all over Bangladesh.</p>
+                <p>↩️ <strong>7-day easy return</strong> if product is defective or not as described.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Frequently Bought Together */}
+      <section className="mx-auto max-w-7xl px-4 py-6">
+        <h2 className="mb-4 text-2xl font-extrabold md:text-3xl">Frequently Bought Together</h2>
+        <div className="rounded-3xl border-2 border-border bg-gradient-to-br from-card to-muted/30 p-4 md:p-6">
           <div className="flex flex-wrap items-stretch gap-3">
             {bundleItems.map((b, idx) => (
               <div key={b.id} className="flex items-center gap-2">
-                <label className="flex min-w-[160px] flex-1 cursor-pointer items-center gap-3 rounded-2xl border-2 border-border p-3 transition hover:border-primary">
+                <label className="flex min-w-[180px] flex-1 cursor-pointer items-center gap-3 rounded-2xl border-2 border-border bg-background p-3 transition hover:border-primary">
                   <input
                     type="checkbox"
                     checked={!!bundle[b.id]}
@@ -306,9 +417,9 @@ function ProductPage() {
                   />
                   <img src={b.image} alt={b.title} className="h-16 w-16 rounded-xl object-cover" />
                   <div className="text-xs">
-                    <p className="line-clamp-2 font-semibold">{b.title}</p>
+                    <p className="line-clamp-2 font-bold">{b.title}</p>
                     <div className="mt-1 flex items-center gap-1.5">
-                      <span className="font-bold text-primary">৳{b.price}</span>
+                      <span className="font-extrabold text-primary">৳{b.price}</span>
                       <span className="text-[10px] text-muted-foreground line-through">৳{b.oldPrice}</span>
                     </div>
                   </div>
@@ -321,11 +432,15 @@ function ProductPage() {
             <div>
               <p className="text-xs text-muted-foreground">Bundle total</p>
               <p className="text-3xl font-extrabold">৳{bundleTotal}</p>
-              {bundleSave > 0 && <p className="text-xs font-semibold text-primary">Save ৳{bundleSave} on this bundle</p>}
+              {bundleSave > 0 && (
+                <p className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
+                  <Gift className="h-3 w-3" /> Save ৳{bundleSave} on this bundle
+                </p>
+              )}
             </div>
             <button
               onClick={() => bundleItems.forEach((b) => bundle[b.id] && add(b))}
-              className="rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground hover:opacity-90"
+              className="rounded-full bg-primary px-6 py-3.5 text-sm font-extrabold text-primary-foreground shadow-lg hover:opacity-90"
             >
               Add Bundle to Cart
             </button>
@@ -335,44 +450,52 @@ function ProductPage() {
 
       {/* Reviews */}
       <section className="mx-auto max-w-7xl px-4 py-10">
-        <div className="mb-5 flex items-end justify-between">
-          <div>
-            <h2 className="text-2xl font-extrabold">Customer Reviews</h2>
-            <div className="mt-1 flex items-center gap-2 text-sm">
-              <div className="flex">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                ))}
-              </div>
-              <span className="font-bold">{product.rating}</span>
-              <span className="text-muted-foreground">based on {product.reviews} reviews</span>
+        <h2 className="mb-5 text-2xl font-extrabold md:text-3xl">Customer Reviews</h2>
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="rounded-3xl border-2 border-border bg-card p-6 md:col-span-1">
+            <p className="text-5xl font-extrabold">{product.rating}</p>
+            <div className="mt-1 flex">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+              ))}
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">Based on {product.reviews} verified reviews</p>
+            <div className="mt-4 space-y-2">
+              {ratingBreakdown.map((r) => (
+                <div key={r.stars} className="flex items-center gap-2 text-xs">
+                  <span className="w-4 font-bold">{r.stars}★</span>
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                    <div className="h-full bg-primary" style={{ width: `${r.pct}%` }} />
+                  </div>
+                  <span className="w-8 text-right text-muted-foreground">{r.pct}%</span>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {reviews.map((r, i) => (
-            <div key={i} className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
-              <div className="flex items-center gap-1 text-primary">
-                {Array.from({ length: r.rating }).map((_, j) => (
-                  <Star key={j} className="h-4 w-4 fill-primary" />
-                ))}
+          <div className="grid gap-4 md:col-span-2">
+            {reviews.map((r, i) => (
+              <div key={i} className="rounded-2xl border border-border bg-card p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1 text-primary">
+                    {Array.from({ length: r.rating }).map((_, j) => (
+                      <Star key={j} className="h-4 w-4 fill-primary" />
+                    ))}
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                    <BadgeCheck className="h-3 w-3" /> Verified Purchase
+                  </span>
+                </div>
+                <p className="mt-2 text-sm leading-relaxed">{r.text}</p>
+                <p className="mt-2 text-xs font-semibold text-muted-foreground">— {r.name}, {r.location}</p>
               </div>
-              <p className="mt-2 text-sm leading-relaxed">{r.text}</p>
-              <div className="mt-3 flex items-center justify-between text-xs">
-                <p className="font-semibold text-muted-foreground">— {r.name}, {r.location}</p>
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary">
-                  <BadgeCheck className="h-3 w-3" />
-                  Verified
-                </span>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* FAQ */}
       <section className="mx-auto max-w-7xl px-4 py-10">
-        <h2 className="mb-5 text-2xl font-extrabold">Frequently Asked Questions</h2>
+        <h2 className="mb-5 text-2xl font-extrabold md:text-3xl">Frequently Asked Questions</h2>
         <div className="space-y-3">
           {faqs.map((f, i) => (
             <div key={i} className="overflow-hidden rounded-2xl border border-border bg-card">
@@ -391,7 +514,7 @@ function ProductPage() {
 
       {/* Cross-sell */}
       <section className="mx-auto max-w-7xl px-4 py-10">
-        <h2 className="mb-4 text-2xl font-extrabold">You May Also Like</h2>
+        <h2 className="mb-4 text-2xl font-extrabold md:text-3xl">You May Also Like</h2>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {related.map((p) => (
             <ProductCard key={p.id} product={p} />
@@ -399,25 +522,25 @@ function ProductPage() {
         </div>
       </section>
 
-      {/* Sticky mobile buy now */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur md:hidden">
+      {/* Sticky mobile buy bar */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-3 shadow-2xl backdrop-blur md:hidden">
         <div className="flex items-center gap-2">
           <button
             onClick={() => wishToggle(product)}
-            className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-border"
+            className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-border"
             aria-label="Wishlist"
           >
             <Heart className={`h-5 w-5 ${wished ? "fill-primary text-primary" : ""}`} />
           </button>
           <button
             onClick={() => add(product, qty)}
-            className="flex-1 rounded-full border-2 border-foreground py-3 text-sm font-bold"
+            className="flex-1 rounded-full border-2 border-foreground py-3 text-sm font-extrabold"
           >
             Add to Cart
           </button>
           <button
             onClick={handleBuyNow}
-            className="flex-1 rounded-full bg-primary py-3 text-sm font-bold text-primary-foreground"
+            className="flex-[1.3] rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground shadow-lg"
           >
             Buy ৳{product.price * qty}
           </button>
