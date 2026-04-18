@@ -627,6 +627,13 @@ function ProductPage() {
           </button>
         </div>
       </div>
+
+      <ReviewModal
+        open={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+        productTitle={product.title}
+        onSubmit={(r) => setUserReviews((prev) => [r, ...prev])}
+      />
     </div>
   );
 }
