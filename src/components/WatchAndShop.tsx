@@ -353,13 +353,99 @@ function FullscreenViewer({
           autoPlay
           playsInline
           className="absolute inset-0 h-full w-full object-cover"
-          onClick={() => {
-            const v = videoRef.current;
-            if (!v) return;
-            if (v.paused) v.play();
-            else v.pause();
+          onClick={(e) => {
+            const now = Date.now();
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const last = lastTapRef.current;
+            if (last && now - last.t < 300 && Math.hypot(x - last.x, y - last.y) < 40) {
+              lastTapRef.current = null;
+              setLiked((prev) => ({ ...prev, [reel.id]: true }));
+              setLikeBurst(true);
+              setTimeout(() => setLikeBurst(false), 600);
+              const id = ++heartIdRef.current;
+              setFloatingHearts((h) => [...h, { id, x, y }]);
+              setTimeout(() => setFloatingHearts((h) => h.filter((fh) => fh.id !== id)), 900);
+              return;
+            }
+            lastTapRef.current = { t: now, x, y };
+            setTimeout(() => {
+              if (lastTapRef.current && lastTapRef.current.t === now) {
+                const v = videoRef.current;
+                if (!v) return;
+                if (v.paused) v.play();
+                else v.pause();
+                lastTapRef.current = null;
+              }
+            }, 280);
           }}
         />
+
+        {/* Floating hearts at tap position */}
+        {floatingHearts.map((h) => (
+          <Heart
+            key={h.id}
+            className="pointer-events-none absolute z-20 h-16 w-16 -translate-x-1/2 -translate-y-1/2 fill-rose-500 text-rose-500 drop-shadow-lg animate-scale-in"
+            style={{ left: h.x, top: h.y }}
+          />
+        ))}
+
+        {/* Center like burst */}
+        {likeBurst && (
+          <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
+            <Heart className="h-32 w-32 animate-ping fill-rose-500 text-rose-500 opacity-80" />
+          </div>
+        )}
+
+        {/* Action rail — like & share */}
+        <div className="absolute bottom-56 right-3 z-10 flex flex-col items-center gap-4 sm:bottom-60 sm:right-4">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setLiked((prev) => {
+                const next = !prev[reel.id];
+                if (next) {
+                  setLikeBurst(true);
+                  setTimeout(() => setLikeBurst(false), 600);
+                }
+                return { ...prev, [reel.id]: next };
+              });
+            }}
+            aria-label={liked[reel.id] ? "Unlike" : "Like"}
+            className="group flex flex-col items-center gap-1"
+          >
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-background/15 text-background backdrop-blur-md transition hover:bg-background/25 group-active:scale-90">
+              <Heart className={`h-5 w-5 transition ${liked[reel.id] ? "scale-110 fill-rose-500 text-rose-500" : ""}`} />
+            </span>
+            <span className="text-[10px] font-bold text-background drop-shadow">
+              {(reel.product.reviews + (liked[reel.id] ? 1 : 0)).toLocaleString()}
+            </span>
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const shareData = {
+                title: reel.product.title,
+                text: reel.caption,
+                url: typeof window !== "undefined" ? window.location.href : "",
+              };
+              if (typeof navigator !== "undefined" && navigator.share) {
+                navigator.share(shareData).catch(() => {});
+              } else if (typeof navigator !== "undefined" && navigator.clipboard) {
+                navigator.clipboard.writeText(shareData.url);
+                toast.success("Link copied to clipboard");
+              }
+            }}
+            aria-label="Share"
+            className="group flex flex-col items-center gap-1"
+          >
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-background/15 text-background backdrop-blur-md transition hover:bg-background/25 group-active:scale-90">
+              <Share2 className="h-5 w-5" />
+            </span>
+            <span className="text-[10px] font-bold text-background drop-shadow">Share</span>
+          </button>
+        </div>
 
         {/* Live badge */}
         <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-background/15 px-2.5 py-1 text-[10px] font-bold text-background backdrop-blur-md">
