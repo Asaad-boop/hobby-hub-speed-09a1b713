@@ -12,6 +12,7 @@ import {
   RotateCcw,
   CreditCard,
   Heart,
+  Sparkles,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
