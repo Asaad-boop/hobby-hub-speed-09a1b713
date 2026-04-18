@@ -1,3 +1,4 @@
+// Footer with highlighted product-request CTA
 import { Link } from "@tanstack/react-router";
 import {
   Facebook,
