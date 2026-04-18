@@ -83,7 +83,6 @@ export default function Header() {
             className="group relative flex shrink-0 items-center"
           >
             <span className="pointer-events-none absolute -inset-2 -z-10 rounded-2xl bg-primary/0 blur-xl transition-all duration-500 group-hover:bg-primary/25" />
-            <span className="pointer-events-none absolute -inset-1.5 -z-10 rounded-2xl ring-0 ring-primary/0 transition-all duration-500 group-hover:ring-2 group-hover:ring-primary/40 group-hover:[box-shadow:0_0_24px_-4px_var(--primary)]" />
             <img
               src={logo}
               alt="HobbyShop"
