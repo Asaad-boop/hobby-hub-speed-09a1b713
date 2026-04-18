@@ -46,6 +46,12 @@ const reels: Reel[] = [
     caption: "Relax mode: ON 🌿",
     product: findProduct("aroma-diffuser"),
   },
+  {
+    id: "r5",
+    videoUrl: reelCustom1,
+    caption: "Trending now 🔥",
+    product: findProduct("diy-kit"),
+  },
 ];
 
 function ReelCard({ reel, muted, onUnmute }: { reel: Reel; muted: boolean; onUnmute: () => void }) {
