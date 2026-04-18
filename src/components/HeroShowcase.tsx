@@ -164,7 +164,7 @@ export default function HeroShowcase() {
         </div>
 
         {/* Right: product carousel */}
-        <div className="relative md:col-span-7">
+        <div className="relative hidden md:col-span-7 md:block">
           <div className="relative mx-auto aspect-[4/3] w-full max-w-2xl sm:aspect-[16/10]">
             {/* Glow */}
             <div className="absolute inset-8 rounded-full bg-gradient-to-br from-primary/40 to-primary/0 blur-3xl" />
