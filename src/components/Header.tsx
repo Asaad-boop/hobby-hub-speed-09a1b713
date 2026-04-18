@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Search, User, ShoppingBag, Menu, X, Heart, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
+import { useWishlist } from "@/lib/wishlist";
 import logo from "@/assets/logo.png";
 
 const categories = [
@@ -17,6 +18,7 @@ const categories = [
 
 export default function Header() {
   const { count, setOpen } = useCart();
+  const { count: wishCount } = useWishlist();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -121,13 +123,19 @@ export default function Header() {
               <Search className="h-[18px] w-[18px] transition-transform group-hover:scale-110" />
             </button>
 
-            {/* Wishlist (desktop) */}
-            <button
+            {/* Wishlist */}
+            <Link
+              to="/wishlist"
               aria-label="Wishlist"
-              className="group relative hidden h-11 w-11 items-center justify-center rounded-full text-foreground transition-all hover:bg-primary/10 hover:text-primary active:scale-95 md:inline-flex"
+              className="group relative inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-all hover:bg-primary/10 hover:text-primary active:scale-95 md:h-11 md:w-11"
             >
               <Heart className="h-[18px] w-[18px] transition-transform group-hover:scale-110" />
-            </button>
+              {wishCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 inline-flex h-[18px] min-w-[18px] animate-scale-in items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground ring-2 ring-background">
+                  {wishCount}
+                </span>
+              )}
+            </Link>
 
             {/* Cart */}
             <button
