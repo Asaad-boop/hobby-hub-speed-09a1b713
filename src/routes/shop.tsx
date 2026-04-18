@@ -1,3 +1,4 @@
+// Shop page — category filter + sort via search params
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { products, newArrivals } from "@/lib/products";
