@@ -172,6 +172,13 @@ export default function Header() {
             </nav>
           </div>
         )}
+        {/* Scroll progress */}
+        <div className="relative h-0.5 w-full bg-transparent">
+          <div
+            className="h-full bg-gradient-to-r from-primary via-primary to-primary/70 shadow-[0_0_8px_var(--primary)] transition-[width] duration-150 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
       </div>
     </header>
   );
