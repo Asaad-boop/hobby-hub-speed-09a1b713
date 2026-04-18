@@ -273,17 +273,7 @@ function ProductPage() {
             </div>
           </div>
 
-          {/* Benefits */}
-          <ul className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {product.benefits.map((b: string) => (
-              <li key={b} className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5 text-sm font-medium">
-                <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/15">
-                  <Check className="h-3 w-3 text-primary" />
-                </span>
-                {b}
-              </li>
-            ))}
-          </ul>
+          {/* Benefits removed */}
 
           {/* Quantity */}
           <div className="mt-6 flex flex-wrap items-center gap-4">
