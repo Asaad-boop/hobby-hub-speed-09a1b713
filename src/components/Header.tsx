@@ -60,20 +60,13 @@ export default function Header() {
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
 
-          {/* Logo slot — replace inner content with your <img> when ready */}
-          <Link to="/" className="group flex shrink-0 items-center gap-2" aria-label="HobbyShop">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary font-extrabold text-primary-foreground shadow-[var(--shadow-card)] transition group-hover:scale-105">
-              H
-            </span>
-            <span className="hidden text-xl font-extrabold leading-none tracking-tight sm:flex sm:flex-col">
-              <span className="flex items-baseline">
-                <span className="text-foreground">Hobby</span>
-                <span className="text-primary">Shop</span>
-              </span>
-              <span className="mt-0.5 text-[10px] font-medium tracking-[0.2em] text-muted-foreground">
-                PREMIUM · BD
-              </span>
-            </span>
+          {/* Logo */}
+          <Link to="/" className="group flex shrink-0 items-center" aria-label="HobbyShop — Touch Your Dream">
+            <img
+              src={logo}
+              alt="HobbyShop"
+              className="h-10 w-auto transition group-hover:scale-105 md:h-12"
+            />
           </Link>
 
           {/* Search */}
