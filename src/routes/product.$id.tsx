@@ -143,7 +143,7 @@ function ProductPage() {
               <p className="text-2xl font-extrabold">৳{bundleTotal}</p>
             </div>
             <button
-              onClick={() => bundleItems.forEach((b) => (bundle[b.id] ?? b.id === product.id) && add(b))}
+              onClick={() => bundleItems.forEach((b) => ((bundle[b.id] ?? b.id === product.id) ? add(b) : null))}
               className="rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground hover:opacity-90"
             >
               Add Bundle
