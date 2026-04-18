@@ -4,6 +4,7 @@ import { getProduct, products, newArrivals, testimonials } from "@/lib/products"
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import ProductCard from "@/components/ProductCard";
+import ReviewModal, { type NewReview } from "@/components/ReviewModal";
 import {
   Star,
   Truck,
