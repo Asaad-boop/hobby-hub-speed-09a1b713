@@ -101,6 +101,8 @@ function ProductPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [activeTab, setActiveTab] = useState<"desc" | "specs" | "ship">("desc");
   const allOthers = [...products, ...newArrivals].filter((p) => p.id !== product.id);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [userReviews, setUserReviews] = useState<NewReview[]>([]);
   const [bundle, setBundle] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = { [product.id]: true };
     allOthers.slice(0, 2).forEach((b) => (init[b.id] = true));
