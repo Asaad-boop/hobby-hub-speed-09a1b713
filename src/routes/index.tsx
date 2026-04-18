@@ -115,49 +115,49 @@ function Index() {
       </section>
 
       {/* Categories */}
-      <section className="mx-auto max-w-7xl px-4 py-14">
-        <div className="mb-8 flex items-end justify-between gap-4">
+      <section className="mx-auto max-w-7xl px-4 py-8 md:py-12">
+        <div className="mb-5 flex items-end justify-between gap-4 md:mb-6">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
               <Sparkles className="h-3 w-3" /> Browse Collections
             </span>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight md:text-4xl">
+            <h2 className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">
               Shop by <span className="text-primary">Category</span>
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">Find exactly what you need across our curated collections</p>
+            <p className="mt-1 text-xs text-muted-foreground md:text-sm">Find exactly what you need across our curated collections</p>
           </div>
-          <a href="#trending" className="hidden items-center gap-1 text-sm font-semibold text-primary hover:underline md:inline-flex">
-            View all <ArrowRight className="h-4 w-4" />
+          <a href="#trending" className="hidden items-center gap-1 text-xs font-semibold text-primary hover:underline md:inline-flex">
+            View all <ArrowRight className="h-3.5 w-3.5" />
           </a>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:gap-3 lg:grid-cols-4">
           {categories.map(({ name, icon: Icon, count, tone }) => (
             <button
               key={name}
-              className="group relative overflow-hidden rounded-3xl border border-border bg-card p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[var(--shadow-elevated)]"
+              className="group relative overflow-hidden rounded-2xl border border-border bg-card p-3 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-elevated)] md:p-4"
             >
               {/* Decorative gradient blob */}
               <div
-                className={`pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-gradient-to-br ${tone} opacity-10 blur-2xl transition-opacity duration-300 group-hover:opacity-30`}
+                className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br ${tone} opacity-10 blur-2xl transition-opacity duration-300 group-hover:opacity-30`}
               />
 
-              <div className="relative flex items-start justify-between">
+              <div className="relative flex items-start justify-between gap-2">
                 <span
-                  className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${tone} text-white shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
+                  className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${tone} text-white shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 md:h-10 md:w-10`}
                 >
-                  <Icon className="h-6 w-6" />
+                  <Icon className="h-4 w-4 md:h-5 md:w-5" />
                 </span>
-                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
+                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-bold text-muted-foreground md:text-[10px]">
                   {count}
                 </span>
               </div>
 
-              <div className="relative mt-5">
-                <h3 className="text-sm font-bold leading-tight text-foreground md:text-base">
+              <div className="relative mt-3">
+                <h3 className="text-xs font-bold leading-tight text-foreground md:text-sm">
                   {name}
                 </h3>
-                <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary opacity-0 transition-all duration-300 group-hover:opacity-100">
+                <span className="mt-1 hidden items-center gap-1 text-[11px] font-semibold text-primary opacity-0 transition-all duration-300 group-hover:opacity-100 md:inline-flex">
                   Shop now <ArrowRight className="h-3 w-3" />
                 </span>
               </div>
