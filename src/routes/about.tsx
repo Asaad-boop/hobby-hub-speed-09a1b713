@@ -22,11 +22,6 @@ const stats = [
   { icon: Heart, label: "Since", value: "Feb 2022" },
 ];
 
-const journey = [
-  { icon: Plane, title: "Drones", desc: "Where it all began — small, simple, but with a big vision." },
-  { icon: Watch, title: "Stylish Watches", desc: "Timepieces that match your vibe and personality." },
-  { icon: Home, title: "Aesthetic Decor", desc: "Room pieces that feel personal — not just useful." },
-];
 
 function AboutPage() {
   const [lang, setLang] = useState<"en" | "bn">("en");
