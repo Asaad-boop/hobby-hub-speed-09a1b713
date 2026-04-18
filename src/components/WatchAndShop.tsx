@@ -184,11 +184,44 @@ function FullscreenViewer({
   onClose: () => void;
 }) {
   const [index, setIndex] = useState(startIndex);
+  const [dragY, setDragY] = useState(0);
+  const touchStartRef = useRef<{ y: number; t: number } | null>(null);
   const reel = reels[index];
   const videoRef = useRef<HTMLVideoElement>(null);
   const { add } = useCart();
   const navigate = useNavigate();
   const off = Math.round(((reel.product.oldPrice - reel.product.price) / reel.product.oldPrice) * 100);
+
+  const goNext = () => setIndex((i) => Math.min(i + 1, reels.length - 1));
+  const goPrev = () => setIndex((i) => Math.max(i - 1, 0));
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = { y: e.touches[0].clientY, t: Date.now() };
+    setDragY(0);
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const dy = e.touches[0].clientY - touchStartRef.current.y;
+    if ((index === 0 && dy > 0) || (index === reels.length - 1 && dy < 0)) {
+      setDragY(dy * 0.3);
+    } else {
+      setDragY(dy);
+    }
+  };
+  const onTouchEnd = () => {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!start) return;
+    const dt = Date.now() - start.t;
+    const velocity = Math.abs(dragY) / Math.max(dt, 1);
+    const threshold = 80;
+    if (dragY < -threshold || (dragY < -30 && velocity > 0.4)) {
+      goNext();
+    } else if (dragY > threshold || (dragY > 30 && velocity > 0.4)) {
+      goPrev();
+    }
+    setDragY(0);
+  };
 
   useEffect(() => {
     const v = videoRef.current;
