@@ -29,9 +29,10 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40">
-      {/* Announcement bar */}
-      <div className="bg-foreground text-background">
-        <div className="mx-auto flex h-9 max-w-7xl items-center justify-between gap-4 px-4 text-[12px]">
+      {/* Announcement bar — animated marquee gradient */}
+      <div className="relative overflow-hidden bg-foreground text-background">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/30 to-transparent bg-[length:200%_100%] animate-[shimmer_4s_linear_infinite]" />
+        <div className="relative mx-auto flex h-9 max-w-7xl items-center justify-between gap-4 px-4 text-[12px]">
           <p className="hidden sm:block">
             🚚 Free delivery on orders over <span className="font-semibold">৳1,500</span>
           </p>
@@ -48,38 +49,50 @@ export default function Header() {
 
       {/* Main bar */}
       <div
-        className={`border-b border-border bg-background/95 backdrop-blur transition-shadow ${
-          scrolled ? "shadow-[var(--shadow-card)]" : ""
+        className={`border-b bg-background/80 backdrop-blur-xl transition-all duration-300 ${
+          scrolled
+            ? "border-border/80 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.18)]"
+            : "border-transparent shadow-none"
         }`}
       >
-        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:gap-6 md:py-4">
+        <div
+          className={`mx-auto flex max-w-7xl items-center gap-3 px-4 transition-all duration-300 md:gap-6 ${
+            scrolled ? "py-2 md:py-2.5" : "py-3 md:py-4"
+          }`}
+        >
           {/* Mobile menu toggle */}
           <button
             onClick={() => setMobileOpen((v) => !v)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition hover:bg-muted lg:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-all hover:bg-muted hover:scale-110 active:scale-95 lg:hidden"
             aria-label="Menu"
           >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <span className="relative inline-flex h-5 w-5 items-center justify-center">
+              <Menu className={`absolute h-5 w-5 transition-all duration-300 ${mobileOpen ? "rotate-90 opacity-0" : "rotate-0 opacity-100"}`} />
+              <X className={`absolute h-5 w-5 transition-all duration-300 ${mobileOpen ? "rotate-0 opacity-100" : "-rotate-90 opacity-0"}`} />
+            </span>
           </button>
 
           {/* Logo */}
-          <Link to="/" className="group flex shrink-0 items-center" aria-label="HobbyShop — Touch Your Dream">
+          <Link to="/" className="group relative flex shrink-0 items-center" aria-label="HobbyShop — Touch Your Dream">
+            <span className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-primary/20 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
             <img
               src={logo}
               alt="HobbyShop"
-              className="h-10 w-auto transition group-hover:scale-105 md:h-12"
+              className={`w-auto transition-all duration-300 group-hover:scale-105 group-hover:rotate-[-2deg] ${
+                scrolled ? "h-9 md:h-10" : "h-10 md:h-12"
+              }`}
             />
           </Link>
 
           {/* Search */}
-          <div className="relative hidden flex-1 md:block">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="group relative hidden flex-1 md:block">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
             <input
               type="search"
               placeholder="Search gadgets, gifts, decor…"
-              className="h-12 w-full rounded-full border border-border bg-muted pl-11 pr-28 text-sm outline-none transition focus:border-primary focus:bg-background focus:ring-2 focus:ring-primary/15"
+              className="h-12 w-full rounded-full border border-border bg-muted pl-11 pr-28 text-sm outline-none transition-all duration-300 focus:border-primary focus:bg-background focus:ring-4 focus:ring-primary/15 focus:shadow-[0_0_0_1px_var(--primary)]"
             />
-            <button className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90">
+            <button className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:scale-105 active:scale-95">
               Search
             </button>
           </div>
@@ -87,28 +100,29 @@ export default function Header() {
           {/* Right actions */}
           <div className="ml-auto flex items-center gap-1">
             <button
-              className="hidden h-10 items-center gap-2 rounded-full px-3 text-sm font-medium text-foreground transition hover:bg-muted lg:inline-flex"
+              className="group relative hidden h-10 items-center gap-2 overflow-hidden rounded-full px-3 text-sm font-medium text-foreground transition-all hover:bg-muted lg:inline-flex"
               aria-label="Account"
             >
-              <User className="h-5 w-5" />
+              <User className="h-5 w-5 transition-transform group-hover:scale-110" />
               <span className="hidden xl:inline">Account</span>
-              <ChevronDown className="hidden h-4 w-4 opacity-60 xl:inline" />
+              <ChevronDown className="hidden h-4 w-4 opacity-60 transition-transform group-hover:rotate-180 xl:inline" />
             </button>
             <button
-              className="hidden h-10 w-10 items-center justify-center rounded-full text-foreground transition hover:bg-muted md:inline-flex"
+              className="group hidden h-10 w-10 items-center justify-center rounded-full text-foreground transition-all hover:bg-muted md:inline-flex"
               aria-label="Wishlist"
             >
-              <Heart className="h-5 w-5" />
+              <Heart className="h-5 w-5 transition-all group-hover:scale-110 group-hover:fill-primary group-hover:text-primary" />
             </button>
             <button
               onClick={() => setOpen(true)}
-              className="relative inline-flex h-10 items-center gap-2 rounded-full px-3 text-foreground transition hover:bg-muted"
+              className="group relative inline-flex h-10 items-center gap-2 rounded-full px-3 text-foreground transition-all hover:bg-muted"
               aria-label="Cart"
             >
               <div className="relative">
-                <ShoppingBag className="h-5 w-5" />
+                <ShoppingBag className="h-5 w-5 transition-transform group-hover:scale-110 group-hover:-rotate-12" />
                 {count > 0 && (
-                  <span className="absolute -right-2 -top-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-bold text-primary-foreground ring-2 ring-background">
+                  <span className="absolute -right-2 -top-2 inline-flex h-5 min-w-5 animate-scale-in items-center justify-center rounded-full bg-primary px-1 text-[11px] font-bold text-primary-foreground ring-2 ring-background">
+                    <span className="absolute inset-0 -z-10 animate-ping rounded-full bg-primary opacity-40" />
                     {count}
                   </span>
                 )}
