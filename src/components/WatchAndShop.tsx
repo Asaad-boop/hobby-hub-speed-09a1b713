@@ -414,7 +414,7 @@ function FullscreenViewer({
 
       {/* Stage */}
       <div
-        className="relative h-full w-full overflow-hidden bg-foreground shadow-2xl select-none sm:h-[min(94vh,900px)] sm:w-auto sm:aspect-[9/16] sm:rounded-3xl sm:border sm:border-background/15"
+        className="relative h-full w-full overflow-hidden bg-foreground shadow-2xl select-none sm:h-[min(92vh,860px)] sm:w-auto sm:aspect-[9/16] sm:max-w-[min(92vw,484px)] sm:rounded-3xl sm:border sm:border-background/15"
         style={{
           transform: `translateY(${dragY}px)`,
           transition: dragY === 0 ? "transform 280ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
