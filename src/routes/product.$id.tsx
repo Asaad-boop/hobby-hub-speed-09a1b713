@@ -134,6 +134,45 @@ function ProductPage() {
     isUser: boolean;
   };
 
+  const seedPhotoMap: Record<number, string[]> = {
+    0: ["__r1", "__r2"],
+    1: ["__r3", "__r4"],
+  };
+  const seedDates = ["2 days ago", "1 week ago", "2 weeks ago", "1 month ago"];
+  const seedHelpful = [42, 28, 19, 11];
+
+  const allReviews = useMemo<DisplayReview[]>(() => {
+    const fromUser: DisplayReview[] = userReviews.map((r) => ({
+      name: r.name, location: r.location, rating: r.rating, text: r.text,
+      photos: r.photos, date: "Just now", helpful: 0, isUser: true,
+    }));
+    const fromSeed: DisplayReview[] = seedReviews.slice(0, 4).map((r, i) => ({
+      name: r.name, location: r.location, rating: r.rating, text: r.text,
+      photos: seedPhotoMap[i] ?? [],
+      date: seedDates[i % seedDates.length],
+      helpful: seedHelpful[i % seedHelpful.length],
+      isUser: false,
+    }));
+    return [...fromUser, ...fromSeed];
+  }, [userReviews, seedReviews]);
+
+  const filteredReviews = useMemo(() => {
+    let list = allReviews;
+    if (filter === "5") list = list.filter((r) => r.rating === 5);
+    else if (filter === "4") list = list.filter((r) => r.rating === 4);
+    else if (filter === "photos") list = list.filter((r) => r.photos.length > 0);
+    else if (filter === "helpful") list = [...list].sort((a, b) => b.helpful - a.helpful);
+    return list;
+  }, [allReviews, filter]);
+
+  const filterCounts = useMemo(() => ({
+    all: allReviews.length,
+    "5": allReviews.filter((r) => r.rating === 5).length,
+    "4": allReviews.filter((r) => r.rating === 4).length,
+    photos: allReviews.filter((r) => r.photos.length > 0).length,
+    helpful: allReviews.length,
+  }), [allReviews]);
+
   const handleBuyNow = () => {
     add(product, qty);
     navigate({ to: "/checkout" });
