@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Heart, Sparkles, Users, Award, Truck, Watch, Home, Plane } from "lucide-react";
+import { Heart, Sparkles, Users, Award, Truck, Watch, Home, Plane, Languages } from "lucide-react";
+import { useState } from "react";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
