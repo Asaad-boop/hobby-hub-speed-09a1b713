@@ -139,29 +139,21 @@ function Index() {
           </a>
         </div>
 
-        {/* Mobile: horizontal scroll */}
-        <div className="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-2 sm:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {categories.map(({ name, icon: Icon, count, tone }) => (
+        {/* Mobile: 5 columns compact icon grid */}
+        <div className="grid grid-cols-5 gap-2 sm:hidden">
+          {categories.map(({ name, icon: Icon, tone }) => (
             <button
               key={name}
-              className="group relative w-[44vw] shrink-0 snap-start overflow-hidden rounded-2xl border border-border bg-card p-3 text-left transition-all hover:border-primary/40 hover:shadow-[var(--shadow-elevated)]"
+              className="group flex flex-col items-center gap-1.5 rounded-xl p-1.5 text-center transition active:scale-95"
             >
-              <div
-                className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br ${tone} opacity-10 blur-2xl`}
-              />
-              <div className="relative flex items-start justify-between gap-2">
-                <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${tone} text-white shadow-md`}
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
-                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-bold text-muted-foreground">
-                  {count}
-                </span>
-              </div>
-              <div className="relative mt-3">
-                <h3 className="text-xs font-bold leading-tight text-foreground">{name}</h3>
-              </div>
+              <span
+                className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${tone} text-white shadow-md`}
+              >
+                <Icon className="h-5 w-5" />
+              </span>
+              <span className="line-clamp-2 text-[10px] font-semibold leading-tight text-foreground">
+                {name}
+              </span>
             </button>
           ))}
         </div>
