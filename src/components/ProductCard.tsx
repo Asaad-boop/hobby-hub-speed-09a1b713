@@ -19,7 +19,7 @@ export default function ProductCard({ product }: { product: Product }) {
       <Link
         to="/product/$id"
         params={{ id: product.id }}
-        className="relative block aspect-[4/5] overflow-hidden bg-muted md:aspect-square"
+        className="relative block aspect-square overflow-hidden bg-muted"
       >
         <img
           src={product.image}
