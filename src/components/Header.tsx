@@ -90,7 +90,7 @@ export default function Header() {
               height={1024}
               loading="lazy"
               className={`w-auto object-contain transition-all duration-500 group-hover:scale-105 ${
-                scrolled ? "h-9 md:h-11" : "h-11 md:h-14"
+                scrolled ? "h-7 md:h-8" : "h-8 md:h-10"
               }`}
             />
           </Link>
