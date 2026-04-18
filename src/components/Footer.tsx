@@ -39,7 +39,7 @@ export default function Footer() {
       <div className="relative border-b border-border/60">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 py-6 sm:grid-cols-4 md:py-8">
           {[
-            { icon: Truck, label: "Free Delivery", desc: "Orders over ৳1500" },
+            { icon: Truck, label: "Free Delivery", desc: "Orders over ৳1990" },
             { icon: ShieldCheck, label: "100% Authentic", desc: "Verified products" },
             { icon: RotateCcw, label: "Easy Returns", desc: "7-day exchange" },
             { icon: CreditCard, label: "Cash on Delivery", desc: "Pay on arrival" },
@@ -67,7 +67,7 @@ export default function Footer() {
             <Heart className="ml-1 h-5 w-5 fill-primary text-primary" />
           </Link>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-            Curated gadgets, decor &amp; gifts shipped fast across Bangladesh. Free delivery over ৳1500 — Cash on
+            Curated gadgets, decor &amp; gifts shipped fast across Bangladesh. Free delivery over ৳1990 — Cash on
             Delivery nationwide.
           </p>
 

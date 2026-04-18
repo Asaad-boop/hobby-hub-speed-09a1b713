@@ -14,9 +14,8 @@ export const Route = createFileRoute("/shipping")({
 });
 
 const zones = [
-  { area: "Inside Dhaka", time: "1 – 2 days", fee: "৳60", icon: MapPin },
-  { area: "Dhaka Suburb", time: "2 – 3 days", fee: "৳100", icon: MapPin },
-  { area: "Outside Dhaka", time: "3 – 5 days", fee: "৳130", icon: MapPin },
+  { area: "Inside Dhaka", time: "1 – 2 days", fee: "৳60 – ৳100", icon: MapPin, note: "Depends on product & weight" },
+  { area: "Outside Dhaka", time: "3 – 5 days", fee: "৳110 – ৳200", icon: MapPin, note: "Depends on product & weight" },
 ];
 
 const returnSteps = [
@@ -48,8 +47,8 @@ function ShippingPage() {
           <h2 className="text-xl font-extrabold md:text-2xl">Shipping Information</h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {zones.map(({ area, time, fee, icon: Icon }) => (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {zones.map(({ area, time, fee, icon: Icon, note }) => (
             <div key={area} className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
               <Icon className="h-6 w-6 text-primary" />
               <div className="mt-3 text-sm font-bold text-foreground">{area}</div>
@@ -57,6 +56,7 @@ function ShippingPage() {
                 <Clock className="h-3.5 w-3.5" /> {time}
               </div>
               <div className="mt-1 text-lg font-extrabold text-primary">{fee}</div>
+              <div className="mt-1 text-[11px] text-muted-foreground">{note}</div>
             </div>
           ))}
         </div>
@@ -64,7 +64,7 @@ function ShippingPage() {
         <div className="mt-6 flex items-start gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5">
           <Package className="h-5 w-5 shrink-0 text-emerald-600" />
           <div className="text-sm">
-            <div className="font-bold text-foreground">FREE Delivery on orders over ৳1500</div>
+            <div className="font-bold text-foreground">FREE Delivery on orders over ৳1990</div>
             <div className="mt-0.5 text-muted-foreground">No code needed — discount applied automatically at checkout.</div>
           </div>
         </div>
