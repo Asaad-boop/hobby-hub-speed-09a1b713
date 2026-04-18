@@ -114,6 +114,7 @@ export default function Footer() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/about" className="transition hover:text-primary">About Us</Link></li>
             <li><Link to="/contact" className="transition hover:text-primary">Contact</Link></li>
+            <li><Link to="/request" className="transition hover:text-primary">Request a Product</Link></li>
             <li><Link to="/shipping" className="transition hover:text-primary">Shipping & Returns</Link></li>
             <li><Link to="/faq" className="transition hover:text-primary">FAQ</Link></li>
           </ul>
