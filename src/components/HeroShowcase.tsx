@@ -164,99 +164,144 @@ export default function HeroShowcase() {
           </div>
         </div>
 
-        {/* Right: product carousel */}
+        {/* Right: premium product showcase */}
         <div className="relative hidden md:col-span-7 md:block">
-          <div className="relative mx-auto aspect-[4/3] w-full max-w-2xl sm:aspect-[16/10]">
-            {/* Glow */}
-            <div className="absolute inset-8 rounded-full bg-gradient-to-br from-primary/40 to-primary/0 blur-3xl" />
+          <div className="relative mx-auto w-full max-w-2xl">
+            {/* Ambient glows */}
+            <div className="pointer-events-none absolute -left-10 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-primary/30 blur-3xl" />
+            <div className="pointer-events-none absolute -right-10 top-10 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
 
-            {/* Stage */}
-            <div className="relative h-full w-full overflow-hidden rounded-[2rem] border border-background/10 bg-gradient-to-br from-background/5 to-background/0 shadow-[var(--shadow-elevated)] backdrop-blur">
+            {/* Main stage */}
+            <div className="relative aspect-[5/4] overflow-hidden rounded-[2.5rem] border border-background/15 bg-gradient-to-br from-background/[0.08] via-background/[0.04] to-transparent shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+              {/* Subtle grid */}
+              <div
+                className="pointer-events-none absolute inset-0 opacity-[0.08]"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)",
+                  backgroundSize: "32px 32px",
+                }}
+              />
+
+              {/* Slides */}
               {slides.map((p, i) => (
                 <div
                   key={p.id}
-                  className={`absolute inset-0 transition-all duration-700 ${
-                    i === active ? "opacity-100 scale-100" : "pointer-events-none opacity-0 scale-105"
+                  className={`absolute inset-0 transition-all duration-[900ms] ease-out ${
+                    i === active
+                      ? "opacity-100 scale-100"
+                      : "pointer-events-none opacity-0 scale-110"
                   }`}
                 >
+                  {/* Spotlight behind product */}
+                  <div className="absolute left-1/2 top-1/2 h-[70%] w-[70%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-radial from-primary/40 via-primary/10 to-transparent blur-2xl" />
                   <img
                     src={p.image}
                     alt={p.title}
-                    className="h-full w-full object-cover"
+                    className="absolute inset-0 h-full w-full object-cover"
                     loading={i === 0 ? "eager" : "lazy"}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
+                  {/* Vignette */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/10 to-foreground/30" />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.6)_100%)]" />
                 </div>
               ))}
 
-              {/* Product info card overlay */}
-              <div key={current.id} className="absolute inset-x-4 bottom-4 animate-fade-in md:inset-x-6 md:bottom-6">
-                <div className="flex items-end justify-between gap-3 rounded-2xl border border-background/15 bg-background/95 p-3 text-foreground shadow-[var(--shadow-elevated)] backdrop-blur md:p-4">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                        {current.category}
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-500">
-                        <Star className="h-3 w-3 fill-amber-500" /> {current.rating}
-                        <span className="text-muted-foreground">({current.reviews})</span>
-                      </span>
-                    </div>
-                    <h3 className="mt-1 truncate text-sm font-bold md:text-base">{current.title}</h3>
-                    <div className="mt-1 flex items-center gap-2">
-                      <span className="text-base font-extrabold text-primary md:text-lg">৳{current.price}</span>
-                      <span className="text-xs text-muted-foreground line-through">৳{current.oldPrice}</span>
-                      <span className="rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600">
-                        -{Math.round((1 - current.price / current.oldPrice) * 100)}%
-                      </span>
-                    </div>
-                  </div>
-                  <Link
-                    to="/product/$id"
-                    params={{ id: current.id }}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-md transition hover:scale-105"
-                  >
-                    View <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                </div>
-              </div>
-
-              {/* Floating badge */}
-              <div className="absolute left-3 top-3 hidden rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground shadow-md md:inline-flex md:items-center md:gap-1">
-                <Truck className="h-3 w-3" /> Free Delivery
+              {/* Top floating chips */}
+              <div className="absolute inset-x-5 top-5 flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground shadow-lg">
+                  <Truck className="h-3 w-3" /> Free Delivery
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-background/25 bg-background/15 px-3 py-1.5 text-[11px] font-bold text-background backdrop-blur-md">
+                  <Flame className="h-3 w-3 text-primary" /> Hot Pick
+                </span>
               </div>
 
               {/* Nav arrows */}
               <button
                 aria-label="Previous"
                 onClick={() => setActive((i) => (i - 1 + slides.length) % slides.length)}
-                className="absolute left-2 top-1/2 hidden -translate-y-1/2 items-center justify-center rounded-full bg-background/90 p-2 text-foreground shadow-md transition hover:scale-110 md:inline-flex"
+                className="group absolute left-4 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-background/20 bg-background/10 text-background backdrop-blur-md transition hover:bg-background hover:text-foreground hover:scale-110"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 aria-label="Next"
                 onClick={() => setActive((i) => (i + 1) % slides.length)}
-                className="absolute right-2 top-1/2 hidden -translate-y-1/2 items-center justify-center rounded-full bg-background/90 p-2 text-foreground shadow-md transition hover:scale-110 md:inline-flex"
+                className="group absolute right-4 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-background/20 bg-background/10 text-background backdrop-blur-md transition hover:bg-background hover:text-foreground hover:scale-110"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-5 w-5" />
               </button>
+
+              {/* Progress dots */}
+              <div className="absolute inset-x-0 top-[52%] hidden" />
+
+              {/* Bottom info — glass card */}
+              <div key={current.id} className="absolute inset-x-5 bottom-5 animate-fade-in">
+                <div className="relative overflow-hidden rounded-2xl border border-background/20 bg-background/10 p-4 text-background shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)] backdrop-blur-2xl">
+                  {/* Shine */}
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-background/60 to-transparent" />
+                  <div className="flex items-end justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+                          {current.category}
+                        </span>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-background/15 px-2 py-0.5 text-[11px] font-semibold text-background backdrop-blur">
+                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {current.rating}
+                          <span className="text-background/60">({current.reviews})</span>
+                        </span>
+                      </div>
+                      <h3 className="mt-2 truncate text-lg font-extrabold tracking-tight">{current.title}</h3>
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <span className="text-2xl font-extrabold text-background">৳{current.price}</span>
+                        <span className="text-sm text-background/50 line-through">৳{current.oldPrice}</span>
+                        <span className="rounded-md bg-emerald-500/90 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                          -{Math.round((1 - current.price / current.oldPrice) * 100)}% OFF
+                        </span>
+                      </div>
+                    </div>
+                    <Link
+                      to="/product/$id"
+                      params={{ id: current.id }}
+                      className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-[0_10px_30px_-10px_var(--primary)] transition hover:scale-105"
+                    >
+                      View <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </div>
+
+                  {/* Slide progress */}
+                  <div className="mt-3 flex items-center gap-1.5">
+                    {slides.map((_, i) => (
+                      <span
+                        key={i}
+                        className={`h-1 rounded-full transition-all duration-500 ${
+                          i === active ? "w-8 bg-primary" : "w-3 bg-background/25"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Thumbnails */}
-            <div className="mt-4 flex items-center justify-center gap-2">
+            <div className="mt-5 flex items-center justify-center gap-2.5">
               {slides.map((p, i) => (
                 <button
                   key={p.id}
                   onClick={() => setActive(i)}
                   aria-label={`Show ${p.title}`}
-                  className={`group relative h-14 w-14 overflow-hidden rounded-xl border-2 transition-all ${
+                  className={`group relative h-16 w-16 overflow-hidden rounded-2xl border-2 transition-all duration-300 ${
                     i === active
-                      ? "border-primary scale-110 shadow-[0_0_20px_-4px_var(--primary)]"
-                      : "border-background/20 opacity-60 hover:opacity-100"
+                      ? "border-primary scale-110 shadow-[0_0_25px_-4px_var(--primary)]"
+                      : "border-background/15 opacity-50 hover:opacity-100 hover:border-background/40"
                   }`}
                 >
                   <img src={p.image} alt={p.title} className="h-full w-full object-cover" />
+                  {i === active && (
+                    <span className="absolute inset-0 bg-gradient-to-t from-primary/30 to-transparent" />
+                  )}
                 </button>
               ))}
             </div>
