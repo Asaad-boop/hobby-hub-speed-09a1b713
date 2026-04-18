@@ -85,26 +85,26 @@ export default function HeroShowcase() {
         </div>
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 py-8 md:grid-cols-12 md:gap-10 md:py-20">
+      <div className="relative mx-auto grid max-w-7xl items-center gap-6 px-4 py-6 md:grid-cols-12 md:gap-8 md:py-12">
         {/* Left: copy + countdown */}
         <div className="animate-fade-in md:col-span-5">
           <span className="inline-flex items-center gap-2 rounded-full border border-background/20 bg-background/10 px-3 py-1 text-[11px] font-semibold backdrop-blur md:text-xs">
             <Flame className="h-3 w-3 text-primary" />
             Flash Sale · Trending in Bangladesh
           </span>
-          <h1 className="mt-4 text-[2.25rem] font-extrabold leading-[1.05] tracking-tight md:mt-5 md:text-6xl">
+          <h1 className="mt-3 text-[2rem] font-extrabold leading-[1.05] tracking-tight md:mt-4 md:text-5xl">
             Upgrade Your <br className="hidden md:block" />
             Space{" "}
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               Instantly.
             </span>
           </h1>
-          <p className="mt-3 max-w-md text-sm text-background/70 md:mt-4 md:text-base">
+          <p className="mt-2.5 max-w-md text-sm text-background/70 md:mt-3">
             Curated gadgets, decor & gifts shipped fast. Free delivery over ৳1500 — Cash on Delivery nationwide.
           </p>
 
           {/* Countdown */}
-          <div className="mt-5 flex w-full max-w-sm items-stretch gap-2 rounded-2xl border border-primary/30 bg-primary/10 p-2.5 backdrop-blur md:mt-6 md:w-auto md:max-w-none md:p-3">
+          <div className="mt-4 flex w-full max-w-sm items-stretch gap-2 rounded-2xl border border-primary/30 bg-primary/10 p-2 backdrop-blur md:mt-5 md:w-auto md:max-w-none md:p-2.5">
             <div className="flex items-center gap-2 pl-0.5 pr-1 md:pl-1 md:pr-2">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
                 <Zap className="h-4 w-4" />
@@ -131,23 +131,23 @@ export default function HeroShowcase() {
             </div>
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-2.5 md:mt-6 md:gap-3">
+          <div className="mt-4 flex flex-wrap gap-2.5 md:mt-5 md:gap-3">
             <a
               href="#trending"
-              className="group inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-[var(--shadow-elevated)] transition hover:scale-[1.02] sm:flex-none md:px-7 md:py-3.5"
+              className="group inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-[var(--shadow-elevated)] transition hover:scale-[1.02] sm:flex-none md:px-7 md:py-3"
             >
               Shop Now
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </a>
             <a
               href="#trending"
-              className="inline-flex flex-1 items-center justify-center rounded-full border border-background/30 bg-background/5 px-6 py-3 text-sm font-bold text-background backdrop-blur transition hover:bg-background/10 sm:flex-none md:px-7 md:py-3.5"
+              className="inline-flex flex-1 items-center justify-center rounded-full border border-background/30 bg-background/5 px-6 py-2.5 text-sm font-bold text-background backdrop-blur transition hover:bg-background/10 sm:flex-none md:px-7 md:py-3"
             >
               View Deals
             </a>
           </div>
 
-          <div className="mt-6 grid max-w-md grid-cols-3 gap-3 border-t border-background/15 pt-4 md:mt-8 md:gap-6 md:pt-5">
+          <div className="mt-5 grid max-w-md grid-cols-3 gap-3 border-t border-background/15 pt-3 md:mt-6 md:gap-6 md:pt-4">
             <div>
               <div className="text-lg font-extrabold md:text-xl">4.8★</div>
               <div className="mt-0.5 text-[9px] uppercase tracking-wider text-background/60 md:text-[10px]">12.4K Reviews</div>
@@ -165,7 +165,7 @@ export default function HeroShowcase() {
 
         {/* Right: product carousel */}
         <div className="relative md:col-span-7">
-          <div className="relative mx-auto aspect-square w-full max-w-2xl sm:aspect-[4/3]">
+          <div className="relative mx-auto aspect-[4/3] w-full max-w-2xl sm:aspect-[16/10]">
             {/* Glow */}
             <div className="absolute inset-8 rounded-full bg-gradient-to-br from-primary/40 to-primary/0 blur-3xl" />
 
