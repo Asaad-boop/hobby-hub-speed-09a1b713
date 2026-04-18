@@ -196,7 +196,7 @@ function ProductPage() {
                 if (sx == null) return;
                 const dx = e.changedTouches[0].clientX - sx;
                 if (Math.abs(dx) < 40) return;
-                const imgs = [product.image, product.image, product.image, product.image];
+                const imgs = product.gallery;
                 const cur = imgs.indexOf(activeImg);
                 const next = dx < 0 ? (cur + 1) % imgs.length : (cur - 1 + imgs.length) % imgs.length;
                 setActiveImg(imgs[next]);
@@ -216,7 +216,7 @@ function ProductPage() {
             </div>
           </div>
           <div className="mt-3 grid grid-cols-4 gap-2">
-            {[product.image, product.image, product.image, product.image].map((src, i) => (
+            {product.gallery.map((src: string, i: number) => (
               <button
                 key={i}
                 onClick={() => setActiveImg(src)}
