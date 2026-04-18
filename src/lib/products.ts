@@ -135,3 +135,24 @@ export const newArrivals: Product[] = [
 const allProducts = [...products, ...newArrivals];
 
 export const getProduct = (id: string) => allProducts.find((p) => p.id === id);
+
+export type Testimonial = {
+  productId: string;
+  name: string;
+  location: string;
+  rating: number;
+  text: string;
+};
+
+export const testimonials: Testimonial[] = [
+  { productId: "crystal-lamp", name: "Sumaiya Akter", location: "Chattogram", rating: 5, text: "Crystal lamp ta amar room er look totally change kore diyeche. Light ta khub soft and romantic. Packaging o neat cilo." },
+  { productId: "crystal-lamp", name: "Nusrat Jahan", location: "Dhaka", rating: 5, text: "Gift hisebe diyechilam, recipient onek khushi hoyeche. Battery backup o impressive. Highly recommended!" },
+  { productId: "magsafe-charger", name: "Tanvir Ahmed", location: "Sylhet", rating: 5, text: "iPhone 14 te perfect fit. Charging speed bhalo, magnet ta strong. Daam onujayi quality top notch." },
+  { productId: "magsafe-charger", name: "Rifat Hossain", location: "Khulna", rating: 4, text: "Cable included thakay extra kichu kinte hoyni. Anti-slip base ta really useful. Overall satisfied." },
+  { productId: "bt-speaker", name: "Mahmuda Rahman", location: "Rajshahi", rating: 5, text: "Sound quality outstanding! Bass ta clear, party te use korlam, sobai impressed. Battery o long lasting." },
+  { productId: "diy-kit", name: "Sakib Khan", location: "Dhaka", rating: 5, text: "Bachchara onek enjoy korche. Educational and fun dujoi. Quality of materials premium." },
+  { productId: "aroma-diffuser", name: "Farhana Islam", location: "Cumilla", rating: 5, text: "Ghorer environment ta totally peaceful hoye geche. LED light ta bonus. Worth every taka." },
+  { productId: "smartwatch", name: "Imran Hossain", location: "Barishal", rating: 5, text: "Fitness tracking accurate, battery 5 din easily jay. Display sharp. Best smartwatch in this price range." },
+  { productId: "mini-projector", name: "Tasnim Akhter", location: "Mymensingh", rating: 4, text: "Movie night er jonno perfect. Setup easy, picture quality dark room e khub bhalo. Recommended!" },
+  { productId: "ceramic-planter", name: "Rakibul Hasan", location: "Dhaka", rating: 5, text: "Plant include thakay extra koste hoyni. Ceramic quality premium, design minimalist and elegant." },
+];
