@@ -97,11 +97,11 @@ export default function Header() {
 
           {/* Desktop categories */}
           <nav className="hidden flex-1 items-center justify-center gap-0.5 lg:flex">
-            {categories.slice(0, 6).map((c) => (
+            {categories.map((c) => (
               <Link
                 key={c.label}
                 to={c.href}
-                className="group relative rounded-full px-3.5 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-primary"
+                className="group relative whitespace-nowrap rounded-full px-2.5 py-2 text-[13px] font-medium text-foreground/75 transition-colors hover:text-primary xl:px-3 xl:text-sm"
               >
                 <span className="relative z-10">{c.label}</span>
                 <span className="absolute inset-0 -z-0 scale-90 rounded-full bg-primary/8 opacity-0 transition-all duration-300 group-hover:scale-100 group-hover:opacity-100" />
