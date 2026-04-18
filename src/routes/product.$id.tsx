@@ -382,7 +382,7 @@ function ProductPage() {
             {activeTab === "desc" && <p>{product.description}</p>}
             {activeTab === "specs" && (
               <ul className="grid gap-2 sm:grid-cols-2">
-                {product.benefits.map((b) => (
+                {product.benefits.map((b: string) => (
                   <li key={b} className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> {b}</li>
                 ))}
                 <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Premium packaging</li>
