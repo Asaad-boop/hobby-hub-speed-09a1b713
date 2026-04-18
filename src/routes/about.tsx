@@ -130,9 +130,33 @@ function AboutPage() {
         )}
       </section>
 
-      {/* Product Request */}
-      <ProductRequestSection lang={lang} />
-
+      {/* Product Request CTA */}
+      <section className="mt-14 overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-6 shadow-[var(--shadow-card)] md:mt-16 md:p-10">
+        <div className="flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-4">
+            <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
+              <Search className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl">
+                {lang === "en" ? "Didn't find what you love?" : "আপনি যেটা খুঁজছেন সেটা পাননি?"}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base">
+                {lang === "en"
+                  ? "Tell us what you're looking for — share a link, image and price. We'll try to bring it for you."
+                  : "আপনার পছন্দের প্রোডাক্ট আমাদের জানান — লিংক, ছবি ও দাম দিন, আমরা চেষ্টা করবো নিয়ে আসতে।"}
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/request"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-md transition hover:scale-[1.03]"
+          >
+            <Send className="h-4 w-4" />
+            {lang === "en" ? "Request a Product" : "প্রোডাক্ট রিকোয়েস্ট করুন"}
+          </Link>
+        </div>
+      </section>
 
       {/* CTA */}
       <div className="mt-14 rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-8 text-center text-primary-foreground md:mt-16 md:p-12">
@@ -148,100 +172,5 @@ function AboutPage() {
         </Link>
       </div>
     </div>
-  );
-}
-
-function ProductRequestSection({ lang }: { lang: "en" | "bn" }) {
-  const [name, setName] = useState("");
-  const [contact, setContact] = useState("");
-  const [product, setProduct] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  const t = lang === "en"
-    ? {
-        title: "Didn't find what you love?",
-        sub: "Tell us what you're looking for — we'll try to bring it for you.",
-        name: "Your name",
-        contact: "Phone or email",
-        product: "What product are you looking for? (link, brand, details…)",
-        submit: "Send Request",
-        sending: "Sending…",
-        success: "Got it! We'll reach out soon 💌",
-        error: "Please fill in all fields.",
-      }
-    : {
-        title: "আপনি যেটা খুঁজছেন সেটা খুঁজে পাননি?",
-        sub: "আপনার পছন্দের প্রোডাক্ট আমাদের জানান, আমরা চেষ্টা করবো আপনার জন্য নিয়ে আসতে।",
-        name: "আপনার নাম",
-        contact: "ফোন অথবা ইমেইল",
-        product: "কোন প্রোডাক্ট খুঁজছেন? (লিংক, ব্র্যান্ড, ডিটেইলস…)",
-        submit: "রিকোয়েস্ট পাঠান",
-        sending: "পাঠানো হচ্ছে…",
-        success: "পেয়েছি! শীঘ্রই যোগাযোগ করব 💌",
-        error: "দয়া করে সব ঘর পূরণ করুন।",
-      };
-
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !contact.trim() || !product.trim()) {
-      toast.error(t.error);
-      return;
-    }
-    setSubmitting(true);
-    setTimeout(() => {
-      toast.success(t.success);
-      setName("");
-      setContact("");
-      setProduct("");
-      setSubmitting(false);
-    }, 600);
-  };
-
-  return (
-    <section className="mt-14 overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-6 shadow-[var(--shadow-card)] md:mt-16 md:p-10">
-      <div className="grid gap-8 md:grid-cols-5 md:gap-10">
-        <div className="md:col-span-2">
-          <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
-            <Search className="h-5 w-5" />
-          </span>
-          <h2 className="mt-4 text-2xl font-extrabold tracking-tight md:text-3xl">{t.title}</h2>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">{t.sub}</p>
-        </div>
-
-        <form onSubmit={onSubmit} className="space-y-3 md:col-span-3">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t.name}
-              className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-            <input
-              type="text"
-              value={contact}
-              onChange={(e) => setContact(e.target.value)}
-              placeholder={t.contact}
-              className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-          <textarea
-            value={product}
-            onChange={(e) => setProduct(e.target.value)}
-            placeholder={t.product}
-            rows={4}
-            className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-          />
-          <button
-            type="submit"
-            disabled={submitting}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground shadow-md transition hover:scale-[1.03] disabled:opacity-60"
-          >
-            <Send className="h-4 w-4" />
-            {submitting ? t.sending : t.submit}
-          </button>
-        </form>
-      </div>
-    </section>
   );
 }
