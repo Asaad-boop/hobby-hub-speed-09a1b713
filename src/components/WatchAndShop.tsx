@@ -185,7 +185,9 @@ function FullscreenViewer({
 }) {
   const [index, setIndex] = useState(startIndex);
   const [dragY, setDragY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const touchStartRef = useRef<{ y: number; t: number } | null>(null);
+  const mouseStartRef = useRef<{ y: number; t: number } | null>(null);
   const reel = reels[index];
   const videoRef = useRef<HTMLVideoElement>(null);
   const { add } = useCart();
@@ -223,6 +225,41 @@ function FullscreenViewer({
     setDragY(0);
   };
 
+  const onMouseDown = (e: React.MouseEvent) => {
+    mouseStartRef.current = { y: e.clientY, t: Date.now() };
+    setIsDragging(true);
+    setDragY(0);
+  };
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!mouseStartRef.current || !isDragging) return;
+    const dy = e.clientY - mouseStartRef.current.y;
+    if ((index === 0 && dy > 0) || (index === reels.length - 1 && dy < 0)) {
+      setDragY(dy * 0.3);
+    } else {
+      setDragY(dy);
+    }
+  };
+  const onMouseUp = () => {
+    const start = mouseStartRef.current;
+    mouseStartRef.current = null;
+    setIsDragging(false);
+    if (!start) return;
+    const dt = Date.now() - start.t;
+    const velocity = Math.abs(dragY) / Math.max(dt, 1);
+    const threshold = 80;
+    if (dragY < -threshold || (dragY < -30 && velocity > 0.4)) {
+      goNext();
+    } else if (dragY > threshold || (dragY > 30 && velocity > 0.4)) {
+      goPrev();
+    }
+    setDragY(0);
+  };
+  const onWheel = (e: React.WheelEvent) => {
+    if (Math.abs(e.deltaY) < 30) return;
+    if (e.deltaY > 0) goNext();
+    else goPrev();
+  };
+
   useEffect(() => {
     const v = videoRef.current;
     if (v) {
@@ -248,49 +285,57 @@ function FullscreenViewer({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/95 backdrop-blur-md animate-fade-in">
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/95 backdrop-blur-md animate-fade-in sm:p-4"
+      onWheel={onWheel}
+    >
       {/* Close */}
       <button
         onClick={onClose}
         aria-label="Close"
-        className="absolute right-4 top-4 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full bg-background/15 text-background backdrop-blur-md transition hover:bg-background/25"
+        className="absolute right-3 top-3 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full bg-background/15 text-background backdrop-blur-md transition hover:bg-background/25 sm:right-5 sm:top-5 sm:h-11 sm:w-11"
       >
         <X className="h-5 w-5" />
       </button>
 
       {/* Counter */}
-      <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full bg-background/15 px-3 py-1.5 text-xs font-bold text-background backdrop-blur-md">
+      <div className="absolute left-1/2 top-3 z-30 -translate-x-1/2 rounded-full bg-background/15 px-3 py-1.5 text-xs font-bold text-background backdrop-blur-md sm:top-5">
         {index + 1} / {reels.length}
       </div>
 
-      {/* Up/Down nav */}
+      {/* Up/Down nav — desktop only */}
       <button
-        onClick={() => setIndex((i) => Math.max(i - 1, 0))}
+        onClick={goPrev}
         disabled={index === 0}
         aria-label="Previous reel"
-        className="absolute right-6 top-1/2 z-20 inline-flex h-11 w-11 -translate-y-16 items-center justify-center rounded-full bg-background/15 text-background backdrop-blur-md transition hover:bg-background/25 disabled:opacity-30"
+        className="absolute right-6 top-1/2 z-30 hidden h-11 w-11 -translate-y-16 items-center justify-center rounded-full bg-background/15 text-background backdrop-blur-md transition hover:bg-background/25 hover:scale-110 disabled:opacity-30 disabled:hover:scale-100 md:inline-flex"
       >
         <ChevronUp className="h-5 w-5" />
       </button>
       <button
-        onClick={() => setIndex((i) => Math.min(i + 1, reels.length - 1))}
+        onClick={goNext}
         disabled={index === reels.length - 1}
         aria-label="Next reel"
-        className="absolute right-6 top-1/2 z-20 inline-flex h-11 w-11 translate-y-4 items-center justify-center rounded-full bg-background/15 text-background backdrop-blur-md transition hover:bg-background/25 disabled:opacity-30"
+        className="absolute right-6 top-1/2 z-30 hidden h-11 w-11 translate-y-4 items-center justify-center rounded-full bg-background/15 text-background backdrop-blur-md transition hover:bg-background/25 hover:scale-110 disabled:opacity-30 disabled:hover:scale-100 md:inline-flex"
       >
         <ChevronDown className="h-5 w-5" />
       </button>
 
-      {/* Reel stage */}
+      {/* Reel stage — fills mobile, contained on desktop */}
       <div
-        className="relative h-[min(90vh,900px)] aspect-[9/16] overflow-hidden rounded-3xl border border-background/15 bg-foreground shadow-2xl touch-pan-x"
+        className="relative h-full w-full overflow-hidden bg-foreground shadow-2xl select-none sm:h-[min(95vh,920px)] sm:w-auto sm:aspect-[9/16] sm:rounded-3xl sm:border sm:border-background/15"
         style={{
           transform: `translateY(${dragY}px)`,
-          transition: dragY === 0 ? "transform 250ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+          transition: dragY === 0 ? "transform 280ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+          cursor: isDragging ? "grabbing" : "grab",
         }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
       >
         <video
           ref={videoRef}
