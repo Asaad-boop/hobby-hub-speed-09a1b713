@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useRef } from "react";
 import heroImg from "@/assets/hero-lamp.jpg";
 import { products } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
-import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight } from "lucide-react";
+import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
