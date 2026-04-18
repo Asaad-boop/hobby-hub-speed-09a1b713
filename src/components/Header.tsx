@@ -175,25 +175,6 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Secondary category strip — desktop only, hides on scroll */}
-        <div
-          className={`mx-auto max-w-7xl overflow-hidden px-6 transition-all duration-500 ${
-            scrolled ? "max-h-0 opacity-0" : "mt-2 max-h-12 opacity-100"
-          }`}
-        >
-          <div className="hidden items-center justify-center gap-1 lg:flex">
-            {categories.slice(6).map((c) => (
-              <Link
-                key={c.label}
-                to={c.href}
-                className="rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
-              >
-                {c.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-
         {/* Expandable search */}
         <div
           className={`mx-auto max-w-7xl overflow-hidden px-4 transition-all duration-300 md:px-6 ${
