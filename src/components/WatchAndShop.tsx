@@ -7,6 +7,7 @@ import reelLamp from "@/assets/reel-lamp.mp4.asset.json";
 import reelCharger from "@/assets/reel-charger.mp4.asset.json";
 import reelSpeaker from "@/assets/reel-speaker.mp4.asset.json";
 import reelDiffuser from "@/assets/reel-diffuser.mp4.asset.json";
+import reelCustom1 from "@/assets/reel-custom-1.mp4";
 
 type Reel = {
   id: string;
