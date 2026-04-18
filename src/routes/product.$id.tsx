@@ -421,45 +421,112 @@ function ProductPage() {
 
       {/* Reviews */}
       <section className="mx-auto max-w-7xl px-4 py-10">
-        <h2 className="mb-5 text-2xl font-extrabold md:text-3xl">Customer Reviews</h2>
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-2xl font-extrabold md:text-3xl">Customer Reviews</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Real photos and feedback from verified buyers</p>
+          </div>
+          <button className="inline-flex items-center gap-2 rounded-full border-2 border-foreground px-4 py-2 text-xs font-bold transition hover:bg-foreground hover:text-background">
+            <MessageSquare className="h-4 w-4" /> Write a review
+          </button>
+        </div>
+
         <div className="grid gap-6 md:grid-cols-3">
-          <div className="rounded-3xl border-2 border-border bg-card p-6 md:col-span-1">
-            <p className="text-5xl font-extrabold">{product.rating}</p>
+          {/* Summary */}
+          <div className="rounded-3xl border-2 border-border bg-gradient-to-br from-primary/5 to-transparent p-6 md:col-span-1">
+            <div className="flex items-baseline gap-2">
+              <p className="text-5xl font-extrabold">{product.rating}</p>
+              <p className="text-sm font-semibold text-muted-foreground">/ 5.0</p>
+            </div>
             <div className="mt-1 flex">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star key={i} className="h-5 w-5 fill-primary text-primary" />
               ))}
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">Based on {product.reviews} verified reviews</p>
-            <div className="mt-4 space-y-2">
+            <p className="mt-1 text-sm text-muted-foreground">Based on {product.reviews.toLocaleString()} verified reviews</p>
+            <div className="mt-5 space-y-2">
               {ratingBreakdown.map((r) => (
                 <div key={r.stars} className="flex items-center gap-2 text-xs">
-                  <span className="w-4 font-bold">{r.stars}★</span>
+                  <span className="inline-flex w-8 items-center gap-0.5 font-bold">{r.stars}<Star className="h-3 w-3 fill-primary text-primary" /></span>
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                    <div className="h-full bg-primary" style={{ width: `${r.pct}%` }} />
+                    <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all" style={{ width: `${r.pct}%` }} />
                   </div>
-                  <span className="w-8 text-right text-muted-foreground">{r.pct}%</span>
+                  <span className="w-10 text-right font-semibold text-muted-foreground">{r.pct}%</span>
                 </div>
               ))}
             </div>
+            <div className="mt-5 flex items-center gap-2 rounded-2xl bg-primary/10 p-3">
+              <ThumbsUp className="h-5 w-5 shrink-0 text-primary" />
+              <p className="text-xs font-bold text-primary">98% of customers recommend this product</p>
+            </div>
           </div>
+
+          {/* Reviews list */}
           <div className="grid gap-4 md:col-span-2">
-            {reviews.map((r, i) => (
-              <div key={i} className="rounded-2xl border border-border bg-card p-5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-primary">
-                    {Array.from({ length: r.rating }).map((_, j) => (
-                      <Star key={j} className="h-4 w-4 fill-primary" />
-                    ))}
-                  </div>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                    <BadgeCheck className="h-3 w-3" /> Verified Purchase
-                  </span>
-                </div>
-                <p className="mt-2 text-sm leading-relaxed">{r.text}</p>
-                <p className="mt-2 text-xs font-semibold text-muted-foreground">— {r.name}, {r.location}</p>
+            {/* Customer photo strip */}
+            <div className="rounded-2xl border border-border bg-card p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="inline-flex items-center gap-2 text-sm font-bold">
+                  <Camera className="h-4 w-4 text-primary" /> Customer photos (28)
+                </p>
+                <button className="text-xs font-semibold text-primary hover:underline">View all</button>
               </div>
-            ))}
+              <div className="grid grid-cols-4 gap-2">
+                {[review1, review2, review3, review4].map((src, i) => (
+                  <button key={i} className="group relative overflow-hidden rounded-xl border border-border">
+                    <img src={src} alt="Customer photo" loading="lazy" width={512} height={512} className="aspect-square w-full object-cover transition group-hover:scale-110" />
+                    <span className="absolute inset-0 bg-foreground/0 transition group-hover:bg-foreground/10" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {reviews.slice(0, 4).map((r, i) => {
+              const avatars = [avatar1, avatar2, avatar3, avatar4];
+              const photos = [review1, review2, review3, review4];
+              const dates = ["2 days ago", "1 week ago", "2 weeks ago", "1 month ago"];
+              const helpful = [42, 28, 19, 11];
+              return (
+                <div key={i} className="rounded-2xl border border-border bg-card p-5 transition hover:border-primary/40 hover:shadow-md">
+                  <div className="flex items-start gap-3">
+                    <img src={avatars[i % avatars.length]} alt={r.name} loading="lazy" width={48} height={48} className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-primary/20" />
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-bold">{r.name}</p>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                          <BadgeCheck className="h-3 w-3" /> Verified Purchase
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{r.location} • {dates[i % dates.length]}</p>
+                      <div className="mt-2 flex items-center gap-1 text-primary">
+                        {Array.from({ length: r.rating }).map((_, j) => (
+                          <Star key={j} className="h-4 w-4 fill-primary" />
+                        ))}
+                      </div>
+                      <p className="mt-2 text-sm leading-relaxed text-foreground">{r.text}</p>
+                      {i < 2 && (
+                        <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                          {photos.slice(0, 2).map((src, j) => (
+                            <img key={j} src={src} alt="Review photo" loading="lazy" width={512} height={512} className="aspect-square w-full rounded-lg border border-border object-cover" />
+                          ))}
+                        </div>
+                      )}
+                      <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+                        <button className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1 font-semibold transition hover:border-primary hover:text-primary">
+                          <ThumbsUp className="h-3 w-3" /> Helpful ({helpful[i % helpful.length]})
+                        </button>
+                        <span>•</span>
+                        <button className="font-semibold hover:text-primary">Reply</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            <button className="mx-auto mt-2 inline-flex items-center gap-2 rounded-full border-2 border-border bg-card px-6 py-3 text-sm font-bold transition hover:border-primary hover:text-primary">
+              Load more reviews <ChevronDown className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </section>
