@@ -188,13 +188,29 @@ function ProductPage() {
             >
               <Share2 className="h-4 w-4" />
             </button>
-            <img
-              src={activeImg}
-              alt={product.title}
-              width={1024}
-              height={1024}
-              className="aspect-square h-full w-full object-cover transition duration-700 group-hover:scale-110"
-            />
+            <div
+              className="touch-pan-y select-none"
+              onTouchStart={(e) => ((e.currentTarget as any)._sx = e.touches[0].clientX)}
+              onTouchEnd={(e) => {
+                const sx = (e.currentTarget as any)._sx as number | undefined;
+                if (sx == null) return;
+                const dx = e.changedTouches[0].clientX - sx;
+                if (Math.abs(dx) < 40) return;
+                const imgs = [product.image, product.image, product.image, product.image];
+                const cur = imgs.indexOf(activeImg);
+                const next = dx < 0 ? (cur + 1) % imgs.length : (cur - 1 + imgs.length) % imgs.length;
+                setActiveImg(imgs[next]);
+              }}
+            >
+              <img
+                src={activeImg}
+                alt={product.title}
+                width={1024}
+                height={1024}
+                className="aspect-square h-full w-full object-cover transition duration-700 group-hover:scale-110"
+                draggable={false}
+              />
+            </div>
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-background/90 px-3 py-1 text-[11px] font-semibold backdrop-blur">
               <span className="inline-flex items-center gap-1"><Users className="h-3 w-3 text-primary" /> 47 people viewing now</span>
             </div>
