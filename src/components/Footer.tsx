@@ -1,29 +1,179 @@
 import { Link } from "@tanstack/react-router";
+import {
+  Facebook,
+  Instagram,
+  Youtube,
+  Mail,
+  Phone,
+  MapPin,
+  Send,
+  ShieldCheck,
+  Truck,
+  RotateCcw,
+  CreditCard,
+  Heart,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function Footer() {
+  const [email, setEmail] = useState("");
+
+  const onSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.includes("@")) {
+      toast.error("Please enter a valid email");
+      return;
+    }
+    toast.success("Subscribed! Check your inbox 🎉");
+    setEmail("");
+  };
+
   return (
-    <footer className="mt-20 border-t border-border bg-muted/40">
-      <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-4 py-10 md:flex-row md:items-center">
-        <div>
-          <div className="text-lg font-extrabold">
-            <span>Hobby</span>
-            <span className="text-primary">Shop</span>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">Unique gadgets & gifts at unbeatable prices.</p>
-        </div>
-        <nav className="flex gap-6 text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-foreground">About</Link>
-          <Link to="/" className="hover:text-foreground">Contact</Link>
-          <Link to="/" className="hover:text-foreground">Privacy</Link>
-        </nav>
-        <div className="flex gap-3 text-sm text-muted-foreground">
-          <a href="#" className="hover:text-foreground">Facebook</a>
-          <a href="#" className="hover:text-foreground">Instagram</a>
-          <a href="#" className="hover:text-foreground">YouTube</a>
+    <footer className="relative mt-20 overflow-hidden border-t border-border bg-gradient-to-b from-muted/30 via-background to-muted/40">
+      {/* Decorative glow */}
+      <div className="pointer-events-none absolute -left-20 top-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+
+      {/* Trust strip */}
+      <div className="relative border-b border-border/60">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 py-6 sm:grid-cols-4 md:py-8">
+          {[
+            { icon: Truck, label: "Free Delivery", desc: "Orders over ৳1500" },
+            { icon: ShieldCheck, label: "100% Authentic", desc: "Verified products" },
+            { icon: RotateCcw, label: "Easy Returns", desc: "7-day exchange" },
+            { icon: CreditCard, label: "Cash on Delivery", desc: "Pay on arrival" },
+          ].map((f) => (
+            <div key={f.label} className="flex items-center gap-3">
+              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <f.icon className="h-5 w-5" />
+              </span>
+              <div className="min-w-0">
+                <div className="truncate text-sm font-bold text-foreground">{f.label}</div>
+                <div className="truncate text-[11px] text-muted-foreground">{f.desc}</div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-      <div className="border-t border-border py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} HobbyShop. All rights reserved.
+
+      {/* Main grid */}
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-12 md:grid-cols-12 md:gap-8">
+        {/* Brand + newsletter */}
+        <div className="md:col-span-5">
+          <Link to="/" className="inline-flex items-center gap-1 text-2xl font-extrabold tracking-tight">
+            <span className="text-foreground">Hobby</span>
+            <span className="text-primary">Shop</span>
+            <Heart className="ml-1 h-5 w-5 fill-primary text-primary" />
+          </Link>
+          <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
+            Curated gadgets, decor &amp; gifts shipped fast across Bangladesh. Free delivery over ৳1500 — Cash on
+            Delivery nationwide.
+          </p>
+
+          <form onSubmit={onSubscribe} className="mt-5 flex max-w-md items-center gap-2">
+            <div className="relative flex-1">
+              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                aria-label="Email for newsletter"
+                className="h-11 w-full rounded-full border border-border bg-background pl-10 pr-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <button
+              type="submit"
+              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground shadow-md transition hover:scale-[1.03]"
+            >
+              <Send className="h-4 w-4" />
+              <span className="hidden sm:inline">Subscribe</span>
+            </button>
+          </form>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Get flash sales, new arrivals &amp; exclusive deals — no spam, ever.
+          </p>
+        </div>
+
+        {/* Shop links */}
+        <div className="md:col-span-2">
+          <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground">Shop</h4>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li><Link to="/" className="transition hover:text-primary">All Products</Link></li>
+            <li><Link to="/" className="transition hover:text-primary">New Arrivals</Link></li>
+            <li><Link to="/" className="transition hover:text-primary">Best Sellers</Link></li>
+            <li><Link to="/" className="transition hover:text-primary">Flash Sale</Link></li>
+            <li><Link to="/" className="transition hover:text-primary">Gift Cards</Link></li>
+          </ul>
+        </div>
+
+        {/* Help links */}
+        <div className="md:col-span-2">
+          <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground">Help</h4>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li><Link to="/" className="transition hover:text-primary">About Us</Link></li>
+            <li><Link to="/" className="transition hover:text-primary">Contact</Link></li>
+            <li><Link to="/" className="transition hover:text-primary">Shipping</Link></li>
+            <li><Link to="/" className="transition hover:text-primary">Returns</Link></li>
+            <li><Link to="/" className="transition hover:text-primary">FAQ</Link></li>
+          </ul>
+        </div>
+
+        {/* Contact */}
+        <div className="md:col-span-3">
+          <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground">Get in Touch</h4>
+          <ul className="space-y-3 text-sm text-muted-foreground">
+            <li className="flex items-start gap-2.5">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <span>Dhanmondi, Dhaka 1209<br />Bangladesh</span>
+            </li>
+            <li className="flex items-center gap-2.5">
+              <Phone className="h-4 w-4 shrink-0 text-primary" />
+              <a href="tel:+8801700000000" className="transition hover:text-primary">+880 1700 000 000</a>
+            </li>
+            <li className="flex items-center gap-2.5">
+              <Mail className="h-4 w-4 shrink-0 text-primary" />
+              <a href="mailto:hello@hobbyshop.com" className="transition hover:text-primary">hello@hobbyshop.com</a>
+            </li>
+          </ul>
+
+          <div className="mt-4 flex items-center gap-2">
+            {[
+              { icon: Facebook, label: "Facebook", href: "#" },
+              { icon: Instagram, label: "Instagram", href: "#" },
+              { icon: Youtube, label: "YouTube", href: "#" },
+            ].map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                aria-label={s.label}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:scale-110 hover:border-primary hover:bg-primary hover:text-primary-foreground"
+              >
+                <s.icon className="h-4 w-4" />
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <div className="relative border-t border-border/60 bg-muted/30">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-5 text-xs text-muted-foreground sm:flex-row">
+          <div className="flex items-center gap-1.5">
+            <span>© {new Date().getFullYear()} HobbyShop. All rights reserved.</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span>Made with</span>
+            <Heart className="h-3.5 w-3.5 fill-primary text-primary" />
+            <span>in Bangladesh</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link to="/" className="transition hover:text-primary">Privacy</Link>
+            <span className="opacity-40">•</span>
+            <Link to="/" className="transition hover:text-primary">Terms</Link>
+          </div>
+        </div>
       </div>
     </footer>
   );
