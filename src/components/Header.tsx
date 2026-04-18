@@ -5,12 +5,14 @@ import { useCart } from "@/lib/cart";
 import logo from "@/assets/logo.png";
 
 const categories = [
-  { label: "Gadgets", href: "/" },
-  { label: "DIY Kits", href: "/" },
-  { label: "Home Decor", href: "/" },
-  { label: "Gifts", href: "/" },
-  { label: "New Arrivals", href: "/" },
-  { label: "Deals 🔥", href: "/" },
+  { label: "All Product", href: "/" },
+  { label: "Kitchen & Home", href: "/" },
+  { label: "Decor & Lighting", href: "/" },
+  { label: "Gift Items", href: "/" },
+  { label: "DIY & Hobby", href: "/" },
+  { label: "Kids & Toys", href: "/" },
+  { label: "Smart Daily Use", href: "/" },
+  { label: "Gadgets & Tech 🔥", href: "/" },
 ];
 
 export default function Header() {
