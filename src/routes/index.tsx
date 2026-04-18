@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import heroImg from "@/assets/hero-lamp.jpg";
 import { products } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
-import { Lightbulb, Wrench, Home, Gift, Truck, ShieldCheck, RotateCcw, BadgeCheck } from "lucide-react";
+import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,10 +17,14 @@ export const Route = createFileRoute("/")({
 });
 
 const categories = [
-  { name: "Gadgets", icon: Lightbulb },
-  { name: "DIY Kits", icon: Wrench },
-  { name: "Home Decor", icon: Home },
-  { name: "Gifts", icon: Gift },
+  { name: "All Product", icon: LayoutGrid, count: "500+", tone: "from-foreground to-foreground/70" },
+  { name: "Kitchen & Home Essentials", icon: ChefHat, count: "120+", tone: "from-orange-500 to-red-500" },
+  { name: "Home Decor & Lighting", icon: Lamp, count: "85+", tone: "from-amber-400 to-pink-500" },
+  { name: "Gift Items", icon: Gift, count: "60+", tone: "from-rose-500 to-primary" },
+  { name: "DIY & Hobby Kits", icon: Wrench, count: "45+", tone: "from-emerald-500 to-teal-600" },
+  { name: "Kids & Toys", icon: ToyBrick, count: "70+", tone: "from-sky-400 to-indigo-500" },
+  { name: "Daily Use Smart Products", icon: Sparkles, count: "90+", tone: "from-violet-500 to-fuchsia-500" },
+  { name: "Gadgets & Tech", icon: Cpu, count: "110+", tone: "from-slate-700 to-primary" },
 ];
 
 const trust = [
