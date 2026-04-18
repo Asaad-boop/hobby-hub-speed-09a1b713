@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { products, newArrivals } from "@/lib/products";
+import { products, newArrivals, testimonials, getProduct } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import HeroShowcase from "@/components/HeroShowcase";
 import WatchAndShop from "@/components/WatchAndShop";
-import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen, Star } from "lucide-react";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen, Star, Quote } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -33,24 +34,6 @@ const trust = [
   { icon: ShieldCheck, label: "100% Authentic" },
   { icon: RotateCcw, label: "Easy Return" },
   { icon: BadgeCheck, label: "Fast Delivery" },
-];
-
-const reviews = [
-  {
-    name: "Rakibul Hasan",
-    location: "Dhaka",
-    text: "Product quality onek valo cilo. Delivery o khub fast peyechi. Cash on delivery option ta khub helpful. Definitely abar order korbo!",
-  },
-  {
-    name: "Sumaiya Akter",
-    location: "Chattogram",
-    text: "Crystal lamp ta amar room er look totally change kore diyeche. Packaging neat cilo, kono damage nai. Highly recommended!",
-  },
-  {
-    name: "Tanvir Ahmed",
-    location: "Sylhet",
-    text: "Price ar quality dujoi top class. Customer support team o khub responsive. HobbyShop er fan hoye gechi.",
-  },
 ];
 
 function Index() {
@@ -201,35 +184,64 @@ function Index() {
             Real feedback from thousands of happy shoppers across Bangladesh
           </p>
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
-          {reviews.map((r) => (
-            <div
-              key={r.name}
-              className="relative flex flex-col rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]"
-            >
-              <div className="flex items-center gap-1 text-amber-500">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
-                ))}
-              </div>
-              <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-foreground">
-                "{r.text}"
-              </p>
-              <div className="mt-4 flex items-center gap-3 border-t border-border/60 pt-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-sm font-bold text-primary-foreground">
-                  {r.name.charAt(0)}
-                </span>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="truncate text-sm font-bold text-foreground">{r.name}</p>
-                    <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-primary" />
+        <Carousel opts={{ align: "start", loop: true }} className="w-full">
+          <CarouselContent className="-ml-3 md:-ml-4">
+            {testimonials.map((r, idx) => {
+              const product = getProduct(r.productId);
+              return (
+                <CarouselItem key={idx} className="basis-full pl-3 sm:basis-1/2 md:pl-4 lg:basis-1/3">
+                  <div className="relative flex h-full flex-col rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]">
+                    <Quote className="absolute right-4 top-4 h-8 w-8 text-primary/10" />
+                    <div className="flex items-center gap-1 text-amber-500">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-3.5 w-3.5 ${i < r.rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground/30"}`}
+                        />
+                      ))}
+                    </div>
+                    <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-foreground">
+                      "{r.text}"
+                    </p>
+                    {product && (
+                      <Link
+                        to="/product/$id"
+                        params={{ id: product.id }}
+                        className="mt-3 flex items-center gap-2 rounded-lg bg-muted/60 p-2 transition hover:bg-muted"
+                      >
+                        <img
+                          src={product.image}
+                          alt={product.title}
+                          loading="lazy"
+                          className="h-9 w-9 shrink-0 rounded-md object-cover"
+                        />
+                        <span className="line-clamp-1 text-[11px] font-semibold text-foreground">
+                          {product.title}
+                        </span>
+                      </Link>
+                    )}
+                    <div className="mt-4 flex items-center gap-3 border-t border-border/60 pt-3">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-sm font-bold text-primary-foreground">
+                        {r.name.charAt(0)}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <p className="truncate text-sm font-bold text-foreground">{r.name}</p>
+                          <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-primary" />
+                        </div>
+                        <p className="truncate text-[11px] text-muted-foreground">
+                          {r.location} · Verified Buyer
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <p className="truncate text-[11px] text-muted-foreground">{r.location} · Verified Buyer</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+          <CarouselPrevious className="hidden md:flex -left-4" />
+          <CarouselNext className="hidden md:flex -right-4" />
+        </Carousel>
       </section>
     </div>
   );
