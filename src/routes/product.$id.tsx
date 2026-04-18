@@ -117,9 +117,22 @@ function ProductPage() {
   const bundleSave = bundleOriginal - bundleTotal;
   const related = allOthers.slice(0, 4);
   const productReviews = testimonials.filter((t) => t.productId === product.id);
-  const reviews = productReviews.length
+  const seedReviews = productReviews.length
     ? productReviews
     : testimonials.slice(0, 3).map((t) => ({ ...t, productId: product.id }));
+
+  const [filter, setFilter] = useState<"all" | "5" | "4" | "photos" | "helpful">("all");
+
+  type DisplayReview = {
+    name: string;
+    location: string;
+    rating: number;
+    text: string;
+    photos: string[];
+    date: string;
+    helpful: number;
+    isUser: boolean;
+  };
 
   const handleBuyNow = () => {
     add(product, qty);
