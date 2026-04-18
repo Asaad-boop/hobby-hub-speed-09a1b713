@@ -64,19 +64,20 @@ export default function HeroShowcase() {
 
       {/* Live order ticker — top */}
       <div className="relative z-10 border-b border-background/10 bg-background/5 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2 text-xs">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 font-bold text-emerald-300">
+        <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2 text-[11px] md:gap-3 md:px-4 md:text-xs">
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/15 px-2 py-0.5 font-bold text-emerald-300 md:px-2.5 md:py-1">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
             </span>
             LIVE
           </span>
-          <div key={tickerIdx} className="flex flex-1 items-center gap-1.5 overflow-hidden animate-fade-in">
+          <div key={tickerIdx} className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden animate-fade-in">
             <ShoppingBag className="h-3.5 w-3.5 shrink-0 text-primary" />
             <p className="truncate text-background/85">
               <span className="font-bold text-background">{ticker.name}</span>{" "}
-              <span className="text-background/60">from {ticker.city} just bought</span>{" "}
+              <span className="text-background/60">from {ticker.city}</span>{" "}
+              <span className="hidden text-background/60 sm:inline">just bought </span>
               <span className="font-semibold text-background">{ticker.item}</span>{" "}
               <span className="text-background/50">· {ticker.time}</span>
             </p>
@@ -84,28 +85,28 @@ export default function HeroShowcase() {
         </div>
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-12 md:grid-cols-12 md:py-20">
+      <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 py-8 md:grid-cols-12 md:gap-10 md:py-20">
         {/* Left: copy + countdown */}
         <div className="animate-fade-in md:col-span-5">
-          <span className="inline-flex items-center gap-2 rounded-full border border-background/20 bg-background/10 px-3 py-1 text-xs font-semibold backdrop-blur">
+          <span className="inline-flex items-center gap-2 rounded-full border border-background/20 bg-background/10 px-3 py-1 text-[11px] font-semibold backdrop-blur md:text-xs">
             <Flame className="h-3 w-3 text-primary" />
             Flash Sale · Trending in Bangladesh
           </span>
-          <h1 className="mt-5 text-5xl font-extrabold leading-[1.05] tracking-tight md:text-6xl">
+          <h1 className="mt-4 text-[2.25rem] font-extrabold leading-[1.05] tracking-tight md:mt-5 md:text-6xl">
             Upgrade Your <br className="hidden md:block" />
             Space{" "}
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               Instantly.
             </span>
           </h1>
-          <p className="mt-4 max-w-md text-base text-background/70">
+          <p className="mt-3 max-w-md text-sm text-background/70 md:mt-4 md:text-base">
             Curated gadgets, decor & gifts shipped fast. Free delivery over ৳1500 — Cash on Delivery nationwide.
           </p>
 
           {/* Countdown */}
-          <div className="mt-6 inline-flex items-stretch gap-2 rounded-2xl border border-primary/30 bg-primary/10 p-3 backdrop-blur">
-            <div className="flex items-center gap-2 pl-1 pr-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
+          <div className="mt-5 flex w-full max-w-sm items-stretch gap-2 rounded-2xl border border-primary/30 bg-primary/10 p-2.5 backdrop-blur md:mt-6 md:w-auto md:max-w-none md:p-3">
+            <div className="flex items-center gap-2 pl-0.5 pr-1 md:pl-1 md:pr-2">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
                 <Zap className="h-4 w-4" />
               </span>
               <div className="leading-tight">
@@ -113,14 +114,14 @@ export default function HeroShowcase() {
                 <div className="text-[10px] text-background/60">Up to 60% OFF</div>
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="ml-auto flex items-center gap-0.5 md:gap-1">
               {[
                 { label: "HRS", v: h },
                 { label: "MIN", v: m },
                 { label: "SEC", v: s },
               ].map((u, i) => (
                 <div key={u.label} className="flex items-center">
-                  <div className="flex w-11 flex-col items-center rounded-lg bg-background/10 px-1 py-1.5">
+                  <div className="flex w-10 flex-col items-center rounded-lg bg-background/10 px-1 py-1.5 md:w-11">
                     <span className="font-mono text-base font-extrabold tabular-nums text-background">{u.v}</span>
                     <span className="text-[9px] font-bold tracking-wider text-background/60">{u.label}</span>
                   </div>
@@ -130,41 +131,41 @@ export default function HeroShowcase() {
             </div>
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-5 flex flex-wrap gap-2.5 md:mt-6 md:gap-3">
             <a
               href="#trending"
-              className="group inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-bold text-primary-foreground shadow-[var(--shadow-elevated)] transition hover:scale-[1.02]"
+              className="group inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-[var(--shadow-elevated)] transition hover:scale-[1.02] sm:flex-none md:px-7 md:py-3.5"
             >
               Shop Now
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </a>
             <a
               href="#trending"
-              className="inline-flex items-center justify-center rounded-full border border-background/30 bg-background/5 px-7 py-3.5 text-sm font-bold text-background backdrop-blur transition hover:bg-background/10"
+              className="inline-flex flex-1 items-center justify-center rounded-full border border-background/30 bg-background/5 px-6 py-3 text-sm font-bold text-background backdrop-blur transition hover:bg-background/10 sm:flex-none md:px-7 md:py-3.5"
             >
               View Deals
             </a>
           </div>
 
-          <div className="mt-8 grid max-w-md grid-cols-3 gap-6 border-t border-background/15 pt-5">
+          <div className="mt-6 grid max-w-md grid-cols-3 gap-3 border-t border-background/15 pt-4 md:mt-8 md:gap-6 md:pt-5">
             <div>
-              <div className="text-xl font-extrabold">4.8★</div>
-              <div className="mt-1 text-[10px] uppercase tracking-wider text-background/60">12.4K Reviews</div>
+              <div className="text-lg font-extrabold md:text-xl">4.8★</div>
+              <div className="mt-0.5 text-[9px] uppercase tracking-wider text-background/60 md:text-[10px]">12.4K Reviews</div>
             </div>
             <div>
-              <div className="text-xl font-extrabold">50K+</div>
-              <div className="mt-1 text-[10px] uppercase tracking-wider text-background/60">Orders Delivered</div>
+              <div className="text-lg font-extrabold md:text-xl">50K+</div>
+              <div className="mt-0.5 text-[9px] uppercase tracking-wider text-background/60 md:text-[10px]">Orders</div>
             </div>
             <div>
-              <div className="text-xl font-extrabold">24h</div>
-              <div className="mt-1 text-[10px] uppercase tracking-wider text-background/60">Fast Dispatch</div>
+              <div className="text-lg font-extrabold md:text-xl">24h</div>
+              <div className="mt-0.5 text-[9px] uppercase tracking-wider text-background/60 md:text-[10px]">Dispatch</div>
             </div>
           </div>
         </div>
 
         {/* Right: product carousel */}
         <div className="relative md:col-span-7">
-          <div className="relative mx-auto aspect-[4/3] w-full max-w-2xl">
+          <div className="relative mx-auto aspect-square w-full max-w-2xl sm:aspect-[4/3]">
             {/* Glow */}
             <div className="absolute inset-8 rounded-full bg-gradient-to-br from-primary/40 to-primary/0 blur-3xl" />
 
