@@ -12,6 +12,7 @@ import {
   RotateCcw,
   CreditCard,
   Heart,
+  Sparkles,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -114,7 +115,16 @@ export default function Footer() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/about" className="transition hover:text-primary">About Us</Link></li>
             <li><Link to="/contact" className="transition hover:text-primary">Contact</Link></li>
-            <li><Link to="/request" className="transition hover:text-primary">Request a Product</Link></li>
+            <li>
+              <Link
+                to="/request"
+                className="group inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-primary to-primary/80 px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-md transition hover:scale-105 hover:shadow-lg"
+              >
+                <Sparkles className="h-3 w-3 animate-pulse" />
+                Request a Product
+                <span className="ml-0.5 rounded-full bg-background/25 px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider">New</span>
+              </Link>
+            </li>
             <li><Link to="/shipping" className="transition hover:text-primary">Shipping & Returns</Link></li>
             <li><Link to="/faq" className="transition hover:text-primary">FAQ</Link></li>
           </ul>
