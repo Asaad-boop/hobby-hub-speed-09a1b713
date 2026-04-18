@@ -3,7 +3,7 @@ import { products, newArrivals } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import HeroShowcase from "@/components/HeroShowcase";
 import WatchAndShop from "@/components/WatchAndShop";
-import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen } from "lucide-react";
+import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen, Star } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -33,6 +33,24 @@ const trust = [
   { icon: ShieldCheck, label: "100% Authentic" },
   { icon: RotateCcw, label: "Easy Return" },
   { icon: BadgeCheck, label: "Fast Delivery" },
+];
+
+const reviews = [
+  {
+    name: "Rakibul Hasan",
+    location: "Dhaka",
+    text: "Product quality onek valo cilo. Delivery o khub fast peyechi. Cash on delivery option ta khub helpful. Definitely abar order korbo!",
+  },
+  {
+    name: "Sumaiya Akter",
+    location: "Chattogram",
+    text: "Crystal lamp ta amar room er look totally change kore diyeche. Packaging neat cilo, kono damage nai. Highly recommended!",
+  },
+  {
+    name: "Tanvir Ahmed",
+    location: "Sylhet",
+    text: "Price ar quality dujoi top class. Customer support team o khub responsive. HobbyShop er fan hoye gechi.",
+  },
 ];
 
 function Index() {
@@ -170,13 +188,49 @@ function Index() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl px-4 py-10 text-center">
-        <h3 className="text-xl font-bold">Ready to upgrade?</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Browse our trending picks and get them delivered fast.</p>
-        <Link to="/product/$id" params={{ id: "crystal-lamp" }} className="mt-4 inline-flex rounded-full bg-primary px-7 py-3 text-sm font-bold text-primary-foreground hover:opacity-90">
-          See Top Pick
-        </Link>
-      </div>
+      {/* Customer Reviews */}
+      <section className="mx-auto max-w-7xl px-4 py-10 md:py-14">
+        <div className="mb-6 text-center md:mb-8">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600">
+            <Star className="h-3 w-3 fill-amber-500 text-amber-500" /> Loved by Customers
+          </span>
+          <h2 className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">
+            Our <span className="text-primary">Customer Reviews</span>
+          </h2>
+          <p className="mt-1 text-xs text-muted-foreground md:text-sm">
+            Real feedback from thousands of happy shoppers across Bangladesh
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
+          {reviews.map((r) => (
+            <div
+              key={r.name}
+              className="relative flex flex-col rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]"
+            >
+              <div className="flex items-center gap-1 text-amber-500">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+                ))}
+              </div>
+              <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-foreground">
+                "{r.text}"
+              </p>
+              <div className="mt-4 flex items-center gap-3 border-t border-border/60 pt-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-sm font-bold text-primary-foreground">
+                  {r.name.charAt(0)}
+                </span>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <p className="truncate text-sm font-bold text-foreground">{r.name}</p>
+                    <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-primary" />
+                  </div>
+                  <p className="truncate text-[11px] text-muted-foreground">{r.location} · Verified Buyer</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
