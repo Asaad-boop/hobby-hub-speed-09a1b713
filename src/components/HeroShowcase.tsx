@@ -175,9 +175,16 @@ export default function HeroShowcase() {
               {/* Left: floating product orb */}
               <div className="relative col-span-3 aspect-square">
                 {/* Concentric decorative rings */}
-                <div className="absolute inset-0 rounded-full border border-background/10" />
-                <div className="absolute inset-6 rounded-full border border-background/15" />
-                <div className="absolute inset-12 rounded-full border border-dashed border-background/15" />
+                <div className="absolute inset-0 rounded-full border border-background/10 animate-spin [animation-duration:40s]" />
+                <div className="absolute inset-6 rounded-full border border-background/15 animate-spin [animation-duration:30s] [animation-direction:reverse]" />
+                <div className="absolute inset-12 rounded-full border border-dashed border-background/20 animate-spin [animation-duration:20s]" />
+                {/* Orbiting accent dots */}
+                <div className="absolute inset-0 animate-spin [animation-duration:15s]">
+                  <span className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 rounded-full bg-primary shadow-[0_0_12px_var(--primary)]" />
+                </div>
+                <div className="absolute inset-6 animate-spin [animation-duration:25s] [animation-direction:reverse]">
+                  <span className="absolute left-1/2 top-0 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-background/60" />
+                </div>
 
                 {/* Product disc */}
                 <div className="absolute inset-10 overflow-hidden rounded-full border-2 border-primary/40 bg-gradient-to-br from-background/15 to-background/0 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-xl">
