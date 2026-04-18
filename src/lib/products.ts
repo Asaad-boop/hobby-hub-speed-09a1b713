@@ -2,6 +2,10 @@ import lamp from "@/assets/p-lamp.jpg";
 import charger from "@/assets/p-charger.jpg";
 import speaker from "@/assets/p-speaker.jpg";
 import diy from "@/assets/p-diy.jpg";
+import diffuser from "@/assets/p-diffuser.jpg";
+import smartwatch from "@/assets/p-smartwatch.jpg";
+import projector from "@/assets/p-projector.jpg";
+import planter from "@/assets/p-planter.jpg";
 
 export type Product = {
   id: string;
@@ -73,4 +77,61 @@ export const products: Product[] = [
   },
 ];
 
-export const getProduct = (id: string) => products.find((p) => p.id === id);
+export const newArrivals: Product[] = [
+  {
+    id: "aroma-diffuser",
+    title: "Smart Aroma Diffuser with Light",
+    price: 1190,
+    oldPrice: 1790,
+    image: diffuser,
+    rating: 4.7,
+    reviews: 86,
+    stock: 15,
+    category: "Home Decor",
+    benefits: ["7 LED colors", "Ultrasonic mist", "Auto shut-off", "300ml tank"],
+    description: "Fill your space with calming aromas and soft ambient light. Perfect for bedroom & living room.",
+  },
+  {
+    id: "smart-watch",
+    title: "Pro Vivid Smart Watch",
+    price: 2490,
+    oldPrice: 3490,
+    image: smartwatch,
+    rating: 4.8,
+    reviews: 142,
+    stock: 10,
+    category: "Gadgets",
+    benefits: ["AMOLED display", "Heart rate & SpO2", "7-day battery", "IP68 waterproof"],
+    description: "A vibrant smartwatch that tracks your fitness, sleep and notifications — all day, every day.",
+  },
+  {
+    id: "mini-projector",
+    title: "Portable Cinema Mini Projector",
+    price: 4990,
+    oldPrice: 6990,
+    image: projector,
+    rating: 4.6,
+    reviews: 58,
+    stock: 6,
+    category: "Gadgets",
+    benefits: ["1080p support", "HDMI & USB", "Built-in speaker", "Compact & portable"],
+    description: "Turn any wall into a cinema. Perfect for movie nights, gaming and presentations.",
+  },
+  {
+    id: "ceramic-planter",
+    title: "Minimalist Ceramic Planter",
+    price: 590,
+    oldPrice: 890,
+    image: planter,
+    rating: 4.9,
+    reviews: 204,
+    stock: 22,
+    category: "Home Decor",
+    benefits: ["Handcrafted ceramic", "Drainage hole", "Indoor & outdoor", "Plant included"],
+    description: "Add a touch of green to any corner. Comes with a small live succulent.",
+  },
+];
+
+const allProducts = [...products, ...newArrivals];
+
+export const getProduct = (id: string) => allProducts.find((p) => p.id === id);

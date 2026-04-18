@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { products } from "@/lib/products";
+import { products, newArrivals } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import HeroShowcase from "@/components/HeroShowcase";
-import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight } from "lucide-react";
+import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -104,6 +104,39 @@ function Index() {
               </div>
             </button>
           ))}
+        </div>
+      </section>
+
+      {/* New Arrivals */}
+      <section className="relative overflow-hidden">
+        <div className="pointer-events-none absolute -left-20 top-1/3 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="mx-auto max-w-7xl px-4 py-10 md:py-12">
+          <div className="mb-5 flex items-end justify-between gap-4 md:mb-6">
+            <div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600">
+                <PackageOpen className="h-3 w-3" /> Just In
+              </span>
+              <h2 className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">
+                New <span className="text-primary">Arrivals</span>
+              </h2>
+              <p className="mt-1 text-xs text-muted-foreground md:text-sm">
+                Fresh drops handpicked for you — limited stock available
+              </p>
+            </div>
+            <a href="#trending" className="hidden items-center gap-1 text-xs font-semibold text-primary hover:underline md:inline-flex">
+              See trending <ArrowRight className="h-3.5 w-3.5" />
+            </a>
+          </div>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+            {newArrivals.map((p) => (
+              <div key={p.id} className="relative">
+                <span className="pointer-events-none absolute -top-2 right-3 z-10 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-md">
+                  New
+                </span>
+                <ProductCard product={p} />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
