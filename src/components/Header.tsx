@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Search, User, ShoppingBag, Heart, Menu, X, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
+import logo from "@/assets/logo.png";
 
 const categories = [
   { label: "Gadgets", href: "/" },
