@@ -130,20 +130,6 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Categories nav (desktop) */}
-        <nav className="hidden border-t border-border lg:block">
-          <div className="mx-auto flex max-w-7xl items-center gap-1 px-4">
-            {categories.map((c) => (
-              <Link
-                key={c.label}
-                to={c.href}
-                className="relative px-4 py-3 text-sm font-medium text-foreground/80 transition hover:text-primary"
-              >
-                {c.label}
-              </Link>
-            ))}
-          </div>
-        </nav>
 
         {/* Mobile drawer menu */}
         {mobileOpen && (
