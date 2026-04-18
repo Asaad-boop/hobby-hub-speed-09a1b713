@@ -164,119 +164,105 @@ export default function HeroShowcase() {
           </div>
         </div>
 
-        {/* Right: premium product showcase */}
+        {/* Right: floating product orb display */}
         <div className="relative hidden md:col-span-7 md:block">
           <div className="relative mx-auto w-full max-w-2xl">
             {/* Ambient glows */}
-            <div className="pointer-events-none absolute -left-10 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-primary/30 blur-3xl" />
-            <div className="pointer-events-none absolute -right-10 top-10 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[440px] w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/25 blur-3xl" />
+            <div className="pointer-events-none absolute left-1/4 top-0 h-48 w-48 rounded-full bg-primary/20 blur-3xl" />
 
-            {/* Main stage */}
-            <div className="relative aspect-[5/4] overflow-hidden rounded-[2.5rem] border border-background/15 bg-gradient-to-br from-background/[0.08] via-background/[0.04] to-transparent shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] backdrop-blur-xl">
-              {/* Subtle grid */}
-              <div
-                className="pointer-events-none absolute inset-0 opacity-[0.08]"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)",
-                  backgroundSize: "32px 32px",
-                }}
-              />
+            <div className="relative grid grid-cols-5 items-center gap-4">
+              {/* Left: floating product orb */}
+              <div className="relative col-span-3 aspect-square">
+                {/* Concentric decorative rings */}
+                <div className="absolute inset-0 rounded-full border border-background/10" />
+                <div className="absolute inset-6 rounded-full border border-background/15" />
+                <div className="absolute inset-12 rounded-full border border-dashed border-background/15" />
 
-              {/* Slides */}
-              {slides.map((p, i) => (
-                <div
-                  key={p.id}
-                  className={`absolute inset-0 transition-all duration-[900ms] ease-out ${
-                    i === active
-                      ? "opacity-100 scale-100"
-                      : "pointer-events-none opacity-0 scale-110"
-                  }`}
-                >
-                  {/* Spotlight behind product */}
-                  <div className="absolute left-1/2 top-1/2 h-[70%] w-[70%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-radial from-primary/40 via-primary/10 to-transparent blur-2xl" />
-                  <img
-                    src={p.image}
-                    alt={p.title}
-                    className="absolute inset-0 h-full w-full object-cover"
-                    loading={i === 0 ? "eager" : "lazy"}
-                  />
-                  {/* Vignette */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/10 to-foreground/30" />
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.6)_100%)]" />
+                {/* Product disc */}
+                <div className="absolute inset-10 overflow-hidden rounded-full border-2 border-primary/40 bg-gradient-to-br from-background/15 to-background/0 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-xl">
+                  {slides.map((p, i) => (
+                    <div
+                      key={p.id}
+                      className={`absolute inset-0 transition-all duration-[900ms] ease-out ${
+                        i === active ? "opacity-100 scale-100" : "pointer-events-none opacity-0 scale-110"
+                      }`}
+                    >
+                      <img
+                        src={p.image}
+                        alt={p.title}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        loading={i === 0 ? "eager" : "lazy"}
+                      />
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.18),transparent_55%)]" />
+                    </div>
+                  ))}
                 </div>
-              ))}
 
-              {/* Top floating chips */}
-              <div className="absolute inset-x-5 top-5 flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground shadow-lg">
+                {/* Floating badges around the orb */}
+                <div className="absolute left-0 top-6 inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground shadow-lg animate-fade-in">
                   <Truck className="h-3 w-3" /> Free Delivery
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-background/25 bg-background/15 px-3 py-1.5 text-[11px] font-bold text-background backdrop-blur-md">
+                </div>
+                <div className="absolute right-2 top-16 inline-flex items-center gap-1.5 rounded-full border border-background/25 bg-background/15 px-3 py-1.5 text-[11px] font-bold text-background backdrop-blur-md animate-fade-in">
                   <Flame className="h-3 w-3 text-primary" /> Hot Pick
-                </span>
+                </div>
+                <div className="absolute -bottom-1 left-8 inline-flex items-center gap-1.5 rounded-full border border-background/20 bg-background/10 px-3 py-1.5 text-[11px] font-bold text-background backdrop-blur-md animate-fade-in">
+                  <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {current.rating} ({current.reviews})
+                </div>
               </div>
 
-              {/* Nav arrows */}
-              <button
-                aria-label="Previous"
-                onClick={() => setActive((i) => (i - 1 + slides.length) % slides.length)}
-                className="group absolute left-4 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-background/20 bg-background/10 text-background backdrop-blur-md transition hover:bg-background hover:text-foreground hover:scale-110"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <button
-                aria-label="Next"
-                onClick={() => setActive((i) => (i + 1) % slides.length)}
-                className="group absolute right-4 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-background/20 bg-background/10 text-background backdrop-blur-md transition hover:bg-background hover:text-foreground hover:scale-110"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
+              {/* Right: info panel */}
+              <div key={current.id} className="col-span-2 animate-fade-in">
+                <div className="space-y-3">
+                  <span className="inline-flex rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+                    {current.category}
+                  </span>
+                  <h3 className="text-xl font-extrabold leading-tight tracking-tight text-background">
+                    {current.title}
+                  </h3>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-extrabold text-background">৳{current.price}</span>
+                    <span className="text-sm text-background/40 line-through">৳{current.oldPrice}</span>
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/90 px-2 py-0.5 text-[11px] font-bold text-white">
+                    Save ৳{current.oldPrice - current.price} · -{Math.round((1 - current.price / current.oldPrice) * 100)}%
+                  </span>
 
-              {/* Progress dots */}
-              <div className="absolute inset-x-0 top-[52%] hidden" />
-
-              {/* Bottom info — glass card */}
-              <div key={current.id} className="absolute inset-x-5 bottom-5 animate-fade-in">
-                <div className="relative overflow-hidden rounded-2xl border border-background/20 bg-background/10 p-4 text-background shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)] backdrop-blur-2xl">
-                  {/* Shine */}
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-background/60 to-transparent" />
-                  <div className="flex items-end justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
-                          {current.category}
-                        </span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-background/15 px-2 py-0.5 text-[11px] font-semibold text-background backdrop-blur">
-                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {current.rating}
-                          <span className="text-background/60">({current.reviews})</span>
-                        </span>
-                      </div>
-                      <h3 className="mt-2 truncate text-lg font-extrabold tracking-tight">{current.title}</h3>
-                      <div className="mt-1.5 flex items-center gap-2">
-                        <span className="text-2xl font-extrabold text-background">৳{current.price}</span>
-                        <span className="text-sm text-background/50 line-through">৳{current.oldPrice}</span>
-                        <span className="rounded-md bg-emerald-500/90 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                          -{Math.round((1 - current.price / current.oldPrice) * 100)}% OFF
-                        </span>
-                      </div>
-                    </div>
+                  <div className="flex flex-col gap-2 pt-2">
                     <Link
                       to="/product/$id"
                       params={{ id: current.id }}
-                      className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-[0_10px_30px_-10px_var(--primary)] transition hover:scale-105"
+                      className="group inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-[0_15px_35px_-10px_var(--primary)] transition hover:scale-[1.03]"
                     >
-                      View <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      View Product <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </Link>
+                    <div className="flex items-center gap-2">
+                      <button
+                        aria-label="Previous"
+                        onClick={() => setActive((i) => (i - 1 + slides.length) % slides.length)}
+                        className="inline-flex h-10 flex-1 items-center justify-center rounded-full border border-background/20 bg-background/5 text-background backdrop-blur-md transition hover:bg-background/15"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
+                      <button
+                        aria-label="Next"
+                        onClick={() => setActive((i) => (i + 1) % slides.length)}
+                        className="inline-flex h-10 flex-1 items-center justify-center rounded-full border border-background/20 bg-background/5 text-background backdrop-blur-md transition hover:bg-background/15"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Slide progress */}
-                  <div className="mt-3 flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 pt-1">
                     {slides.map((_, i) => (
-                      <span
+                      <button
                         key={i}
+                        onClick={() => setActive(i)}
+                        aria-label={`Slide ${i + 1}`}
                         className={`h-1 rounded-full transition-all duration-500 ${
-                          i === active ? "w-8 bg-primary" : "w-3 bg-background/25"
+                          i === active ? "w-8 bg-primary" : "w-3 bg-background/25 hover:bg-background/50"
                         }`}
                       />
                     ))}
@@ -285,8 +271,8 @@ export default function HeroShowcase() {
               </div>
             </div>
 
-            {/* Thumbnails */}
-            <div className="mt-5 flex items-center justify-center gap-2.5">
+            {/* Thumbnail strip */}
+            <div className="mt-6 flex items-center justify-center gap-3">
               {slides.map((p, i) => (
                 <button
                   key={p.id}
