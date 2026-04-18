@@ -117,9 +117,61 @@ function ProductPage() {
   const bundleSave = bundleOriginal - bundleTotal;
   const related = allOthers.slice(0, 4);
   const productReviews = testimonials.filter((t) => t.productId === product.id);
-  const reviews = productReviews.length
+  const seedReviews = productReviews.length
     ? productReviews
     : testimonials.slice(0, 3).map((t) => ({ ...t, productId: product.id }));
+
+  const [filter, setFilter] = useState<"all" | "5" | "4" | "photos" | "helpful">("all");
+
+  type DisplayReview = {
+    name: string;
+    location: string;
+    rating: number;
+    text: string;
+    photos: string[];
+    date: string;
+    helpful: number;
+    isUser: boolean;
+  };
+
+  const seedPhotoMap: Record<number, string[]> = {
+    0: ["__r1", "__r2"],
+    1: ["__r3", "__r4"],
+  };
+  const seedDates = ["2 days ago", "1 week ago", "2 weeks ago", "1 month ago"];
+  const seedHelpful = [42, 28, 19, 11];
+
+  const allReviews = useMemo<DisplayReview[]>(() => {
+    const fromUser: DisplayReview[] = userReviews.map((r) => ({
+      name: r.name, location: r.location, rating: r.rating, text: r.text,
+      photos: r.photos, date: "Just now", helpful: 0, isUser: true,
+    }));
+    const fromSeed: DisplayReview[] = seedReviews.slice(0, 4).map((r, i) => ({
+      name: r.name, location: r.location, rating: r.rating, text: r.text,
+      photos: seedPhotoMap[i] ?? [],
+      date: seedDates[i % seedDates.length],
+      helpful: seedHelpful[i % seedHelpful.length],
+      isUser: false,
+    }));
+    return [...fromUser, ...fromSeed];
+  }, [userReviews, seedReviews]);
+
+  const filteredReviews = useMemo(() => {
+    let list = allReviews;
+    if (filter === "5") list = list.filter((r) => r.rating === 5);
+    else if (filter === "4") list = list.filter((r) => r.rating === 4);
+    else if (filter === "photos") list = list.filter((r) => r.photos.length > 0);
+    else if (filter === "helpful") list = [...list].sort((a, b) => b.helpful - a.helpful);
+    return list;
+  }, [allReviews, filter]);
+
+  const filterCounts = useMemo(() => ({
+    all: allReviews.length,
+    "5": allReviews.filter((r) => r.rating === 5).length,
+    "4": allReviews.filter((r) => r.rating === 4).length,
+    photos: allReviews.filter((r) => r.photos.length > 0).length,
+    helpful: allReviews.length,
+  }), [allReviews]);
 
   const handleBuyNow = () => {
     add(product, qty);
@@ -487,79 +539,98 @@ function ProductPage() {
               </div>
             </div>
 
-            {userReviews.map((r, i) => (
-              <div key={`u-${i}`} className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5 shadow-sm">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-base font-extrabold text-primary-foreground ring-2 ring-primary/20">
-                    {r.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-bold">{r.name}</p>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
-                        New
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{r.location} • Just now</p>
-                    <div className="mt-2 flex items-center gap-1 text-primary">
-                      {Array.from({ length: r.rating }).map((_, j) => (
-                        <Star key={j} className="h-4 w-4 fill-primary" />
-                      ))}
-                    </div>
-                    <p className="mt-2 text-sm leading-relaxed text-foreground">{r.text}</p>
-                    {r.photos.length > 0 && (
-                      <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
-                        {r.photos.map((src, j) => (
-                          <img key={j} src={src} alt="Review photo" className="aspect-square w-full rounded-lg border border-border object-cover" />
-                        ))}
-                      </div>
-                    )}
-                    <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
-                      <button className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1 font-semibold transition hover:border-primary hover:text-primary">
-                        <ThumbsUp className="h-3 w-3" /> Helpful (0)
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+            {/* Filter chips */}
+            <div className="flex flex-wrap items-center gap-2">
+              {([
+                { k: "all", l: "All reviews" },
+                { k: "5", l: "5★ only" },
+                { k: "4", l: "4★ only" },
+                { k: "photos", l: "With photos" },
+                { k: "helpful", l: "Most helpful" },
+              ] as const).map((f) => {
+                const active = filter === f.k;
+                return (
+                  <button
+                    key={f.k}
+                    onClick={() => setFilter(f.k)}
+                    className={`inline-flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-xs font-bold transition ${
+                      active
+                        ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                        : "border-border bg-card text-foreground hover:border-primary/50"
+                    }`}
+                  >
+                    {f.l}
+                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${active ? "bg-primary-foreground/20" : "bg-muted"}`}>
+                      {filterCounts[f.k]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-            {reviews.slice(0, 4).map((r, i) => {
+            {filteredReviews.length === 0 && (
+              <div className="rounded-2xl border-2 border-dashed border-border p-8 text-center">
+                <p className="text-sm font-semibold text-muted-foreground">No reviews match this filter.</p>
+                <button onClick={() => setFilter("all")} className="mt-2 text-sm font-bold text-primary hover:underline">
+                  Show all reviews
+                </button>
+              </div>
+            )}
+
+            {filteredReviews.map((r, i) => {
               const avatars = [avatar1, avatar2, avatar3, avatar4];
-              const photos = [review1, review2, review3, review4];
-              const dates = ["2 days ago", "1 week ago", "2 weeks ago", "1 month ago"];
-              const helpful = [42, 28, 19, 11];
+              const photoMap: Record<string, string> = { __r1: review1, __r2: review2, __r3: review3, __r4: review4 };
+              const resolvedPhotos = r.photos.map((p) => photoMap[p] ?? p);
               return (
-                <div key={i} className="rounded-2xl border border-border bg-card p-5 transition hover:border-primary/40 hover:shadow-md">
+                <div
+                  key={`${r.isUser ? "u" : "s"}-${i}`}
+                  className={`rounded-2xl border bg-card p-5 transition hover:shadow-md ${
+                    r.isUser ? "border-2 border-primary/40 bg-primary/5" : "border-border hover:border-primary/40"
+                  }`}
+                >
                   <div className="flex items-start gap-3">
-                    <img src={avatars[i % avatars.length]} alt={r.name} loading="lazy" width={48} height={48} className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-primary/20" />
+                    {r.isUser ? (
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-base font-extrabold text-primary-foreground ring-2 ring-primary/20">
+                        {r.name.charAt(0).toUpperCase()}
+                      </div>
+                    ) : (
+                      <img src={avatars[i % avatars.length]} alt={r.name} loading="lazy" width={48} height={48} className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-primary/20" />
+                    )}
                     <div className="flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="text-sm font-bold">{r.name}</p>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                          <BadgeCheck className="h-3 w-3" /> Verified Purchase
-                        </span>
+                        {r.isUser ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">New</span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                            <BadgeCheck className="h-3 w-3" /> Verified Purchase
+                          </span>
+                        )}
                       </div>
-                      <p className="text-xs text-muted-foreground">{r.location} • {dates[i % dates.length]}</p>
+                      <p className="text-xs text-muted-foreground">{r.location} • {r.date}</p>
                       <div className="mt-2 flex items-center gap-1 text-primary">
                         {Array.from({ length: r.rating }).map((_, j) => (
                           <Star key={j} className="h-4 w-4 fill-primary" />
                         ))}
                       </div>
                       <p className="mt-2 text-sm leading-relaxed text-foreground">{r.text}</p>
-                      {i < 2 && (
+                      {resolvedPhotos.length > 0 && (
                         <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
-                          {photos.slice(0, 2).map((src, j) => (
-                            <img key={j} src={src} alt="Review photo" loading="lazy" width={512} height={512} className="aspect-square w-full rounded-lg border border-border object-cover" />
+                          {resolvedPhotos.map((src, j) => (
+                            <img key={j} src={src} alt="Review photo" loading="lazy" className="aspect-square w-full rounded-lg border border-border object-cover" />
                           ))}
                         </div>
                       )}
                       <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
-                        <button className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1 font-semibold transition hover:border-primary hover:text-primary">
-                          <ThumbsUp className="h-3 w-3" /> Helpful ({helpful[i % helpful.length]})
+                        <button className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1 font-semibold transition hover:border-primary hover:text-primary">
+                          <ThumbsUp className="h-3 w-3" /> Helpful ({r.helpful})
                         </button>
-                        <span>•</span>
-                        <button className="font-semibold hover:text-primary">Reply</button>
+                        {!r.isUser && (
+                          <>
+                            <span>•</span>
+                            <button className="font-semibold hover:text-primary">Reply</button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
