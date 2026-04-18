@@ -131,33 +131,56 @@ function Index() {
           </a>
         </div>
 
-        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:gap-3 lg:grid-cols-4">
+        {/* Mobile: horizontal scroll */}
+        <div className="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-2 sm:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {categories.map(({ name, icon: Icon, count, tone }) => (
             <button
               key={name}
-              className="group relative overflow-hidden rounded-2xl border border-border bg-card p-3 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-elevated)] md:p-4"
+              className="group relative w-[44vw] shrink-0 snap-start overflow-hidden rounded-2xl border border-border bg-card p-3 text-left transition-all hover:border-primary/40 hover:shadow-[var(--shadow-elevated)]"
             >
-              {/* Decorative gradient blob */}
               <div
-                className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br ${tone} opacity-10 blur-2xl transition-opacity duration-300 group-hover:opacity-30`}
+                className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br ${tone} opacity-10 blur-2xl`}
               />
-
               <div className="relative flex items-start justify-between gap-2">
                 <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${tone} text-white shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 md:h-10 md:w-10`}
+                  className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${tone} text-white shadow-md`}
                 >
-                  <Icon className="h-4 w-4 md:h-5 md:w-5" />
+                  <Icon className="h-4 w-4" />
                 </span>
-                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-bold text-muted-foreground md:text-[10px]">
+                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-bold text-muted-foreground">
                   {count}
                 </span>
               </div>
-
               <div className="relative mt-3">
-                <h3 className="text-xs font-bold leading-tight text-foreground md:text-sm">
-                  {name}
-                </h3>
-                <span className="mt-1 hidden items-center gap-1 text-[11px] font-semibold text-primary opacity-0 transition-all duration-300 group-hover:opacity-100 md:inline-flex">
+                <h3 className="text-xs font-bold leading-tight text-foreground">{name}</h3>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* Tablet & Desktop: grid */}
+        <div className="hidden grid-cols-3 gap-3 sm:grid lg:grid-cols-4">
+          {categories.map(({ name, icon: Icon, count, tone }) => (
+            <button
+              key={name}
+              className="group relative overflow-hidden rounded-2xl border border-border bg-card p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-elevated)]"
+            >
+              <div
+                className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br ${tone} opacity-10 blur-2xl transition-opacity duration-300 group-hover:opacity-30`}
+              />
+              <div className="relative flex items-start justify-between gap-2">
+                <span
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${tone} text-white shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
+                >
+                  <Icon className="h-5 w-5" />
+                </span>
+                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground">
+                  {count}
+                </span>
+              </div>
+              <div className="relative mt-3">
+                <h3 className="text-sm font-bold leading-tight text-foreground">{name}</h3>
+                <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-primary opacity-0 transition-all duration-300 group-hover:opacity-100">
                   Shop now <ArrowRight className="h-3 w-3" />
                 </span>
               </div>
