@@ -429,7 +429,10 @@ function ProductPage() {
             <h2 className="text-2xl font-extrabold md:text-3xl">Customer Reviews</h2>
             <p className="mt-1 text-sm text-muted-foreground">Real photos and feedback from verified buyers</p>
           </div>
-          <button className="inline-flex items-center gap-2 rounded-full border-2 border-foreground px-4 py-2 text-xs font-bold transition hover:bg-foreground hover:text-background">
+          <button
+            onClick={() => setReviewOpen(true)}
+            className="inline-flex items-center gap-2 rounded-full border-2 border-foreground px-4 py-2 text-xs font-bold transition hover:bg-foreground hover:text-background"
+          >
             <MessageSquare className="h-4 w-4" /> Write a review
           </button>
         </div>
