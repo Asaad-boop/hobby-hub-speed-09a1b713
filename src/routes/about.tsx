@@ -133,21 +133,6 @@ function AboutPage() {
         )}
       </section>
 
-      {/* Journey */}
-      <section className="mt-14">
-        <h2 className="text-center text-2xl font-extrabold tracking-tight md:text-3xl">From drones to a whole vibe</h2>
-        <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
-          {journey.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-              <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-md">
-                <Icon className="h-5 w-5" />
-              </span>
-              <h3 className="mt-4 text-lg font-bold">{title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* CTA */}
       <div className="mt-14 rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-8 text-center text-primary-foreground md:mt-16 md:p-12">
