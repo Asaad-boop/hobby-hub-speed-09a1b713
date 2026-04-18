@@ -282,7 +282,16 @@ function FullscreenViewer({
       </button>
 
       {/* Reel stage */}
-      <div className="relative h-[min(90vh,900px)] aspect-[9/16] overflow-hidden rounded-3xl border border-background/15 bg-foreground shadow-2xl">
+      <div
+        className="relative h-[min(90vh,900px)] aspect-[9/16] overflow-hidden rounded-3xl border border-background/15 bg-foreground shadow-2xl touch-pan-x"
+        style={{
+          transform: `translateY(${dragY}px)`,
+          transition: dragY === 0 ? "transform 250ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+        }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <video
           ref={videoRef}
           key={reel.id}
