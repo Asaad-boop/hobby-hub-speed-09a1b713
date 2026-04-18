@@ -1,11 +1,35 @@
 import lamp from "@/assets/p-lamp.jpg";
+import lamp2 from "@/assets/p-lamp-2.jpg";
+import lamp3 from "@/assets/p-lamp-3.jpg";
+import lamp4 from "@/assets/p-lamp-4.jpg";
 import charger from "@/assets/p-charger.jpg";
+import charger2 from "@/assets/p-charger-2.jpg";
+import charger3 from "@/assets/p-charger-3.jpg";
+import charger4 from "@/assets/p-charger-4.jpg";
 import speaker from "@/assets/p-speaker.jpg";
+import speaker2 from "@/assets/p-speaker-2.jpg";
+import speaker3 from "@/assets/p-speaker-3.jpg";
+import speaker4 from "@/assets/p-speaker-4.jpg";
 import diy from "@/assets/p-diy.jpg";
+import diy2 from "@/assets/p-diy-2.jpg";
+import diy3 from "@/assets/p-diy-3.jpg";
+import diy4 from "@/assets/p-diy-4.jpg";
 import diffuser from "@/assets/p-diffuser.jpg";
+import diffuser2 from "@/assets/p-diffuser-2.jpg";
+import diffuser3 from "@/assets/p-diffuser-3.jpg";
+import diffuser4 from "@/assets/p-diffuser-4.jpg";
 import smartwatch from "@/assets/p-smartwatch.jpg";
+import smartwatch2 from "@/assets/p-smartwatch-2.jpg";
+import smartwatch3 from "@/assets/p-smartwatch-3.jpg";
+import smartwatch4 from "@/assets/p-smartwatch-4.jpg";
 import projector from "@/assets/p-projector.jpg";
+import projector2 from "@/assets/p-projector-2.jpg";
+import projector3 from "@/assets/p-projector-3.jpg";
+import projector4 from "@/assets/p-projector-4.jpg";
 import planter from "@/assets/p-planter.jpg";
+import planter2 from "@/assets/p-planter-2.jpg";
+import planter3 from "@/assets/p-planter-3.jpg";
+import planter4 from "@/assets/p-planter-4.jpg";
 
 export type Product = {
   id: string;
@@ -13,6 +37,7 @@ export type Product = {
   price: number;
   oldPrice: number;
   image: string;
+  gallery: string[];
   rating: number;
   reviews: number;
   stock: number;
@@ -28,6 +53,7 @@ export const products: Product[] = [
     price: 1290,
     oldPrice: 1990,
     image: lamp,
+    gallery: [lamp, lamp2, lamp3, lamp4],
     rating: 4.8,
     reviews: 1240,
     stock: 7,
@@ -42,6 +68,7 @@ export const products: Product[] = [
     price: 890,
     oldPrice: 1490,
     image: charger,
+    gallery: [charger, charger2, charger3, charger4],
     rating: 4.7,
     reviews: 832,
     stock: 12,
@@ -55,6 +82,7 @@ export const products: Product[] = [
     price: 1490,
     oldPrice: 2290,
     image: speaker,
+    gallery: [speaker, speaker2, speaker3, speaker4],
     rating: 4.6,
     reviews: 510,
     stock: 9,
@@ -68,6 +96,7 @@ export const products: Product[] = [
     price: 1990,
     oldPrice: 2990,
     image: diy,
+    gallery: [diy, diy2, diy3, diy4],
     rating: 4.9,
     reviews: 312,
     stock: 5,
@@ -84,6 +113,7 @@ export const newArrivals: Product[] = [
     price: 1190,
     oldPrice: 1790,
     image: diffuser,
+    gallery: [diffuser, diffuser2, diffuser3, diffuser4],
     rating: 4.7,
     reviews: 86,
     stock: 15,
@@ -97,6 +127,7 @@ export const newArrivals: Product[] = [
     price: 2490,
     oldPrice: 3490,
     image: smartwatch,
+    gallery: [smartwatch, smartwatch2, smartwatch3, smartwatch4],
     rating: 4.8,
     reviews: 142,
     stock: 10,
@@ -110,6 +141,7 @@ export const newArrivals: Product[] = [
     price: 4990,
     oldPrice: 6990,
     image: projector,
+    gallery: [projector, projector2, projector3, projector4],
     rating: 4.6,
     reviews: 58,
     stock: 6,
@@ -123,6 +155,7 @@ export const newArrivals: Product[] = [
     price: 590,
     oldPrice: 890,
     image: planter,
+    gallery: [planter, planter2, planter3, planter4],
     rating: 4.9,
     reviews: 204,
     stock: 22,
