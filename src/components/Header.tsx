@@ -97,11 +97,11 @@ export default function Header() {
 
           {/* Desktop categories */}
           <nav className="hidden flex-1 items-center justify-center gap-0.5 lg:flex">
-            {categories.slice(0, 6).map((c) => (
+            {categories.map((c) => (
               <Link
                 key={c.label}
                 to={c.href}
-                className="group relative rounded-full px-3.5 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-primary"
+                className="group relative whitespace-nowrap rounded-full px-2.5 py-2 text-[13px] font-medium text-foreground/75 transition-colors hover:text-primary xl:px-3 xl:text-sm"
               >
                 <span className="relative z-10">{c.label}</span>
                 <span className="absolute inset-0 -z-0 scale-90 rounded-full bg-primary/8 opacity-0 transition-all duration-300 group-hover:scale-100 group-hover:opacity-100" />
@@ -172,25 +172,6 @@ export default function Header() {
                 <X className={`absolute h-5 w-5 transition-all duration-300 ${mobileOpen ? "rotate-0 opacity-100" : "-rotate-90 opacity-0"}`} />
               </span>
             </button>
-          </div>
-        </div>
-
-        {/* Secondary category strip — desktop only, hides on scroll */}
-        <div
-          className={`mx-auto max-w-7xl overflow-hidden px-6 transition-all duration-500 ${
-            scrolled ? "max-h-0 opacity-0" : "mt-2 max-h-12 opacity-100"
-          }`}
-        >
-          <div className="hidden items-center justify-center gap-1 lg:flex">
-            {categories.slice(6).map((c) => (
-              <Link
-                key={c.label}
-                to={c.href}
-                className="rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
-              >
-                {c.label}
-              </Link>
-            ))}
           </div>
         </div>
 
