@@ -487,6 +487,43 @@ function ProductPage() {
               </div>
             </div>
 
+            {userReviews.map((r, i) => (
+              <div key={`u-${i}`} className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-base font-extrabold text-primary-foreground ring-2 ring-primary/20">
+                    {r.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-bold">{r.name}</p>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
+                        New
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{r.location} • Just now</p>
+                    <div className="mt-2 flex items-center gap-1 text-primary">
+                      {Array.from({ length: r.rating }).map((_, j) => (
+                        <Star key={j} className="h-4 w-4 fill-primary" />
+                      ))}
+                    </div>
+                    <p className="mt-2 text-sm leading-relaxed text-foreground">{r.text}</p>
+                    {r.photos.length > 0 && (
+                      <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                        {r.photos.map((src, j) => (
+                          <img key={j} src={src} alt="Review photo" className="aspect-square w-full rounded-lg border border-border object-cover" />
+                        ))}
+                      </div>
+                    )}
+                    <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+                      <button className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1 font-semibold transition hover:border-primary hover:text-primary">
+                        <ThumbsUp className="h-3 w-3" /> Helpful (0)
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
             {reviews.slice(0, 4).map((r, i) => {
               const avatars = [avatar1, avatar2, avatar3, avatar4];
               const photos = [review1, review2, review3, review4];
