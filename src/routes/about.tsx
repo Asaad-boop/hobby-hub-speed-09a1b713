@@ -1,3 +1,4 @@
+// About page — bilingual story + product request form
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Heart, Sparkles, Users, Award, Truck, Languages, Search, Send } from "lucide-react";
 import { useState } from "react";
