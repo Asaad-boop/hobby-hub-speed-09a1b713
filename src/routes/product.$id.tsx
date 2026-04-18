@@ -407,52 +407,7 @@ function ProductPage() {
         </div>
       </section>
 
-      {/* Frequently Bought Together */}
-      <section className="mx-auto max-w-7xl px-4 py-6">
-        <h2 className="mb-4 text-2xl font-extrabold md:text-3xl">Frequently Bought Together</h2>
-        <div className="rounded-3xl border-2 border-border bg-gradient-to-br from-card to-muted/30 p-4 md:p-6">
-          <div className="flex flex-wrap items-stretch gap-3">
-            {bundleItems.map((b, idx) => (
-              <div key={b.id} className="flex items-center gap-2">
-                <label className="flex min-w-[180px] flex-1 cursor-pointer items-center gap-3 rounded-2xl border-2 border-border bg-background p-3 transition hover:border-primary">
-                  <input
-                    type="checkbox"
-                    checked={!!bundle[b.id]}
-                    onChange={(e) => setBundle((s) => ({ ...s, [b.id]: e.target.checked }))}
-                    className="h-4 w-4 accent-[oklch(0.585_0.245_27.5)]"
-                  />
-                  <img src={b.image} alt={b.title} className="h-16 w-16 rounded-xl object-cover" />
-                  <div className="text-xs">
-                    <p className="line-clamp-2 font-bold">{b.title}</p>
-                    <div className="mt-1 flex items-center gap-1.5">
-                      <span className="font-extrabold text-primary">৳{b.price}</span>
-                      <span className="text-[10px] text-muted-foreground line-through">৳{b.oldPrice}</span>
-                    </div>
-                  </div>
-                </label>
-                {idx < bundleItems.length - 1 && <Plus className="h-4 w-4 text-muted-foreground" />}
-              </div>
-            ))}
-          </div>
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-            <div>
-              <p className="text-xs text-muted-foreground">Bundle total</p>
-              <p className="text-3xl font-extrabold">৳{bundleTotal}</p>
-              {bundleSave > 0 && (
-                <p className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
-                  <Gift className="h-3 w-3" /> Save ৳{bundleSave} on this bundle
-                </p>
-              )}
-            </div>
-            <button
-              onClick={() => bundleItems.forEach((b) => bundle[b.id] && add(b))}
-              className="rounded-full bg-primary px-6 py-3.5 text-sm font-extrabold text-primary-foreground shadow-lg hover:opacity-90"
-            >
-              Add Bundle to Cart
-            </button>
-          </div>
-        </div>
-      </section>
+      {/* Frequently Bought Together removed */}
 
       {/* Reviews */}
       <section className="mx-auto max-w-7xl px-4 py-10">
