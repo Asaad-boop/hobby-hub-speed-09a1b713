@@ -152,7 +152,11 @@ export default function Header() {
           {/* Account card */}
           <button
             aria-label="Account"
-            className="group hidden shrink-0 items-center gap-2 rounded-full border border-border bg-background/90 px-3 py-2 text-left shadow-[0_8px_30px_-10px_rgba(0,0,0,0.18)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-primary/40 md:inline-flex md:px-4 md:py-2.5"
+            className={`group hidden shrink-0 items-center gap-2 rounded-full px-3 py-2 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 md:inline-flex md:px-4 md:py-2.5 ${
+              scrolled
+                ? "border border-transparent bg-transparent shadow-none"
+                : "border border-border bg-background/90 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.18)] backdrop-blur-xl"
+            }`}
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
               <User className="h-4 w-4" />
