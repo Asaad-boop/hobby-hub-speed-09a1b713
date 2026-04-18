@@ -53,9 +53,6 @@ function Index() {
             </h2>
             <p className="mt-1 text-xs text-muted-foreground md:text-sm">Find exactly what you need across our curated collections</p>
           </div>
-          <a href="#trending" className="hidden items-center gap-1 text-xs font-semibold text-primary hover:underline md:inline-flex">
-            View all <ArrowRight className="h-3.5 w-3.5" />
-          </a>
         </div>
 
         {/* Mobile: 5 columns compact icon grid */}
