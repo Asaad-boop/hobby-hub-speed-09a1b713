@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { products, newArrivals } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import HeroShowcase from "@/components/HeroShowcase";
+import WatchAndShop from "@/components/WatchAndShop";
 import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -139,6 +140,9 @@ function Index() {
           </div>
         </div>
       </section>
+
+      {/* Watch & Shop reels */}
+      <WatchAndShop />
 
       {/* Trending */}
       <section id="trending" className="mx-auto max-w-7xl px-4 py-10">
