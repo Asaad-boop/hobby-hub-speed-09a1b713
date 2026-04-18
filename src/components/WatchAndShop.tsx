@@ -98,7 +98,7 @@ function ReelCard({
   return (
     <div
       ref={containerRef}
-      className="group relative aspect-[9/16] w-[78vw] max-w-[320px] shrink-0 snap-start overflow-hidden rounded-3xl border border-border bg-foreground shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-elevated)] sm:w-72 md:w-64 lg:w-72"
+      className="group relative aspect-[9/16] w-[72vw] max-w-[300px] shrink-0 snap-start overflow-hidden rounded-3xl border border-border bg-foreground shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-elevated)] xs:w-[60vw] sm:w-[44vw] sm:max-w-[260px] md:w-[30vw] md:max-w-[260px] lg:w-[22vw] lg:max-w-[280px] xl:w-[260px]"
     >
       <video
         ref={videoRef}
@@ -414,7 +414,7 @@ function FullscreenViewer({
 
       {/* Stage */}
       <div
-        className="relative h-full w-full overflow-hidden bg-foreground shadow-2xl select-none sm:h-[min(94vh,900px)] sm:w-auto sm:aspect-[9/16] sm:rounded-3xl sm:border sm:border-background/15"
+        className="relative h-full w-full overflow-hidden bg-foreground shadow-2xl select-none sm:h-[min(92vh,860px)] sm:w-auto sm:aspect-[9/16] sm:max-w-[min(92vw,484px)] sm:rounded-3xl sm:border sm:border-background/15"
         style={{
           transform: `translateY(${dragY}px)`,
           transition: dragY === 0 ? "transform 280ms cubic-bezier(0.22, 1, 0.36, 1)" : "none",
