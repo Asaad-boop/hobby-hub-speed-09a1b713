@@ -35,13 +35,6 @@ const trust = [
 ];
 
 function Index() {
-  const catScrollerRef = useRef<HTMLDivElement | null>(null);
-  const scrollCats = (dir: "left" | "right") => {
-    const el = catScrollerRef.current;
-    if (!el) return;
-    const amount = el.clientWidth * 0.8;
-    el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
-  };
   return (
     <div>
       {/* Hero */}
