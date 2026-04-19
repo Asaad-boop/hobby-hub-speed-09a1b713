@@ -1,10 +1,12 @@
 import { MessageCircle } from "lucide-react";
-
-const WA_NUMBER = "8809638779900";
-const WA_MESSAGE = "Hi HobbyShop! I have a question about your products.";
+import { useSiteSettings } from "@/lib/site-settings";
 
 export default function WhatsAppButton() {
-  const href = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(WA_MESSAGE)}`;
+  const { data: settings } = useSiteSettings();
+  const number = (settings?.whatsapp_number ?? "").replace(/[^0-9]/g, "");
+  const message = settings?.whatsapp_message ?? "";
+  if (!number) return null;
+  const href = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
   return (
     <a
       href={href}

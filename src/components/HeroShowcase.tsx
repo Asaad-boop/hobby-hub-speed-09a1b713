@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ChevronLeft, ChevronRight, Flame, ShoppingBag, Star, Truck, Zap } from "lucide-react";
 import { useProducts, type Product } from "@/lib/products";
+import { useSiteSettings } from "@/lib/site-settings";
 
 const orderTicker = [
   { name: "Rahim", city: "Dhaka", item: "Sunset Crystal LED Lamp", time: "2 min ago" },
@@ -30,6 +31,7 @@ function useCountdown(targetMs: number) {
 
 export default function HeroShowcase() {
   const { data: allProducts = [] } = useProducts();
+  const { data: settings } = useSiteSettings();
   const slides: Product[] = useMemo(() => allProducts.slice(0, 4), [allProducts]);
   const [active, setActive] = useState(0);
   const [tickerIdx, setTickerIdx] = useState(0);
@@ -94,18 +96,18 @@ export default function HeroShowcase() {
         <div className="animate-fade-in md:col-span-5">
           <span className="inline-flex items-center gap-2 rounded-full border border-background/20 bg-background/10 px-3 py-1 text-[11px] font-semibold backdrop-blur md:text-xs">
             <Flame className="h-3 w-3 text-primary" />
-            Flash Sale · Trending in Bangladesh
+            {settings?.hero_badge ?? "Flash Sale · Trending in Bangladesh"}
           </span>
           <h1 className="mt-3 text-[1.6rem] font-extrabold leading-[1.25] tracking-tight md:mt-4 md:text-[2.5rem] md:leading-[1.15]">
-            শখের প্রোডাক্টের একমাত্র ঠিকানা
+            {settings?.hero_heading ?? "শখের প্রোডাক্টের একমাত্র ঠিকানা"}
             <br />
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              HobbyShop
+              {settings?.hero_heading_highlight ?? "HobbyShop"}
             </span>
             <span className="ml-1">❤️</span>
           </h1>
           <p className="mt-2.5 max-w-md text-sm text-background/70 md:mt-3">
-            Curated gadgets, decor & gifts shipped fast. Free delivery over ৳1500 — Cash on Delivery nationwide.
+            {settings?.hero_subheading ?? "Curated gadgets, decor & gifts shipped fast. Free delivery over ৳1500 — Cash on Delivery nationwide."}
           </p>
 
           {/* Countdown */}
