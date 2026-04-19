@@ -89,22 +89,49 @@ function AuthPage() {
             Join thousands of happy customers shopping curated gadgets, decor, and unique gifts — delivered across Bangladesh.
           </p>
 
-          <div className="mt-10 grid gap-4">
+          {/* Animated stats row */}
+          <div className="mt-10 grid grid-cols-3 gap-3">
             {[
-              { icon: Truck, title: "Free delivery", desc: "On orders over ৳1,500" },
-              { icon: ShieldCheck, title: "100% Authentic", desc: "Verified quality products" },
-              { icon: Sparkles, title: "Cash on Delivery", desc: "Pay only when you receive" },
-            ].map((f) => (
-              <div key={f.title} className="flex items-center gap-4 rounded-2xl border border-border/60 bg-background/60 p-4 backdrop-blur">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <f.icon className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="text-sm font-bold text-foreground">{f.title}</p>
-                  <p className="text-xs text-muted-foreground">{f.desc}</p>
-                </div>
+              { value: "10K+", label: "Happy buyers", icon: Heart },
+              { value: "4.9★", label: "Avg rating", icon: Star },
+              { value: "500+", label: "Products", icon: TrendingUp },
+            ].map((s) => (
+              <div key={s.label} className="rounded-2xl border border-border/60 bg-background/60 p-4 text-center backdrop-blur transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_10px_30px_-15px_oklch(0.585_0.245_27.5/0.4)]">
+                <s.icon className="mx-auto mb-2 h-4 w-4 text-primary" />
+                <p className="text-xl font-extrabold text-foreground">{s.value}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">{s.label}</p>
               </div>
             ))}
+          </div>
+
+          {/* Testimonial card */}
+          <div className="relative mt-6 overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background/80 to-background p-5 backdrop-blur">
+            <Quote className="absolute -right-2 -top-2 h-16 w-16 text-primary/10" />
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/60 text-sm font-bold text-primary-foreground shadow-lg">
+                NA
+              </div>
+              <div>
+                <p className="text-sm font-bold text-foreground">Nusrat Ahmed</p>
+                <div className="flex gap-0.5 text-primary">
+                  {[...Array(5)].map((_, i) => <Star key={i} className="h-3 w-3 fill-current" />)}
+                </div>
+              </div>
+            </div>
+            <p className="relative mt-3 text-sm leading-relaxed text-muted-foreground">
+              "Fast delivery, exactly as described. HobbyShop er collection osadharon — already 5+ orders diechi!"
+            </p>
+          </div>
+
+          {/* Trending now strip */}
+          <div className="mt-5 flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-4 py-2.5 backdrop-blur">
+            <span className="relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+              <Zap className="h-3.5 w-3.5" />
+              <span className="absolute inset-0 animate-ping rounded-full bg-primary/30" />
+            </span>
+            <p className="text-xs font-medium text-muted-foreground">
+              <span className="font-bold text-foreground">247 people</span> joined HobbyShop this week
+            </p>
           </div>
         </div>
 
