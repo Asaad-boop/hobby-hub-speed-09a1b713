@@ -20,7 +20,6 @@ function Checkout() {
   const { items, total, clear, add } = useCart();
   const navigate = useNavigate();
   const [bump, setBump] = useState(true);
-  const [placed, setPlaced] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", city: "", district: "" });
 
