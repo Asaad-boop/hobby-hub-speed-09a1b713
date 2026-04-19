@@ -90,12 +90,16 @@ function AuthPage() {
           </p>
 
           {/* Bangladesh delivery map showcase */}
-          <div className="relative mt-10 overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-background/80 via-primary/5 to-background p-6 backdrop-blur">
-            <div className="pointer-events-none absolute -top-20 left-1/2 h-60 w-60 -translate-x-1/2 rounded-full bg-primary/15 blur-3xl" />
+          <div className="relative mt-10 overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-background/90 via-primary/[0.04] to-background p-7 shadow-[0_30px_80px_-30px_oklch(0.585_0.245_27.5/0.25)] backdrop-blur-xl">
+            {/* Glow accents */}
+            <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-20 -right-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+            {/* Grid pattern */}
+            <div className="pointer-events-none absolute inset-0 opacity-[0.4] [background-image:linear-gradient(oklch(0.585_0.245_27.5/0.06)_1px,transparent_1px),linear-gradient(90deg,oklch(0.585_0.245_27.5/0.06)_1px,transparent_1px)] [background-size:28px_28px]" />
 
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
+            <div className="relative mb-5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30">
                   <Truck className="h-4 w-4" />
                 </span>
                 <div>
@@ -103,44 +107,78 @@ function AuthPage() {
                   <p className="text-[11px] text-muted-foreground">64 districts • 7 days a week</p>
                 </div>
               </div>
-              <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+              <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 </span>
-                LIVE
+                Live
               </span>
             </div>
 
-            <div className="relative mx-auto aspect-[4/5] w-full max-w-[280px]">
-              <svg viewBox="0 0 400 500" className="h-full w-full" aria-label="Bangladesh map">
+            <div className="relative mx-auto aspect-[4/5] w-full max-w-[300px]">
+              <svg viewBox="0 0 400 500" className="h-full w-full drop-shadow-[0_10px_30px_oklch(0.585_0.245_27.5/0.25)]" aria-label="Bangladesh delivery map">
                 <defs>
                   <linearGradient id="bdFill" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.585 0.245 27.5)" stopOpacity="0.25" />
-                    <stop offset="100%" stopColor="oklch(0.585 0.245 27.5)" stopOpacity="0.08" />
+                    <stop offset="0%" stopColor="oklch(0.585 0.245 27.5)" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="oklch(0.585 0.245 27.5)" stopOpacity="0.1" />
                   </linearGradient>
+                  <linearGradient id="bdStroke" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="oklch(0.585 0.245 27.5)" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="oklch(0.585 0.245 27.5)" stopOpacity="0.5" />
+                  </linearGradient>
+                  <radialGradient id="pinGlow" cx="0.5" cy="0.5" r="0.5">
+                    <stop offset="0%" stopColor="oklch(0.585 0.245 27.5)" stopOpacity="0.6" />
+                    <stop offset="100%" stopColor="oklch(0.585 0.245 27.5)" stopOpacity="0" />
+                  </radialGradient>
+                  <filter id="pinShadow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+                    <feOffset dy="2" />
+                    <feComponentTransfer><feFuncA type="linear" slope="0.4" /></feComponentTransfer>
+                    <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+                  </filter>
                 </defs>
+
+                {/* Country shape */}
                 <path
                   d="M155 30 L185 25 L215 35 L240 30 L260 50 L285 55 L295 80 L285 105 L300 125 L320 130 L340 155 L335 185 L355 210 L345 245 L360 275 L340 300 L355 330 L335 355 L345 385 L320 405 L325 435 L300 455 L275 445 L255 465 L230 470 L210 455 L185 465 L165 450 L145 460 L130 440 L140 415 L120 395 L130 370 L110 350 L120 320 L100 295 L115 270 L95 245 L110 215 L95 185 L115 160 L100 135 L120 115 L110 90 L130 65 L140 45 Z"
                   fill="url(#bdFill)"
-                  stroke="oklch(0.585 0.245 27.5)"
-                  strokeWidth="2"
-                  strokeOpacity="0.5"
+                  stroke="url(#bdStroke)"
+                  strokeWidth="2.5"
+                  strokeLinejoin="round"
                 />
-                <g stroke="oklch(0.585 0.245 27.5)" strokeWidth="1.5" strokeDasharray="4 4" strokeOpacity="0.4" fill="none">
-                  <line x1="225" y1="240" x2="125" y2="180">
-                    <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.5s" repeatCount="indefinite" />
-                  </line>
-                  <line x1="225" y1="240" x2="310" y2="370">
-                    <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.8s" repeatCount="indefinite" />
-                  </line>
-                  <line x1="225" y1="240" x2="180" y2="430">
-                    <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="2s" repeatCount="indefinite" />
-                  </line>
-                  <line x1="225" y1="240" x2="290" y2="120">
-                    <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.6s" repeatCount="indefinite" />
-                  </line>
+
+                {/* Animated delivery routes from Dhaka */}
+                <g stroke="oklch(0.585 0.245 27.5)" strokeWidth="2" strokeDasharray="5 5" strokeLinecap="round" strokeOpacity="0.55" fill="none">
+                  {[
+                    { x: 125, y: 180, dur: "1.5s" },
+                    { x: 310, y: 370, dur: "1.8s" },
+                    { x: 180, y: 430, dur: "2s" },
+                    { x: 290, y: 120, dur: "1.6s" },
+                  ].map((r) => (
+                    <line key={`${r.x}-${r.y}`} x1="225" y1="240" x2={r.x} y2={r.y}>
+                      <animate attributeName="stroke-dashoffset" from="0" to="-20" dur={r.dur} repeatCount="indefinite" />
+                    </line>
+                  ))}
                 </g>
+
+                {/* Moving delivery dots along routes */}
+                <g fill="oklch(0.585 0.245 27.5)">
+                  {[
+                    { x: 125, y: 180, dur: "3s" },
+                    { x: 310, y: 370, dur: "3.5s" },
+                    { x: 180, y: 430, dur: "4s" },
+                    { x: 290, y: 120, dur: "3.2s" },
+                  ].map((r, i) => (
+                    <circle key={i} r="3" fill="oklch(0.585 0.245 27.5)">
+                      <animate attributeName="cx" values={`225;${r.x};225`} dur={r.dur} repeatCount="indefinite" />
+                      <animate attributeName="cy" values={`240;${r.y};240`} dur={r.dur} repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0;1;1;0" dur={r.dur} repeatCount="indefinite" />
+                    </circle>
+                  ))}
+                </g>
+
+                {/* City pins */}
                 {[
                   { x: 225, y: 240, name: "Dhaka", main: true },
                   { x: 125, y: 180, name: "Rajshahi" },
@@ -148,16 +186,44 @@ function AuthPage() {
                   { x: 180, y: 430, name: "Khulna" },
                   { x: 290, y: 120, name: "Sylhet" },
                 ].map((c) => (
-                  <g key={c.name}>
+                  <g key={c.name} filter="url(#pinShadow)">
+                    {/* Glow halo */}
+                    <circle cx={c.x} cy={c.y} r={c.main ? 28 : 18} fill="url(#pinGlow)" />
+                    {/* Pulse ring (Dhaka only) */}
                     {c.main && (
-                      <circle cx={c.x} cy={c.y} r="14" fill="oklch(0.585 0.245 27.5)" opacity="0.2">
-                        <animate attributeName="r" from="8" to="22" dur="2s" repeatCount="indefinite" />
-                        <animate attributeName="opacity" from="0.4" to="0" dur="2s" repeatCount="indefinite" />
-                      </circle>
+                      <>
+                        <circle cx={c.x} cy={c.y} r="10" fill="none" stroke="oklch(0.585 0.245 27.5)" strokeWidth="2" opacity="0.6">
+                          <animate attributeName="r" from="8" to="26" dur="2.2s" repeatCount="indefinite" />
+                          <animate attributeName="opacity" from="0.7" to="0" dur="2.2s" repeatCount="indefinite" />
+                        </circle>
+                        <circle cx={c.x} cy={c.y} r="10" fill="none" stroke="oklch(0.585 0.245 27.5)" strokeWidth="2" opacity="0.4">
+                          <animate attributeName="r" from="8" to="26" dur="2.2s" begin="1.1s" repeatCount="indefinite" />
+                          <animate attributeName="opacity" from="0.5" to="0" dur="2.2s" begin="1.1s" repeatCount="indefinite" />
+                        </circle>
+                      </>
                     )}
-                    <circle cx={c.x} cy={c.y} r={c.main ? 6 : 4} fill="oklch(0.585 0.245 27.5)" />
+                    {/* Pin body */}
+                    <circle cx={c.x} cy={c.y} r={c.main ? 7 : 5} fill="oklch(0.585 0.245 27.5)" stroke="white" strokeWidth="2.5" />
                     <circle cx={c.x} cy={c.y} r={c.main ? 2.5 : 1.5} fill="white" />
-                    <text x={c.x + 12} y={c.y + 4} className="fill-foreground" fontSize="13" fontWeight={c.main ? "700" : "500"}>
+                    {/* Label with background */}
+                    <rect
+                      x={c.x + 11}
+                      y={c.y - 9}
+                      width={c.name.length * 7.5 + 10}
+                      height="18"
+                      rx="9"
+                      fill="oklch(1 0 0 / 0.92)"
+                      className="dark:fill-[oklch(0.2_0_0/0.85)]"
+                      stroke="oklch(0.585 0.245 27.5 / 0.2)"
+                      strokeWidth="1"
+                    />
+                    <text
+                      x={c.x + 16}
+                      y={c.y + 4}
+                      className="fill-foreground"
+                      fontSize="11"
+                      fontWeight={c.main ? "800" : "600"}
+                    >
                       {c.name}
                     </text>
                   </g>
@@ -165,16 +231,20 @@ function AuthPage() {
               </svg>
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-2">
+            {/* Stats below map */}
+            <div className="relative mt-5 grid grid-cols-3 gap-2.5">
               {[
                 { icon: MapPin, value: "64", label: "Districts" },
                 { icon: Package, value: "10K+", label: "Delivered" },
                 { icon: Star, value: "4.9", label: "Rated" },
               ].map((s) => (
-                <div key={s.label} className="rounded-xl border border-border/40 bg-background/60 p-2.5 text-center">
-                  <s.icon className="mx-auto mb-1 h-3.5 w-3.5 text-primary" />
-                  <p className="text-sm font-extrabold text-foreground">{s.value}</p>
-                  <p className="text-[10px] text-muted-foreground">{s.label}</p>
+                <div
+                  key={s.label}
+                  className="group rounded-2xl border border-border/50 bg-background/70 p-3 text-center backdrop-blur transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-background hover:shadow-[0_10px_25px_-12px_oklch(0.585_0.245_27.5/0.4)]"
+                >
+                  <s.icon className="mx-auto mb-1 h-4 w-4 text-primary transition-transform group-hover:scale-110" />
+                  <p className="text-base font-extrabold text-foreground">{s.value}</p>
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{s.label}</p>
                 </div>
               ))}
             </div>
