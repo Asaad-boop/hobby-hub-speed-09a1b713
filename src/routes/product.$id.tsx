@@ -174,7 +174,7 @@ function ProductPage() {
   }), [allReviews]);
 
   const handleBuyNow = () => {
-    add(product, qty);
+    add(product, qty, { silent: true });
     navigate({ to: "/checkout" });
   };
 
