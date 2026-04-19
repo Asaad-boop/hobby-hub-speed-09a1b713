@@ -194,11 +194,11 @@ function Checkout() {
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-6 md:grid-cols-[1fr_400px] md:py-10">
-        <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="mx-auto grid max-w-6xl gap-4 px-3 py-4 md:grid-cols-[1fr_380px] md:gap-6 md:px-4 md:py-8">
+        <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
           <div>
-            <h1 className="text-2xl font-extrabold sm:text-3xl">Checkout</h1>
-            <p className="text-sm text-muted-foreground">Fill in your details — we'll handle the rest.</p>
+            <h1 className="text-xl font-extrabold sm:text-2xl">Checkout</h1>
+            <p className="text-xs text-muted-foreground">Fill in your details — we'll handle the rest.</p>
           </div>
 
           {/* Delivery info */}
