@@ -119,16 +119,6 @@ export default function QuickViewModal({
               {product.description}
             </p>
 
-            {product.highlights && product.highlights.length > 0 && (
-              <ul className="mt-3 space-y-1">
-                {product.highlights.slice(0, 3).map((h, i) => (
-                  <li key={i} className="flex items-start gap-1.5 text-xs">
-                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-                    <span>{h}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
 
             <div className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-muted/60 px-2 py-1 text-[11px] text-muted-foreground w-fit">
               <Truck className="h-3 w-3" /> Cash on Delivery available
