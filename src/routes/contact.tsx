@@ -148,9 +148,10 @@ function ContactPage() {
 
           <button
             type="submit"
-            className="mt-5 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary/85 px-7 text-sm font-bold text-primary-foreground shadow-md transition hover:scale-[1.02]"
+            disabled={loading}
+            className="mt-5 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary/85 px-7 text-sm font-bold text-primary-foreground shadow-md transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
           >
-            <Send className="h-4 w-4" /> Send Message
+            <Send className="h-4 w-4" /> {loading ? "Sending…" : "Send Message"}
           </button>
         </form>
       </div>
