@@ -49,11 +49,11 @@ export default function QuickViewModal({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4"
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="relative max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-2xl bg-background shadow-2xl sm:rounded-2xl"
+        className="relative max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-2xl bg-background shadow-2xl sm:rounded-2xl animate-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         <button
