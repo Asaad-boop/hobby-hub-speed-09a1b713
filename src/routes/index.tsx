@@ -98,9 +98,9 @@ function Index() {
       {settings?.homepage_banner_url && (
         <section className="mx-auto max-w-7xl px-4 pt-6 md:pt-8">
           {settings.homepage_banner_link ? (
-            <Link to={settings.homepage_banner_link} className="block overflow-hidden rounded-2xl shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-elevated)]">
+            <a href={settings.homepage_banner_link} className="block overflow-hidden rounded-2xl shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-elevated)]">
               <img src={settings.homepage_banner_url} alt="Promotional banner" className="h-auto w-full object-cover" loading="lazy" />
-            </Link>
+            </a>
           ) : (
             <div className="overflow-hidden rounded-2xl shadow-[var(--shadow-card)]">
               <img src={settings.homepage_banner_url} alt="Promotional banner" className="h-auto w-full object-cover" loading="lazy" />
