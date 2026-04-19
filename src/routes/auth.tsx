@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, Mail, Lock, User as UserIcon, Eye, EyeOff, Star, Quote, TrendingUp, Heart, Zap } from "lucide-react";
+import { Loader2, Mail, Lock, User as UserIcon, Eye, EyeOff, Star, MapPin, Truck, Package } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/auth")({
@@ -89,49 +89,95 @@ function AuthPage() {
             Join thousands of happy customers shopping curated gadgets, decor, and unique gifts — delivered across Bangladesh.
           </p>
 
-          {/* Animated stats row */}
-          <div className="mt-10 grid grid-cols-3 gap-3">
-            {[
-              { value: "10K+", label: "Happy buyers", icon: Heart },
-              { value: "4.9★", label: "Avg rating", icon: Star },
-              { value: "500+", label: "Products", icon: TrendingUp },
-            ].map((s) => (
-              <div key={s.label} className="rounded-2xl border border-border/60 bg-background/60 p-4 text-center backdrop-blur transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_10px_30px_-15px_oklch(0.585_0.245_27.5/0.4)]">
-                <s.icon className="mx-auto mb-2 h-4 w-4 text-primary" />
-                <p className="text-xl font-extrabold text-foreground">{s.value}</p>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">{s.label}</p>
-              </div>
-            ))}
-          </div>
+          {/* Bangladesh delivery map showcase */}
+          <div className="relative mt-10 overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-background/80 via-primary/5 to-background p-6 backdrop-blur">
+            <div className="pointer-events-none absolute -top-20 left-1/2 h-60 w-60 -translate-x-1/2 rounded-full bg-primary/15 blur-3xl" />
 
-          {/* Testimonial card */}
-          <div className="relative mt-6 overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background/80 to-background p-5 backdrop-blur">
-            <Quote className="absolute -right-2 -top-2 h-16 w-16 text-primary/10" />
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/60 text-sm font-bold text-primary-foreground shadow-lg">
-                NA
-              </div>
-              <div>
-                <p className="text-sm font-bold text-foreground">Nusrat Ahmed</p>
-                <div className="flex gap-0.5 text-primary">
-                  {[...Array(5)].map((_, i) => <Star key={i} className="h-3 w-3 fill-current" />)}
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                  <Truck className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-foreground">Delivering nationwide</p>
+                  <p className="text-[11px] text-muted-foreground">64 districts • 7 days a week</p>
                 </div>
               </div>
+              <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                </span>
+                LIVE
+              </span>
             </div>
-            <p className="relative mt-3 text-sm leading-relaxed text-muted-foreground">
-              "Fast delivery, exactly as described. HobbyShop er collection osadharon — already 5+ orders diechi!"
-            </p>
-          </div>
 
-          {/* Trending now strip */}
-          <div className="mt-5 flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-4 py-2.5 backdrop-blur">
-            <span className="relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
-              <Zap className="h-3.5 w-3.5" />
-              <span className="absolute inset-0 animate-ping rounded-full bg-primary/30" />
-            </span>
-            <p className="text-xs font-medium text-muted-foreground">
-              <span className="font-bold text-foreground">247 people</span> joined HobbyShop this week
-            </p>
+            <div className="relative mx-auto aspect-[4/5] w-full max-w-[280px]">
+              <svg viewBox="0 0 400 500" className="h-full w-full" aria-label="Bangladesh map">
+                <defs>
+                  <linearGradient id="bdFill" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="oklch(0.585 0.245 27.5)" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="oklch(0.585 0.245 27.5)" stopOpacity="0.08" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M155 30 L185 25 L215 35 L240 30 L260 50 L285 55 L295 80 L285 105 L300 125 L320 130 L340 155 L335 185 L355 210 L345 245 L360 275 L340 300 L355 330 L335 355 L345 385 L320 405 L325 435 L300 455 L275 445 L255 465 L230 470 L210 455 L185 465 L165 450 L145 460 L130 440 L140 415 L120 395 L130 370 L110 350 L120 320 L100 295 L115 270 L95 245 L110 215 L95 185 L115 160 L100 135 L120 115 L110 90 L130 65 L140 45 Z"
+                  fill="url(#bdFill)"
+                  stroke="oklch(0.585 0.245 27.5)"
+                  strokeWidth="2"
+                  strokeOpacity="0.5"
+                />
+                <g stroke="oklch(0.585 0.245 27.5)" strokeWidth="1.5" strokeDasharray="4 4" strokeOpacity="0.4" fill="none">
+                  <line x1="225" y1="240" x2="125" y2="180">
+                    <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.5s" repeatCount="indefinite" />
+                  </line>
+                  <line x1="225" y1="240" x2="310" y2="370">
+                    <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.8s" repeatCount="indefinite" />
+                  </line>
+                  <line x1="225" y1="240" x2="180" y2="430">
+                    <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="2s" repeatCount="indefinite" />
+                  </line>
+                  <line x1="225" y1="240" x2="290" y2="120">
+                    <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.6s" repeatCount="indefinite" />
+                  </line>
+                </g>
+                {[
+                  { x: 225, y: 240, name: "Dhaka", main: true },
+                  { x: 125, y: 180, name: "Rajshahi" },
+                  { x: 310, y: 370, name: "Chattogram" },
+                  { x: 180, y: 430, name: "Khulna" },
+                  { x: 290, y: 120, name: "Sylhet" },
+                ].map((c) => (
+                  <g key={c.name}>
+                    {c.main && (
+                      <circle cx={c.x} cy={c.y} r="14" fill="oklch(0.585 0.245 27.5)" opacity="0.2">
+                        <animate attributeName="r" from="8" to="22" dur="2s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" from="0.4" to="0" dur="2s" repeatCount="indefinite" />
+                      </circle>
+                    )}
+                    <circle cx={c.x} cy={c.y} r={c.main ? 6 : 4} fill="oklch(0.585 0.245 27.5)" />
+                    <circle cx={c.x} cy={c.y} r={c.main ? 2.5 : 1.5} fill="white" />
+                    <text x={c.x + 12} y={c.y + 4} className="fill-foreground" fontSize="13" fontWeight={c.main ? "700" : "500"}>
+                      {c.name}
+                    </text>
+                  </g>
+                ))}
+              </svg>
+            </div>
+
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              {[
+                { icon: MapPin, value: "64", label: "Districts" },
+                { icon: Package, value: "10K+", label: "Delivered" },
+                { icon: Star, value: "4.9", label: "Rated" },
+              ].map((s) => (
+                <div key={s.label} className="rounded-xl border border-border/40 bg-background/60 p-2.5 text-center">
+                  <s.icon className="mx-auto mb-1 h-3.5 w-3.5 text-primary" />
+                  <p className="text-sm font-extrabold text-foreground">{s.value}</p>
+                  <p className="text-[10px] text-muted-foreground">{s.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
