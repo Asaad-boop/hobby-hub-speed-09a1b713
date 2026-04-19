@@ -42,26 +42,20 @@ const trust = [
 
 function Index() {
   const navigate = useNavigate();
-  const [trackId, setTrackId] = useState("");
-  const [trackPhone, setTrackPhone] = useState("");
+  const [trackQuery, setTrackQuery] = useState("");
   const [trackLoading, setTrackLoading] = useState(false);
   const [trackError, setTrackError] = useState("");
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
     setTrackError("");
-    const id = trackId.trim();
-    const phone = trackPhone.trim();
-    if (id.length < 6) {
-      setTrackError("Enter a valid Order ID");
-      return;
-    }
-    if (phone.replace(/\D/g, "").length < 10) {
-      setTrackError("Enter a valid phone number");
+    const q = trackQuery.trim();
+    if (!q) {
+      setTrackError("Enter Order ID, phone or email");
       return;
     }
     setTrackLoading(true);
     try {
-      const res = await lookupOrder({ data: { orderId: id, contact: phone } });
+      const res = await lookupOrder({ data: { query: q } });
       if (!res.ok) {
         setTrackError(res.error);
         toast.error(res.error);
