@@ -58,7 +58,7 @@ function Checkout() {
         .order("is_default", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (data) {
+              if (data) {
         setForm({
           name: data.full_name,
           phone: data.phone,
@@ -66,6 +66,7 @@ function Checkout() {
           city: data.city,
           district: data.district,
         });
+        setShipMethod(data.district === "Dhaka" ? "inside" : "outside");
       }
     })();
   }, []);
