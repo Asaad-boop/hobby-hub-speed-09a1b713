@@ -4,7 +4,7 @@ import { useCart } from "@/lib/cart";
 import { products } from "@/lib/products";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Check, Truck, ShieldCheck, Loader2 } from "lucide-react";
+import { Truck, ShieldCheck, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -20,7 +20,6 @@ function Checkout() {
   const { items, total, clear, add } = useCart();
   const navigate = useNavigate();
   const [bump, setBump] = useState(true);
-  const [placed, setPlaced] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", city: "", district: "" });
 
@@ -99,26 +98,20 @@ function Checkout() {
         quantity: i.qty,
       }));
       await supabase.from("order_items").insert(orderItemsPayload);
-    } else {
-      if (bump) add(bumpItem);
+
+      clear();
+      toast.success("Order placed successfully!");
+      navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
+      return;
     }
 
-    setPlaced(true);
+    // Guest fallback — no DB order, generate a temp ref
+    if (bump) add(bumpItem);
     clear();
-    setTimeout(() => navigate({ to: session ? "/account" : "/" }), 2200);
+    const tempId = `guest-${Date.now().toString(36)}`;
+    toast.success("Order placed successfully!");
+    navigate({ to: "/order-success/$orderId", params: { orderId: tempId } });
   };
-
-  if (placed) {
-    return (
-      <div className="mx-auto max-w-md px-4 py-20 text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <Check className="h-8 w-8" />
-        </div>
-        <h1 className="mt-4 text-2xl font-bold">Order Placed!</h1>
-        <p className="mt-2 text-sm text-muted-foreground">We'll call you shortly to confirm. Thanks for shopping with HobbyShop.</p>
-      </div>
-    );
-  }
 
   if (items.length === 0) {
     return (
