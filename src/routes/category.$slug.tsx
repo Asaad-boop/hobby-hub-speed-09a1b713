@@ -95,7 +95,7 @@ function CategoryLandingPage() {
           <p className="py-20 text-center text-muted-foreground">No products in this category yet.</p>
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {items.map((p) => (
+            {items.map((p: typeof items[number]) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
