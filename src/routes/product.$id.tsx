@@ -495,18 +495,18 @@ function ProductPage() {
       </div>
 
       {/* Tabbed details */}
-      <section className="mx-auto max-w-7xl px-4 py-10">
+      <section className="mx-auto max-w-7xl px-4 py-8 md:py-10">
         <div className="rounded-3xl border border-border bg-card overflow-hidden">
           <div className="flex border-b border-border">
             {[
-              { k: "desc", l: "Description" },
-              { k: "specs", l: "What's Inside" },
-              { k: "ship", l: "Shipping & Returns" },
+              { k: "desc", l: "Details" },
+              { k: "specs", l: "Inside" },
+              { k: "ship", l: "Shipping" },
             ].map((t) => (
               <button
                 key={t.k}
                 onClick={() => setActiveTab(t.k as any)}
-                className={`flex-1 px-4 py-4 text-sm font-bold transition ${
+                className={`flex-1 px-2 py-3.5 text-xs font-bold transition sm:text-sm ${
                   activeTab === t.k ? "border-b-2 border-primary text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
