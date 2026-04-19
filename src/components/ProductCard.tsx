@@ -50,22 +50,39 @@ export default function ProductCard({ product }: { product: Product }) {
           </span>
         )}
 
-        {/* Wishlist */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const added = toggle(product);
-            toast.success(added ? "Added to wishlist" : "Removed from wishlist");
-          }}
-          aria-label="Add to wishlist"
-          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-background/95 text-foreground shadow-sm backdrop-blur transition hover:scale-110 hover:bg-background md:right-3 md:top-3 md:h-9 md:w-9 md:shadow-md"
-        >
-          <Heart
-            className={`h-3.5 w-3.5 transition md:h-4 md:w-4 ${liked ? "fill-primary text-primary" : ""}`}
-          />
-        </button>
+        {/* Top-right action stack */}
+        <div className="absolute right-2 top-2 flex flex-col gap-1.5 md:right-3 md:top-3 md:gap-2">
+          {/* Wishlist */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const added = toggle(product);
+              toast.success(added ? "Added to wishlist" : "Removed from wishlist");
+            }}
+            aria-label="Add to wishlist"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-background/95 text-foreground shadow-sm backdrop-blur transition hover:scale-110 hover:bg-background md:h-9 md:w-9 md:shadow-md"
+          >
+            <Heart
+              className={`h-3.5 w-3.5 transition md:h-4 md:w-4 ${liked ? "fill-primary text-primary" : ""}`}
+            />
+          </button>
+
+          {/* Quick view (mobile only — desktop uses bottom hover button) */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setQuickOpen(true);
+            }}
+            aria-label="Quick view"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-background/95 text-foreground shadow-sm backdrop-blur transition hover:scale-110 hover:bg-background md:hidden"
+          >
+            <Eye className="h-3.5 w-3.5" />
+          </button>
+        </div>
 
         {/* Quick view (desktop only) */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 hidden translate-y-3 p-3 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 md:block">
