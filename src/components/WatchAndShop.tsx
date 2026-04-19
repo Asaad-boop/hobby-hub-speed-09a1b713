@@ -18,43 +18,13 @@ import {
 import { toast } from "sonner";
 import { type Product, useProducts } from "@/lib/products";
 import { useCart } from "@/lib/cart";
-import reelLamp from "@/assets/reel-lamp.mp4.asset.json";
-import reelCharger from "@/assets/reel-charger.mp4.asset.json";
-import reelSpeaker from "@/assets/reel-speaker.mp4.asset.json";
-import reelDiffuser from "@/assets/reel-diffuser.mp4.asset.json";
-import reelCustom1 from "@/assets/reel-custom-1.mp4";
+import { useSiteSettings } from "@/lib/site-settings";
 
 type Reel = {
   id: string;
   videoUrl: string;
   caption: string;
   product: Product;
-};
-
-// Reels are matched to products by slug-like keyword in title (DB-driven).
-const REEL_SOURCES: { id: string; videoUrl: string; caption: string; match: string[] }[] = [
-  { id: "r1", videoUrl: reelLamp.url, caption: "Cozy vibes only ✨", match: ["lamp", "crystal"] },
-  { id: "r2", videoUrl: reelCharger.url, caption: "Snap. Charge. Done. ⚡", match: ["charger", "magsafe"] },
-  { id: "r3", videoUrl: reelSpeaker.url, caption: "Big sound, tiny size 🔊", match: ["speaker"] },
-  { id: "r4", videoUrl: reelDiffuser.url, caption: "Relax mode: ON 🌿", match: ["diffuser", "aroma"] },
-  { id: "r5", videoUrl: reelCustom1, caption: "Trending now 🔥", match: ["diy", "kit"] },
-];
-
-const buildReels = (all: Product[]): Reel[] => {
-  const matched: Reel[] = [];
-  for (const src of REEL_SOURCES) {
-    const product = all.find((p) =>
-      src.match.some((kw) => p.title.toLowerCase().includes(kw))
-    );
-    if (product) matched.push({ id: src.id, videoUrl: src.videoUrl, caption: src.caption, product });
-  }
-  // Fallback: pair remaining reels with any product so the section never breaks
-  if (matched.length === 0 && all.length > 0) {
-    REEL_SOURCES.slice(0, all.length).forEach((src, i) => {
-      matched.push({ id: src.id, videoUrl: src.videoUrl, caption: src.caption, product: all[i] });
-    });
-  }
-  return matched;
 };
 
 function ReelCard({
