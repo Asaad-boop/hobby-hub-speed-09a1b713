@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -8,42 +9,43 @@ export type AdminAuthState = {
   isAdmin: boolean;
 };
 
+type AuthData = { user: User | null; isAdmin: boolean };
+
+async function fetchAuthData(): Promise<AuthData> {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const user = sessionData.session?.user ?? null;
+  if (!user) return { user: null, isAdmin: false };
+  const { data, error } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id)
+    .eq("role", "admin")
+    .maybeSingle();
+  return { user, isAdmin: !error && !!data };
+}
+
 export function useAdminAuth(): AdminAuthState {
-  const [state, setState] = useState<AdminAuthState>({
-    loading: true,
-    user: null,
-    isAdmin: false,
+  const qc = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin_auth"],
+    queryFn: fetchAuthData,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function check(user: User | null) {
-      if (!user) {
-        if (!cancelled) setState({ loading: false, user: null, isAdmin: false });
-        return;
-      }
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-      if (cancelled) return;
-      setState({ loading: false, user, isAdmin: !error && !!data });
-    }
-
-    // Listener first, then getSession (per Supabase auth pattern)
-    const { data: sub } = supabase.auth.onAuthStateChange((_evt, session) => {
-      check(session?.user ?? null);
+    const { data: sub } = supabase.auth.onAuthStateChange(() => {
+      qc.invalidateQueries({ queryKey: ["admin_auth"] });
     });
-    supabase.auth.getSession().then(({ data }) => check(data.session?.user ?? null));
-
     return () => {
-      cancelled = true;
       sub.subscription.unsubscribe();
     };
-  }, []);
+  }, [qc]);
 
-  return state;
+  return {
+    loading: isLoading,
+    user: data?.user ?? null,
+    isAdmin: data?.isAdmin ?? false,
+  };
 }
