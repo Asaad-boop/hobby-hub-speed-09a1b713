@@ -281,10 +281,10 @@ function Checkout() {
           </section>
 
           {/* Shipping method */}
-          <section className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <section className="space-y-2.5 rounded-xl border border-border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-extrabold text-primary-foreground">2</span>
-              <h2 className="font-bold">Shipping Method</h2>
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-extrabold text-primary-foreground">2</span>
+              <h2 className="text-sm font-bold">Shipping Method</h2>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {[
@@ -295,56 +295,105 @@ function Checkout() {
                   key={opt.id}
                   type="button"
                   onClick={() => setShipMethod(opt.id as "inside" | "outside")}
-                  className={`rounded-xl border-2 p-3 text-left transition ${
+                  className={`rounded-lg border p-2.5 text-left transition ${
                     shipMethod === opt.id
-                      ? "border-primary bg-primary/5"
+                      ? "border-primary bg-primary/5 ring-1 ring-primary"
                       : "border-border bg-background hover:border-primary/40"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-bold">{opt.label}</p>
-                    {shipMethod === opt.id && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                    <p className="text-xs font-bold">{opt.label}</p>
+                    {shipMethod === opt.id && <CheckCircle2 className="h-3.5 w-3.5 text-primary" />}
                   </div>
-                  <p className="mt-0.5 text-[11px] text-muted-foreground">{opt.time}</p>
-                  <p className="mt-1 text-sm font-extrabold text-primary">৳{opt.fee}</p>
+                  <p className="mt-0.5 text-[10px] text-muted-foreground">{opt.time}</p>
+                  <p className="mt-0.5 text-sm font-extrabold text-primary">৳{opt.fee}</p>
                 </button>
               ))}
             </div>
           </section>
 
           {/* Payment */}
-          <section className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <section className="space-y-2.5 rounded-xl border border-border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-extrabold text-primary-foreground">3</span>
-              <h2 className="font-bold">Payment Method</h2>
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-extrabold text-primary-foreground">3</span>
+              <h2 className="text-sm font-bold">Payment Method</h2>
             </div>
-            <div className="rounded-xl border-2 border-primary bg-primary/5 p-4">
-              <label className="flex cursor-pointer items-start gap-3">
-                <input type="radio" checked readOnly className="mt-1 h-4 w-4 accent-[oklch(0.585_0.245_27.5)]" />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="font-bold">Cash on Delivery</p>
-                    <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-extrabold text-primary-foreground">RECOMMENDED</span>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { id: "cod", label: "Cash on Delivery", sub: "Pay on receive", color: "oklch(0.585 0.245 27.5)", badge: "POPULAR" },
+                { id: "bkash", label: "bKash", sub: "Send Money", color: "oklch(0.55 0.22 0)" },
+                { id: "nagad", label: "Nagad", sub: "Send Money", color: "oklch(0.65 0.2 35)" },
+                { id: "rocket", label: "Rocket", sub: "Send Money", color: "oklch(0.45 0.18 295)" },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setPayMethod(opt.id as typeof payMethod)}
+                  className={`relative rounded-lg border p-2.5 text-left transition ${
+                    payMethod === opt.id
+                      ? "border-primary bg-primary/5 ring-1 ring-primary"
+                      : "border-border bg-background hover:border-primary/40"
+                  }`}
+                >
+                  {opt.badge && (
+                    <span className="absolute -right-1 -top-1.5 rounded-full bg-primary px-1.5 py-0.5 text-[8px] font-extrabold text-primary-foreground">
+                      {opt.badge}
+                    </span>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[10px] font-extrabold text-white"
+                      style={{ backgroundColor: opt.color }}
+                    >
+                      {opt.label[0]}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-bold">{opt.label}</p>
+                      <p className="truncate text-[10px] text-muted-foreground">{opt.sub}</p>
+                    </div>
+                    {payMethod === opt.id && <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary" />}
                   </div>
-                  <p className="mt-0.5 text-xs text-muted-foreground">Pay when you receive your order. No prepayment required.</p>
-                </div>
-              </label>
+                </button>
+              ))}
             </div>
+
+            {payMethod !== "cod" && (
+              <div className="space-y-2 rounded-lg bg-muted/50 p-3">
+                <p className="text-[11px] leading-relaxed">
+                  Send <span className="font-extrabold text-primary">৳{grand}</span> to{" "}
+                  <span className="font-mono font-bold">01700-000000</span> ({payMethod === "bkash" ? "bKash" : payMethod === "nagad" ? "Nagad" : "Rocket"} Personal), then enter details below.
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    value={payNumber}
+                    onChange={(e) => setPayNumber(e.target.value)}
+                    placeholder="Your Number"
+                    className="h-10 w-full rounded-lg border border-border bg-background px-3 text-xs outline-none focus:border-primary"
+                  />
+                  <input
+                    value={trxId}
+                    onChange={(e) => setTrxId(e.target.value)}
+                    placeholder="Transaction ID"
+                    className="h-10 w-full rounded-lg border border-border bg-background px-3 text-xs outline-none focus:border-primary"
+                  />
+                </div>
+              </div>
+            )}
           </section>
 
           {/* Order bump */}
-          <section className="rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 p-4">
-            <label className="flex cursor-pointer items-center gap-3">
+          <section className="rounded-xl border border-dashed border-primary/40 bg-primary/5 p-3">
+            <label className="flex cursor-pointer items-center gap-2.5">
               <input
                 type="checkbox"
                 checked={bump}
                 onChange={(e) => setBump(e.target.checked)}
-                className="h-5 w-5 accent-[oklch(0.585_0.245_27.5)]"
+                className="h-4 w-4 accent-[oklch(0.585_0.245_27.5)]"
               />
-              <img src={bumpItem.image} alt="" className="h-14 w-14 rounded-lg object-cover" />
-              <div className="flex-1 text-sm">
-                <p className="font-bold">🎁 Add a {bumpItem.title} for only ৳{bumpPrice}</p>
-                <p className="text-xs text-muted-foreground">One-time offer — only at checkout.</p>
+              <img src={bumpItem.image} alt="" className="h-12 w-12 rounded-md object-cover" />
+              <div className="flex-1 text-xs">
+                <p className="font-bold">🎁 Add {bumpItem.title} for ৳{bumpPrice}</p>
+                <p className="text-[11px] text-muted-foreground">One-time offer.</p>
               </div>
             </label>
           </section>
