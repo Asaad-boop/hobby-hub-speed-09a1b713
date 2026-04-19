@@ -1,9 +1,9 @@
-// Shop page — category filter + sort via search params
+// Shop page — category filter + sort + search via search params
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { products, newArrivals } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
-import { Filter, SlidersHorizontal, Store } from "lucide-react";
+import { Filter, SlidersHorizontal, Store, Search as SearchIcon, X } from "lucide-react";
 
 const allProducts = [...products, ...newArrivals];
 const categories = ["All", ...Array.from(new Set(allProducts.map((p) => p.category)))];
@@ -13,6 +13,7 @@ type SortKey = "popular" | "price-asc" | "price-desc" | "rating";
 type ShopSearch = {
   category: string;
   sort: SortKey;
+  q?: string;
 };
 
 const VALID_SORTS: SortKey[] = ["popular", "price-asc", "price-desc", "rating"];
@@ -21,7 +22,8 @@ export const Route = createFileRoute("/shop")({
   validateSearch: (raw: Record<string, unknown>): ShopSearch => {
     const category = typeof raw.category === "string" ? raw.category : "All";
     const sort = VALID_SORTS.includes(raw.sort as SortKey) ? (raw.sort as SortKey) : "popular";
-    return { category, sort };
+    const q = typeof raw.q === "string" && raw.q.trim() ? raw.q.trim().slice(0, 100) : undefined;
+    return { category, sort, q };
   },
   head: () => ({
     meta: [
@@ -35,11 +37,21 @@ export const Route = createFileRoute("/shop")({
 });
 
 function ShopPage() {
-  const { category, sort } = Route.useSearch();
+  const { category, sort, q } = Route.useSearch();
   const navigate = useNavigate({ from: "/shop" });
 
   const filtered = useMemo(() => {
     let list = category === "All" ? allProducts : allProducts.filter((p) => p.category === category);
+    if (q) {
+      const needle = q.toLowerCase();
+      list = list.filter(
+        (p) =>
+          p.title.toLowerCase().includes(needle) ||
+          p.description.toLowerCase().includes(needle) ||
+          p.category.toLowerCase().includes(needle) ||
+          p.benefits.some((b) => b.toLowerCase().includes(needle))
+      );
+    }
     list = [...list].sort((a, b) => {
       if (sort === "price-asc") return a.price - b.price;
       if (sort === "price-desc") return b.price - a.price;
@@ -47,7 +59,7 @@ function ShopPage() {
       return b.reviews - a.reviews;
     });
     return list;
-  }, [category, sort]);
+  }, [category, sort, q]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
@@ -56,11 +68,30 @@ function ShopPage() {
           <Store className="h-3 w-3" /> Full Catalog
         </span>
         <h1 className="mt-3 text-2xl font-extrabold tracking-tight md:text-4xl">
-          Shop All <span className="text-primary">Products</span>
+          {q ? (
+            <>
+              Search: <span className="text-primary">"{q}"</span>
+            </>
+          ) : (
+            <>
+              Shop All <span className="text-primary">Products</span>
+            </>
+          )}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          {filtered.length} {filtered.length === 1 ? "product" : "products"} available
+          {filtered.length} {filtered.length === 1 ? "product" : "products"}{" "}
+          {q ? "found" : "available"}
         </p>
+        {q && (
+          <button
+            onClick={() =>
+              navigate({ search: (prev: ShopSearch) => ({ ...prev, q: undefined }) })
+            }
+            className="mt-2 inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground transition hover:bg-muted/70"
+          >
+            <X className="h-3 w-3" /> Clear search
+          </button>
+        )}
       </div>
 
       {/* Filter bar */}
@@ -105,8 +136,21 @@ function ShopPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="mt-16 text-center">
-          <p className="text-muted-foreground">No products found in this category.</p>
+        <div className="mt-16 flex flex-col items-center text-center">
+          <SearchIcon className="h-12 w-12 text-muted-foreground/50" />
+          <p className="mt-4 text-lg font-bold">No products found</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {q
+              ? `We couldn't find anything matching "${q}". Try a different search.`
+              : "No products in this category yet."}
+          </p>
+          <Link
+            to="/shop"
+            search={{ category: "All", sort: "popular" } as any}
+            className="mt-4 inline-flex items-center rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-md transition hover:scale-105"
+          >
+            View all products
+          </Link>
         </div>
       ) : (
         <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
