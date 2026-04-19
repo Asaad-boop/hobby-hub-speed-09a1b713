@@ -4,7 +4,7 @@ import { useCart } from "@/lib/cart";
 import { products } from "@/lib/products";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Check, Truck, ShieldCheck, Loader2 } from "lucide-react";
+import { Truck, ShieldCheck, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
