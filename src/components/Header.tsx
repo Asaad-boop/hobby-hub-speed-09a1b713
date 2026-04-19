@@ -155,7 +155,8 @@ export default function Header() {
             <span className="mx-1 hidden h-7 w-px bg-border md:block" />
 
             {/* Account */}
-            <button
+            <Link
+              to="/account"
               aria-label="Account"
               className="group hidden shrink-0 items-center gap-2.5 rounded-full border border-border bg-background px-3.5 py-2 text-left transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[0_8px_24px_-10px_oklch(0.585_0.245_27.5/0.5)] md:inline-flex"
             >
@@ -166,7 +167,7 @@ export default function Header() {
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Account</span>
                 <span className="text-xs font-bold text-foreground">Sign in</span>
               </span>
-            </button>
+            </Link>
 
             {/* Mobile menu */}
             <button
@@ -220,9 +221,13 @@ export default function Header() {
                 {c.label}
               </Link>
             ))}
-            <button className="mt-1 flex items-center justify-center gap-2 rounded-xl bg-primary px-3 py-3 text-sm font-bold text-primary-foreground shadow-[0_8px_24px_-8px_oklch(0.585_0.245_27.5/0.6)]">
+            <Link
+              to="/account"
+              onClick={() => setMobileOpen(false)}
+              className="mt-1 flex items-center justify-center gap-2 rounded-xl bg-primary px-3 py-3 text-sm font-bold text-primary-foreground shadow-[0_8px_24px_-8px_oklch(0.585_0.245_27.5/0.6)]"
+            >
               <User className="h-4 w-4" /> Sign in
-            </button>
+            </Link>
           </nav>
         </div>
       </div>
