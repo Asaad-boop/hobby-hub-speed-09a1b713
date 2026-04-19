@@ -588,7 +588,19 @@ export default function WatchAndShop() {
   const [muted, setMuted] = useState(true);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const { data: allProducts = [] } = useProducts();
-  const reels = useMemo(() => buildReels(allProducts), [allProducts]);
+  const { data: settings } = useSiteSettings();
+  const reels = useMemo<Reel[]>(() => {
+    const productMap = new Map(allProducts.map((p) => [p.id, p]));
+    const items = settings?.reels ?? [];
+    return items
+      .filter((r) => r.video_url && r.product_id && productMap.has(r.product_id))
+      .map((r) => ({
+        id: r.id,
+        videoUrl: r.video_url,
+        caption: r.caption,
+        product: productMap.get(r.product_id)!,
+      }));
+  }, [allProducts, settings?.reels]);
 
   if (reels.length === 0) return null;
 
