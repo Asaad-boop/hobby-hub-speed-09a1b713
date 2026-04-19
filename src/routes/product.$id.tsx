@@ -602,7 +602,6 @@ function ProductPage() {
                 { k: "5", l: "5★ only" },
                 { k: "4", l: "4★ only" },
                 { k: "photos", l: "With photos" },
-                { k: "helpful", l: "Most helpful" },
               ] as const).map((f) => {
                 const active = filter === f.k;
                 return (
@@ -677,17 +676,11 @@ function ProductPage() {
                           ))}
                         </div>
                       )}
-                      <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
-                        <button className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1 font-semibold transition hover:border-primary hover:text-primary">
-                          <ThumbsUp className="h-3 w-3" /> Helpful ({r.helpful})
-                        </button>
-                        {!r.isUser && (
-                          <>
-                            <span>•</span>
-                            <button className="font-semibold hover:text-primary">Reply</button>
-                          </>
-                        )}
-                      </div>
+                      {!r.isUser && (
+                        <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+                          <button className="font-semibold hover:text-primary">Reply</button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
