@@ -287,7 +287,7 @@ function ProductPage() {
                         className="flex transition-transform duration-500 ease-out"
                         style={{ transform: `translateX(-${curIdx * 100}%)` }}
                       >
-                        {imgs.map((src, i) => (
+                        {imgs.map((src: string, i: number) => (
                           <img
                             key={i}
                             src={src}
@@ -318,7 +318,7 @@ function ProductPage() {
                     <ChevronRight className="h-5 w-5" />
                   </button>
                   <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5">
-                    {imgs.map((_, i) => (
+                    {imgs.map((_: string, i: number) => (
                       <button
                         key={i}
                         onClick={() => goto(i)}
