@@ -137,11 +137,15 @@ export default function Footer() {
           <ul className="space-y-3 text-sm text-muted-foreground">
             <li className="flex items-start gap-2.5">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <span>Dhanmondi, Dhaka 1209<br />Bangladesh</span>
+              <span>Dhaka, Bangladesh</span>
             </li>
             <li className="flex items-center gap-2.5">
               <Phone className="h-4 w-4 shrink-0 text-primary" />
-              <a href="tel:+8801700000000" className="transition hover:text-primary">+880 1700 000 000</a>
+              <a href="tel:09638779900" className="transition hover:text-primary">09638779900</a>
+            </li>
+            <li className="flex items-center gap-2.5">
+              <MessageCircle className="h-4 w-4 shrink-0 text-primary" />
+              <a href="https://wa.me/8801964437520" target="_blank" rel="noopener noreferrer" className="transition hover:text-primary">+880 1964-437520</a>
             </li>
             <li className="flex items-center gap-2.5">
               <Mail className="h-4 w-4 shrink-0 text-primary" />
@@ -151,8 +155,8 @@ export default function Footer() {
 
           <div className="mt-4 flex items-center gap-2">
             {[
-              { icon: Facebook, label: "Facebook", href: "#" },
-              { icon: Instagram, label: "Instagram", href: "#" },
+              { icon: Facebook, label: "Facebook", href: "https://www.facebook.com/hobbyshopbd.shop" },
+              { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/hobbyshopbd" },
               { icon: Youtube, label: "YouTube", href: "#" },
             ].map((s) => (
               <a
