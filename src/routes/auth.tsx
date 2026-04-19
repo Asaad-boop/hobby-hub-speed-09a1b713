@@ -269,41 +269,8 @@ function AuthPage() {
               </svg>
             </div>
 
-            {/* Live order ticker */}
-            <div className="relative mt-5 overflow-hidden rounded-2xl border border-border/50 bg-background/70 backdrop-blur">
-              <div className="flex items-center gap-2 border-b border-border/40 px-3 py-2">
-                <Navigation className="h-3.5 w-3.5 text-primary" />
-                <p className="text-[11px] font-bold uppercase tracking-wider text-foreground">Recent orders</p>
-                <span className="ml-auto flex h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-              </div>
-              <div className="divide-y divide-border/40">
-                {[
-                  { name: "Tareq R.", city: "Chattogram", item: "Wireless Charger", time: "2m" },
-                  { name: "Sumaya K.", city: "Sylhet", item: "Aroma Diffuser", time: "5m" },
-                  { name: "Rifat H.", city: "Khulna", item: "LED Lamp", time: "8m" },
-                ].map((o) => (
-                  <div key={o.name} className="flex items-center gap-2.5 px-3 py-2 text-[11px]">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">
-                      {o.name[0]}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold text-foreground">
-                        {o.name} <span className="font-normal text-muted-foreground">→ {o.item}</span>
-                      </p>
-                      <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                        <MapPin className="h-2.5 w-2.5" /> {o.city} • {o.time} ago
-                      </p>
-                    </div>
-                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
-                      shipped
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Stats grid — expanded */}
-            <div className="relative mt-4 grid grid-cols-4 gap-2">
+            <div className="relative mt-5 grid grid-cols-4 gap-2">
               {[
                 { icon: MapPin, value: "64", label: "Districts" },
                 { icon: Package, value: "10K+", label: "Orders" },
@@ -320,16 +287,6 @@ function AuthPage() {
                 </div>
               ))}
             </div>
-
-            {/* Bottom feature strip */}
-            <div className="relative mt-3 flex items-center justify-between gap-2 rounded-xl border border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent px-3 py-2.5">
-              <div className="flex items-center gap-2">
-                <Compass className="h-4 w-4 text-primary" />
-                <p className="text-[11px] font-semibold text-foreground">Same-day delivery in Dhaka</p>
-              </div>
-              <span className="rounded-full bg-primary px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground">New</span>
-            </div>
-          </div>
         </div>
 
         {/* Right form panel */}
