@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, Mail, Lock, User as UserIcon, Eye, EyeOff, Star, MapPin, Truck, Package } from "lucide-react";
+import { Loader2, Mail, Lock, User as UserIcon, Eye, EyeOff, Star, MapPin, Truck, Package, Compass, Navigation, ShieldCheck } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/auth")({
