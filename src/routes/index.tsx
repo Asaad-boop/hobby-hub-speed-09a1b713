@@ -1,13 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { products, newArrivals, testimonials, getProduct } from "@/lib/products";
+import { useProducts, testimonials, findTestimonialProduct } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
+import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import HeroShowcase from "@/components/HeroShowcase";
 import WatchAndShop from "@/components/WatchAndShop";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen, Star, Quote, Search, Package, Loader2 } from "lucide-react";
 import { lookupOrder } from "@/lib/order-lookup.functions";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
@@ -42,6 +43,12 @@ const trust = [
 
 function Index() {
   const navigate = useNavigate();
+  const { data: allProducts = [], isLoading: productsLoading } = useProducts();
+  const newArrivals = useMemo(() => allProducts.filter((p) => p.isNewArrival).slice(0, 8), [allProducts]);
+  const featured = useMemo(() => {
+    const f = allProducts.filter((p) => p.isFeatured);
+    return (f.length ? f : allProducts).slice(0, 8);
+  }, [allProducts]);
   const [trackQuery, setTrackQuery] = useState("");
   const [trackLoading, setTrackLoading] = useState(false);
   const [trackError, setTrackError] = useState("");
@@ -159,14 +166,16 @@ function Index() {
             </a>
           </div>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-            {newArrivals.map((p) => (
-              <div key={p.id} className="relative">
-                <span className="pointer-events-none absolute -top-2 right-3 z-10 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-md">
-                  New
-                </span>
-                <ProductCard product={p} />
-              </div>
-            ))}
+            {productsLoading
+              ? Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)
+              : newArrivals.map((p) => (
+                  <div key={p.id} className="relative">
+                    <span className="pointer-events-none absolute -top-2 right-3 z-10 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-md">
+                      New
+                    </span>
+                    <ProductCard product={p} />
+                  </div>
+                ))}
           </div>
         </div>
       </section>
@@ -183,9 +192,9 @@ function Index() {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-          {products.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
+          {productsLoading
+            ? Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)
+            : featured.map((p) => <ProductCard key={p.id} product={p} />)}
         </div>
       </section>
 
