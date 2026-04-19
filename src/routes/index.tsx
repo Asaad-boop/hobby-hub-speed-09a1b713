@@ -39,6 +39,14 @@ const trust = [
 ];
 
 function Index() {
+  const navigate = useNavigate();
+  const [trackId, setTrackId] = useState("");
+  const handleTrack = (e: React.FormEvent) => {
+    e.preventDefault();
+    const id = trackId.trim();
+    if (id.length >= 6) navigate({ to: "/track/$orderId", params: { orderId: id } });
+    else navigate({ to: "/track" });
+  };
   return (
     <div>
       {/* Hero */}
