@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { products } from "@/lib/products";
 import { supabase } from "@/integrations/supabase/client";
+import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { toast } from "sonner";
 import {
   Truck,
@@ -38,7 +39,7 @@ function Checkout() {
   const [bump, setBump] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
-  const [payMethod, setPayMethod] = useState<"cod" | "bkash" | "nagad" | "rocket">("cod");
+  const [payMethod, setPayMethod] = useState<"cod" | "bkash">("cod");
   const [payNumber, setPayNumber] = useState("");
   const [trxId, setTrxId] = useState("");
   const [coupon, setCoupon] = useState("");
@@ -246,22 +247,31 @@ function Checkout() {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="mb-1 block text-[11px] font-semibold text-muted-foreground">City</label>
-                <input
-                  value={form.city}
-                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                <label className="mb-1 block text-[11px] font-semibold text-muted-foreground">District *</label>
+                <select
+                  value={form.district}
+                  onChange={(e) => setForm({ ...form, district: e.target.value, city: "" })}
                   className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-                  placeholder="Dhaka"
-                />
+                >
+                  <option value="">Select District</option>
+                  {BD_DISTRICTS.map((d) => (
+                    <option key={d.name} value={d.name}>{d.name}</option>
+                  ))}
+                </select>
               </div>
               <div>
-                <label className="mb-1 block text-[11px] font-semibold text-muted-foreground">District</label>
-                <input
-                  value={form.district}
-                  onChange={(e) => setForm({ ...form, district: e.target.value })}
-                  className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-                  placeholder="Dhaka"
-                />
+                <label className="mb-1 block text-[11px] font-semibold text-muted-foreground">City / Thana *</label>
+                <select
+                  value={form.city}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  disabled={!form.district}
+                  className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+                >
+                  <option value="">Select City</option>
+                  {(BD_DISTRICTS.find((d) => d.name === form.district)?.cities ?? []).map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
               </div>
             </div>
             <div>
@@ -322,8 +332,6 @@ function Checkout() {
               {[
                 { id: "cod", label: "Cash on Delivery", sub: "Pay on receive", color: "oklch(0.585 0.245 27.5)", badge: "POPULAR" },
                 { id: "bkash", label: "bKash", sub: "Send Money", color: "oklch(0.55 0.22 0)" },
-                { id: "nagad", label: "Nagad", sub: "Send Money", color: "oklch(0.65 0.2 35)" },
-                { id: "rocket", label: "Rocket", sub: "Send Money", color: "oklch(0.45 0.18 295)" },
               ].map((opt) => (
                 <button
                   key={opt.id}
@@ -361,7 +369,7 @@ function Checkout() {
               <div className="space-y-2 rounded-lg bg-muted/50 p-3">
                 <p className="text-[11px] leading-relaxed">
                   Send <span className="font-extrabold text-primary">৳{grand}</span> to{" "}
-                  <span className="font-mono font-bold">01700-000000</span> ({payMethod === "bkash" ? "bKash" : payMethod === "nagad" ? "Nagad" : "Rocket"} Personal), then enter details below.
+                  <span className="font-mono font-bold">01700-000000</span> (bKash Personal), then enter details below.
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   <input
