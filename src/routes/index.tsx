@@ -204,28 +204,28 @@ function Index() {
       </section>
 
       {/* Track Order */}
-      <section className="mx-auto max-w-7xl px-4 py-6 md:py-8">
-        <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 md:p-6">
+      <section className="mx-auto max-w-7xl px-4 py-4 md:py-8">
+        <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-3 md:p-6">
           <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/20 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-10 -left-8 h-32 w-32 rounded-full bg-primary/10 blur-3xl" />
-          <div className="relative grid items-center gap-4 md:grid-cols-[1fr_1.3fr]">
-            <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
-                <Package className="h-5 w-5" />
+          <div className="relative grid items-center gap-3 md:gap-4 md:grid-cols-[1fr_1.3fr]">
+            <div className="flex items-center gap-2.5 md:items-start md:gap-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md md:h-10 md:w-10 md:rounded-xl">
+                <Package className="h-4 w-4 md:h-5 md:w-5" />
               </span>
-              <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                  <Truck className="h-3 w-3" /> Live Tracking
+              <div className="min-w-0">
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary md:gap-1.5 md:px-2 md:text-[10px]">
+                  <Truck className="h-2.5 w-2.5 md:h-3 md:w-3" /> Live Tracking
                 </span>
-                <h2 className="mt-1 text-lg font-extrabold tracking-tight md:text-xl">
+                <h2 className="text-base font-extrabold leading-tight tracking-tight md:mt-1 md:text-xl">
                   Track Your <span className="text-primary">Order</span>
                 </h2>
-                <p className="mt-0.5 text-[11px] text-muted-foreground md:text-xs">
+                <p className="hidden text-[11px] text-muted-foreground md:mt-0.5 md:block md:text-xs">
                   Enter Order ID, phone, or email — whichever you remember.
                 </p>
               </div>
             </div>
-            <form onSubmit={handleTrack} className="space-y-2">
+            <form onSubmit={handleTrack} className="space-y-1.5 md:space-y-2">
               <div className="flex flex-col gap-2 sm:flex-row">
                 <div className="relative flex-1">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -233,13 +233,13 @@ function Index() {
                     value={trackQuery}
                     onChange={(e) => { setTrackQuery(e.target.value); setTrackError(""); }}
                     placeholder="Order ID, phone, or email"
-                    className="h-11 w-full rounded-full border border-border bg-background pl-9 pr-3 text-sm outline-none transition focus:border-primary"
+                    className="h-10 w-full rounded-full border border-border bg-background pl-9 pr-3 text-sm outline-none transition focus:border-primary md:h-11"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={trackLoading}
-                  className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full bg-primary px-5 text-sm font-extrabold text-primary-foreground shadow-[var(--shadow-card)] transition hover:opacity-90 active:scale-95 disabled:opacity-60"
+                  className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-primary px-5 text-sm font-extrabold text-primary-foreground shadow-[var(--shadow-card)] transition hover:opacity-90 active:scale-95 disabled:opacity-60 md:h-11"
                 >
                   {trackLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (<>Track <ArrowRight className="h-4 w-4" /></>)}
                 </button>
@@ -248,7 +248,7 @@ function Index() {
                 {trackError ? (
                   <p className="text-[11px] font-semibold text-destructive">{trackError}</p>
                 ) : <span />}
-                <Link to="/track" className="text-[11px] font-semibold text-muted-foreground hover:text-primary">
+                <Link to="/track" className="ml-auto text-[11px] font-semibold text-muted-foreground hover:text-primary">
                   Open full tracker →
                 </Link>
               </div>
