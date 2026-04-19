@@ -65,6 +65,9 @@ export function useSiteSettings() {
 export async function saveSiteSettings(settings: SiteSettings) {
   const { error } = await supabase
     .from("site_settings")
-    .upsert({ key: SITE_SETTINGS_KEY, value: settings as unknown as Record<string, unknown> });
+    .upsert(
+      { key: SITE_SETTINGS_KEY, value: settings as unknown as Record<string, unknown> },
+      { onConflict: "key" },
+    );
   if (error) throw error;
 }
