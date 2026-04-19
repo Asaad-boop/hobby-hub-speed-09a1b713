@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { z } from "zod";
 import { Mail, Phone, MapPin, MessageCircle, Send, Clock } from "lucide-react";
 import { toast } from "sonner";
 
@@ -22,17 +23,29 @@ const channels = [
   { icon: MapPin, label: "Visit", value: "Dhaka, Bangladesh" },
 ];
 
+const contactSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(80),
+  email: z.string().trim().email("Enter a valid email").max(255),
+  subject: z.string().trim().max(150).optional(),
+  message: z.string().trim().min(10, "Message must be at least 10 characters").max(2000, "Message is too long"),
+});
+
 function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.message) {
-      toast.error("Please fill in all required fields");
-      return;
+    const parsed = contactSchema.safeParse(form);
+    if (!parsed.success) {
+      return toast.error(parsed.error.issues[0].message);
     }
-    toast.success("Message sent! We'll reply within 24 hours.");
-    setForm({ name: "", email: "", subject: "", message: "" });
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      toast.success("Message sent! We'll reply within 24 hours.");
+      setForm({ name: "", email: "", subject: "", message: "" });
+    }, 600);
   };
 
   return (
@@ -135,9 +148,10 @@ function ContactPage() {
 
           <button
             type="submit"
-            className="mt-5 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary/85 px-7 text-sm font-bold text-primary-foreground shadow-md transition hover:scale-[1.02]"
+            disabled={loading}
+            className="mt-5 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary/85 px-7 text-sm font-bold text-primary-foreground shadow-md transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
           >
-            <Send className="h-4 w-4" /> Send Message
+            <Send className="h-4 w-4" /> {loading ? "Sending…" : "Send Message"}
           </button>
         </form>
       </div>

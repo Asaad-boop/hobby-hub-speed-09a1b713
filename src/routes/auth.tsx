@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,17 @@ export const Route = createFileRoute("/auth")({
     ],
   }),
   component: AuthPage,
+});
+
+const signInSchema = z.object({
+  email: z.string().trim().email("Enter a valid email").max(255),
+  password: z.string().min(1, "Password required").max(72),
+});
+
+const signUpSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(80),
+  email: z.string().trim().email("Enter a valid email").max(255),
+  password: z.string().min(6, "Password must be at least 6 characters").max(72),
 });
 
 function AuthPage() {
@@ -37,30 +49,39 @@ function AuthPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
 
     if (mode === "signin") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const parsed = signInSchema.safeParse({ email, password });
+      if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithPassword({
+        email: parsed.data.email,
+        password: parsed.data.password,
+      });
       setLoading(false);
       if (error) return toast.error(error.message);
       toast.success("Welcome back!");
       navigate({ to: "/account" });
     } else {
-      if (password.length < 6) {
-        setLoading(false);
-        return toast.error("Password must be at least 6 characters");
-      }
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
+      const parsed = signUpSchema.safeParse({ name, email, password });
+      if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+      setLoading(true);
+      const { data, error } = await supabase.auth.signUp({
+        email: parsed.data.email,
+        password: parsed.data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/account`,
-          data: { display_name: name },
+          data: { display_name: parsed.data.name },
         },
       });
       setLoading(false);
       if (error) return toast.error(error.message);
-      toast.success("Account created! Check your email to confirm.");
+      // If email confirmation is required, no session returned
+      if (!data.session) {
+        toast.success("Account created! Check your email to confirm.");
+        return;
+      }
+      toast.success("Account created!");
       navigate({ to: "/account" });
     }
   };
