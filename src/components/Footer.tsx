@@ -38,27 +38,7 @@ export default function Footer() {
       <div className="pointer-events-none absolute -left-20 top-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
 
-      {/* Trust strip */}
-      <div className="relative border-b border-border/60">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 py-6 sm:grid-cols-4 md:py-8">
-          {[
-            { icon: Truck, label: "Free Delivery", desc: "Orders over ৳1990" },
-            { icon: ShieldCheck, label: "100% Authentic", desc: "Verified products" },
-            { icon: RotateCcw, label: "Easy Returns", desc: "7-day exchange" },
-            { icon: CreditCard, label: "Cash on Delivery", desc: "Pay on arrival" },
-          ].map((f) => (
-            <div key={f.label} className="flex items-center gap-3">
-              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <f.icon className="h-5 w-5" />
-              </span>
-              <div className="min-w-0">
-                <div className="truncate text-sm font-bold text-foreground">{f.label}</div>
-                <div className="truncate text-[11px] text-muted-foreground">{f.desc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Trust strip removed */}
 
       {/* Main grid */}
       <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-12 md:grid-cols-12 md:gap-8">
