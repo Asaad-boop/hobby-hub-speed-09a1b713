@@ -411,49 +411,93 @@ function ProductPage() {
 
           {/* Benefits removed */}
 
-          {/* Quantity */}
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <span className="text-xs font-bold">Qty:</span>
-            <div className="inline-flex items-center rounded-full border border-border">
-              <button
-                onClick={() => setQty((q) => Math.max(1, q - 1))}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-l-full hover:bg-muted"
-                aria-label="Decrease"
-              >
-                <Minus className="h-3.5 w-3.5" />
-              </button>
-              <span className="w-8 text-center text-sm font-extrabold">{qty}</span>
-              <button
-                onClick={() => setQty((q) => Math.min(product.stock, q + 1))}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-r-full hover:bg-muted"
-                aria-label="Increase"
-              >
-                <Plus className="h-3.5 w-3.5" />
-              </button>
-            </div>
-            {qty > 1 && (
-              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary">
-                ৳{product.price * qty} • Save ৳{saved}
-              </span>
-            )}
-          </div>
+          {/* Bundle offer */}
+          {(() => {
+            const tiers = [
+              { qty: 1, discount: 0, label: "1 PCS", tag: "Regular" },
+              { qty: 2, discount: 10, label: "2 PCS", tag: "10% OFF" },
+              { qty: 3, discount: 15, label: "3 PCS", tag: "15% OFF" },
+            ];
+            return (
+              <div className="mt-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-foreground">
+                    <Gift className="h-3.5 w-3.5 text-primary" /> Bundle Offer — Save More!
+                  </span>
+                  <span className="text-[10px] font-bold text-muted-foreground">Select pack</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {tiers.map((t) => {
+                    const unit = Math.round(product.price * (1 - t.discount / 100));
+                    const total = unit * t.qty;
+                    const active = qty === t.qty;
+                    return (
+                      <button
+                        key={t.qty}
+                        type="button"
+                        onClick={() => setQty(t.qty)}
+                        className={`relative flex flex-col items-center rounded-2xl border-2 p-2.5 text-center transition ${
+                          active
+                            ? "border-primary bg-primary/5 shadow-md"
+                            : "border-border bg-card hover:border-primary/50"
+                        }`}
+                      >
+                        {t.discount > 0 && (
+                          <span className="absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary px-2 py-0.5 text-[9px] font-extrabold text-primary-foreground shadow">
+                            {t.tag}
+                          </span>
+                        )}
+                        <span className={`text-xs font-extrabold ${active ? "text-primary" : "text-foreground"}`}>
+                          {t.label}
+                        </span>
+                        <span className="mt-1 text-[13px] font-extrabold text-foreground">৳{total}</span>
+                        {t.discount > 0 ? (
+                          <span className="text-[10px] text-muted-foreground line-through">
+                            ৳{product.price * t.qty}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground">৳{unit}/pc</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* CTA */}
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <button
-              onClick={() => add(product, qty)}
-              className="group inline-flex items-center justify-center gap-2 rounded-full border-2 border-foreground bg-background px-4 py-4 text-sm font-extrabold text-foreground transition hover:bg-foreground hover:text-background"
-            >
-              <ShoppingBag className="h-4 w-4 transition group-hover:scale-110" /> Add to Cart
-            </button>
-            <button
-              onClick={handleBuyNow}
-              className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-primary px-4 py-4 text-sm font-extrabold text-primary-foreground shadow-[var(--shadow-card)] transition hover:shadow-2xl"
-            >
-              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-              <Zap className="h-4 w-4 fill-current" /> Buy Now — ৳{product.price * qty}
-            </button>
-          </div>
+          {(() => {
+            const discount = qty === 3 ? 15 : qty === 2 ? 10 : 0;
+            const unitPrice = Math.round(product.price * (1 - discount / 100));
+            const totalPrice = unitPrice * qty;
+            const handleAdd = () => {
+              const discounted: typeof product = { ...product, price: unitPrice };
+              add(discounted, qty);
+            };
+            const handleBuy = () => {
+              const discounted: typeof product = { ...product, price: unitPrice };
+              add(discounted, qty, { silent: true });
+              navigate({ to: "/checkout" });
+            };
+            return (
+              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <button
+                  onClick={handleAdd}
+                  className="group inline-flex items-center justify-center gap-2 rounded-full border-2 border-foreground bg-background px-4 py-4 text-sm font-extrabold text-foreground transition hover:bg-foreground hover:text-background"
+                >
+                  <ShoppingBag className="h-4 w-4 transition group-hover:scale-110" /> Add to Cart
+                </button>
+                <button
+                  onClick={handleBuy}
+                  className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-primary px-4 py-4 text-sm font-extrabold text-primary-foreground shadow-[var(--shadow-card)] transition hover:shadow-2xl"
+                >
+                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                  <Zap className="h-4 w-4 fill-current" /> Buy Now — ৳{totalPrice}
+                </button>
+              </div>
+            );
+          })()}
 
           {/* Help */}
           <div className="mt-3 grid grid-cols-2 gap-2">
