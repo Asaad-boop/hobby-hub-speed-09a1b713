@@ -4,6 +4,7 @@ import ProductCard from "@/components/ProductCard";
 import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import HeroShowcase from "@/components/HeroShowcase";
 import WatchAndShop from "@/components/WatchAndShop";
+import { useSiteSettings } from "@/lib/site-settings";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen, Star, Quote, Search, Package, Loader2 } from "lucide-react";
 import { lookupOrder } from "@/lib/order-lookup.functions";
@@ -44,11 +45,23 @@ const trust = [
 function Index() {
   const navigate = useNavigate();
   const { data: allProducts = [], isLoading: productsLoading } = useProducts();
-  const newArrivals = useMemo(() => allProducts.filter((p) => p.isNewArrival).slice(0, 8), [allProducts]);
+  const { data: settings } = useSiteSettings();
+  const productMap = useMemo(() => new Map(allProducts.map((p) => [p.id, p])), [allProducts]);
+  const newArrivals = useMemo(() => {
+    const curated = (settings?.new_arrival_product_ids ?? [])
+      .map((id) => productMap.get(id))
+      .filter((p): p is NonNullable<typeof p> => !!p);
+    if (curated.length) return curated.slice(0, 8);
+    return allProducts.filter((p) => p.isNewArrival).slice(0, 8);
+  }, [allProducts, productMap, settings?.new_arrival_product_ids]);
   const featured = useMemo(() => {
+    const curated = (settings?.featured_product_ids ?? [])
+      .map((id) => productMap.get(id))
+      .filter((p): p is NonNullable<typeof p> => !!p);
+    if (curated.length) return curated.slice(0, 8);
     const f = allProducts.filter((p) => p.isFeatured);
     return (f.length ? f : allProducts).slice(0, 8);
-  }, [allProducts]);
+  }, [allProducts, productMap, settings?.featured_product_ids]);
   const [trackQuery, setTrackQuery] = useState("");
   const [trackLoading, setTrackLoading] = useState(false);
   const [trackError, setTrackError] = useState("");
@@ -80,6 +93,21 @@ function Index() {
     <div>
       {/* Hero */}
       <HeroShowcase />
+
+      {/* Promotional banner (CMS controlled) */}
+      {settings?.homepage_banner_url && (
+        <section className="mx-auto max-w-7xl px-4 pt-6 md:pt-8">
+          {settings.homepage_banner_link ? (
+            <a href={settings.homepage_banner_link} className="block overflow-hidden rounded-2xl shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-elevated)]">
+              <img src={settings.homepage_banner_url} alt="Promotional banner" className="h-auto w-full object-cover" loading="lazy" />
+            </a>
+          ) : (
+            <div className="overflow-hidden rounded-2xl shadow-[var(--shadow-card)]">
+              <img src={settings.homepage_banner_url} alt="Promotional banner" className="h-auto w-full object-cover" loading="lazy" />
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Categories */}
       <section className="mx-auto max-w-7xl px-4 py-8 md:py-12">

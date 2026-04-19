@@ -18,6 +18,12 @@ export type SiteSettings = {
   hero_heading_highlight: string;
   hero_subheading: string;
   free_delivery_threshold: number;
+  // Homepage CMS
+  hero_product_ids: string[];
+  homepage_banner_url: string;
+  homepage_banner_link: string;
+  featured_product_ids: string[];
+  new_arrival_product_ids: string[];
 };
 
 export const DEFAULT_SETTINGS: SiteSettings = {
@@ -38,6 +44,11 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   hero_subheading:
     "Curated gadgets, decor & gifts shipped fast. Free delivery over ৳1500 — Cash on Delivery nationwide.",
   free_delivery_threshold: 1500,
+  hero_product_ids: [],
+  homepage_banner_url: "",
+  homepage_banner_link: "",
+  featured_product_ids: [],
+  new_arrival_product_ids: [],
 };
 
 export const SITE_SETTINGS_KEY = "site_config";

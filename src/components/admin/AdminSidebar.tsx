@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Package, Tags, Settings, ShoppingBag, LogOut, Store } from "lucide-react";
+import { LayoutDashboard, Package, Tags, Settings, ShoppingBag, LogOut, Store, Home } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +18,7 @@ import logo from "@/assets/logo.png";
 
 const items = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true },
+  { title: "Homepage", url: "/admin/homepage", icon: Home },
   { title: "Products", url: "/admin/products", icon: Package },
   { title: "Categories", url: "/admin/categories", icon: Tags },
   { title: "Orders", url: "/admin/orders", icon: ShoppingBag },
