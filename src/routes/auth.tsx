@@ -116,7 +116,7 @@ function AuthPage() {
               </span>
             </div>
 
-            <div className="relative mx-auto aspect-[4/5] w-full max-w-[300px]">
+            <div className="relative mx-auto aspect-[4/3.5] w-full max-w-[260px]">
               <svg viewBox="0 0 400 500" className="h-full w-full drop-shadow-[0_10px_30px_oklch(0.585_0.245_27.5/0.25)]" aria-label="Bangladesh delivery map">
                 <defs>
                   <linearGradient id="bdFill" x1="0" y1="0" x2="1" y2="1">
