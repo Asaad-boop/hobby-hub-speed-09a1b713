@@ -360,7 +360,7 @@ function ProductPage() {
               <Sparkles className="h-3 w-3" /> Trending
             </span>
           </div>
-          <h1 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight md:text-4xl lg:text-5xl">
+          <h1 className="mt-3 text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl md:text-4xl lg:text-5xl">
             {product.title}
           </h1>
 
@@ -380,20 +380,20 @@ function ProductPage() {
           </div>
 
           {/* Price card */}
-          <div className="mt-5 rounded-3xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-5">
-            <div className="flex items-baseline gap-3">
-              <span className="text-5xl font-extrabold text-foreground">৳{product.price}</span>
-              <span className="text-xl text-muted-foreground line-through">৳{product.oldPrice}</span>
+          <div className="mt-5 rounded-3xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4 sm:p-5">
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="text-4xl font-extrabold text-foreground sm:text-5xl">৳{product.price}</span>
+              <span className="text-lg text-muted-foreground line-through sm:text-xl">৳{product.oldPrice}</span>
               <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-extrabold text-primary-foreground">-{off}%</span>
             </div>
-            <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary">
+            <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary sm:text-sm">
               <Gift className="h-3.5 w-3.5" /> You save ৳{product.oldPrice - product.price}
             </p>
           </div>
 
           {/* Stock + urgency */}
-          <div className="mt-4 rounded-2xl border-2 border-primary/30 bg-primary/5 p-4">
-            <div className="flex items-center justify-between text-xs">
+          <div className="mt-4 rounded-2xl border-2 border-primary/30 bg-primary/5 p-3 sm:p-4">
+            <div className="flex flex-col gap-1.5 text-xs sm:flex-row sm:items-center sm:justify-between">
               <span className="inline-flex items-center gap-1 font-extrabold text-primary">
                 <Flame className="h-4 w-4 animate-pulse" /> Hurry! Only {product.stock} left
               </span>
@@ -456,12 +456,22 @@ function ProductPage() {
           </div>
 
           {/* Help */}
-          <a
-            href="tel:+8801700000000"
-            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-muted px-4 py-3 text-sm font-bold transition hover:bg-muted/70"
-          >
-            <Phone className="h-4 w-4 text-primary" /> Order by Call: 01700-000000
-          </a>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <a
+              href="tel:+8809638779900"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-muted px-3 py-3 text-xs font-bold transition hover:bg-muted/70 sm:text-sm"
+            >
+              <Phone className="h-4 w-4 text-primary" /> Call Now
+            </a>
+            <a
+              href="https://wa.me/8801964437520"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-3 py-3 text-xs font-bold text-white transition hover:opacity-90 sm:text-sm"
+            >
+              <MessageSquare className="h-4 w-4" /> WhatsApp
+            </a>
+          </div>
 
           {/* Trust badges */}
           <div className="mt-5 grid grid-cols-3 gap-2">
