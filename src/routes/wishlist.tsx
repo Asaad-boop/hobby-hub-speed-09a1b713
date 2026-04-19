@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Heart, Trash2, ShoppingBag, ArrowLeft } from "lucide-react";
 import { useWishlist } from "@/lib/wishlist";
 import { useCart } from "@/lib/cart";
-import { getProduct } from "@/lib/products";
+import { useProducts } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
 
@@ -21,8 +21,11 @@ export const Route = createFileRoute("/wishlist")({
 function WishlistPage() {
   const { ids, clear, remove } = useWishlist();
   const { add } = useCart();
+  const { data: allProducts = [] } = useProducts();
 
-  const products = ids.map((id) => getProduct(id)).filter((p): p is NonNullable<ReturnType<typeof getProduct>> => Boolean(p));
+  const products = ids
+    .map((id) => allProducts.find((p) => p.id === id))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p));
 
   const addAllToCart = () => {
     products.forEach((p) => add(p));

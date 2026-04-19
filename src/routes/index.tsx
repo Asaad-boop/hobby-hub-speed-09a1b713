@@ -268,7 +268,7 @@ function Index() {
         <Carousel opts={{ align: "start", loop: true }} className="w-full">
           <CarouselContent className="-ml-3 md:-ml-4">
             {testimonials.map((r, idx) => {
-              const product = getProduct(r.productId);
+              const product = findTestimonialProduct(r, allProducts);
               return (
                 <CarouselItem key={idx} className="basis-full pl-3 sm:basis-1/2 md:pl-4 lg:basis-1/3">
                   <div className="relative flex h-full flex-col rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]">

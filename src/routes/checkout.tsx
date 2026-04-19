@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
-import { products } from "@/lib/products";
+import { useProducts } from "@/lib/products";
 import { supabase } from "@/integrations/supabase/client";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { toast } from "sonner";
@@ -35,6 +35,7 @@ export const Route = createFileRoute("/checkout")({
 
 function Checkout() {
   const { items, total, clear, add, setQty, remove } = useCart();
+  const { data: allProducts = [] } = useProducts();
   const navigate = useNavigate();
   const [bump] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -71,7 +72,7 @@ function Checkout() {
     })();
   }, []);
 
-  const bumpItem = products[1];
+  const bumpItem = allProducts[1] ?? allProducts[0];
   const bumpPrice = 199;
   const shippingFee = shipMethod === "inside" ? 60 : 130;
   const couponDiscount = couponApplied ? Math.round(total * 0.05) : 0;
