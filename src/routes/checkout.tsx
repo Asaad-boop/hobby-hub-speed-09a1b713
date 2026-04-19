@@ -117,7 +117,7 @@ function Checkout() {
           subtotal,
           shipping_fee: shippingFee,
           total: orderTotal,
-          payment_method: "cod",
+          payment_method: payMethod,
           shipping_name: form.name,
           shipping_phone: form.phone,
           shipping_address: form.address,
