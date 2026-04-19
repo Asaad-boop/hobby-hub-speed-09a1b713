@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { products } from "@/lib/products";
 import { supabase } from "@/integrations/supabase/client";
+import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { toast } from "sonner";
 import {
   Truck,
