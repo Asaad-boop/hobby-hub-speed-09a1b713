@@ -412,28 +412,28 @@ function ProductPage() {
           {/* Benefits removed */}
 
           {/* Quantity */}
-          <div className="mt-6 flex flex-wrap items-center gap-4">
-            <span className="text-sm font-bold">Quantity:</span>
-            <div className="inline-flex items-center rounded-full border-2 border-border">
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <span className="text-xs font-bold">Qty:</span>
+            <div className="inline-flex items-center rounded-full border border-border">
               <button
                 onClick={() => setQty((q) => Math.max(1, q - 1))}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-l-full hover:bg-muted"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-l-full hover:bg-muted"
                 aria-label="Decrease"
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="h-3.5 w-3.5" />
               </button>
-              <span className="w-12 text-center text-base font-extrabold">{qty}</span>
+              <span className="w-8 text-center text-sm font-extrabold">{qty}</span>
               <button
                 onClick={() => setQty((q) => Math.min(product.stock, q + 1))}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-r-full hover:bg-muted"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-r-full hover:bg-muted"
                 aria-label="Increase"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-3.5 w-3.5" />
               </button>
             </div>
             {qty > 1 && (
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
-                Subtotal ৳{product.price * qty} • Save ৳{saved}
+              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary">
+                ৳{product.price * qty} • Save ৳{saved}
               </span>
             )}
           </div>
