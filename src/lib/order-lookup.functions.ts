@@ -4,50 +4,59 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 const normalizePhone = (p: string) => p.replace(/\D/g, "").slice(-10);
 
 export const lookupOrder = createServerFn({ method: "POST" })
-  .inputValidator((input: { orderId: string; contact: string }) => {
-    const orderId = String(input.orderId || "").trim();
-    const contact = String(input.contact || "").trim().toLowerCase();
-    if (!orderId || orderId.length < 6) throw new Error("Invalid order ID");
-    if (!contact) throw new Error("Phone or email required");
-    return { orderId, contact };
+  .inputValidator((input: { query: string }) => {
+    const query = String(input.query || "").trim();
+    if (!query) throw new Error("Please enter Order ID, phone or email");
+    return { query };
   })
   .handler(async ({ data }) => {
-    const { orderId, contact } = data;
-    const isEmail = contact.includes("@");
+    const { query } = data;
+    const isEmail = query.includes("@");
+    const digits = normalizePhone(query);
+    const isPhone = !isEmail && digits.length >= 10;
+    const isOrderId = !isEmail && !isPhone;
 
-    // Support short ID prefix (first 8 chars uppercase) or full UUID
-    let orderQuery = supabaseAdmin
-      .from("orders")
-      .select("*, order_items(id,name,image,price,quantity)");
-
-    if (orderId.length === 36) {
-      orderQuery = orderQuery.eq("id", orderId);
-    } else {
-      // Match by short prefix (first 8 chars)
-      orderQuery = orderQuery.ilike("id", `${orderId.toLowerCase()}%`);
+    // Lookup by Order ID (full UUID or short prefix)
+    if (isOrderId) {
+      let q = supabaseAdmin
+        .from("orders")
+        .select("*, order_items(id,name,image,price,quantity)");
+      if (query.length === 36) q = q.eq("id", query);
+      else q = q.ilike("id", `${query.toLowerCase()}%`);
+      const { data: orders } = await q.order("created_at", { ascending: false }).limit(1);
+      if (orders && orders.length > 0) return { ok: true as const, order: orders[0] };
+      return { ok: false as const, error: "No order found with that Order ID" };
     }
 
-    const { data: orders, error } = await orderQuery.limit(5);
-    if (error || !orders || orders.length === 0) {
-      return { ok: false as const, error: "Order not found" };
+    // Lookup by phone
+    if (isPhone) {
+      const { data: orders } = await supabaseAdmin
+        .from("orders")
+        .select("*, order_items(id,name,image,price,quantity)")
+        .order("created_at", { ascending: false })
+        .limit(50);
+      const match = (orders || []).find(
+        (o) => normalizePhone(o.shipping_phone || "") === digits
+      );
+      if (match) return { ok: true as const, order: match };
+      return { ok: false as const, error: "No order found with that phone number" };
     }
 
-    // Find matching order by phone or email
-    for (const order of orders) {
-      if (!isEmail) {
-        const inputDigits = normalizePhone(contact);
-        const orderDigits = normalizePhone(order.shipping_phone || "");
-        if (inputDigits && orderDigits && inputDigits === orderDigits) {
-          return { ok: true as const, order };
-        }
-      } else {
-        // Email check via auth.users
-        const { data: userData } = await supabaseAdmin.auth.admin.getUserById(order.user_id);
-        if (userData?.user?.email?.toLowerCase() === contact) {
-          return { ok: true as const, order };
-        }
-      }
+    // Lookup by email
+    if (isEmail) {
+      const email = query.toLowerCase();
+      const { data: usersData } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+      const user = usersData?.users?.find((u) => u.email?.toLowerCase() === email);
+      if (!user) return { ok: false as const, error: "No order found with that email" };
+      const { data: orders } = await supabaseAdmin
+        .from("orders")
+        .select("*, order_items(id,name,image,price,quantity)")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (orders && orders.length > 0) return { ok: true as const, order: orders[0] };
+      return { ok: false as const, error: "No order found with that email" };
     }
 
-    return { ok: false as const, error: "Order ID and contact don't match" };
+    return { ok: false as const, error: "Invalid input" };
   });
