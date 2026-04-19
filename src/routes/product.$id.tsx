@@ -123,7 +123,7 @@ function ProductPage() {
     ? productReviews
     : testimonials.slice(0, 3).map((t) => ({ ...t, productId: product.id }));
 
-  const [filter, setFilter] = useState<"all" | "5" | "4" | "photos" | "helpful">("all");
+  const [filter, setFilter] = useState<"all" | "5" | "4" | "photos">("all");
 
   type DisplayReview = {
     name: string;
@@ -163,7 +163,6 @@ function ProductPage() {
     if (filter === "5") list = list.filter((r) => r.rating === 5);
     else if (filter === "4") list = list.filter((r) => r.rating === 4);
     else if (filter === "photos") list = list.filter((r) => r.photos.length > 0);
-    else if (filter === "helpful") list = [...list].sort((a, b) => b.helpful - a.helpful);
     return list;
   }, [allReviews, filter]);
 
@@ -172,7 +171,6 @@ function ProductPage() {
     "5": allReviews.filter((r) => r.rating === 5).length,
     "4": allReviews.filter((r) => r.rating === 4).length,
     photos: allReviews.filter((r) => r.photos.length > 0).length,
-    helpful: allReviews.length,
   }), [allReviews]);
 
   const handleBuyNow = () => {
@@ -602,7 +600,6 @@ function ProductPage() {
                 { k: "5", l: "5★ only" },
                 { k: "4", l: "4★ only" },
                 { k: "photos", l: "With photos" },
-                { k: "helpful", l: "Most helpful" },
               ] as const).map((f) => {
                 const active = filter === f.k;
                 return (
@@ -663,7 +660,7 @@ function ProductPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground">{r.location} • {r.date}</p>
+                      <p className="text-xs text-muted-foreground">{r.date}</p>
                       <div className="mt-2 flex items-center gap-1 text-primary">
                         {Array.from({ length: r.rating }).map((_, j) => (
                           <Star key={j} className="h-4 w-4 fill-primary" />
@@ -677,17 +674,11 @@ function ProductPage() {
                           ))}
                         </div>
                       )}
-                      <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
-                        <button className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1 font-semibold transition hover:border-primary hover:text-primary">
-                          <ThumbsUp className="h-3 w-3" /> Helpful ({r.helpful})
-                        </button>
-                        {!r.isUser && (
-                          <>
-                            <span>•</span>
-                            <button className="font-semibold hover:text-primary">Reply</button>
-                          </>
-                        )}
-                      </div>
+                      {!r.isUser && (
+                        <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+                          <button className="font-semibold hover:text-primary">Reply</button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
