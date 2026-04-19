@@ -1,9 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { products, newArrivals } from "@/lib/products";
+import { fetchAllProducts, type Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import { Sparkles, ArrowRight } from "lucide-react";
-
-const allProducts = [...products, ...newArrivals];
 
 const CATEGORY_MAP: Record<string, { label: string; category: string; tagline: string; description: string }> = {
   "home-decor": {
@@ -27,10 +25,11 @@ const CATEGORY_MAP: Record<string, { label: string; category: string; tagline: s
 };
 
 export const Route = createFileRoute("/category/$slug")({
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
     const meta = CATEGORY_MAP[params.slug.toLowerCase()];
     if (!meta) throw notFound();
-    const items = allProducts.filter((p) => p.category === meta.category);
+    const all = await fetchAllProducts();
+    const items: Product[] = all.filter((p) => p.category === meta.category);
     return { meta, items };
   },
   head: ({ loaderData }) => ({

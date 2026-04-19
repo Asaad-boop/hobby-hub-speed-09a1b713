@@ -1,12 +1,10 @@
 // Shop page — category filter + sort + search via search params
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { products, newArrivals } from "@/lib/products";
+import { useProducts } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
+import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import { Filter, SlidersHorizontal, Store, Search as SearchIcon, X } from "lucide-react";
-
-const allProducts = [...products, ...newArrivals];
-const categories = ["All", ...Array.from(new Set(allProducts.map((p) => p.category)))];
 
 type SortKey = "popular" | "price-asc" | "price-desc" | "rating";
 
@@ -42,6 +40,12 @@ function ShopPage() {
   const sort: SortKey = search.sort ?? "popular";
   const q = search.q;
   const navigate = useNavigate({ from: "/shop" });
+  const { data: allProducts = [], isLoading } = useProducts();
+
+  const categories = useMemo(
+    () => ["All", ...Array.from(new Set(allProducts.map((p) => p.category)))],
+    [allProducts]
+  );
 
   const filtered = useMemo(() => {
     let list = category === "All" ? allProducts : allProducts.filter((p) => p.category === category);
@@ -52,7 +56,7 @@ function ShopPage() {
           p.title.toLowerCase().includes(needle) ||
           p.description.toLowerCase().includes(needle) ||
           p.category.toLowerCase().includes(needle) ||
-          p.benefits.some((b) => b.toLowerCase().includes(needle))
+          p.benefits.some((b: string) => b.toLowerCase().includes(needle))
       );
     }
     list = [...list].sort((a, b) => {
@@ -62,7 +66,7 @@ function ShopPage() {
       return b.reviews - a.reviews;
     });
     return list;
-  }, [category, sort, q]);
+  }, [allProducts, category, sort, q]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
@@ -138,7 +142,13 @@ function ShopPage() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <ProductCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="mt-16 flex flex-col items-center text-center">
           <SearchIcon className="h-12 w-12 text-muted-foreground/50" />
           <p className="mt-4 text-lg font-bold">No products found</p>

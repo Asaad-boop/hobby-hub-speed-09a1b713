@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ChevronLeft, ChevronRight, Flame, ShoppingBag, Star, Truck, Zap } from "lucide-react";
-import { products } from "@/lib/products";
+import { useProducts, type Product } from "@/lib/products";
 
 const orderTicker = [
   { name: "Rahim", city: "Dhaka", item: "Sunset Crystal LED Lamp", time: "2 min ago" },
@@ -29,7 +29,8 @@ function useCountdown(targetMs: number) {
 }
 
 export default function HeroShowcase() {
-  const slides = products;
+  const { data: allProducts = [] } = useProducts();
+  const slides: Product[] = useMemo(() => allProducts.slice(0, 4), [allProducts]);
   const [active, setActive] = useState(0);
   const [tickerIdx, setTickerIdx] = useState(0);
 
@@ -39,6 +40,7 @@ export default function HeroShowcase() {
 
   // Auto-rotate slides
   useEffect(() => {
+    if (slides.length === 0) return;
     const id = setInterval(() => setActive((i) => (i + 1) % slides.length), 5000);
     return () => clearInterval(id);
   }, [slides.length]);
@@ -49,8 +51,10 @@ export default function HeroShowcase() {
     return () => clearInterval(id);
   }, []);
 
-  const current = slides[active];
+  const current: Product | undefined = slides[active];
   const ticker = orderTicker[tickerIdx];
+
+  if (!current) return null;
 
   return (
     <section className="relative overflow-hidden bg-foreground text-background">

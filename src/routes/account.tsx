@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useWishlist } from "@/lib/wishlist";
-import { getProduct } from "@/lib/products";
+import { useProducts } from "@/lib/products";
 import { toast } from "sonner";
 import { Loader2, LogOut, User as UserIcon, Heart, Package, MapPin, Plus, Trash2, Star, ChevronRight } from "lucide-react";
 
@@ -57,6 +57,7 @@ const STATUS_COLOR: Record<string, string> = {
 function AccountPage() {
   const navigate = useNavigate();
   const wishlist = useWishlist();
+  const { data: allProductsData = [] } = useProducts();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -160,7 +161,7 @@ function AccountPage() {
     );
   }
 
-  const wishlistProducts = wishlist.ids.map(getProduct).filter(Boolean) as NonNullable<ReturnType<typeof getProduct>>[];
+  const wishlistProducts = wishlist.ids.map((id) => allProductsData.find((p) => p.id === id)).filter(Boolean) as NonNullable<typeof allProductsData[number]>[];
   const totalSpent = orders.reduce((s, o) => s + Number(o.total), 0);
 
   return (

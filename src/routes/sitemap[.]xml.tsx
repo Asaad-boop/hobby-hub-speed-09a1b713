@@ -1,18 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { products, newArrivals } from "@/lib/products";
+import { fetchAllProducts } from "@/lib/products";
 
 const SITE_URL = "https://hobby-hub-speed.lovable.app";
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
-      GET: () => {
+      GET: async () => {
         const staticPaths = [
           "", "/shop", "/about", "/contact", "/faq", "/shipping",
           "/returns", "/privacy", "/terms", "/wishlist", "/track", "/request",
           "/category/home-decor", "/category/gadgets", "/category/diy-kits",
         ];
-        const productPaths = [...products, ...newArrivals].map((p) => `/product/${p.id}`);
+        const allProducts = await fetchAllProducts().catch(() => []);
+        const productPaths = allProducts.map((p) => `/product/${p.id}`);
         const all = [...staticPaths, ...productPaths];
         const today = new Date().toISOString().split("T")[0];
         const urls = all

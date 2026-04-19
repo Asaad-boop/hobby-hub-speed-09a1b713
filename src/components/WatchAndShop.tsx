@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   Play,
@@ -16,7 +16,7 @@ import {
   Share2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { products, newArrivals, type Product } from "@/lib/products";
+import { type Product, useProducts } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import reelLamp from "@/assets/reel-lamp.mp4.asset.json";
 import reelCharger from "@/assets/reel-charger.mp4.asset.json";
@@ -31,18 +31,31 @@ type Reel = {
   product: Product;
 };
 
-const findProduct = (id: string): Product => {
-  const all = [...products, ...newArrivals];
-  return all.find((p) => p.id === id)!;
-};
-
-const reels: Reel[] = [
-  { id: "r1", videoUrl: reelLamp.url, caption: "Cozy vibes only ✨", product: findProduct("crystal-lamp") },
-  { id: "r2", videoUrl: reelCharger.url, caption: "Snap. Charge. Done. ⚡", product: findProduct("magsafe-charger") },
-  { id: "r3", videoUrl: reelSpeaker.url, caption: "Big sound, tiny size 🔊", product: findProduct("mini-speaker") },
-  { id: "r4", videoUrl: reelDiffuser.url, caption: "Relax mode: ON 🌿", product: findProduct("aroma-diffuser") },
-  { id: "r5", videoUrl: reelCustom1, caption: "Trending now 🔥", product: findProduct("diy-kit") },
+// Reels are matched to products by slug-like keyword in title (DB-driven).
+const REEL_SOURCES: { id: string; videoUrl: string; caption: string; match: string[] }[] = [
+  { id: "r1", videoUrl: reelLamp.url, caption: "Cozy vibes only ✨", match: ["lamp", "crystal"] },
+  { id: "r2", videoUrl: reelCharger.url, caption: "Snap. Charge. Done. ⚡", match: ["charger", "magsafe"] },
+  { id: "r3", videoUrl: reelSpeaker.url, caption: "Big sound, tiny size 🔊", match: ["speaker"] },
+  { id: "r4", videoUrl: reelDiffuser.url, caption: "Relax mode: ON 🌿", match: ["diffuser", "aroma"] },
+  { id: "r5", videoUrl: reelCustom1, caption: "Trending now 🔥", match: ["diy", "kit"] },
 ];
+
+const buildReels = (all: Product[]): Reel[] => {
+  const matched: Reel[] = [];
+  for (const src of REEL_SOURCES) {
+    const product = all.find((p) =>
+      src.match.some((kw) => p.title.toLowerCase().includes(kw))
+    );
+    if (product) matched.push({ id: src.id, videoUrl: src.videoUrl, caption: src.caption, product });
+  }
+  // Fallback: pair remaining reels with any product so the section never breaks
+  if (matched.length === 0 && all.length > 0) {
+    REEL_SOURCES.slice(0, all.length).forEach((src, i) => {
+      matched.push({ id: src.id, videoUrl: src.videoUrl, caption: src.caption, product: all[i] });
+    });
+  }
+  return matched;
+};
 
 function ReelCard({
   reel,
@@ -208,11 +221,13 @@ function FullscreenViewer({
   muted,
   onMuteToggle,
   onClose,
+  reels,
 }: {
   startIndex: number;
   muted: boolean;
   onMuteToggle: () => void;
   onClose: () => void;
+  reels: Reel[];
 }) {
   const [index, setIndex] = useState(startIndex);
   const [dragY, setDragY] = useState(0);
@@ -230,8 +245,8 @@ function FullscreenViewer({
   const videoRef = useRef<HTMLVideoElement>(null);
   const { add } = useCart();
   const navigate = useNavigate();
-  const off = Math.round(((reel.product.oldPrice - reel.product.price) / reel.product.oldPrice) * 100);
-  const isLiked = !!liked[reel.id];
+  const off = reel ? Math.round(((reel.product.oldPrice - reel.product.price) / reel.product.oldPrice) * 100) : 0;
+  const isLiked = reel ? !!liked[reel.id] : false;
 
   const goNext = () => setIndex((i) => Math.min(i + 1, reels.length - 1));
   const goPrev = () => setIndex((i) => Math.max(i - 1, 0));
@@ -602,6 +617,10 @@ function FullscreenViewer({
 export default function WatchAndShop() {
   const [muted, setMuted] = useState(true);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const { data: allProducts = [] } = useProducts();
+  const reels = useMemo(() => buildReels(allProducts), [allProducts]);
+
+  if (reels.length === 0) return null;
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-muted/40 to-background">
@@ -640,6 +659,7 @@ export default function WatchAndShop() {
           muted={muted}
           onMuteToggle={() => setMuted((m) => !m)}
           onClose={() => setOpenIndex(null)}
+          reels={reels}
         />
       )}
     </section>

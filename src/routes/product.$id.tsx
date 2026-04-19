@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, notFound, Link } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
-import { getProduct, products, newArrivals, testimonials } from "@/lib/products";
+import { fetchProductByIdOrSlug, fetchAllProducts, testimonials } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import ProductCard from "@/components/ProductCard";
@@ -41,10 +41,11 @@ import review3 from "@/assets/review-3.jpg";
 import review4 from "@/assets/review-4.jpg";
 
 export const Route = createFileRoute("/product/$id")({
-  loader: ({ params }) => {
-    const product = getProduct(params.id);
+  loader: async ({ params }) => {
+    const product = await fetchProductByIdOrSlug(params.id);
     if (!product) throw notFound();
-    return { product };
+    const all = await fetchAllProducts();
+    return { product, all };
   },
   head: ({ loaderData }) => ({
     meta: loaderData
@@ -129,7 +130,7 @@ function CountdownTimer() {
 }
 
 function ProductPage() {
-  const { product } = Route.useLoaderData();
+  const { product, all } = Route.useLoaderData();
   const { add } = useCart();
   const { has: wishHas, toggle: wishToggle } = useWishlist();
   const navigate = useNavigate();
@@ -137,7 +138,7 @@ function ProductPage() {
   const [qty, setQty] = useState(1);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [activeTab, setActiveTab] = useState<"desc" | "specs" | "ship">("desc");
-  const allOthers = [...products, ...newArrivals].filter((p) => p.id !== product.id);
+  const allOthers = all.filter((p) => p.id !== product.id);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [userReviews, setUserReviews] = useState<NewReview[]>([]);
   const [bundle, setBundle] = useState<Record<string, boolean>>(() => {
@@ -153,10 +154,12 @@ function ProductPage() {
   const bundleOriginal = bundleItems.filter((b) => bundle[b.id]).reduce((s, b) => s + b.oldPrice, 0);
   const bundleSave = bundleOriginal - bundleTotal;
   const related = allOthers.slice(0, 4);
-  const productReviews = testimonials.filter((t) => t.productId === product.id);
+  const productReviews = testimonials.filter(
+    (t) => t.productSlug === product.id || product.title.toLowerCase().includes(t.productSlug.replace(/-/g, " "))
+  );
   const seedReviews = productReviews.length
     ? productReviews
-    : testimonials.slice(0, 3).map((t) => ({ ...t, productId: product.id }));
+    : testimonials.slice(0, 3);
 
   const [filter, setFilter] = useState<"all" | "5" | "4" | "photos">("all");
   const [visibleReviews, setVisibleReviews] = useState(3);
