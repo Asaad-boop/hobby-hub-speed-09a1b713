@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { ImageUploader, GalleryUploader } from "@/components/admin/ImageUploader";
 
 export const Route = createFileRoute("/admin/products")({
   component: AdminProductsPage,
@@ -335,7 +336,7 @@ function ProductDialog({
   const [oldPrice, setOldPrice] = useState("");
   const [stock, setStock] = useState("");
   const [image, setImage] = useState("");
-  const [galleryText, setGalleryText] = useState("");
+  const [gallery, setGallery] = useState<string[]>([]);
   const [benefitsText, setBenefitsText] = useState("");
   const [categoryId, setCategoryId] = useState<string | "none">("none");
   const [isActive, setIsActive] = useState(true);
@@ -354,7 +355,7 @@ function ProductDialog({
       setOldPrice(editing.old_price != null ? String(editing.old_price) : "");
       setStock(String(editing.stock ?? 0));
       setImage(editing.image ?? "");
-      setGalleryText(Array.isArray(editing.gallery) ? (editing.gallery as string[]).join("\n") : "");
+      setGallery(Array.isArray(editing.gallery) ? (editing.gallery as string[]).filter((g): g is string => typeof g === "string") : []);
       setBenefitsText(Array.isArray(editing.benefits) ? (editing.benefits as string[]).join("\n") : "");
       setCategoryId(editing.category_id ?? "none");
       setIsActive(editing.is_active);
@@ -369,7 +370,7 @@ function ProductDialog({
       setOldPrice("");
       setStock("0");
       setImage("");
-      setGalleryText("");
+      setGallery([]);
       setBenefitsText("");
       setCategoryId("none");
       setIsActive(true);
@@ -398,7 +399,7 @@ function ProductDialog({
       is_featured: isFeatured,
       is_new_arrival: isNewArrival,
       benefits: benefitsText.split("\n").map((s) => s.trim()).filter(Boolean),
-      gallery: galleryText.split("\n").map((s) => s.trim()).filter(Boolean),
+      gallery,
     });
     if (!parsed.success) {
       return toast.error(parsed.error.issues[0].message);
@@ -506,29 +507,17 @@ function ProductDialog({
               </Select>
             </div>
             <div className="sm:col-span-2">
-              <Label htmlFor="image">Main image URL</Label>
-              <Input
-                id="image"
+              <Label>Main image</Label>
+              <ImageUploader
                 value={image}
-                onChange={(e) => setImage(e.target.value)}
-                placeholder="https://… or /assets/…"
-                required
+                onChange={setImage}
+                folder="products"
+                label="Main product image"
               />
-              {image && (
-                <div className="mt-2 h-24 w-24 overflow-hidden rounded-lg border border-border bg-muted">
-                  <img src={image} alt="preview" className="h-full w-full object-cover" />
-                </div>
-              )}
             </div>
             <div className="sm:col-span-2">
-              <Label htmlFor="gallery">Gallery URLs (one per line)</Label>
-              <Textarea
-                id="gallery"
-                value={galleryText}
-                onChange={(e) => setGalleryText(e.target.value)}
-                rows={3}
-                placeholder={"https://...\nhttps://..."}
-              />
+              <Label>Gallery (additional images)</Label>
+              <GalleryUploader value={gallery} onChange={setGallery} folder="products" />
             </div>
             <div className="sm:col-span-2">
               <Label htmlFor="benefits">Benefits / features (one per line)</Label>
