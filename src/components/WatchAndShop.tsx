@@ -617,6 +617,10 @@ function FullscreenViewer({
 export default function WatchAndShop() {
   const [muted, setMuted] = useState(true);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const { data: allProducts = [] } = useProducts();
+  const reels = useMemo(() => buildReels(allProducts), [allProducts]);
+
+  if (reels.length === 0) return null;
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-muted/40 to-background">
@@ -655,6 +659,7 @@ export default function WatchAndShop() {
           muted={muted}
           onMuteToggle={() => setMuted((m) => !m)}
           onClose={() => setOpenIndex(null)}
+          reels={reels}
         />
       )}
     </section>
