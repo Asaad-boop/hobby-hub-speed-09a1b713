@@ -202,34 +202,34 @@ function Checkout() {
           </div>
 
           {/* Delivery info */}
-          <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <section className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-extrabold text-primary-foreground">1</span>
-              <h2 className="font-bold">Delivery Information</h2>
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-extrabold text-primary-foreground">1</span>
+              <h2 className="text-sm font-bold">Delivery Information</h2>
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold">Full Name *</label>
+              <label className="mb-1 block text-[11px] font-semibold text-muted-foreground">Full Name *</label>
               <div className="relative">
-                <UserIcon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="h-12 w-full rounded-xl border border-border bg-background pl-10 pr-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  className="h-11 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                   placeholder="Your name"
                 />
               </div>
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold">Phone Number *</label>
+              <label className="mb-1 block text-[11px] font-semibold text-muted-foreground">Phone Number *</label>
               <div className="relative">
-                <Phone className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   required
                   inputMode="tel"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  className={`h-12 w-full rounded-xl border bg-background pl-10 pr-10 text-sm outline-none transition focus:ring-2 ${
+                  className={`h-11 w-full rounded-lg border bg-background pl-9 pr-9 text-sm outline-none transition focus:ring-2 ${
                     form.phone && !phoneValid
                       ? "border-destructive focus:border-destructive focus:ring-destructive/20"
                       : "border-border focus:border-primary focus:ring-primary/20"
@@ -237,43 +237,43 @@ function Checkout() {
                   placeholder="01XXXXXXXXX"
                 />
                 {form.phone && phoneValid && (
-                  <CheckCircle2 className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" />
+                  <CheckCircle2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" />
                 )}
               </div>
               {form.phone && !phoneValid && (
-                <p className="mt-1 text-xs text-destructive">Enter a valid 11-digit BD number</p>
+                <p className="mt-1 text-[11px] text-destructive">Enter a valid 11-digit BD number</p>
               )}
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold">City</label>
+                <label className="mb-1 block text-[11px] font-semibold text-muted-foreground">City</label>
                 <input
                   value={form.city}
                   onChange={(e) => setForm({ ...form, city: e.target.value })}
-                  className="h-12 w-full rounded-xl border border-border bg-background px-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                   placeholder="Dhaka"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-semibold">District</label>
+                <label className="mb-1 block text-[11px] font-semibold text-muted-foreground">District</label>
                 <input
                   value={form.district}
                   onChange={(e) => setForm({ ...form, district: e.target.value })}
-                  className="h-12 w-full rounded-xl border border-border bg-background px-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                   placeholder="Dhaka"
                 />
               </div>
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold">Full Address *</label>
+              <label className="mb-1 block text-[11px] font-semibold text-muted-foreground">Full Address *</label>
               <div className="relative">
-                <MapPin className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
+                <MapPin className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <textarea
                   required
                   value={form.address}
                   onChange={(e) => setForm({ ...form, address: e.target.value })}
-                  rows={3}
-                  className="w-full rounded-xl border border-border bg-background pl-10 pr-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  rows={2}
+                  className="w-full rounded-lg border border-border bg-background pl-9 pr-3 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                   placeholder="House, Road, Area"
                 />
               </div>
