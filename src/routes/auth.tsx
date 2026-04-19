@@ -287,6 +287,7 @@ function AuthPage() {
                 </div>
               ))}
             </div>
+          </div>
         </div>
 
         {/* Right form panel */}
