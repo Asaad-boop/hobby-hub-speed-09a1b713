@@ -54,6 +54,41 @@ export const Route = createFileRoute("/product/$id")({
           { property: "og:title", content: `${loaderData.product.title} — HobbyShop` },
           { property: "og:description", content: loaderData.product.description },
           { property: "og:image", content: loaderData.product.image },
+          { property: "og:type", content: "product" },
+          { property: "product:price:amount", content: String(loaderData.product.price) },
+          { property: "product:price:currency", content: "BDT" },
+        ]
+      : [],
+    scripts: loaderData
+      ? [
+          {
+            type: "application/ld+json",
+            children: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Product",
+              name: loaderData.product.title,
+              description: loaderData.product.description,
+              image: loaderData.product.gallery,
+              sku: loaderData.product.id,
+              brand: { "@type": "Brand", name: "HobbyShop" },
+              category: loaderData.product.category,
+              offers: {
+                "@type": "Offer",
+                url: `https://hobby-hub-speed.lovable.app/product/${loaderData.product.id}`,
+                priceCurrency: "BDT",
+                price: loaderData.product.price,
+                availability: loaderData.product.stock > 0
+                  ? "https://schema.org/InStock"
+                  : "https://schema.org/OutOfStock",
+                itemCondition: "https://schema.org/NewCondition",
+              },
+              aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: loaderData.product.rating,
+                reviewCount: loaderData.product.reviews,
+              },
+            }),
+          },
         ]
       : [],
   }),

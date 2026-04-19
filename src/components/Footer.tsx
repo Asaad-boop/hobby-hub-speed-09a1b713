@@ -103,7 +103,8 @@ export default function Footer() {
                 <span className="ml-0.5 rounded-full bg-background/25 px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider">New</span>
               </Link>
             </li>
-            <li><Link to="/shipping" className="transition hover:text-primary">Shipping & Returns</Link></li>
+            <li><Link to="/shipping" className="transition hover:text-primary">Shipping Info</Link></li>
+            <li><Link to="/returns" className="transition hover:text-primary">Returns & Refunds</Link></li>
             <li><Link to="/faq" className="transition hover:text-primary">FAQ</Link></li>
           </ul>
         </div>
