@@ -221,11 +221,13 @@ function FullscreenViewer({
   muted,
   onMuteToggle,
   onClose,
+  reels,
 }: {
   startIndex: number;
   muted: boolean;
   onMuteToggle: () => void;
   onClose: () => void;
+  reels: Reel[];
 }) {
   const [index, setIndex] = useState(startIndex);
   const [dragY, setDragY] = useState(0);
@@ -243,8 +245,8 @@ function FullscreenViewer({
   const videoRef = useRef<HTMLVideoElement>(null);
   const { add } = useCart();
   const navigate = useNavigate();
-  const off = Math.round(((reel.product.oldPrice - reel.product.price) / reel.product.oldPrice) * 100);
-  const isLiked = !!liked[reel.id];
+  const off = reel ? Math.round(((reel.product.oldPrice - reel.product.price) / reel.product.oldPrice) * 100) : 0;
+  const isLiked = reel ? !!liked[reel.id] : false;
 
   const goNext = () => setIndex((i) => Math.min(i + 1, reels.length - 1));
   const goPrev = () => setIndex((i) => Math.max(i - 1, 0));
