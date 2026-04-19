@@ -280,12 +280,12 @@ function ProductPage() {
               <span className="inline-flex items-center gap-1"><Users className="h-3 w-3 text-primary" /> 47 people viewing now</span>
             </div>
           </div>
-          <div className="mt-3 grid grid-cols-4 gap-2">
+          <div className="mt-3 grid max-w-sm grid-cols-4 gap-2 md:max-w-md">
             {product.gallery.map((src: string, i: number) => (
               <button
                 key={i}
                 onClick={() => setActiveImg(src)}
-                className={`overflow-hidden rounded-xl border-2 bg-muted transition ${
+                className={`overflow-hidden rounded-lg border-2 bg-muted transition ${
                   activeImg === src ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"
                 }`}
               >
