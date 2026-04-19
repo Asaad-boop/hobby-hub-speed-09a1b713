@@ -777,29 +777,61 @@ function ProductPage() {
       </section>
 
       {/* Sticky mobile buy bar */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-3 shadow-2xl backdrop-blur md:hidden">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => wishToggle(product)}
-            className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-border"
-            aria-label="Wishlist"
-          >
-            <Heart className={`h-5 w-5 ${wished ? "fill-primary text-primary" : ""}`} />
-          </button>
-          <button
-            onClick={() => add(product, qty)}
-            className="flex-1 rounded-full border-2 border-foreground py-3 text-sm font-extrabold"
-          >
-            Add to Cart
-          </button>
-          <button
-            onClick={handleBuyNow}
-            className="flex-[1.3] rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground shadow-lg"
-          >
-            Buy ৳{product.price * qty}
-          </button>
-        </div>
-      </div>
+      {(() => {
+        const discount = qty === 3 ? 15 : qty === 2 ? 10 : 0;
+        const unitPrice = Math.round(product.price * (1 - discount / 100));
+        const totalPrice = unitPrice * qty;
+        const stickyAdd = () => {
+          const discounted: typeof product = { ...product, price: unitPrice };
+          add(discounted, qty);
+        };
+        const stickyBuy = () => {
+          const discounted: typeof product = { ...product, price: unitPrice };
+          add(discounted, qty, { silent: true });
+          navigate({ to: "/checkout" });
+        };
+        return (
+          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 shadow-2xl backdrop-blur md:hidden">
+            <div className="flex items-center justify-between gap-3 px-4 pt-2 pb-1 text-[11px]">
+              <span className="font-bold text-muted-foreground">
+                {qty} {qty > 1 ? "PCS" : "PC"}
+                {discount > 0 && (
+                  <span className="ml-1.5 rounded-full bg-primary/10 px-1.5 py-0.5 font-extrabold text-primary">
+                    {discount}% OFF
+                  </span>
+                )}
+              </span>
+              <span className="font-bold">
+                <span className="text-foreground">৳{totalPrice}</span>
+                {discount > 0 && (
+                  <span className="ml-1.5 text-muted-foreground line-through">৳{product.price * qty}</span>
+                )}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 p-3 pt-2">
+              <button
+                onClick={() => wishToggle(product)}
+                className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-border"
+                aria-label="Wishlist"
+              >
+                <Heart className={`h-5 w-5 ${wished ? "fill-primary text-primary" : ""}`} />
+              </button>
+              <button
+                onClick={stickyAdd}
+                className="flex-1 rounded-full border-2 border-foreground py-3 text-sm font-extrabold"
+              >
+                Add to Cart
+              </button>
+              <button
+                onClick={stickyBuy}
+                className="flex-[1.3] rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground shadow-lg"
+              >
+                Buy ৳{totalPrice}
+              </button>
+            </div>
+          </div>
+        );
+      })()}
 
       <ReviewModal
         open={reviewOpen}
