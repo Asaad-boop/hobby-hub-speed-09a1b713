@@ -663,7 +663,7 @@ function ProductPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground">{r.location} • {r.date}</p>
+                      <p className="text-xs text-muted-foreground">{r.date}</p>
                       <div className="mt-2 flex items-center gap-1 text-primary">
                         {Array.from({ length: r.rating }).map((_, j) => (
                           <Star key={j} className="h-4 w-4 fill-primary" />
