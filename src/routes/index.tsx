@@ -4,7 +4,9 @@ import ProductCard from "@/components/ProductCard";
 import HeroShowcase from "@/components/HeroShowcase";
 import WatchAndShop from "@/components/WatchAndShop";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen, Star, Quote } from "lucide-react";
+import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen, Star, Quote, Search, Package } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -37,6 +39,14 @@ const trust = [
 ];
 
 function Index() {
+  const navigate = useNavigate();
+  const [trackId, setTrackId] = useState("");
+  const handleTrack = (e: React.FormEvent) => {
+    e.preventDefault();
+    const id = trackId.trim();
+    if (id.length >= 6) navigate({ to: "/track/$orderId", params: { orderId: id } });
+    else navigate({ to: "/track" });
+  };
   return (
     <div>
       {/* Hero */}
@@ -171,7 +181,45 @@ function Index() {
         </div>
       </section>
 
-      {/* Customer Reviews */}
+      {/* Track Order */}
+      <section className="mx-auto max-w-7xl px-4 py-10 md:py-14">
+        <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 md:p-10">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-12 -left-8 h-44 w-44 rounded-full bg-primary/10 blur-3xl" />
+          <div className="relative grid items-center gap-6 md:grid-cols-[1fr_auto]">
+            <div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                <Package className="h-3 w-3" /> Order Tracking
+              </span>
+              <h2 className="mt-2 text-xl font-extrabold tracking-tight md:text-3xl">
+                Track Your <span className="text-primary">Order</span> in Seconds
+              </h2>
+              <p className="mt-1.5 text-xs text-muted-foreground md:text-sm">
+                Enter your Order ID below or verify with phone/email — no login needed.
+              </p>
+            </div>
+            <form onSubmit={handleTrack} className="flex w-full gap-2 md:w-auto">
+              <div className="relative flex-1 md:w-72">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={trackId}
+                  onChange={(e) => setTrackId(e.target.value)}
+                  placeholder="Enter Order ID"
+                  className="h-12 w-full rounded-full border border-border bg-background pl-9 pr-3 text-sm font-mono uppercase outline-none transition focus:border-primary"
+                />
+              </div>
+              <button
+                type="submit"
+                className="inline-flex h-12 items-center gap-1.5 rounded-full bg-primary px-5 text-sm font-extrabold text-primary-foreground shadow-[var(--shadow-card)] transition hover:opacity-90 active:scale-95"
+              >
+                Track <ArrowRight className="h-4 w-4" />
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+
       <section className="mx-auto max-w-7xl px-4 py-10 md:py-14">
         <div className="mb-6 text-center md:mb-8">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600">
