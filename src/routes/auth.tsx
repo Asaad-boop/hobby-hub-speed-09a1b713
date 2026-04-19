@@ -90,7 +90,7 @@ function AuthPage() {
           </p>
 
           {/* Bangladesh delivery map showcase */}
-          <div className="relative mt-10 overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-background/90 via-primary/[0.04] to-background p-7 shadow-[0_30px_80px_-30px_oklch(0.585_0.245_27.5/0.25)] backdrop-blur-xl">
+          <div className="animate-float-card relative mt-10 overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-background/90 via-primary/[0.04] to-background p-7 shadow-[0_30px_80px_-30px_oklch(0.585_0.245_27.5/0.25)] backdrop-blur-xl">
             {/* Glow accents */}
             <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-20 -right-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
