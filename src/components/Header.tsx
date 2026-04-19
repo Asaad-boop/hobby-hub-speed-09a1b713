@@ -1,28 +1,29 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Search, User, ShoppingBag, Menu, X, Heart, Phone } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import logo from "@/assets/logo.png";
 
-const categories = [
-  { label: "All Product", href: "/" },
-  { label: "Kitchen & Home", href: "/" },
-  { label: "Decor & Lighting", href: "/" },
-  { label: "Gift Items", href: "/" },
-  { label: "DIY & Hobby", href: "/" },
-  { label: "Kids & Toys", href: "/" },
-  { label: "Smart Daily Use", href: "/" },
-  { label: "Gadgets & Tech 🔥", href: "/" },
+type Category = { label: string; category: string };
+
+const categories: Category[] = [
+  { label: "All Products", category: "All" },
+  { label: "Home Decor", category: "Home Decor" },
+  { label: "Gadgets 🔥", category: "Gadgets" },
+  { label: "DIY Kits", category: "DIY Kits" },
 ];
 
 export default function Header() {
   const { count, setOpen } = useCart();
   const { count: wishCount } = useWishlist();
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [progress, setProgress] = useState(0);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const onScroll = () => {
@@ -39,6 +40,35 @@ export default function Header() {
       window.removeEventListener("resize", onScroll);
     };
   }, []);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
+
+  // Focus search input when opened
+  useEffect(() => {
+    if (searchOpen) {
+      const t = setTimeout(() => searchInputRef.current?.focus(), 50);
+      return () => clearTimeout(t);
+    }
+  }, [searchOpen]);
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    navigate({
+      to: "/shop",
+      search: { category: "All", sort: "popular", q: q || undefined } as any,
+    });
+    setSearchOpen(false);
+    setMobileOpen(false);
+  };
 
   return (
     <header
@@ -102,7 +132,8 @@ export default function Header() {
             {categories.map((c) => (
               <Link
                 key={c.label}
-                to={c.href}
+                to="/shop"
+                search={{ category: c.category, sort: "popular" } as any}
                 className="group relative whitespace-nowrap rounded-full px-2.5 py-2 text-[13px] font-medium text-foreground/75 transition-colors hover:text-primary xl:px-3 xl:text-sm"
               >
                 <span className="relative z-10">{c.label}</span>
@@ -185,7 +216,8 @@ export default function Header() {
         </div>
 
         {/* Expandable search */}
-        <div
+        <form
+          onSubmit={submitSearch}
           className={`mx-auto max-w-7xl overflow-hidden px-4 transition-all duration-300 md:px-6 ${
             searchOpen ? "mt-3 max-h-20 opacity-100" : "max-h-0 opacity-0"
           }`}
@@ -193,16 +225,21 @@ export default function Header() {
           <div className="relative rounded-full border border-border bg-background shadow-[0_8px_30px_-10px_rgba(0,0,0,0.15)]">
             <Search className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
+              ref={searchInputRef}
               type="search"
-              autoFocus={searchOpen}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search gadgets, gifts, decor…"
               className="h-12 w-full rounded-full bg-transparent pl-12 pr-28 text-sm outline-none focus:ring-4 focus:ring-primary/15"
             />
-            <button className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full bg-primary px-5 py-2 text-xs font-bold text-primary-foreground transition hover:scale-105 active:scale-95">
+            <button
+              type="submit"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full bg-primary px-5 py-2 text-xs font-bold text-primary-foreground transition hover:scale-105 active:scale-95"
+            >
               Search
             </button>
           </div>
-        </div>
+        </form>
 
         {/* Mobile drawer */}
         <div
@@ -214,7 +251,8 @@ export default function Header() {
             {categories.map((c) => (
               <Link
                 key={c.label}
-                to={c.href}
+                to="/shop"
+                search={{ category: c.category, sort: "popular" } as any}
                 onClick={() => setMobileOpen(false)}
                 className="rounded-xl px-3 py-3 text-sm font-medium text-foreground transition hover:bg-primary/10 hover:text-primary"
               >
