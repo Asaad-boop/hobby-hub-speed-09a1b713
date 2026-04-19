@@ -4,7 +4,9 @@ import ProductCard from "@/components/ProductCard";
 import HeroShowcase from "@/components/HeroShowcase";
 import WatchAndShop from "@/components/WatchAndShop";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen, Star, Quote, Search, Package } from "lucide-react";
+import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen, Star, Quote, Search, Package, Phone, Loader2 } from "lucide-react";
+import { lookupOrder } from "@/lib/order-lookup.functions";
+import { toast } from "sonner";
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -41,11 +43,37 @@ const trust = [
 function Index() {
   const navigate = useNavigate();
   const [trackId, setTrackId] = useState("");
-  const handleTrack = (e: React.FormEvent) => {
+  const [trackPhone, setTrackPhone] = useState("");
+  const [trackLoading, setTrackLoading] = useState(false);
+  const [trackError, setTrackError] = useState("");
+  const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
+    setTrackError("");
     const id = trackId.trim();
-    if (id.length >= 6) navigate({ to: "/track/$orderId", params: { orderId: id } });
-    else navigate({ to: "/track" });
+    const phone = trackPhone.trim();
+    if (id.length < 6) {
+      setTrackError("Enter a valid Order ID");
+      return;
+    }
+    if (phone.replace(/\D/g, "").length < 10) {
+      setTrackError("Enter a valid phone number");
+      return;
+    }
+    setTrackLoading(true);
+    try {
+      const res = await lookupOrder({ data: { orderId: id, contact: phone } });
+      if (!res.ok) {
+        setTrackError(res.error);
+        toast.error(res.error);
+        return;
+      }
+      sessionStorage.setItem(`order:${res.order.id}`, JSON.stringify(res.order));
+      navigate({ to: "/track/$orderId", params: { orderId: res.order.id } });
+    } catch (err: any) {
+      setTrackError(err?.message || "Lookup failed");
+    } finally {
+      setTrackLoading(false);
+    }
   };
   return (
     <div>
