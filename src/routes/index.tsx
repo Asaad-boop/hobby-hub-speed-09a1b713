@@ -4,7 +4,7 @@ import ProductCard from "@/components/ProductCard";
 import HeroShowcase from "@/components/HeroShowcase";
 import WatchAndShop from "@/components/WatchAndShop";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen, Star, Quote, Search, Package, Phone, Loader2 } from "lucide-react";
+import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen, Star, Quote, Search, Package, Loader2 } from "lucide-react";
 import { lookupOrder } from "@/lib/order-lookup.functions";
 import { toast } from "sonner";
 import { useState } from "react";
