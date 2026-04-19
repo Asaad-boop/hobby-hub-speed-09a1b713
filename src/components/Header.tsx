@@ -64,8 +64,8 @@ export default function Header() {
           <div className="hidden items-center gap-4 md:flex">
             <span className="opacity-80">💰 Cash on Delivery</span>
             <span className="h-3 w-px bg-background/30" />
-            <a href="tel:+8801000000000" className="inline-flex items-center gap-1.5 opacity-90 transition hover:text-primary hover:opacity-100">
-              <Phone className="h-3 w-3" /> +880 1000-000000
+            <a href="tel:+8809638779900" className="inline-flex items-center gap-1.5 opacity-90 transition hover:text-primary hover:opacity-100">
+              <Phone className="h-3 w-3" /> 09638779900
             </a>
           </div>
         </div>
