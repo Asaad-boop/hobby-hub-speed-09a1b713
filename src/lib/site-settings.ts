@@ -63,11 +63,13 @@ export function useSiteSettings() {
 }
 
 export async function saveSiteSettings(settings: SiteSettings) {
+  const payload = {
+    key: SITE_SETTINGS_KEY,
+    value: settings as unknown as Record<string, unknown>,
+  };
   const { error } = await supabase
     .from("site_settings")
-    .upsert(
-      { key: SITE_SETTINGS_KEY, value: settings as unknown as Record<string, unknown> },
-      { onConflict: "key" },
-    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .upsert(payload as any, { onConflict: "key" });
   if (error) throw error;
 }
