@@ -414,59 +414,59 @@ function Checkout() {
         </form>
 
         {/* Summary */}
-        <aside className="space-y-4 md:sticky md:top-6 md:self-start">
-          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-            <h2 className="mb-4 font-bold">Order Summary ({items.length})</h2>
-            <ul className="space-y-3">
+        <aside className="space-y-3 md:sticky md:top-6 md:self-start">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+            <h2 className="mb-3 text-sm font-bold">Order Summary ({items.length})</h2>
+            <ul className="space-y-2.5">
               {items.map(({ product, qty }) => (
-                <li key={product.id} className="flex gap-3">
+                <li key={product.id} className="flex gap-2.5">
                   <div className="relative">
-                    <img src={product.image} alt="" className="h-16 w-16 rounded-lg object-cover" />
-                    <span className="absolute -right-1.5 -top-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-foreground px-1 text-[10px] font-extrabold text-background">
+                    <img src={product.image} alt="" className="h-14 w-14 rounded-md object-cover" />
+                    <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-foreground px-1 text-[9px] font-extrabold text-background">
                       {qty}
                     </span>
                   </div>
-                  <div className="flex-1 text-sm">
+                  <div className="flex-1 text-xs">
                     <p className="line-clamp-2 font-semibold leading-snug">{product.title}</p>
-                    <div className="mt-1.5 flex items-center gap-1">
+                    <div className="mt-1 flex items-center gap-1">
                       <button
                         type="button"
                         onClick={() => (qty > 1 ? setQty(product.id, qty - 1) : remove(product.id))}
-                        className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-border hover:bg-muted"
+                        className="inline-flex h-5 w-5 items-center justify-center rounded border border-border hover:bg-muted"
                         aria-label="Decrease"
                       >
-                        <Minus className="h-3 w-3" />
+                        <Minus className="h-2.5 w-2.5" />
                       </button>
-                      <span className="w-6 text-center text-xs font-bold">{qty}</span>
+                      <span className="w-5 text-center text-[11px] font-bold">{qty}</span>
                       <button
                         type="button"
                         onClick={() => setQty(product.id, qty + 1)}
-                        className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-border hover:bg-muted"
+                        className="inline-flex h-5 w-5 items-center justify-center rounded border border-border hover:bg-muted"
                         aria-label="Increase"
                       >
-                        <Plus className="h-3 w-3" />
+                        <Plus className="h-2.5 w-2.5" />
                       </button>
                       <button
                         type="button"
                         onClick={() => remove(product.id)}
-                        className="ml-1 inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:text-destructive"
+                        className="ml-0.5 inline-flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:text-destructive"
                         aria-label="Remove"
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <Trash2 className="h-2.5 w-2.5" />
                       </button>
                     </div>
                   </div>
-                  <p className="text-sm font-bold">৳{product.price * qty}</p>
+                  <p className="text-xs font-bold">৳{product.price * qty}</p>
                 </li>
               ))}
             </ul>
 
             {/* Coupon */}
-            <div className="mt-4 border-t border-border pt-4">
+            <div className="mt-3 border-t border-border pt-3">
               {couponApplied ? (
-                <div className="flex items-center justify-between rounded-xl bg-primary/10 px-3 py-2 text-xs">
-                  <span className="inline-flex items-center gap-1.5 font-bold text-primary">
-                    <Tag className="h-3.5 w-3.5" /> SAVE5 applied
+                <div className="flex items-center justify-between rounded-lg bg-primary/10 px-2.5 py-1.5 text-[11px]">
+                  <span className="inline-flex items-center gap-1 font-bold text-primary">
+                    <Tag className="h-3 w-3" /> SAVE5 applied
                   </span>
                   <button
                     type="button"
@@ -477,45 +477,45 @@ function Checkout() {
                   </button>
                 </div>
               ) : (
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
                   <div className="relative flex-1">
-                    <Tag className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <Tag className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
                     <input
                       value={coupon}
                       onChange={(e) => setCoupon(e.target.value)}
                       placeholder="Coupon code"
-                      className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-xs outline-none focus:border-primary"
+                      className="h-9 w-full rounded-md border border-border bg-background pl-8 pr-2 text-[11px] outline-none focus:border-primary"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={applyCoupon}
-                    className="rounded-lg bg-foreground px-4 text-xs font-bold text-background hover:opacity-90"
+                    className="rounded-md bg-foreground px-3 text-[11px] font-bold text-background hover:opacity-90"
                   >
                     Apply
                   </button>
                 </div>
               )}
-              <p className="mt-1.5 text-[10px] text-muted-foreground">Try code: <span className="font-mono font-bold">SAVE5</span></p>
+              <p className="mt-1 text-[10px] text-muted-foreground">Try: <span className="font-mono font-bold">SAVE5</span></p>
             </div>
 
-            <div className="mt-4 space-y-1.5 border-t border-border pt-4 text-sm">
+            <div className="mt-3 space-y-1 border-t border-border pt-3 text-xs">
               <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>৳{total}</span></div>
               {bump && <div className="flex justify-between"><span className="text-muted-foreground">Bonus item</span><span>৳{bumpPrice}</span></div>}
               <div className="flex justify-between"><span className="text-muted-foreground">Delivery</span><span>৳{shippingFee}</span></div>
               {couponApplied && (
                 <div className="flex justify-between text-primary"><span>Discount (5%)</span><span>-৳{couponDiscount}</span></div>
               )}
-              <div className="flex justify-between border-t border-border pt-2 text-base font-extrabold"><span>Total</span><span className="text-primary">৳{grand}</span></div>
+              <div className="mt-1 flex justify-between border-t border-border pt-2 text-sm font-extrabold"><span>Total</span><span className="text-primary">৳{grand}</span></div>
             </div>
           </div>
 
           {/* Trust badges */}
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="flex items-center gap-2 rounded-xl bg-card border border-border p-3"><Truck className="h-4 w-4 shrink-0 text-primary" /> <span className="font-semibold">Fast Delivery</span></div>
-            <div className="flex items-center gap-2 rounded-xl bg-card border border-border p-3"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> <span className="font-semibold">Easy Return</span></div>
-            <div className="flex items-center gap-2 rounded-xl bg-card border border-border p-3"><Lock className="h-4 w-4 shrink-0 text-primary" /> <span className="font-semibold">Secure Order</span></div>
-            <div className="flex items-center gap-2 rounded-xl bg-card border border-border p-3"><Gift className="h-4 w-4 shrink-0 text-primary" /> <span className="font-semibold">100% Genuine</span></div>
+          <div className="grid grid-cols-4 gap-1.5 text-[10px] md:grid-cols-2 md:gap-2 md:text-xs">
+            <div className="flex flex-col items-center gap-1 rounded-lg border border-border bg-card p-2 md:flex-row md:p-2.5"><Truck className="h-3.5 w-3.5 shrink-0 text-primary" /> <span className="text-center font-semibold">Fast Delivery</span></div>
+            <div className="flex flex-col items-center gap-1 rounded-lg border border-border bg-card p-2 md:flex-row md:p-2.5"><ShieldCheck className="h-3.5 w-3.5 shrink-0 text-primary" /> <span className="text-center font-semibold">Easy Return</span></div>
+            <div className="flex flex-col items-center gap-1 rounded-lg border border-border bg-card p-2 md:flex-row md:p-2.5"><Lock className="h-3.5 w-3.5 shrink-0 text-primary" /> <span className="text-center font-semibold">Secure Order</span></div>
+            <div className="flex flex-col items-center gap-1 rounded-lg border border-border bg-card p-2 md:flex-row md:p-2.5"><Gift className="h-3.5 w-3.5 shrink-0 text-primary" /> <span className="text-center font-semibold">100% Genuine</span></div>
           </div>
         </aside>
 
