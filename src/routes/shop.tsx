@@ -11,8 +11,8 @@ const categories = ["All", ...Array.from(new Set(allProducts.map((p) => p.catego
 type SortKey = "popular" | "price-asc" | "price-desc" | "rating";
 
 type ShopSearch = {
-  category: string;
-  sort: SortKey;
+  category?: string;
+  sort?: SortKey;
   q?: string;
 };
 
@@ -37,7 +37,10 @@ export const Route = createFileRoute("/shop")({
 });
 
 function ShopPage() {
-  const { category, sort, q } = Route.useSearch();
+  const search = Route.useSearch();
+  const category = search.category ?? "All";
+  const sort: SortKey = search.sort ?? "popular";
+  const q = search.q;
   const navigate = useNavigate({ from: "/shop" });
 
   const filtered = useMemo(() => {
