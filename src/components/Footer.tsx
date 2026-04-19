@@ -150,7 +150,7 @@ export default function Footer() {
             </li>
             <li className="flex items-center gap-2.5">
               <Mail className="h-4 w-4 shrink-0 text-primary" />
-              <a href="mailto:hello@hobbyshop.com" className="transition hover:text-primary">hello@hobbyshop.com</a>
+              <a href="mailto:support@hobbyshopbd.com" className="transition hover:text-primary">support@hobbyshopbd.com</a>
             </li>
           </ul>
 

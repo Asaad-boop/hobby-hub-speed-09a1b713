@@ -100,7 +100,7 @@ function TermsPage() {
         <section>
           <h2 className="text-lg font-bold">10. Contact</h2>
           <p className="mt-2 text-muted-foreground">
-            Questions? Email <a href="mailto:hello@hobbyshop.com" className="text-primary hover:underline">hello@hobbyshop.com</a>.
+            Questions? Email <a href="mailto:support@hobbyshopbd.com" className="text-primary hover:underline">support@hobbyshopbd.com</a>.
           </p>
         </section>
       </div>
