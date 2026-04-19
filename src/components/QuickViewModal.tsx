@@ -25,12 +25,14 @@ export default function QuickViewModal({
     if (open) {
       setQty(1);
       setActiveImg(product.image);
+      // Prevent layout shift from scrollbar disappearing
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
       document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+      if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
     }
     return () => {
       document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
     };
   }, [open, product.image]);
 
