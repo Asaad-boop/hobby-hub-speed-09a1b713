@@ -36,7 +36,7 @@ export const Route = createFileRoute("/checkout")({
 function Checkout() {
   const { items, total, clear, add, setQty, remove } = useCart();
   const navigate = useNavigate();
-  const [bump, setBump] = useState(true);
+  const [bump] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [payMethod, setPayMethod] = useState<"cod" | "bkash">("cod");
@@ -392,23 +392,6 @@ function Checkout() {
                 </div>
               </div>
             )}
-          </section>
-
-          {/* Order bump */}
-          <section className="rounded-xl border border-dashed border-primary/40 bg-primary/5 p-3">
-            <label className="flex cursor-pointer items-center gap-2.5">
-              <input
-                type="checkbox"
-                checked={bump}
-                onChange={(e) => setBump(e.target.checked)}
-                className="h-4 w-4 accent-[oklch(0.585_0.245_27.5)]"
-              />
-              <img src={bumpItem.image} alt="" className="h-12 w-12 rounded-md object-cover" />
-              <div className="flex-1 text-xs">
-                <p className="font-bold">🎁 Add {bumpItem.title} for ৳{bumpPrice}</p>
-                <p className="text-[11px] text-muted-foreground">One-time offer.</p>
-              </div>
-            </label>
           </section>
 
           <button
