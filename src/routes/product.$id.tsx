@@ -392,16 +392,16 @@ function ProductPage() {
           </div>
 
           {/* Stock + urgency */}
-          <div className="mt-4 rounded-2xl border-2 border-primary/30 bg-primary/5 p-3 sm:p-4">
-            <div className="flex flex-col gap-1.5 text-xs sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2">
+            <div className="flex items-center justify-between gap-2 text-[11px]">
               <span className="inline-flex items-center gap-1 font-extrabold text-primary">
-                <Flame className="h-4 w-4 animate-pulse" /> Hurry! Only {product.stock} left
+                <Flame className="h-3.5 w-3.5 animate-pulse" /> Only {product.stock} left
               </span>
-              <span className="inline-flex items-center gap-1 text-muted-foreground">
-                <Clock className="h-3 w-3" /> Order now for today's dispatch
+              <span className="hidden items-center gap-1 text-muted-foreground sm:inline-flex">
+                <Clock className="h-3 w-3" /> Today's dispatch
               </span>
             </div>
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-background">
+            <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-background">
               <div
                 className="h-full bg-gradient-to-r from-primary to-primary/70 transition-all"
                 style={{ width: `${Math.min(100, (product.stock / 25) * 100)}%` }}
