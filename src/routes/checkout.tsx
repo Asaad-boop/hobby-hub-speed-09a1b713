@@ -38,6 +38,9 @@ function Checkout() {
   const [bump, setBump] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
+  const [payMethod, setPayMethod] = useState<"cod" | "bkash" | "nagad" | "rocket">("cod");
+  const [payNumber, setPayNumber] = useState("");
+  const [trxId, setTrxId] = useState("");
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", city: "", district: "" });
