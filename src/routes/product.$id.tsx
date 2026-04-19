@@ -123,7 +123,7 @@ function ProductPage() {
     ? productReviews
     : testimonials.slice(0, 3).map((t) => ({ ...t, productId: product.id }));
 
-  const [filter, setFilter] = useState<"all" | "5" | "4" | "photos" | "helpful">("all");
+  const [filter, setFilter] = useState<"all" | "5" | "4" | "photos">("all");
 
   type DisplayReview = {
     name: string;
@@ -163,7 +163,6 @@ function ProductPage() {
     if (filter === "5") list = list.filter((r) => r.rating === 5);
     else if (filter === "4") list = list.filter((r) => r.rating === 4);
     else if (filter === "photos") list = list.filter((r) => r.photos.length > 0);
-    else if (filter === "helpful") list = [...list].sort((a, b) => b.helpful - a.helpful);
     return list;
   }, [allReviews, filter]);
 
@@ -172,7 +171,6 @@ function ProductPage() {
     "5": allReviews.filter((r) => r.rating === 5).length,
     "4": allReviews.filter((r) => r.rating === 4).length,
     photos: allReviews.filter((r) => r.photos.length > 0).length,
-    helpful: allReviews.length,
   }), [allReviews]);
 
   const handleBuyNow = () => {
