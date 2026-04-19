@@ -14,9 +14,22 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useSiteSettings } from "@/lib/site-settings";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
+  const { data: settings } = useSiteSettings();
+  const siteName = settings?.site_title ?? "HobbyShop";
+  const phone = settings?.contact_phone ?? "";
+  const waNumber = (settings?.whatsapp_number ?? "").replace(/[^0-9]/g, "");
+  const emailAddr = settings?.contact_email ?? "";
+  const address = settings?.address ?? "";
+  const freeThreshold = settings?.free_delivery_threshold ?? 1500;
+  const socials = [
+    settings?.social_facebook ? { icon: Facebook, label: "Facebook", href: settings.social_facebook } : null,
+    settings?.social_instagram ? { icon: Instagram, label: "Instagram", href: settings.social_instagram } : null,
+    settings?.social_youtube ? { icon: Youtube, label: "YouTube", href: settings.social_youtube } : null,
+  ].filter(Boolean) as { icon: typeof Facebook; label: string; href: string }[];
 
   const onSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,12 +54,11 @@ export default function Footer() {
         {/* Brand + newsletter */}
         <div className="md:col-span-5">
           <Link to="/" className="inline-flex items-center gap-1 text-2xl font-extrabold tracking-tight">
-            <span className="text-foreground">Hobby</span>
-            <span className="text-primary">Shop</span>
+            <span className="text-foreground">{siteName}</span>
             <Heart className="ml-1 h-5 w-5 fill-primary text-primary" />
           </Link>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-            Curated gadgets, decor &amp; gifts shipped fast across Bangladesh. Free delivery over ৳1990 — Cash on
+            Curated gadgets, decor &amp; gifts shipped fast across Bangladesh. Free delivery over ৳{freeThreshold.toLocaleString()} — Cash on
             Delivery nationwide.
           </p>
 
@@ -113,40 +125,48 @@ export default function Footer() {
         <div className="md:col-span-3">
           <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground">Get in Touch</h4>
           <ul className="space-y-3 text-sm text-muted-foreground">
-            <li className="flex items-start gap-2.5">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <span>Dhaka, Bangladesh</span>
-            </li>
-            <li className="flex items-center gap-2.5">
-              <Phone className="h-4 w-4 shrink-0 text-primary" />
-              <a href="tel:09638779900" className="transition hover:text-primary">09638779900</a>
-            </li>
-            <li className="flex items-center gap-2.5">
-              <MessageCircle className="h-4 w-4 shrink-0 text-primary" />
-              <a href="https://wa.me/8801964437520" target="_blank" rel="noopener noreferrer" className="transition hover:text-primary">+880 1964-437520</a>
-            </li>
-            <li className="flex items-center gap-2.5">
-              <Mail className="h-4 w-4 shrink-0 text-primary" />
-              <a href="mailto:support@hobbyshopbd.com" className="transition hover:text-primary">support@hobbyshopbd.com</a>
-            </li>
+            {address && (
+              <li className="flex items-start gap-2.5">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <span>{address}</span>
+              </li>
+            )}
+            {phone && (
+              <li className="flex items-center gap-2.5">
+                <Phone className="h-4 w-4 shrink-0 text-primary" />
+                <a href={`tel:${phone}`} className="transition hover:text-primary">{phone}</a>
+              </li>
+            )}
+            {waNumber && (
+              <li className="flex items-center gap-2.5">
+                <MessageCircle className="h-4 w-4 shrink-0 text-primary" />
+                <a href={`https://wa.me/${waNumber}`} target="_blank" rel="noopener noreferrer" className="transition hover:text-primary">+{waNumber}</a>
+              </li>
+            )}
+            {emailAddr && (
+              <li className="flex items-center gap-2.5">
+                <Mail className="h-4 w-4 shrink-0 text-primary" />
+                <a href={`mailto:${emailAddr}`} className="transition hover:text-primary">{emailAddr}</a>
+              </li>
+            )}
           </ul>
 
-          <div className="mt-4 flex items-center gap-2">
-            {[
-              { icon: Facebook, label: "Facebook", href: "https://www.facebook.com/hobbyshopbd.shop" },
-              { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/hobbyshopbd" },
-              { icon: Youtube, label: "YouTube", href: "#" },
-            ].map((s) => (
-              <a
-                key={s.label}
-                href={s.href}
-                aria-label={s.label}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:scale-110 hover:border-primary hover:bg-primary hover:text-primary-foreground"
-              >
-                <s.icon className="h-4 w-4" />
-              </a>
-            ))}
-          </div>
+          {socials.length > 0 && (
+            <div className="mt-4 flex items-center gap-2">
+              {socials.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:scale-110 hover:border-primary hover:bg-primary hover:text-primary-foreground"
+                >
+                  <s.icon className="h-4 w-4" />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -154,7 +174,7 @@ export default function Footer() {
       <div className="relative border-t border-border/60 bg-muted/30">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-5 text-xs text-muted-foreground sm:flex-row">
           <div className="flex items-center gap-1.5">
-            <span>© {new Date().getFullYear()} HobbyShop. All rights reserved.</span>
+            <span>© {new Date().getFullYear()} {siteName}. All rights reserved.</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span>Made with</span>
