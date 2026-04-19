@@ -251,7 +251,11 @@ function Checkout() {
                 <label className="mb-1 block text-[11px] font-semibold text-muted-foreground">District *</label>
                 <select
                   value={form.district}
-                  onChange={(e) => setForm({ ...form, district: e.target.value, city: "" })}
+                  onChange={(e) => {
+                    const district = e.target.value;
+                    setForm({ ...form, district, city: "" });
+                    if (district) setShipMethod(district === "Dhaka" ? "inside" : "outside");
+                  }}
                   className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                 >
                   <option value="">Select District</option>
