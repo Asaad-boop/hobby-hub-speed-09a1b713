@@ -178,75 +178,156 @@ function AuthPage() {
                   ))}
                 </g>
 
-                {/* City pins */}
+                {/* District dots (smaller secondary pins) */}
+                <g fill="oklch(0.585 0.245 27.5)" opacity="0.55">
+                  {[
+                    { x: 160, y: 110, name: "Rangpur" },
+                    { x: 200, y: 150, name: "Bogura" },
+                    { x: 175, y: 220, name: "Pabna" },
+                    { x: 260, y: 200, name: "Mymensingh" },
+                    { x: 270, y: 280, name: "Cumilla" },
+                    { x: 220, y: 340, name: "Barishal" },
+                    { x: 145, y: 380, name: "Jashore" },
+                    { x: 320, y: 260, name: "Brahmanbaria" },
+                    { x: 280, y: 410, name: "Cox's Bazar" },
+                    { x: 195, y: 280, name: "Faridpur" },
+                  ].map((d) => (
+                    <g key={d.name}>
+                      <circle cx={d.x} cy={d.y} r="2.5" />
+                      <circle cx={d.x} cy={d.y} r="5" fill="none" stroke="oklch(0.585 0.245 27.5)" strokeWidth="0.8" opacity="0.5" />
+                      <text x={d.x + 6} y={d.y + 3} className="fill-muted-foreground" fontSize="8" fontWeight="500">
+                        {d.name}
+                      </text>
+                    </g>
+                  ))}
+                </g>
+
+                {/* Major division city pins */}
                 {[
                   { x: 225, y: 240, name: "Dhaka", main: true },
                   { x: 125, y: 180, name: "Rajshahi" },
                   { x: 310, y: 370, name: "Chattogram" },
                   { x: 180, y: 430, name: "Khulna" },
                   { x: 290, y: 120, name: "Sylhet" },
+                  { x: 235, y: 410, name: "Barishal" },
+                  { x: 145, y: 95, name: "Rangpur" },
+                  { x: 250, y: 175, name: "Mymensingh" },
                 ].map((c) => (
                   <g key={c.name} filter="url(#pinShadow)">
-                    {/* Glow halo */}
-                    <circle cx={c.x} cy={c.y} r={c.main ? 28 : 18} fill="url(#pinGlow)" />
-                    {/* Pulse ring (Dhaka only) */}
+                    <circle cx={c.x} cy={c.y} r={c.main ? 28 : 16} fill="url(#pinGlow)" />
                     {c.main && (
                       <>
                         <circle cx={c.x} cy={c.y} r="10" fill="none" stroke="oklch(0.585 0.245 27.5)" strokeWidth="2" opacity="0.6">
-                          <animate attributeName="r" from="8" to="26" dur="2.2s" repeatCount="indefinite" />
+                          <animate attributeName="r" from="8" to="28" dur="2.2s" repeatCount="indefinite" />
                           <animate attributeName="opacity" from="0.7" to="0" dur="2.2s" repeatCount="indefinite" />
                         </circle>
                         <circle cx={c.x} cy={c.y} r="10" fill="none" stroke="oklch(0.585 0.245 27.5)" strokeWidth="2" opacity="0.4">
-                          <animate attributeName="r" from="8" to="26" dur="2.2s" begin="1.1s" repeatCount="indefinite" />
+                          <animate attributeName="r" from="8" to="28" dur="2.2s" begin="1.1s" repeatCount="indefinite" />
                           <animate attributeName="opacity" from="0.5" to="0" dur="2.2s" begin="1.1s" repeatCount="indefinite" />
                         </circle>
                       </>
                     )}
-                    {/* Pin body */}
-                    <circle cx={c.x} cy={c.y} r={c.main ? 7 : 5} fill="oklch(0.585 0.245 27.5)" stroke="white" strokeWidth="2.5" />
+                    <circle cx={c.x} cy={c.y} r={c.main ? 7 : 4.5} fill="oklch(0.585 0.245 27.5)" stroke="white" strokeWidth="2" />
                     <circle cx={c.x} cy={c.y} r={c.main ? 2.5 : 1.5} fill="white" />
-                    {/* Label with background */}
                     <rect
-                      x={c.x + 11}
+                      x={c.x + 10}
                       y={c.y - 9}
-                      width={c.name.length * 7.5 + 10}
-                      height="18"
-                      rx="9"
-                      fill="oklch(1 0 0 / 0.92)"
-                      className="dark:fill-[oklch(0.2_0_0/0.85)]"
-                      stroke="oklch(0.585 0.245 27.5 / 0.2)"
+                      width={c.name.length * 6.5 + 10}
+                      height="17"
+                      rx="8.5"
+                      fill="oklch(1 0 0 / 0.95)"
+                      className="dark:fill-[oklch(0.2_0_0/0.9)]"
+                      stroke="oklch(0.585 0.245 27.5 / 0.25)"
                       strokeWidth="1"
                     />
                     <text
-                      x={c.x + 16}
+                      x={c.x + 15}
                       y={c.y + 4}
                       className="fill-foreground"
-                      fontSize="11"
-                      fontWeight={c.main ? "800" : "600"}
+                      fontSize="10"
+                      fontWeight={c.main ? "800" : "700"}
                     >
                       {c.name}
                     </text>
                   </g>
                 ))}
+
+                {/* Compass */}
+                <g transform="translate(355, 50)" opacity="0.7">
+                  <circle r="18" fill="oklch(1 0 0 / 0.85)" stroke="oklch(0.585 0.245 27.5 / 0.4)" strokeWidth="1" className="dark:fill-[oklch(0.2_0_0/0.7)]" />
+                  <path d="M 0 -12 L 4 0 L 0 12 L -4 0 Z" fill="oklch(0.585 0.245 27.5)" />
+                  <text y="-20" textAnchor="middle" fontSize="9" fontWeight="700" className="fill-foreground">N</text>
+                </g>
+
+                {/* Scale bar */}
+                <g transform="translate(30, 470)" opacity="0.6">
+                  <line x1="0" y1="0" x2="60" y2="0" stroke="oklch(0.585 0.245 27.5)" strokeWidth="2" />
+                  <line x1="0" y1="-3" x2="0" y2="3" stroke="oklch(0.585 0.245 27.5)" strokeWidth="2" />
+                  <line x1="60" y1="-3" x2="60" y2="3" stroke="oklch(0.585 0.245 27.5)" strokeWidth="2" />
+                  <text x="30" y="-6" textAnchor="middle" fontSize="8" fontWeight="600" className="fill-muted-foreground">100 km</text>
+                </g>
               </svg>
             </div>
 
-            {/* Stats below map */}
-            <div className="relative mt-5 grid grid-cols-3 gap-2.5">
+            {/* Live order ticker */}
+            <div className="relative mt-5 overflow-hidden rounded-2xl border border-border/50 bg-background/70 backdrop-blur">
+              <div className="flex items-center gap-2 border-b border-border/40 px-3 py-2">
+                <Navigation className="h-3.5 w-3.5 text-primary" />
+                <p className="text-[11px] font-bold uppercase tracking-wider text-foreground">Recent orders</p>
+                <span className="ml-auto flex h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+              </div>
+              <div className="divide-y divide-border/40">
+                {[
+                  { name: "Tareq R.", city: "Chattogram", item: "Wireless Charger", time: "2m" },
+                  { name: "Sumaya K.", city: "Sylhet", item: "Aroma Diffuser", time: "5m" },
+                  { name: "Rifat H.", city: "Khulna", item: "LED Lamp", time: "8m" },
+                ].map((o) => (
+                  <div key={o.name} className="flex items-center gap-2.5 px-3 py-2 text-[11px]">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">
+                      {o.name[0]}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold text-foreground">
+                        {o.name} <span className="font-normal text-muted-foreground">→ {o.item}</span>
+                      </p>
+                      <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                        <MapPin className="h-2.5 w-2.5" /> {o.city} • {o.time} ago
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
+                      shipped
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Stats grid — expanded */}
+            <div className="relative mt-4 grid grid-cols-4 gap-2">
               {[
                 { icon: MapPin, value: "64", label: "Districts" },
-                { icon: Package, value: "10K+", label: "Delivered" },
-                { icon: Star, value: "4.9", label: "Rated" },
+                { icon: Package, value: "10K+", label: "Orders" },
+                { icon: Star, value: "4.9", label: "Rating" },
+                { icon: ShieldCheck, value: "100%", label: "Trusted" },
               ].map((s) => (
                 <div
                   key={s.label}
-                  className="group rounded-2xl border border-border/50 bg-background/70 p-3 text-center backdrop-blur transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-background hover:shadow-[0_10px_25px_-12px_oklch(0.585_0.245_27.5/0.4)]"
+                  className="group rounded-xl border border-border/50 bg-background/70 p-2.5 text-center backdrop-blur transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-background hover:shadow-[0_10px_25px_-12px_oklch(0.585_0.245_27.5/0.4)]"
                 >
-                  <s.icon className="mx-auto mb-1 h-4 w-4 text-primary transition-transform group-hover:scale-110" />
-                  <p className="text-base font-extrabold text-foreground">{s.value}</p>
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{s.label}</p>
+                  <s.icon className="mx-auto mb-1 h-3.5 w-3.5 text-primary transition-transform group-hover:scale-110" />
+                  <p className="text-sm font-extrabold text-foreground">{s.value}</p>
+                  <p className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground">{s.label}</p>
                 </div>
               ))}
+            </div>
+
+            {/* Bottom feature strip */}
+            <div className="relative mt-3 flex items-center justify-between gap-2 rounded-xl border border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent px-3 py-2.5">
+              <div className="flex items-center gap-2">
+                <Compass className="h-4 w-4 text-primary" />
+                <p className="text-[11px] font-semibold text-foreground">Same-day delivery in Dhaka</p>
+              </div>
+              <span className="rounded-full bg-primary px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground">New</span>
             </div>
           </div>
         </div>
