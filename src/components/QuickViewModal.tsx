@@ -22,17 +22,17 @@ export default function QuickViewModal({
   const [activeImg, setActiveImg] = useState(product.image);
 
   useEffect(() => {
-    if (open) {
-      setQty(1);
-      setActiveImg(product.image);
-      // Prevent layout shift from scrollbar disappearing
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      document.body.style.overflow = "hidden";
-      if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
-    }
+    if (!open) return;
+    setQty(1);
+    setActiveImg(product.image);
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const prevOverflow = document.body.style.overflow;
+    const prevPadding = document.body.style.paddingRight;
+    document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
     return () => {
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
+      document.body.style.overflow = prevOverflow;
+      document.body.style.paddingRight = prevPadding;
     };
   }, [open, product.image]);
 
