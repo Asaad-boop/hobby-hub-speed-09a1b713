@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { useAdminAuth } from "@/lib/admin";
-import logo from "@/assets/logo.png";
+import { useSiteSettings } from "@/lib/site-settings";
+import defaultLogo from "@/assets/logo.png";
 
 type Category = { label: string; category: string };
 
@@ -19,6 +20,11 @@ export default function Header() {
   const { count, setOpen } = useCart();
   const { count: wishCount } = useWishlist();
   const { isAdmin } = useAdminAuth();
+  const { data: settings } = useSiteSettings();
+  const logo = settings?.logo_url || defaultLogo;
+  const phone = settings?.contact_phone || "";
+  const siteName = settings?.site_title || "HobbyShop";
+  const freeThreshold = settings?.free_delivery_threshold ?? 1500;
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
