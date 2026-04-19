@@ -189,20 +189,6 @@ function Index() {
         </div>
       </section>
 
-      {/* Trust */}
-      <section className="bg-muted/40 py-10">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 md:grid-cols-4">
-          {trust.map(({ icon: Icon, label }) => (
-            <div key={label} className="flex items-center gap-3 rounded-2xl bg-background p-4 shadow-[var(--shadow-card)]">
-              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Icon className="h-5 w-5" />
-              </span>
-              <span className="text-sm font-semibold">{label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* Track Order */}
       <section className="mx-auto max-w-7xl px-4 py-4 md:py-8">
         <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-3 md:p-6">
