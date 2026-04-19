@@ -124,6 +124,7 @@ function ProductPage() {
     : testimonials.slice(0, 3).map((t) => ({ ...t, productId: product.id }));
 
   const [filter, setFilter] = useState<"all" | "5" | "4" | "photos">("all");
+  const [visibleReviews, setVisibleReviews] = useState(3);
 
   type DisplayReview = {
     name: string;
@@ -545,75 +546,75 @@ function ProductPage() {
 
         <div className="grid gap-6 md:grid-cols-3">
           {/* Summary */}
-          <div className="rounded-3xl border-2 border-border bg-gradient-to-br from-primary/5 to-transparent p-6 md:col-span-1">
-            <div className="flex items-baseline gap-2">
-              <p className="text-5xl font-extrabold">{product.rating}</p>
-              <p className="text-sm font-semibold text-muted-foreground">/ 5.0</p>
+          <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/5 to-transparent p-5 md:col-span-1 md:sticky md:top-24 md:self-start">
+            <div className="flex items-center gap-3">
+              <p className="text-4xl font-extrabold leading-none">{product.rating}</p>
+              <div>
+                <div className="flex">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                  ))}
+                </div>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">{product.reviews.toLocaleString()} verified</p>
+              </div>
             </div>
-            <div className="mt-1 flex">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className="h-5 w-5 fill-primary text-primary" />
-              ))}
-            </div>
-            <p className="mt-1 text-sm text-muted-foreground">Based on {product.reviews.toLocaleString()} verified reviews</p>
-            <div className="mt-5 space-y-2">
+            <div className="mt-4 space-y-1.5">
               {ratingBreakdown.map((r) => (
-                <div key={r.stars} className="flex items-center gap-2 text-xs">
-                  <span className="inline-flex w-8 items-center gap-0.5 font-bold">{r.stars}<Star className="h-3 w-3 fill-primary text-primary" /></span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                    <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all" style={{ width: `${r.pct}%` }} />
+                <div key={r.stars} className="flex items-center gap-2 text-[11px]">
+                  <span className="inline-flex w-6 items-center gap-0.5 font-bold">{r.stars}<Star className="h-2.5 w-2.5 fill-primary text-primary" /></span>
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${r.pct}%` }} />
                   </div>
-                  <span className="w-10 text-right font-semibold text-muted-foreground">{r.pct}%</span>
+                  <span className="w-8 text-right font-semibold text-muted-foreground">{r.pct}%</span>
                 </div>
               ))}
             </div>
-            <div className="mt-5 flex items-center gap-2 rounded-2xl bg-primary/10 p-3">
-              <ThumbsUp className="h-5 w-5 shrink-0 text-primary" />
-              <p className="text-xs font-bold text-primary">98% of customers recommend this product</p>
+            <div className="mt-4 flex items-center gap-2 rounded-xl bg-primary/10 p-2.5">
+              <ThumbsUp className="h-4 w-4 shrink-0 text-primary" />
+              <p className="text-[11px] font-bold text-primary">98% recommend this product</p>
             </div>
           </div>
 
           {/* Reviews list */}
-          <div className="grid gap-4 md:col-span-2">
+          <div className="grid gap-3 md:col-span-2">
             {/* Customer photo strip */}
-            <div className="rounded-2xl border border-border bg-card p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <p className="inline-flex items-center gap-2 text-sm font-bold">
-                  <Camera className="h-4 w-4 text-primary" /> Customer photos (28)
+            <div className="rounded-xl border border-border bg-card p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="inline-flex items-center gap-1.5 text-xs font-bold">
+                  <Camera className="h-3.5 w-3.5 text-primary" /> Customer photos (28)
                 </p>
-                <button className="text-xs font-semibold text-primary hover:underline">View all</button>
+                <button className="text-[11px] font-semibold text-primary hover:underline">View all</button>
               </div>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-4 gap-1.5">
                 {[review1, review2, review3, review4].map((src, i) => (
-                  <button key={i} className="group relative overflow-hidden rounded-xl border border-border">
+                  <button key={i} className="group relative overflow-hidden rounded-lg border border-border">
                     <img src={src} alt="Customer photo" loading="lazy" width={512} height={512} className="aspect-square w-full object-cover transition group-hover:scale-110" />
-                    <span className="absolute inset-0 bg-foreground/0 transition group-hover:bg-foreground/10" />
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Filter chips */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1.5">
               {([
-                { k: "all", l: "All reviews" },
-                { k: "5", l: "5★ only" },
-                { k: "4", l: "4★ only" },
-                { k: "photos", l: "With photos" },
+                { k: "all", l: "All" },
+                { k: "5", l: "5★" },
+                { k: "4", l: "4★" },
+                { k: "photos", l: "Photos" },
               ] as const).map((f) => {
                 const active = filter === f.k;
                 return (
                   <button
                     key={f.k}
                     onClick={() => setFilter(f.k)}
-                    className={`inline-flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-xs font-bold transition ${
+                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${
                       active
-                        ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                        ? "border-primary bg-primary text-primary-foreground"
                         : "border-border bg-card text-foreground hover:border-primary/50"
                     }`}
                   >
                     {f.l}
-                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${active ? "bg-primary-foreground/20" : "bg-muted"}`}>
+                    <span className={`rounded-full px-1 text-[9px] ${active ? "bg-primary-foreground/20" : "bg-muted"}`}>
                       {filterCounts[f.k]}
                     </span>
                   </button>
@@ -622,61 +623,56 @@ function ProductPage() {
             </div>
 
             {filteredReviews.length === 0 && (
-              <div className="rounded-2xl border-2 border-dashed border-border p-8 text-center">
-                <p className="text-sm font-semibold text-muted-foreground">No reviews match this filter.</p>
-                <button onClick={() => setFilter("all")} className="mt-2 text-sm font-bold text-primary hover:underline">
+              <div className="rounded-xl border-2 border-dashed border-border p-6 text-center">
+                <p className="text-xs font-semibold text-muted-foreground">No reviews match this filter.</p>
+                <button onClick={() => setFilter("all")} className="mt-2 text-xs font-bold text-primary hover:underline">
                   Show all reviews
                 </button>
               </div>
             )}
 
-            {filteredReviews.map((r, i) => {
+            {filteredReviews.slice(0, visibleReviews).map((r, i) => {
               const avatars = [avatar1, avatar2, avatar3, avatar4];
               const photoMap: Record<string, string> = { __r1: review1, __r2: review2, __r3: review3, __r4: review4 };
               const resolvedPhotos = r.photos.map((p) => photoMap[p] ?? p);
               return (
                 <div
                   key={`${r.isUser ? "u" : "s"}-${i}`}
-                  className={`rounded-2xl border bg-card p-5 transition hover:shadow-md ${
-                    r.isUser ? "border-2 border-primary/40 bg-primary/5" : "border-border hover:border-primary/40"
+                  className={`rounded-xl border bg-card p-3.5 ${
+                    r.isUser ? "border-primary/40 bg-primary/5" : "border-border"
                   }`}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-2.5">
                     {r.isUser ? (
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-base font-extrabold text-primary-foreground ring-2 ring-primary/20">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-extrabold text-primary-foreground">
                         {r.name.charAt(0).toUpperCase()}
                       </div>
                     ) : (
-                      <img src={avatars[i % avatars.length]} alt={r.name} loading="lazy" width={48} height={48} className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-primary/20" />
+                      <img src={avatars[i % avatars.length]} alt={r.name} loading="lazy" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-cover" />
                     )}
-                    <div className="flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-bold">{r.name}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <p className="text-xs font-bold">{r.name}</p>
                         {r.isUser ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">New</span>
+                          <span className="rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold text-primary-foreground">New</span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                            <BadgeCheck className="h-3 w-3" /> Verified Purchase
+                          <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold text-primary">
+                            <BadgeCheck className="h-2.5 w-2.5" /> Verified
                           </span>
                         )}
-                      </div>
-                      <p className="text-xs text-muted-foreground">{r.date}</p>
-                      <div className="mt-2 flex items-center gap-1 text-primary">
-                        {Array.from({ length: r.rating }).map((_, j) => (
-                          <Star key={j} className="h-4 w-4 fill-primary" />
-                        ))}
-                      </div>
-                      <p className="mt-2 text-sm leading-relaxed text-foreground">{r.text}</p>
-                      {resolvedPhotos.length > 0 && (
-                        <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
-                          {resolvedPhotos.map((src, j) => (
-                            <img key={j} src={src} alt="Review photo" loading="lazy" className="aspect-square w-full rounded-lg border border-border object-cover" />
+                        <div className="flex items-center text-primary">
+                          {Array.from({ length: r.rating }).map((_, j) => (
+                            <Star key={j} className="h-3 w-3 fill-primary" />
                           ))}
                         </div>
-                      )}
-                      {!r.isUser && (
-                        <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
-                          <button className="font-semibold hover:text-primary">Reply</button>
+                        <span className="text-[10px] text-muted-foreground">• {r.date}</span>
+                      </div>
+                      <p className="mt-1.5 text-xs leading-relaxed text-foreground">{r.text}</p>
+                      {resolvedPhotos.length > 0 && (
+                        <div className="mt-2 grid grid-cols-4 gap-1.5 sm:grid-cols-5">
+                          {resolvedPhotos.map((src, j) => (
+                            <img key={j} src={src} alt="Review photo" loading="lazy" className="aspect-square w-full rounded-md border border-border object-cover" />
+                          ))}
                         </div>
                       )}
                     </div>
@@ -685,9 +681,14 @@ function ProductPage() {
               );
             })}
 
-            <button className="mx-auto mt-2 inline-flex items-center gap-2 rounded-full border-2 border-border bg-card px-6 py-3 text-sm font-bold transition hover:border-primary hover:text-primary">
-              Load more reviews <ChevronDown className="h-4 w-4" />
-            </button>
+            {visibleReviews < filteredReviews.length && (
+              <button
+                onClick={() => setVisibleReviews((n) => n + 3)}
+                className="mx-auto mt-1 inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2 text-xs font-bold transition hover:border-primary hover:text-primary"
+              >
+                Load more reviews <ChevronDown className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
         </div>
       </section>
