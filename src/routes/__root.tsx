@@ -1,4 +1,5 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, createRootRouteWithContext, HeadContent, Scripts, useRouterState } from "@tanstack/react-router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import appCss from "../styles.css?url";
 import Header from "@/components/Header";
@@ -10,7 +11,11 @@ import NotFound from "@/components/NotFound";
 import { CartProvider } from "@/lib/cart";
 import { WishlistProvider } from "@/lib/wishlist";
 
-export const Route = createRootRoute({
+interface RouterContext {
+  queryClient: QueryClient;
+}
+
+export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -49,20 +54,30 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAdmin = pathname.startsWith("/admin");
+
   return (
-    <WishlistProvider>
-      <CartProvider>
-        <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
-          <Header />
-          <main className="flex-1">
+    <QueryClientProvider client={queryClient}>
+      <WishlistProvider>
+        <CartProvider>
+          {isAdmin ? (
             <Outlet />
-          </main>
-          <Footer />
-          <CartDrawer />
-          <WhatsAppButton />
-          <MobileBottomNav />
-        </div>
-      </CartProvider>
-    </WishlistProvider>
+          ) : (
+            <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
+              <Header />
+              <main className="flex-1">
+                <Outlet />
+              </main>
+              <Footer />
+              <CartDrawer />
+              <WhatsAppButton />
+              <MobileBottomNav />
+            </div>
+          )}
+        </CartProvider>
+      </WishlistProvider>
+    </QueryClientProvider>
   );
 }

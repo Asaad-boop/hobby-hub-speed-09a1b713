@@ -1,8 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, User, ShoppingBag, Menu, X, Heart, Phone } from "lucide-react";
+import { Search, User, ShoppingBag, Menu, X, Heart, Phone, Shield } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
+import { useAdminAuth } from "@/lib/admin";
 import logo from "@/assets/logo.png";
 
 type Category = { label: string; category: string };
@@ -17,6 +18,7 @@ const categories: Category[] = [
 export default function Header() {
   const { count, setOpen } = useCart();
   const { count: wishCount } = useWishlist();
+  const { isAdmin } = useAdminAuth();
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -184,6 +186,18 @@ export default function Header() {
             </button>
 
             <span className="mx-1 hidden h-7 w-px bg-border md:block" />
+
+            {/* Admin link (only for admins) */}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                aria-label="Admin"
+                title="Admin panel"
+                className="hidden h-10 items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 text-xs font-bold text-primary transition hover:bg-primary hover:text-primary-foreground md:inline-flex md:h-11"
+              >
+                <Shield className="h-4 w-4" /> Admin
+              </Link>
+            )}
 
             {/* Account */}
             <Link

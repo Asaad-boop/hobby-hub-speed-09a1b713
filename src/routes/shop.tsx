@@ -11,8 +11,8 @@ const categories = ["All", ...Array.from(new Set(allProducts.map((p) => p.catego
 type SortKey = "popular" | "price-asc" | "price-desc" | "rating";
 
 type ShopSearch = {
-  category: string;
-  sort: SortKey;
+  category?: string;
+  sort?: SortKey;
   q?: string;
 };
 
@@ -37,7 +37,10 @@ export const Route = createFileRoute("/shop")({
 });
 
 function ShopPage() {
-  const { category, sort, q } = Route.useSearch();
+  const search = Route.useSearch();
+  const category = search.category ?? "All";
+  const sort: SortKey = search.sort ?? "popular";
+  const q = search.q;
   const navigate = useNavigate({ from: "/shop" });
 
   const filtered = useMemo(() => {
@@ -85,7 +88,7 @@ function ShopPage() {
         {q && (
           <button
             onClick={() =>
-              navigate({ search: (prev: ShopSearch) => ({ ...prev, q: undefined }) })
+              navigate({ search: ((prev: ShopSearch) => ({ ...prev, q: undefined })) as never })
             }
             className="mt-2 inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground transition hover:bg-muted/70"
           >
@@ -103,7 +106,7 @@ function ShopPage() {
               <Link
                 key={cat}
                 to="/shop"
-                search={(prev: ShopSearch) => ({ ...prev, category: cat })}
+                search={((prev: ShopSearch) => ({ ...prev, category: cat })) as never}
                 className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                   category === cat
                     ? "bg-primary text-primary-foreground shadow-md"
@@ -121,7 +124,7 @@ function ShopPage() {
               value={sort}
               onChange={(e) => {
                 navigate({
-                  search: (prev: ShopSearch) => ({ ...prev, sort: e.target.value as SortKey }),
+                  search: ((prev: ShopSearch) => ({ ...prev, sort: e.target.value as SortKey })) as never,
                 });
               }}
               className="h-9 rounded-full border border-border bg-background px-3 text-xs font-semibold outline-none focus:border-primary"
