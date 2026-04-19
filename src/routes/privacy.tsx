@@ -71,7 +71,7 @@ function PrivacyPage() {
           <h2 className="text-lg font-bold">6. Your Rights</h2>
           <p className="mt-2 text-muted-foreground">
             You can request access, correction, or deletion of your personal data at any time by
-            emailing us at <a href="mailto:hello@hobbyshop.com" className="text-primary hover:underline">hello@hobbyshop.com</a>.
+            emailing us at <a href="mailto:support@hobbyshopbd.com" className="text-primary hover:underline">support@hobbyshopbd.com</a>.
           </p>
         </section>
 

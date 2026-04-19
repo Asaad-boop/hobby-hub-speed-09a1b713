@@ -18,7 +18,7 @@ export const Route = createFileRoute("/contact")({
 const channels = [
   { icon: Phone, label: "Call us", value: "09638779900", href: "tel:09638779900" },
   { icon: MessageCircle, label: "WhatsApp", value: "+880 1964-437520", href: "https://wa.me/8801964437520" },
-  { icon: Mail, label: "Email", value: "hello@hobbyshop.com", href: "mailto:hello@hobbyshop.com" },
+  { icon: Mail, label: "Email", value: "support@hobbyshopbd.com", href: "mailto:support@hobbyshopbd.com" },
   { icon: MapPin, label: "Visit", value: "Dhaka, Bangladesh" },
 ];
 
