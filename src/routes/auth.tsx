@@ -192,7 +192,18 @@ function AuthPage() {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Password</Label>
                   {mode === "signin" && (
-                    <button type="button" className="text-xs font-medium text-primary hover:underline">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!email) return toast.error("Enter your email first");
+                        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                          redirectTo: `${window.location.origin}/reset-password`,
+                        });
+                        if (error) return toast.error(error.message);
+                        toast.success("Reset link sent! Check your email.");
+                      }}
+                      className="text-xs font-medium text-primary hover:underline"
+                    >
                       Forgot?
                     </button>
                   )}
