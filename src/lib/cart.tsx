@@ -9,7 +9,7 @@ type CartCtx = {
   total: number;
   open: boolean;
   setOpen: (o: boolean) => void;
-  add: (p: Product, qty?: number) => void;
+  add: (p: Product, qty?: number, opts?: { silent?: boolean }) => void;
   remove: (id: string) => void;
   setQty: (id: string, qty: number) => void;
   clear: () => void;
@@ -21,13 +21,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [open, setOpen] = useState(false);
 
-  const add = useCallback((p: Product, qty = 1) => {
+  const add = useCallback((p: Product, qty = 1, opts?: { silent?: boolean }) => {
     setItems((cur) => {
       const found = cur.find((i) => i.product.id === p.id);
       if (found) return cur.map((i) => (i.product.id === p.id ? { ...i, qty: i.qty + qty } : i));
       return [...cur, { product: p, qty }];
     });
-    setOpen(true);
+    if (!opts?.silent) setOpen(true);
   }, []);
 
   const remove = useCallback((id: string) => {
