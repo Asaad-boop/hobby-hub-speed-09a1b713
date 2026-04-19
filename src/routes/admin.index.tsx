@@ -27,10 +27,10 @@ function AdminDashboard() {
   });
 
   const cards = [
-    { label: "Products", value: stats?.products ?? "—", icon: Package, to: "/admin/products", color: "text-primary bg-primary/10" },
-    { label: "Categories", value: stats?.categories ?? "—", icon: Tags, to: "/admin/categories", color: "text-blue-600 bg-blue-500/10" },
-    { label: "Orders", value: stats?.orders ?? "—", icon: ShoppingBag, to: "/admin/orders", color: "text-emerald-600 bg-emerald-500/10" },
-    { label: "Revenue", value: stats ? `৳${stats.revenue.toLocaleString()}` : "—", icon: TrendingUp, to: "/admin/orders", color: "text-amber-600 bg-amber-500/10" },
+    { label: "Products", value: stats?.products ?? "—", icon: Package, to: "/admin/products" as const, color: "text-primary bg-primary/10" },
+    { label: "Categories", value: stats?.categories ?? "—", icon: Tags, to: "/admin/products" as const, color: "text-blue-600 bg-blue-500/10" },
+    { label: "Orders", value: stats?.orders ?? "—", icon: ShoppingBag, to: "/admin" as const, color: "text-emerald-600 bg-emerald-500/10" },
+    { label: "Revenue", value: stats ? `৳${stats.revenue.toLocaleString()}` : "—", icon: TrendingUp, to: "/admin" as const, color: "text-amber-600 bg-amber-500/10" },
   ];
 
   return (
@@ -64,11 +64,11 @@ function AdminDashboard() {
           <Link to="/admin/products" className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
             Manage products
           </Link>
-          <Link to="/admin/categories" className="rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted">
-            Manage categories
+          <Link to="/admin" className="rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted">
+            Categories (soon)
           </Link>
-          <Link to="/admin/orders" className="rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted">
-            View orders
+          <Link to="/admin" className="rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted">
+            Orders (soon)
           </Link>
         </div>
       </div>

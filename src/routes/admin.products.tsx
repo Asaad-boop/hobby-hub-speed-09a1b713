@@ -125,8 +125,8 @@ function AdminProductsPage() {
   }, [products, search]);
 
   const toggleField = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Partial<ProductRow> }) => {
-      const { error } = await supabase.from("products").update(patch).eq("id", id);
+    mutationFn: async ({ id, patch }: { id: string; patch: Record<string, unknown> }) => {
+      const { error } = await supabase.from("products").update(patch as never).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "products"] }),
