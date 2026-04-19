@@ -54,7 +54,7 @@ const groups: { label: string; items: NavItem[] }[] = [
     label: "Sales",
     items: [
       { title: "Orders", url: "/admin/orders", icon: ShoppingBag },
-      { title: "Customers", url: "/admin/customers", icon: Users, badge: "soon" },
+      { title: "Customers", url: "/admin/customers", icon: Users },
       { title: "Analytics", url: "/admin/analytics", icon: BarChart3, badge: "soon" },
       { title: "Finance", url: "/admin/finance", icon: Wallet, badge: "soon" },
     ],
