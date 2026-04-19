@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Save, ExternalLink, Sparkles, Image as ImageIcon, Star, PackageOpen } from "lucide-react";
+import { Loader2, Save, ExternalLink, Sparkles, Image as ImageIcon, Star, PackageOpen, Video } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import ProductPicker from "@/components/admin/ProductPicker";
+import ReelsManager from "@/components/admin/ReelsManager";
 import {
   DEFAULT_SETTINGS,
   saveSiteSettings,
@@ -136,6 +137,18 @@ function AdminHomepagePage() {
           onChange={(ids) => set("featured_product_ids", ids)}
           max={8}
           emptyHint="Auto mode — products page theke 'Featured' toggle on koro."
+        />
+      </Section>
+
+      <Section
+        icon={<Video className="h-4 w-4 text-rose-500" />}
+        title="Watch & Shop reels"
+        description="Short videos linked to products — homepage e horizontal scroller hisebe show korbe. Khali rakhle section hide thakbe."
+      >
+        <ReelsManager
+          value={form.reels}
+          onChange={(reels) => set("reels", reels)}
+          max={10}
         />
       </Section>
 
