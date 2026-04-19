@@ -4,7 +4,7 @@ import ProductCard from "@/components/ProductCard";
 import HeroShowcase from "@/components/HeroShowcase";
 import WatchAndShop from "@/components/WatchAndShop";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen, Star, Quote, Search, Package, Phone, Loader2 } from "lucide-react";
+import { LayoutGrid, ChefHat, Lamp, Gift, Wrench, ToyBrick, Sparkles, Cpu, Truck, ShieldCheck, RotateCcw, BadgeCheck, ArrowRight, PackageOpen, Star, Quote, Search, Package, Loader2 } from "lucide-react";
 import { lookupOrder } from "@/lib/order-lookup.functions";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -42,26 +42,20 @@ const trust = [
 
 function Index() {
   const navigate = useNavigate();
-  const [trackId, setTrackId] = useState("");
-  const [trackPhone, setTrackPhone] = useState("");
+  const [trackQuery, setTrackQuery] = useState("");
   const [trackLoading, setTrackLoading] = useState(false);
   const [trackError, setTrackError] = useState("");
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
     setTrackError("");
-    const id = trackId.trim();
-    const phone = trackPhone.trim();
-    if (id.length < 6) {
-      setTrackError("Enter a valid Order ID");
-      return;
-    }
-    if (phone.replace(/\D/g, "").length < 10) {
-      setTrackError("Enter a valid phone number");
+    const q = trackQuery.trim();
+    if (!q) {
+      setTrackError("Enter Order ID, phone or email");
       return;
     }
     setTrackLoading(true);
     try {
-      const res = await lookupOrder({ data: { orderId: id, contact: phone } });
+      const res = await lookupOrder({ data: { query: q } });
       if (!res.ok) {
         setTrackError(res.error);
         toast.error(res.error);
@@ -216,38 +210,19 @@ function Index() {
           <div className="pointer-events-none absolute -bottom-12 -left-8 h-44 w-44 rounded-full bg-primary/10 blur-3xl" />
           <div className="relative grid items-center gap-6 md:grid-cols-[1fr_1.2fr]">
             <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                <Package className="h-3 w-3" /> Order Tracking
-              </span>
-              <h2 className="mt-2 text-xl font-extrabold tracking-tight md:text-3xl">
-                Track Your <span className="text-primary">Order</span> in Seconds
-              </h2>
               <p className="mt-1.5 text-xs text-muted-foreground md:text-sm">
-                Enter your Order ID and the phone number you used at checkout — no login required.
+                Enter your Order ID, phone number, or email — whichever you remember.
               </p>
             </div>
             <form onSubmit={handleTrack} className="space-y-2.5">
-              <div className="grid gap-2.5 sm:grid-cols-2">
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    value={trackId}
-                    onChange={(e) => { setTrackId(e.target.value); setTrackError(""); }}
-                    placeholder="Order ID (e.g. A1B2C3D4)"
-                    className="h-12 w-full rounded-full border border-border bg-background pl-9 pr-3 text-sm font-mono uppercase outline-none transition focus:border-primary"
-                  />
-                </div>
-                <div className="relative">
-                  <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    type="tel"
-                    inputMode="tel"
-                    value={trackPhone}
-                    onChange={(e) => { setTrackPhone(e.target.value); setTrackError(""); }}
-                    placeholder="Phone (01XXXXXXXXX)"
-                    className="h-12 w-full rounded-full border border-border bg-background pl-9 pr-3 text-sm outline-none transition focus:border-primary"
-                  />
-                </div>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={trackQuery}
+                  onChange={(e) => { setTrackQuery(e.target.value); setTrackError(""); }}
+                  placeholder="Order ID, phone, or email"
+                  className="h-12 w-full rounded-full border border-border bg-background pl-9 pr-3 text-sm outline-none transition focus:border-primary"
+                />
               </div>
               {trackError && (
                 <p className="px-2 text-xs font-semibold text-destructive">{trackError}</p>
@@ -261,7 +236,7 @@ function Index() {
                   {trackLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (<>Track Order <ArrowRight className="h-4 w-4" /></>)}
                 </button>
                 <Link to="/track" className="text-center text-xs font-semibold text-muted-foreground hover:text-primary sm:text-right">
-                  Use email instead →
+                  Open full tracker →
                 </Link>
               </div>
             </form>
