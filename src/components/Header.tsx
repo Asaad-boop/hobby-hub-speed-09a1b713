@@ -96,15 +96,19 @@ export default function Header() {
         <div className="relative mx-auto flex h-9 max-w-7xl items-center justify-between gap-4 px-4 text-[12px]">
           <p className="hidden items-center gap-1.5 sm:flex">
             <span>🚚</span>
-            <span>Free delivery on orders over <span className="font-bold text-primary-foreground">৳1,500</span></span>
+            <span>Free delivery on orders over <span className="font-bold text-primary-foreground">৳{freeThreshold.toLocaleString()}</span></span>
           </p>
-          <p className="sm:hidden">🚚 Free delivery over ৳1,500</p>
+          <p className="sm:hidden">🚚 Free delivery over ৳{freeThreshold.toLocaleString()}</p>
           <div className="hidden items-center gap-4 md:flex">
             <span className="opacity-80">💰 Cash on Delivery</span>
-            <span className="h-3 w-px bg-background/30" />
-            <a href="tel:+8809638779900" className="inline-flex items-center gap-1.5 opacity-90 transition hover:text-primary hover:opacity-100">
-              <Phone className="h-3 w-3" /> 09638779900
-            </a>
+            {phone && (
+              <>
+                <span className="h-3 w-px bg-background/30" />
+                <a href={`tel:${phone}`} className="inline-flex items-center gap-1.5 opacity-90 transition hover:text-primary hover:opacity-100">
+                  <Phone className="h-3 w-3" /> {phone}
+                </a>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -119,13 +123,13 @@ export default function Header() {
           {/* Logo */}
           <Link
             to="/"
-            aria-label="HobbyShop — Touch Your Dream"
+            aria-label={`${siteName} — Touch Your Dream`}
             className="group relative flex shrink-0 items-center"
           >
             <span className="pointer-events-none absolute -inset-2 -z-10 rounded-2xl bg-primary/0 blur-xl transition-all duration-500 group-hover:bg-primary/25" />
             <img
               src={logo}
-              alt="HobbyShop"
+              alt={siteName}
               width={1024}
               height={1024}
               loading="lazy"
