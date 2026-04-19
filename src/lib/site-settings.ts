@@ -24,6 +24,14 @@ export type SiteSettings = {
   homepage_banner_link: string;
   featured_product_ids: string[];
   new_arrival_product_ids: string[];
+  reels: ReelItem[];
+};
+
+export type ReelItem = {
+  id: string;
+  video_url: string;
+  caption: string;
+  product_id: string;
 };
 
 export const DEFAULT_SETTINGS: SiteSettings = {
@@ -49,6 +57,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   homepage_banner_link: "",
   featured_product_ids: [],
   new_arrival_product_ids: [],
+  reels: [],
 };
 
 export const SITE_SETTINGS_KEY = "site_config";
