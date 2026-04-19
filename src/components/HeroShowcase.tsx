@@ -54,6 +54,8 @@ export default function HeroShowcase() {
   const current: Product | undefined = slides[active];
   const ticker = orderTicker[tickerIdx];
 
+  if (!current) return null;
+
   return (
     <section className="relative overflow-hidden bg-foreground text-background">
       {/* Glow blobs */}
