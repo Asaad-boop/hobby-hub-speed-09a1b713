@@ -1,17 +1,14 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Star, ShoppingBag, Zap, Heart, Eye } from "lucide-react";
-import { useState } from "react";
+import { Star, ShoppingBag, Zap, Heart } from "lucide-react";
 import type { Product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { toast } from "sonner";
-import QuickViewModal from "./QuickViewModal";
 
 export default function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
   const { has, toggle } = useWishlist();
   const navigate = useNavigate();
-  const [quickOpen, setQuickOpen] = useState(false);
   const liked = has(product.id);
   const off = Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100);
   const lowStock = product.stock <= 8;
@@ -50,9 +47,8 @@ export default function ProductCard({ product }: { product: Product }) {
           </span>
         )}
 
-        {/* Top-right action stack */}
-        <div className="absolute right-2 top-2 flex flex-col gap-1.5 md:right-3 md:top-3 md:gap-2">
-          {/* Wishlist */}
+        {/* Wishlist */}
+        <div className="absolute right-2 top-2 md:right-3 md:top-3">
           <button
             type="button"
             onClick={(e) => {
@@ -67,35 +63,6 @@ export default function ProductCard({ product }: { product: Product }) {
             <Heart
               className={`h-3.5 w-3.5 transition md:h-4 md:w-4 ${liked ? "fill-primary text-primary" : ""}`}
             />
-          </button>
-
-          {/* Quick view (mobile only — desktop uses bottom hover button) */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setQuickOpen(true);
-            }}
-            aria-label="Quick view"
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-background/95 text-foreground shadow-sm backdrop-blur transition hover:scale-110 hover:bg-background md:hidden"
-          >
-            <Eye className="h-3.5 w-3.5" />
-          </button>
-        </div>
-
-        {/* Quick view (desktop only) */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 hidden translate-y-3 p-3 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 md:block">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setQuickOpen(true);
-            }}
-            className="pointer-events-auto mx-auto flex w-full items-center justify-center gap-1.5 rounded-full bg-background/95 px-3 py-2 text-xs font-semibold text-foreground shadow-lg backdrop-blur transition hover:bg-background"
-          >
-            <Eye className="h-3.5 w-3.5" /> Quick view
           </button>
         </div>
       </Link>
@@ -147,7 +114,6 @@ export default function ProductCard({ product }: { product: Product }) {
           </button>
         </div>
       </div>
-      <QuickViewModal product={product} open={quickOpen} onClose={() => setQuickOpen(false)} />
     </div>
   );
 }
