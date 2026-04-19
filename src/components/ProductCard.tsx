@@ -130,6 +130,7 @@ export default function ProductCard({ product }: { product: Product }) {
           </button>
         </div>
       </div>
+      <QuickViewModal product={product} open={quickOpen} onClose={() => setQuickOpen(false)} />
     </div>
   );
 }
