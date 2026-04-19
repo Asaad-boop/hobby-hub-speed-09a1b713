@@ -1,5 +1,18 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Package, Tags, Settings, ShoppingBag, LogOut, Store, Home } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  Tags,
+  Settings,
+  ShoppingBag,
+  LogOut,
+  Store,
+  Home,
+  Users,
+  BarChart3,
+  Boxes,
+  Wallet,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -16,13 +29,43 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 
-const items = [
-  { title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true },
-  { title: "Homepage", url: "/admin/homepage", icon: Home },
-  { title: "Products", url: "/admin/products", icon: Package },
-  { title: "Categories", url: "/admin/categories", icon: Tags },
-  { title: "Orders", url: "/admin/orders", icon: ShoppingBag },
-  { title: "Settings", url: "/admin/settings", icon: Settings },
+type NavItem = {
+  title: string;
+  url: string;
+  icon: typeof LayoutDashboard;
+  exact?: boolean;
+  badge?: "soon";
+};
+
+const groups: { label: string; items: NavItem[] }[] = [
+  {
+    label: "Overview",
+    items: [{ title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true }],
+  },
+  {
+    label: "Catalog",
+    items: [
+      { title: "Products", url: "/admin/products", icon: Package },
+      { title: "Categories", url: "/admin/categories", icon: Tags },
+      { title: "Inventory", url: "/admin/inventory", icon: Boxes, badge: "soon" },
+    ],
+  },
+  {
+    label: "Sales",
+    items: [
+      { title: "Orders", url: "/admin/orders", icon: ShoppingBag },
+      { title: "Customers", url: "/admin/customers", icon: Users, badge: "soon" },
+      { title: "Analytics", url: "/admin/analytics", icon: BarChart3, badge: "soon" },
+      { title: "Finance", url: "/admin/finance", icon: Wallet, badge: "soon" },
+    ],
+  },
+  {
+    label: "Storefront",
+    items: [
+      { title: "Homepage", url: "/admin/homepage", icon: Home },
+      { title: "Settings", url: "/admin/settings", icon: Settings },
+    ],
+  },
 ];
 
 export default function AdminSidebar() {
@@ -41,39 +84,62 @@ export default function AdminSidebar() {
           {!collapsed && (
             <div className="flex flex-col leading-tight">
               <span className="text-sm font-bold">HobbyShop</span>
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Admin</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Admin ERP</span>
             </div>
           )}
         </Link>
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Manage</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => {
-                const active = isActive(item.url, item.exact);
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={active}>
-                      <Link to={item.url} className="flex items-center gap-2">
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {groups.map((group) => (
+          <SidebarGroup key={group.label}>
+            {!collapsed && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => {
+                  const active = isActive(item.url, item.exact);
+                  const isSoon = item.badge === "soon";
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild={!isSoon}
+                        isActive={active}
+                        disabled={isSoon}
+                        tooltip={collapsed ? item.title : undefined}
+                        className={isSoon ? "cursor-not-allowed opacity-60" : ""}
+                      >
+                        {isSoon ? (
+                          <div className="flex items-center gap-2">
+                            <item.icon className="h-4 w-4" />
+                            {!collapsed && (
+                              <>
+                                <span>{item.title}</span>
+                                <span className="ml-auto rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                  Soon
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        ) : (
+                          <Link to={item.url} className="flex items-center gap-2">
+                            <item.icon className="h-4 w-4" />
+                            {!collapsed && <span>{item.title}</span>}
+                          </Link>
+                        )}
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild tooltip={collapsed ? "View storefront" : undefined}>
               <Link to="/" className="flex items-center gap-2">
                 <Store className="h-4 w-4" />
                 {!collapsed && <span>View storefront</span>}
@@ -82,6 +148,7 @@ export default function AdminSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
+              tooltip={collapsed ? "Sign out" : undefined}
               onClick={async () => {
                 await supabase.auth.signOut();
                 window.location.href = "/auth";
