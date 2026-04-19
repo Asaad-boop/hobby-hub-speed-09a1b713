@@ -235,9 +235,12 @@ function AccountPage() {
                     </div>
                   ))}
                 </div>
-                <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-sm">
+                <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-3 text-sm">
                   <span className="text-muted-foreground">{o.shipping_city || o.shipping_district || "—"}</span>
-                  <span className="font-bold text-primary">৳{Number(o.total).toFixed(0)}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="font-bold text-primary">৳{Number(o.total).toFixed(0)}</span>
+                    <Link to="/track/$orderId" params={{ orderId: o.id }} className="rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90">Track</Link>
+                  </div>
                 </div>
               </CardContent>
             </Card>
