@@ -91,9 +91,21 @@ function TrackOrderPage() {
   useEffect(() => {
     (async () => {
       setLoading(true);
+
+      // Guest lookup cache (set by /track index page after phone/email verification)
+      try {
+        const cached = sessionStorage.getItem(`order:${orderId}`);
+        if (cached) {
+          setOrder(JSON.parse(cached) as Order);
+          setLoading(false);
+          return;
+        }
+      } catch {}
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        navigate({ to: "/auth" });
+        // Not logged in and no cached lookup → send to public tracker
+        navigate({ to: "/track" });
         return;
       }
       const { data } = await supabase
