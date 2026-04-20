@@ -57,6 +57,7 @@ export const Route = createFileRoute("/admin/homepage")({
 
 const ALL_SECTION_TYPES: SectionType[] = [
   "hero",
+  "video_hero",
   "banner",
   "categories",
   "products",
@@ -69,6 +70,8 @@ const ALL_SECTION_TYPES: SectionType[] = [
   "countdown",
   "trust_badges",
   "track_order",
+  "faq",
+  "brand_logos",
   "spacer",
 ];
 

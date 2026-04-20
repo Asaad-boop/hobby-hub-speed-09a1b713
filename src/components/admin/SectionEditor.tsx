@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { ImageUploader } from "./ImageUploader";
 import ProductPicker from "./ProductPicker";
 import ReelsManager from "./ReelsManager";
+import { VideoUploader } from "./VideoUploader";
 import { Plus, Trash2 } from "lucide-react";
 import { useSiteSettings, type SiteSettings } from "@/lib/site-settings";
 
