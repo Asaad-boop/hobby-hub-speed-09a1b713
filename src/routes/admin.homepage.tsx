@@ -67,6 +67,8 @@ import {
   type SiteSettings,
 } from "@/lib/site-settings";
 import SectionEditor from "@/components/admin/SectionEditor";
+import VersionHistoryPanel from "@/components/admin/VersionHistoryPanel";
+import { saveHomepageVersion } from "@/lib/version-history";
 import { useHistory, useLocalDraft, readLocalDraft, clearLocalDraft } from "@/hooks/use-history";
 import { SECTION_TEMPLATES } from "@/lib/homepage-templates";
 
