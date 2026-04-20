@@ -160,3 +160,35 @@
 .animate-float-card {
   animation: float-card 6s ease-in-out infinite;
 }
+
+@keyframes cat-pop-in {
+  0% { opacity: 0; transform: translateY(16px) scale(0.92); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-cat-pop { animation: cat-pop-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@keyframes cat-shine {
+  0% { transform: translateX(-120%) skewX(-20deg); }
+  100% { transform: translateX(220%) skewX(-20deg); }
+}
+.cat-shine::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, white 40%, transparent), transparent);
+  transform: translateX(-120%) skewX(-20deg);
+  pointer-events: none;
+}
+.cat-shine:hover::after { animation: cat-shine 0.9s ease-out; }
+
+@keyframes icon-wiggle {
+  0%, 100% { transform: rotate(0) scale(1.1); }
+  25% { transform: rotate(-8deg) scale(1.15); }
+  75% { transform: rotate(8deg) scale(1.15); }
+}
+.group:hover .cat-icon-wiggle { animation: icon-wiggle 0.6s ease-in-out; }
+
+@keyframes cat-glow-pulse {
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(1.15); }
+}
+.group:hover .cat-glow { animation: cat-glow-pulse 1.8s ease-in-out infinite; }

@@ -347,9 +347,13 @@ function CategoriesSection({ section }: { section: HomepageSection }) {
         </div>
       </div>
       <div className="grid grid-cols-4 gap-2 sm:hidden">
-        {fallbackCategories.map(({ name, icon: Icon, tone }) => (
-          <button key={name} className="group flex flex-col items-center gap-1.5 rounded-xl p-1.5 text-center transition active:scale-95">
-            <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${tone} text-white shadow-md`}>
+        {fallbackCategories.map(({ name, icon: Icon, tone }, i) => (
+          <button
+            key={name}
+            style={{ animationDelay: `${i * 60}ms` }}
+            className="group animate-cat-pop flex flex-col items-center gap-1.5 rounded-xl p-1.5 text-center transition active:scale-95"
+          >
+            <span className={`cat-icon-wiggle flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${tone} text-white shadow-md transition-transform duration-300 group-hover:scale-110`}>
               <Icon className="h-5 w-5" />
             </span>
             <span className="line-clamp-2 text-[10px] font-semibold leading-tight text-foreground">{name}</span>
@@ -357,22 +361,23 @@ function CategoriesSection({ section }: { section: HomepageSection }) {
         ))}
       </div>
       <div className="hidden grid-cols-3 gap-3 sm:grid lg:grid-cols-4">
-        {fallbackCategories.map(({ name, icon: Icon, count, tone }) => (
+        {fallbackCategories.map(({ name, icon: Icon, count, tone }, i) => (
           <button
             key={name}
-            className="group relative overflow-hidden rounded-2xl border border-border bg-card p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-elevated)]"
+            style={{ animationDelay: `${i * 80}ms` }}
+            className="group cat-shine animate-cat-pop relative overflow-hidden rounded-2xl border border-border bg-card p-4 text-left transition-all duration-500 hover:-translate-y-1.5 hover:border-primary/60 hover:shadow-[var(--shadow-elevated)]"
           >
-            <div className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br ${tone} opacity-10 blur-2xl transition-opacity duration-300 group-hover:opacity-30`} />
+            <div className={`cat-glow pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br ${tone} opacity-10 blur-2xl transition-opacity duration-300`} />
             <div className="relative flex items-start justify-between gap-2">
-              <span className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${tone} text-white shadow-md transition-transform duration-300 group-hover:scale-110`}>
+              <span className={`cat-icon-wiggle flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${tone} text-white shadow-md transition-transform duration-300 group-hover:scale-110`}>
                 <Icon className="h-5 w-5" />
               </span>
-              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground">{count}</span>
+              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground transition-colors duration-300 group-hover:bg-primary/10 group-hover:text-primary">{count}</span>
             </div>
             <div className="relative mt-3">
-              <h3 className="text-sm font-bold leading-tight text-foreground">{name}</h3>
-              <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-primary opacity-0 transition-all duration-300 group-hover:opacity-100">
-                Shop now <ArrowRight className="h-3 w-3" />
+              <h3 className="text-sm font-bold leading-tight text-foreground transition-transform duration-300 group-hover:translate-x-0.5">{name}</h3>
+              <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-primary opacity-0 -translate-x-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">
+                Shop now <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
               </span>
             </div>
           </button>
