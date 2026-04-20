@@ -30,11 +30,13 @@ export async function saveHomepageVersion(
   label?: string,
 ): Promise<void> {
   const { data: userData } = await supabase.auth.getUser();
-  const { error } = await supabase.from("homepage_versions").insert({
+  const payload = {
     sections: sections as unknown as Record<string, unknown>[],
     label: label ?? null,
     created_by: userData.user?.id ?? null,
-  });
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await supabase.from("homepage_versions").insert(payload as any);
   if (error) throw error;
 }
 
