@@ -1,16 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ChevronLeft, ChevronRight, Flame, ShoppingBag, Star, Truck, Zap } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Flame, Star, Truck, Zap } from "lucide-react";
 import { useProducts, type Product } from "@/lib/products";
 import { useSiteSettings } from "@/lib/site-settings";
-
-const orderTicker = [
-  { name: "Rahim", city: "Dhaka", item: "Sunset Crystal LED Lamp", time: "2 min ago" },
-  { name: "Ayesha", city: "Chattogram", item: "Magnetic Wireless Charger", time: "5 min ago" },
-  { name: "Tanvir", city: "Sylhet", item: "Boom Mini Bluetooth Speaker", time: "8 min ago" },
-  { name: "Nusrat", city: "Khulna", item: "Wooden Mechanical DIY Kit", time: "11 min ago" },
-  { name: "Sabbir", city: "Rajshahi", item: "Sunset Crystal LED Lamp", time: "14 min ago" },
-];
 
 function useCountdown(targetMs: number) {
   const [now, setNow] = useState(() => Date.now());
