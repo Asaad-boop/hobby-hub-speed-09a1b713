@@ -481,8 +481,8 @@ function ImageWithTextSection({ section }: { section: HomepageSection }) {
           )}
         </div>
         <div>
-          {heading && <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl">{heading}</h2>}
-          {body && <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">{body}</p>}
+          {heading && <Editable as="h2" editKey="heading" value={heading} className="text-2xl font-extrabold tracking-tight md:text-3xl">{heading}</Editable>}
+          {body && <Editable as="p" editKey="body" value={body} multiline className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">{body}</Editable>}
           {ctaLabel && ctaLink && (
             <a href={ctaLink} className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground shadow-md hover:opacity-90">
               {ctaLabel} <ArrowRight className="h-4 w-4" />
@@ -501,7 +501,7 @@ function CategoryGridSection({ section }: { section: HomepageSection }) {
   if (!items.length) return null;
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 md:py-12">
-      {heading && <h2 className="mb-5 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</h2>}
+      {heading && <Editable as="h2" editKey="heading" value={heading} className="mb-5 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</Editable>}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
         {items.map((it, i) => (
           <a key={i} href={it.link || "#"} className="group relative block overflow-hidden rounded-2xl">
@@ -532,8 +532,8 @@ function TestimonialsSection({ section }: { section: HomepageSection }) {
         <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600">
           <Star className="h-3 w-3 fill-amber-500 text-amber-500" /> Loved by Customers
         </span>
-        <h2 className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</h2>
-        <p className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</p>
+        <Editable as="h2" editKey="heading" value={heading} className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</Editable>
+        <Editable as="p" editKey="subheading" value={subheading} multiline className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</Editable>
       </div>
       <Carousel opts={{ align: "start", loop: true }} className="w-full">
         <CarouselContent className="-ml-3 md:-ml-4">
@@ -604,8 +604,8 @@ function NewsletterSection({ section }: { section: HomepageSection }) {
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
               <Mail className="h-3 w-3" /> Newsletter
             </span>
-            <h2 className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</h2>
-            <p className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</p>
+            <Editable as="h2" editKey="heading" value={heading} className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</Editable>
+            <Editable as="p" editKey="subheading" value={subheading} multiline className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</Editable>
           </div>
           <form onSubmit={onSubmit} className="flex flex-col gap-2 sm:flex-row">
             <input
@@ -649,8 +649,8 @@ function CountdownSection({ section }: { section: HomepageSection }) {
       <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-6 text-primary-foreground md:p-10">
         <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
         <div className="relative flex flex-col items-center gap-5 text-center">
-          <h2 className="text-xl font-extrabold tracking-tight md:text-3xl">{heading}</h2>
-          {subheading && <p className="text-xs opacity-90 md:text-sm">{subheading}</p>}
+          <Editable as="h2" editKey="heading" value={heading} className="text-xl font-extrabold tracking-tight md:text-3xl">{heading}</Editable>
+          {subheading && <Editable as="p" editKey="subheading" value={subheading} multiline className="text-xs opacity-90 md:text-sm">{subheading}</Editable>}
           <div className="flex items-end gap-2 md:gap-4">
             {cells.map(([label, val]) => (
               <div key={label} className="flex flex-col items-center">
