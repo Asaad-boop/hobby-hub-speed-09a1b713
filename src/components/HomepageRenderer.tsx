@@ -86,6 +86,42 @@ function useBuilderMode() {
   return on;
 }
 
+/**
+ * Inline-editable text wrapper. Active only in builder mode.
+ * Click → contentEditable. Blur/Enter → postMessage to parent admin.
+ * Esc cancels and restores original text.
+ */
+function Editable({
+  as: Tag = "span",
+  value,
+  editKey,
+  multiline = false,
+  className,
+  children,
+}: {
+  as?: keyof JSX.IntrinsicElements;
+  value: string;
+  editKey: string;
+  multiline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+}) {
+  // Tag is dynamic; cast to any for TS.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Component = Tag as any;
+  return (
+    <Component
+      data-edit-key={editKey}
+      data-edit-multiline={multiline ? "1" : undefined}
+      data-edit-original={value}
+      suppressContentEditableWarning
+      className={className}
+    >
+      {children ?? value}
+    </Component>
+  );
+}
+
 export default function HomepageRenderer() {
   const { data: settings } = useSiteSettings();
   const sections = settings?.homepage_sections ?? [];
