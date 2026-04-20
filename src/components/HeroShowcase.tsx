@@ -26,6 +26,13 @@ export default function HeroShowcase() {
   const { data: settings } = useSiteSettings();
   const slides: Product[] = useMemo(() => {
     const ids = settings?.hero_product_ids ?? [];
+    if (ids.length) {
+      const map = new Map(allProducts.map((p) => [p.id, p]));
+      const picked = ids.map((id) => map.get(id)).filter((p): p is Product => !!p);
+      if (picked.length) return picked;
+    }
+    return allProducts.slice(0, 4);
+  }, [allProducts, settings?.hero_product_ids]);
   const [active, setActive] = useState(0);
 
   // Target: 18 hours from first mount (stable)
