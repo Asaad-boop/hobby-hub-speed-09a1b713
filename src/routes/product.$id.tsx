@@ -926,7 +926,7 @@ function ProductPage() {
         open={reviewOpen}
         onClose={() => setReviewOpen(false)}
         productTitle={product.title}
-        onSubmit={(r) => setUserReviews((prev) => [r, ...prev])}
+        onSubmit={handleReviewSubmit}
       />
     </div>
   );
