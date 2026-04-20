@@ -342,8 +342,8 @@ function CategoriesSection({ section }: { section: HomepageSection }) {
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
             <Sparkles className="h-3 w-3" /> Browse Collections
           </span>
-          <h2 className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</h2>
-          <p className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</p>
+          <Editable as="h2" editKey="heading" value={heading} className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</Editable>
+          <Editable as="p" editKey="subheading" value={subheading} multiline className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</Editable>
         </div>
       </div>
       <div className="grid grid-cols-4 gap-2 sm:hidden">
