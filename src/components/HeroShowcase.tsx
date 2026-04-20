@@ -1,16 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ChevronLeft, ChevronRight, Flame, ShoppingBag, Star, Truck, Zap } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Flame, Star, Truck, Zap } from "lucide-react";
 import { useProducts, type Product } from "@/lib/products";
 import { useSiteSettings } from "@/lib/site-settings";
-
-const orderTicker = [
-  { name: "Rahim", city: "Dhaka", item: "Sunset Crystal LED Lamp", time: "2 min ago" },
-  { name: "Ayesha", city: "Chattogram", item: "Magnetic Wireless Charger", time: "5 min ago" },
-  { name: "Tanvir", city: "Sylhet", item: "Boom Mini Bluetooth Speaker", time: "8 min ago" },
-  { name: "Nusrat", city: "Khulna", item: "Wooden Mechanical DIY Kit", time: "11 min ago" },
-  { name: "Sabbir", city: "Rajshahi", item: "Sunset Crystal LED Lamp", time: "14 min ago" },
-];
 
 function useCountdown(targetMs: number) {
   const [now, setNow] = useState(() => Date.now());
@@ -42,7 +34,6 @@ export default function HeroShowcase() {
     return allProducts.slice(0, 4);
   }, [allProducts, settings?.hero_product_ids]);
   const [active, setActive] = useState(0);
-  const [tickerIdx, setTickerIdx] = useState(0);
 
   // Target: 18 hours from first mount (stable)
   const target = useMemo(() => Date.now() + 18 * 3_600_000, []);
@@ -55,14 +46,7 @@ export default function HeroShowcase() {
     return () => clearInterval(id);
   }, [slides.length]);
 
-  // Rotate ticker
-  useEffect(() => {
-    const id = setInterval(() => setTickerIdx((i) => (i + 1) % orderTicker.length), 3500);
-    return () => clearInterval(id);
-  }, []);
-
   const current: Product | undefined = slides[active];
-  const ticker = orderTicker[tickerIdx];
 
   if (!current) return null;
 
@@ -75,29 +59,6 @@ export default function HeroShowcase() {
         className="pointer-events-none absolute inset-0 opacity-[0.06]"
         style={{ backgroundImage: "radial-gradient(currentColor 1px, transparent 1px)", backgroundSize: "22px 22px" }}
       />
-
-      {/* Live order ticker — top */}
-      <div className="relative z-10 border-b border-background/10 bg-background/5 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2 text-[11px] md:gap-3 md:px-4 md:text-xs">
-          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/15 px-2 py-0.5 font-bold text-emerald-300 md:px-2.5 md:py-1">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            </span>
-            LIVE
-          </span>
-          <div key={tickerIdx} className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden animate-fade-in">
-            <ShoppingBag className="h-3.5 w-3.5 shrink-0 text-primary" />
-            <p className="truncate text-background/85">
-              <span className="font-bold text-background">{ticker.name}</span>{" "}
-              <span className="text-background/60">from {ticker.city}</span>{" "}
-              <span className="hidden text-background/60 sm:inline">just bought </span>
-              <span className="font-semibold text-background">{ticker.item}</span>{" "}
-              <span className="text-background/50">· {ticker.time}</span>
-            </p>
-          </div>
-        </div>
-      </div>
 
       <div className="relative mx-auto grid max-w-7xl items-center gap-6 px-4 py-6 md:grid-cols-12 md:gap-8 md:py-12">
         {/* Left: copy + countdown */}
