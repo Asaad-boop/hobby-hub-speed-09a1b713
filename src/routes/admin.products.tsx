@@ -317,6 +317,13 @@ function AdminProductsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <StockHistoryDrawer
+        open={!!historyProduct}
+        onOpenChange={(o) => !o && setHistoryProduct(null)}
+        productId={historyProduct?.id ?? null}
+        productTitle={historyProduct?.title ?? null}
+      />
     </div>
   );
 }
