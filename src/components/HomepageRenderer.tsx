@@ -14,6 +14,7 @@ import {
   Mail,
   Package,
   PackageOpen,
+  Play,
   Quote,
   RotateCcw,
   Search,
@@ -24,6 +25,12 @@ import {
   Truck,
   Wrench,
 } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import HeroShowcase from "@/components/HeroShowcase";
 import WatchAndShop from "@/components/WatchAndShop";
 import ProductCard from "@/components/ProductCard";
