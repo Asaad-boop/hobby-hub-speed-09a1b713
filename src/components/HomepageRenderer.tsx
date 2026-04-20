@@ -14,6 +14,7 @@ import {
   Mail,
   Package,
   PackageOpen,
+  Play,
   Quote,
   RotateCcw,
   Search,
@@ -24,6 +25,12 @@ import {
   Truck,
   Wrench,
 } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import HeroShowcase from "@/components/HeroShowcase";
 import WatchAndShop from "@/components/WatchAndShop";
 import ProductCard from "@/components/ProductCard";
@@ -104,6 +111,8 @@ function SectionSwitcher({ section }: { section: HomepageSection }) {
   switch (section.type) {
     case "hero":
       return <HeroShowcase />;
+    case "video_hero":
+      return <VideoHeroSection section={section} />;
     case "banner":
       return <BannerSection section={section} />;
     case "categories":
@@ -128,6 +137,10 @@ function SectionSwitcher({ section }: { section: HomepageSection }) {
       return <TrustBadgesSection />;
     case "track_order":
       return <TrackOrderSection />;
+    case "faq":
+      return <FaqSection section={section} />;
+    case "brand_logos":
+      return <BrandLogosSection section={section} />;
     case "spacer":
       return <SpacerSection section={section} />;
     default:
@@ -601,4 +614,132 @@ function SpacerSection({ section }: { section: HomepageSection }) {
   const size = cfg(section, "size", "md") as "sm" | "md" | "lg";
   const h = size === "sm" ? "h-6" : size === "lg" ? "h-20" : "h-12";
   return <div className={h} aria-hidden />;
+}
+
+/* ---------------- VIDEO HERO ---------------- */
+function VideoHeroSection({ section }: { section: HomepageSection }) {
+  const videoUrl = cfg(section, "video_url", "");
+  const posterUrl = cfg(section, "poster_url", "");
+  const heading = cfg(section, "heading", "");
+  const subheading = cfg(section, "subheading", "");
+  const ctaLabel = cfg(section, "cta_label", "");
+  const ctaLink = cfg(section, "cta_link", "");
+  const overlay = Number(cfg(section, "overlay_opacity", 0.45));
+  const height = cfg(section, "height", "lg") as "sm" | "md" | "lg";
+  const heightClass =
+    height === "sm" ? "h-[360px] md:h-[420px]" : height === "md" ? "h-[460px] md:h-[560px]" : "h-[560px] md:h-[680px]";
+  return (
+    <section className="relative">
+      <div className={`relative w-full overflow-hidden ${heightClass}`}>
+        {videoUrl ? (
+          <video
+            src={videoUrl}
+            poster={posterUrl || undefined}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted">
+            <div className="flex flex-col items-center gap-2 text-muted-foreground">
+              <Play className="h-10 w-10" />
+              <span className="text-xs">Upload a video in the editor</span>
+            </div>
+          </div>
+        )}
+        <div
+          className="absolute inset-0 bg-black"
+          style={{ opacity: Math.max(0, Math.min(1, overlay)) }}
+          aria-hidden
+        />
+        <div className="relative z-10 mx-auto flex h-full max-w-5xl flex-col items-center justify-center gap-3 px-4 text-center text-white">
+          {heading && (
+            <h2 className="text-3xl font-extrabold tracking-tight drop-shadow md:text-5xl">
+              {heading}
+            </h2>
+          )}
+          {subheading && (
+            <p className="max-w-2xl text-sm leading-relaxed opacity-95 drop-shadow md:text-base">
+              {subheading}
+            </p>
+          )}
+          {ctaLabel && ctaLink && (
+            <a
+              href={ctaLink}
+              className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary px-6 py-2.5 text-sm font-extrabold text-primary-foreground shadow-lg hover:opacity-90"
+            >
+              {ctaLabel} <ArrowRight className="h-4 w-4" />
+            </a>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------- FAQ ---------------- */
+function FaqSection({ section }: { section: HomepageSection }) {
+  const heading = cfg(section, "heading", "Frequently asked questions");
+  const subheading = cfg(section, "subheading", "");
+  const items = cfg<Array<{ q: string; a: string }>>(section, "items", []);
+  if (!items.length) return null;
+  return (
+    <section className="mx-auto max-w-3xl px-4 py-10 md:py-14">
+      <div className="mb-6 text-center">
+        <h2 className="text-xl font-extrabold tracking-tight md:text-2xl">{heading}</h2>
+        {subheading && <p className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</p>}
+      </div>
+      <Accordion type="single" collapsible className="w-full">
+        {items.map((it, i) => (
+          <AccordionItem key={i} value={`faq-${i}`} className="border-border">
+            <AccordionTrigger className="text-left text-sm font-bold md:text-base">
+              {it.q}
+            </AccordionTrigger>
+            <AccordionContent className="text-sm leading-relaxed text-muted-foreground">
+              {it.a}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </section>
+  );
+}
+
+/* ---------------- BRAND LOGOS ---------------- */
+function BrandLogosSection({ section }: { section: HomepageSection }) {
+  const heading = cfg(section, "heading", "");
+  const grayscale = cfg(section, "grayscale", true);
+  const items = cfg<Array<{ image_url: string; alt: string; link: string }>>(section, "items", []);
+  if (!items.length) return null;
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-8 md:py-10">
+      {heading && (
+        <p className="mb-5 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground md:text-xs">
+          {heading}
+        </p>
+      )}
+      <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-5 md:gap-x-12">
+        {items.map((it, i) => {
+          const img = (
+            <img
+              src={it.image_url}
+              alt={it.alt || `Brand ${i + 1}`}
+              loading="lazy"
+              className={`h-8 w-auto object-contain opacity-70 transition hover:opacity-100 md:h-10 ${grayscale ? "grayscale hover:grayscale-0" : ""}`}
+            />
+          );
+          return it.link ? (
+            <a key={i} href={it.link} target="_blank" rel="noreferrer">
+              {img}
+            </a>
+          ) : (
+            <span key={i}>{img}</span>
+          );
+        })}
+      </div>
+    </section>
+  );
 }

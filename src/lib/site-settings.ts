@@ -39,6 +39,7 @@ export type ReelItem = {
 // ===== Homepage section types =====
 export type SectionType =
   | "hero"
+  | "video_hero"
   | "banner"
   | "categories"
   | "products"
@@ -51,6 +52,8 @@ export type SectionType =
   | "countdown"
   | "trust_badges"
   | "track_order"
+  | "faq"
+  | "brand_logos"
   | "spacer";
 
 export type HomepageSection = {
@@ -62,6 +65,7 @@ export type HomepageSection = {
 
 export const SECTION_LABELS: Record<SectionType, string> = {
   hero: "Hero showcase",
+  video_hero: "Video hero",
   banner: "Promotional banner",
   categories: "Category cards",
   products: "Product grid",
@@ -74,6 +78,8 @@ export const SECTION_LABELS: Record<SectionType, string> = {
   countdown: "Countdown timer",
   trust_badges: "Trust badges",
   track_order: "Track order box",
+  faq: "FAQ accordion",
+  brand_logos: "Brand logos strip",
   spacer: "Spacer",
 };
 
@@ -128,6 +134,29 @@ export const SECTION_DEFAULT_CONFIG: Record<SectionType, Record<string, unknown>
   trust_badges: {},
   track_order: {},
   spacer: { size: "md" }, // sm | md | lg
+  video_hero: {
+    video_url: "",
+    poster_url: "",
+    heading: "Discover what's new",
+    subheading: "Bold drops, fast delivery — built for hobbyists.",
+    cta_label: "Shop now",
+    cta_link: "/shop",
+    overlay_opacity: 0.45,
+    height: "lg",
+  },
+  faq: {
+    heading: "Frequently asked questions",
+    subheading: "Everything you need to know before you buy.",
+    items: [
+      { q: "How long does delivery take?", a: "Usually 1–3 days inside Dhaka, 2–5 days outside." },
+      { q: "Do you offer Cash on Delivery?", a: "Yes — COD is available nationwide in Bangladesh." },
+    ] as Array<{ q: string; a: string }>,
+  },
+  brand_logos: {
+    heading: "As featured by",
+    grayscale: true,
+    items: [] as Array<{ image_url: string; alt: string; link: string }>,
+  },
 };
 
 export const DEFAULT_HOMEPAGE_SECTIONS: HomepageSection[] = [
