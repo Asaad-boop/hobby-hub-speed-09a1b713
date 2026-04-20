@@ -123,20 +123,6 @@ export default function HeroShowcase() {
             </a>
           </div>
 
-          <div className="mt-5 grid max-w-md grid-cols-3 gap-3 border-t border-background/15 pt-3 md:mt-6 md:gap-6 md:pt-4">
-            <div>
-              <div className="text-lg font-extrabold md:text-xl">4.8★</div>
-              <div className="mt-0.5 text-[9px] uppercase tracking-wider text-background/60 md:text-[10px]">12.4K Reviews</div>
-            </div>
-            <div>
-              <div className="text-lg font-extrabold md:text-xl">50K+</div>
-              <div className="mt-0.5 text-[9px] uppercase tracking-wider text-background/60 md:text-[10px]">Orders</div>
-            </div>
-            <div>
-              <div className="text-lg font-extrabold md:text-xl">24h</div>
-              <div className="mt-0.5 text-[9px] uppercase tracking-wider text-background/60 md:text-[10px]">Dispatch</div>
-            </div>
-          </div>
         </div>
 
         {/* Right: floating product orb display */}
