@@ -338,9 +338,7 @@ function CustomersPage() {
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5 font-medium">
                             <span className="truncate">{c.display_name ?? "Unknown"}</span>
-                            {isVip && (
-                              <Crown className="h-3.5 w-3.5 text-amber-500" aria-label="VIP" />
-                            )}
+                            <SegmentBadge orders={c.orders} />
                             {sortBy === "spend" && idx < 3 && (
                               <Badge variant="secondary" className="text-[10px]">
                                 #{idx + 1}

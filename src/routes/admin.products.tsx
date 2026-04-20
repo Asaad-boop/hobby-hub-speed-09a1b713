@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Search, Loader2, Package, ImageOff } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Loader2, Package, ImageOff, History } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ImageUploader, GalleryUploader } from "@/components/admin/ImageUploader";
+import { StockHistoryDrawer } from "@/components/admin/StockHistoryDrawer";
 
 export const Route = createFileRoute("/admin/products")({
   component: AdminProductsPage,
@@ -90,6 +91,7 @@ function AdminProductsPage() {
   const [editing, setEditing] = useState<ProductRow | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [historyProduct, setHistoryProduct] = useState<ProductRow | null>(null);
 
   const { data: products, isLoading } = useQuery({
     queryKey: ["admin", "products"],
@@ -249,6 +251,14 @@ function AdminProductsPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          title="Stock history"
+                          onClick={() => setHistoryProduct(p)}
+                        >
+                          <History className="h-4 w-4" />
+                        </Button>
                         <Button
                           size="icon"
                           variant="ghost"
