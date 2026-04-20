@@ -226,6 +226,13 @@ function AdminHomepagePage() {
     setSaving(true);
     try {
       await saveSiteSettings(formRef.current);
+      // Snapshot for version history (non-blocking — failure shouldn't block publish)
+      try {
+        await saveHomepageVersion(formRef.current.homepage_sections);
+        setHistoryRefreshKey((k) => k + 1);
+      } catch (e) {
+        console.warn("Version snapshot failed", e);
+      }
       await queryClient.invalidateQueries({ queryKey: ["site_settings"] });
       clearLocalDraft(DRAFT_KEY);
       setLastSavedAt(Date.now());
@@ -237,6 +244,14 @@ function AdminHomepagePage() {
       setSaving(false);
     }
   }, [queryClient]);
+
+  const restoreVersion = useCallback(
+    (sections: HomepageSection[]) => {
+      setForm((p) => ({ ...p, homepage_sections: sections }));
+      setSelectedId(sections[0]?.id ?? null);
+    },
+    [setForm],
+  );
 
   const refreshPreview = () => previewRef.current?.contentWindow?.location.reload();
 
