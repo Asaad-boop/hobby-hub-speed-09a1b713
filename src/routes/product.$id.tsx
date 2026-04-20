@@ -212,19 +212,41 @@ function ProductPage() {
   const seedHelpful = [42, 28, 19, 11];
 
   const allReviews = useMemo<DisplayReview[]>(() => {
-    const fromUser: DisplayReview[] = userReviews.map((r) => ({
-      name: r.name, location: r.location, rating: r.rating, text: r.text,
-      photos: r.photos, date: "Just now", helpful: 0, isUser: true,
-    }));
-    const fromSeed: DisplayReview[] = seedReviews.slice(0, 4).map((r, i) => ({
-      name: r.name, location: r.location, rating: r.rating, text: r.text,
-      photos: seedPhotoMap[i] ?? [],
-      date: seedDates[i % seedDates.length],
-      helpful: seedHelpful[i % seedHelpful.length],
-      isUser: false,
-    }));
-    return [...fromUser, ...fromSeed];
-  }, [userReviews, seedReviews]);
+    const fromDb: DisplayReview[] = dbReviews.map((r) => {
+      const titleParts = (r.title ?? "").split(" · ");
+      const name = r.display_name ?? titleParts[0] ?? "Verified buyer";
+      const loc = titleParts[1] ?? "";
+      const ageMs = Date.now() - new Date(r.created_at).getTime();
+      const days = Math.floor(ageMs / 86_400_000);
+      const date = days < 1 ? "Today" : days === 1 ? "1 day ago" : days < 30 ? `${days} days ago` : new Date(r.created_at).toLocaleDateString();
+      return {
+        name,
+        location: loc,
+        rating: r.rating,
+        text: r.comment ?? "",
+        photos: [],
+        date,
+        helpful: 0,
+        isUser: false,
+      };
+    });
+    const fromUserLocal: DisplayReview[] = userReviews
+      .filter((u) => !dbReviews.some((d) => d.comment === u.text && d.rating === u.rating))
+      .map((r) => ({
+        name: r.name, location: r.location, rating: r.rating, text: r.text,
+        photos: r.photos, date: "Just now", helpful: 0, isUser: true,
+      }));
+    const fromSeed: DisplayReview[] = dbReviews.length === 0
+      ? seedReviews.slice(0, 4).map((r, i) => ({
+          name: r.name, location: r.location, rating: r.rating, text: r.text,
+          photos: seedPhotoMap[i] ?? [],
+          date: seedDates[i % seedDates.length],
+          helpful: seedHelpful[i % seedHelpful.length],
+          isUser: false,
+        }))
+      : [];
+    return [...fromUserLocal, ...fromDb, ...fromSeed];
+  }, [userReviews, seedReviews, dbReviews]);
 
   const filteredReviews = useMemo(() => {
     let list = allReviews;
