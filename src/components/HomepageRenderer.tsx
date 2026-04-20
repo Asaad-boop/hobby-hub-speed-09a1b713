@@ -77,15 +77,51 @@ function cfg<T = unknown>(s: HomepageSection, key: string, fallback: T): T {
   return (v === undefined || v === null ? fallback : v) as T;
 }
 
+function useBuilderMode() {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setOn(new URLSearchParams(window.location.search).has("builder"));
+  }, []);
+  return on;
+}
+
 export default function HomepageRenderer() {
   const { data: settings } = useSiteSettings();
   const sections = settings?.homepage_sections ?? [];
+  const builderMode = useBuilderMode();
+
+  // Notify parent (admin builder) when sections render so it can position overlays.
+  useEffect(() => {
+    if (!builderMode || typeof window === "undefined") return;
+    const post = () => {
+      try {
+        window.parent?.postMessage({ type: "builder:ready" }, "*");
+      } catch {
+        /* cross-origin — ignore */
+      }
+    };
+    post();
+    const onClick = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement)?.closest?.("[data-section-id]") as HTMLElement | null;
+      if (!el) return;
+      e.preventDefault();
+      e.stopPropagation();
+      window.parent?.postMessage(
+        { type: "builder:select", id: el.getAttribute("data-section-id") },
+        "*",
+      );
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [builderMode, sections.length]);
+
   return (
     <div>
       {sections
         .filter((s) => s.enabled)
         .map((s) => (
-          <SectionWrapper key={s.id} section={s}>
+          <SectionWrapper key={s.id} section={s} builderMode={builderMode}>
             <SectionSwitcher section={s} />
           </SectionWrapper>
         ))}
@@ -93,18 +129,47 @@ export default function HomepageRenderer() {
   );
 }
 
-function SectionWrapper({ section, children }: { section: HomepageSection; children: React.ReactNode }) {
+function SectionWrapper({
+  section,
+  children,
+  builderMode,
+}: {
+  section: HomepageSection;
+  children: React.ReactNode;
+  builderMode: boolean;
+}) {
   const padTop = Number(cfg(section, "pad_top", NaN));
   const padBottom = Number(cfg(section, "pad_bottom", NaN));
   const bgColor = cfg<string>(section, "bg_color", "");
   const hasStyle =
     !Number.isNaN(padTop) || !Number.isNaN(padBottom) || (bgColor && bgColor.trim().length > 0);
-  if (!hasStyle) return <>{children}</>;
+
   const style: React.CSSProperties = {};
   if (!Number.isNaN(padTop)) style.paddingTop = `${padTop}px`;
   if (!Number.isNaN(padBottom)) style.paddingBottom = `${padBottom}px`;
   if (bgColor) style.backgroundColor = bgColor;
-  return <div style={style}>{children}</div>;
+
+  if (!builderMode && !hasStyle) return <>{children}</>;
+
+  return (
+    <div
+      data-section-id={builderMode ? section.id : undefined}
+      data-section-type={builderMode ? section.type : undefined}
+      style={style}
+      className={builderMode ? "relative outline outline-2 outline-transparent transition-[outline-color] hover:outline-primary/60 hover:cursor-pointer" : undefined}
+    >
+      {children}
+      {builderMode && (
+        <div
+          className="pointer-events-none absolute left-2 top-2 z-50 rounded-md bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground opacity-0 shadow-md transition-opacity"
+          style={{ opacity: undefined }}
+          data-section-badge
+        >
+          {section.type}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function SectionSwitcher({ section }: { section: HomepageSection }) {
