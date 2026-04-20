@@ -393,6 +393,15 @@ function AdminHomepagePage() {
             </DropdownMenuContent>
           </DropdownMenu>
 
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setHistoryOpen((o) => !o)}
+            title="Version history"
+          >
+            <History className="h-4 w-4" /> History
+          </Button>
+
           <Button variant="ghost" size="icon" className="h-9 w-9" onClick={refreshPreview} title="Refresh preview">
             <RefreshCw className="h-4 w-4" />
           </Button>
