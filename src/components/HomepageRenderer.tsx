@@ -99,16 +99,14 @@ function Editable({
   className,
   children,
 }: {
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
   value: string;
   editKey: string;
   multiline?: boolean;
   className?: string;
   children?: React.ReactNode;
 }) {
-  // Tag is dynamic; cast to any for TS.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const Component = Tag as any;
+  const Component = Tag as React.ElementType;
   return (
     <Component
       data-edit-key={editKey}
