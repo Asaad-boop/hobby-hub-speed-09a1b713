@@ -1,51 +1,157 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Save, ExternalLink, Sparkles, Image as ImageIcon, Star, PackageOpen, Video } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
+  Eye,
+  EyeOff,
+  GripVertical,
+  Loader2,
+  Monitor,
+  Plus,
+  RefreshCw,
+  Save,
+  Smartphone,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { ImageUploader } from "@/components/admin/ImageUploader";
-import ProductPicker from "@/components/admin/ProductPicker";
-import ReelsManager from "@/components/admin/ReelsManager";
+import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   DEFAULT_SETTINGS,
+  SECTION_LABELS,
+  newSection,
   saveSiteSettings,
   useSiteSettings,
+  type HomepageSection,
+  type SectionType,
   type SiteSettings,
 } from "@/lib/site-settings";
+import SectionEditor from "@/components/admin/SectionEditor";
 
 export const Route = createFileRoute("/admin/homepage")({
   component: AdminHomepagePage,
 });
+
+const ALL_SECTION_TYPES: SectionType[] = [
+  "hero",
+  "banner",
+  "categories",
+  "products",
+  "reels",
+  "rich_text",
+  "image_with_text",
+  "category_grid",
+  "testimonials",
+  "newsletter",
+  "countdown",
+  "trust_badges",
+  "track_order",
+  "spacer",
+];
 
 function AdminHomepagePage() {
   const { data, isLoading } = useSiteSettings();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<SiteSettings>(DEFAULT_SETTINGS);
   const [saving, setSaving] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
+  const previewRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    if (data) setForm(data);
+    if (data) {
+      setForm(data);
+      if (!selectedId && data.homepage_sections?.length) {
+        setSelectedId(data.homepage_sections[0].id);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
-  const set = <K extends keyof SiteSettings>(key: K, value: SiteSettings[K]) =>
-    setForm((prev) => ({ ...prev, [key]: value }));
+  const sections = form.homepage_sections;
+  const selected = useMemo(() => sections.find((s) => s.id === selectedId) ?? null, [sections, selectedId]);
+
+  const setSettingsField = <K extends keyof SiteSettings>(key: K, value: SiteSettings[K]) =>
+    setForm((p) => ({ ...p, [key]: value }));
+
+  const updateSections = (next: HomepageSection[]) =>
+    setForm((p) => ({ ...p, homepage_sections: next }));
+
+  const patchSection = (
+    id: string,
+    patch: Partial<HomepageSection> | ((s: HomepageSection) => HomepageSection),
+  ) => {
+    updateSections(
+      sections.map((s) =>
+        s.id === id ? (typeof patch === "function" ? patch(s) : { ...s, ...patch }) : s,
+      ),
+    );
+  };
+
+  const removeSection = (id: string) => {
+    updateSections(sections.filter((s) => s.id !== id));
+    if (selectedId === id) setSelectedId(sections[0]?.id ?? null);
+  };
+
+  const addSection = (type: SectionType) => {
+    const sec = newSection(type);
+    updateSections([...sections, sec]);
+    setSelectedId(sec.id);
+    toast.success(`${SECTION_LABELS[type]} added`);
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const onDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    const oldIdx = sections.findIndex((s) => s.id === active.id);
+    const newIdx = sections.findIndex((s) => s.id === over.id);
+    if (oldIdx < 0 || newIdx < 0) return;
+    updateSections(arrayMove(sections, oldIdx, newIdx));
+  };
 
   const onSave = async () => {
     setSaving(true);
     try {
       await saveSiteSettings(form);
       await queryClient.invalidateQueries({ queryKey: ["site_settings"] });
-      toast.success("Homepage updated — storefront e reflect hoye geche.");
+      toast.success("Homepage saved — refreshing preview");
+      previewRef.current?.contentWindow?.location.reload();
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
       setSaving(false);
     }
   };
+
+  const refreshPreview = () => previewRef.current?.contentWindow?.location.reload();
 
   if (isLoading) {
     return (
@@ -56,147 +162,202 @@ function AdminHomepagePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <div className="flex h-[calc(100vh-8rem)] flex-col gap-3">
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-border bg-background p-3">
         <div>
-          <h1 className="text-2xl font-bold">Homepage CMS</h1>
-          <p className="text-sm text-muted-foreground">
-            Hero showcase, banner, ar featured/new-arrival sections control koro.
-          </p>
+          <h1 className="text-lg font-extrabold leading-tight">Homepage builder</h1>
+          <p className="text-[11px] text-muted-foreground">Drag sections to reorder · click to edit · live preview on the right</p>
         </div>
-        <div className="flex gap-2">
-          <Button asChild variant="outline">
-            <Link to="/" target="_blank">
-              <ExternalLink className="h-4 w-4" /> View storefront
-            </Link>
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-full bg-muted p-0.5">
+            <button
+              onClick={() => setDevice("desktop")}
+              className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold transition ${device === "desktop" ? "bg-background shadow-sm" : "text-muted-foreground"}`}
+            >
+              <Monitor className="h-3.5 w-3.5" /> Desktop
+            </button>
+            <button
+              onClick={() => setDevice("mobile")}
+              className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold transition ${device === "mobile" ? "bg-background shadow-sm" : "text-muted-foreground"}`}
+            >
+              <Smartphone className="h-3.5 w-3.5" /> Mobile
+            </button>
+          </div>
+          <Button variant="outline" size="sm" onClick={refreshPreview}>
+            <RefreshCw className="h-4 w-4" /> Refresh
           </Button>
-          <Button onClick={onSave} disabled={saving}>
+          <Button size="sm" onClick={onSave} disabled={saving}>
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save changes
+            Save & publish
           </Button>
         </div>
       </div>
 
-      <Section
-        icon={<Sparkles className="h-4 w-4 text-primary" />}
-        title="Hero showcase products"
-        description="Top hero rotator e ja products dekhabe. Order matter kore. Khali rakhle prothom 4 product use hobe."
-      >
-        <ProductPicker
-          value={form.hero_product_ids}
-          onChange={(ids) => set("hero_product_ids", ids)}
-          max={6}
-          emptyHint="Hero te products add koro (max 6)."
-        />
-      </Section>
+      {/* Three panes */}
+      <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[280px_360px_1fr]">
+        {/* Sections list */}
+        <div className="flex min-h-0 flex-col rounded-2xl border border-border bg-background">
+          <div className="flex items-center justify-between border-b border-border px-3 py-2">
+            <span className="text-xs font-bold uppercase tracking-wider">Sections</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="ghost">
+                  <Plus className="h-4 w-4" /> Add
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="max-h-80 overflow-auto">
+                {ALL_SECTION_TYPES.map((t) => (
+                  <DropdownMenuItem key={t} onClick={() => addSection(t)}>
+                    {SECTION_LABELS[t]}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="flex-1 overflow-auto p-2">
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+              <SortableContext items={sections.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-1.5">
+                  {sections.map((s) => (
+                    <SortableRow
+                      key={s.id}
+                      section={s}
+                      selected={selectedId === s.id}
+                      onSelect={() => setSelectedId(s.id)}
+                      onToggle={(v) => patchSection(s.id, { enabled: v })}
+                      onRemove={() => removeSection(s.id)}
+                    />
+                  ))}
+                  {sections.length === 0 && (
+                    <p className="px-2 py-6 text-center text-xs text-muted-foreground">
+                      No sections. Click Add ↑
+                    </p>
+                  )}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </div>
+        </div>
 
-      <Section
-        icon={<ImageIcon className="h-4 w-4 text-primary" />}
-        title="Promotional banner"
-        description="Homepage e ekta promotional banner show korbe (hero ar new arrivals er majhe)."
-      >
-        <Field label="Banner image (optional)">
-          <ImageUploader
-            value={form.homepage_banner_url}
-            onChange={(url) => set("homepage_banner_url", url)}
-            folder="banners"
-          />
-          <p className="mt-1 text-xs text-muted-foreground">
-            Khali rakhle banner section hide thakbe. Recommended size: 1600×400.
-          </p>
-        </Field>
-        <Field label="Banner link (optional)">
-          <Input
-            value={form.homepage_banner_link}
-            onChange={(e) => set("homepage_banner_link", e.target.value)}
-            placeholder="/shop or /category/gadgets-tech"
-          />
-        </Field>
-      </Section>
+        {/* Editor */}
+        <div className="flex min-h-0 flex-col rounded-2xl border border-border bg-background">
+          <div className="border-b border-border px-3 py-2">
+            <span className="text-xs font-bold uppercase tracking-wider">Edit section</span>
+          </div>
+          <div className="flex-1 overflow-auto p-4">
+            {selected ? (
+              <SectionEditor
+                section={selected}
+                onChange={(p) => patchSection(selected.id, p)}
+                settings={form}
+                onSettingsChange={setSettingsField}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground">Select a section from the left to edit.</p>
+            )}
+          </div>
+        </div>
 
-      <Section
-        icon={<PackageOpen className="h-4 w-4 text-emerald-600" />}
-        title="New arrivals (curated)"
-        description="Override the default new-arrivals section. Khali rakhle products table er 'New arrival' flagged products auto-show korbe."
-      >
-        <ProductPicker
-          value={form.new_arrival_product_ids}
-          onChange={(ids) => set("new_arrival_product_ids", ids)}
-          max={8}
-          emptyHint="Auto mode — products page theke 'New arrival' toggle on koro."
-        />
-      </Section>
-
-      <Section
-        icon={<Star className="h-4 w-4 text-amber-500" />}
-        title="Trending / featured (curated)"
-        description="Override the trending section. Khali rakhle products table er 'Featured' flagged products auto-show korbe."
-      >
-        <ProductPicker
-          value={form.featured_product_ids}
-          onChange={(ids) => set("featured_product_ids", ids)}
-          max={8}
-          emptyHint="Auto mode — products page theke 'Featured' toggle on koro."
-        />
-      </Section>
-
-      <Section
-        icon={<Video className="h-4 w-4 text-rose-500" />}
-        title="Watch & Shop reels"
-        description="Short videos linked to products — homepage e horizontal scroller hisebe show korbe. Khali rakhle section hide thakbe."
-      >
-        <ReelsManager
-          value={form.reels}
-          onChange={(reels) => set("reels", reels)}
-          max={10}
-        />
-      </Section>
-
-      <div className="flex justify-end">
-        <Button onClick={onSave} disabled={saving} size="lg">
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          Save changes
-        </Button>
+        {/* Live preview */}
+        <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-muted/30">
+          <div className="flex items-center justify-between border-b border-border bg-background px-3 py-2">
+            <span className="text-xs font-bold uppercase tracking-wider">Live preview</span>
+            <a href="/" target="_blank" rel="noreferrer" className="text-[11px] font-semibold text-primary hover:underline">
+              Open in new tab ↗
+            </a>
+          </div>
+          <div className="flex flex-1 items-start justify-center overflow-auto p-3">
+            <div
+              className="h-full overflow-hidden rounded-xl border border-border bg-background shadow-lg transition-all"
+              style={{
+                width: device === "mobile" ? 390 : "100%",
+                maxWidth: device === "mobile" ? 390 : 1400,
+              }}
+            >
+              <iframe
+                ref={previewRef}
+                src="/"
+                title="Homepage preview"
+                className="h-full w-full"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-function Section({
-  icon,
-  title,
-  description,
-  children,
+function SortableRow({
+  section,
+  selected,
+  onSelect,
+  onToggle,
+  onRemove,
 }: {
-  icon: React.ReactNode;
-  title: string;
-  description?: string;
-  children: React.ReactNode;
+  section: HomepageSection;
+  selected: boolean;
+  onSelect: () => void;
+  onToggle: (v: boolean) => void;
+  onRemove: () => void;
 }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: section.id,
+  });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
   return (
-    <section className="rounded-2xl border border-border bg-background p-5">
-      <header className="mb-4 flex items-start gap-3">
-        <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted">
-          {icon}
-        </span>
-        <div>
-          <h2 className="text-lg font-semibold">{title}</h2>
-          {description && <p className="text-sm text-muted-foreground">{description}</p>}
-        </div>
-      </header>
-      <Separator className="mb-4" />
-      <div className="space-y-4">{children}</div>
-    </section>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-1.5">
-      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        {label}
-      </Label>
-      {children}
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`group flex items-center gap-1 rounded-xl border px-2 py-2 transition ${
+        selected
+          ? "border-primary bg-primary/5"
+          : "border-border bg-background hover:border-primary/40"
+      }`}
+    >
+      <button
+        type="button"
+        className="flex h-6 w-6 shrink-0 cursor-grab items-center justify-center text-muted-foreground active:cursor-grabbing"
+        {...attributes}
+        {...listeners}
+        aria-label="Drag to reorder"
+      >
+        <GripVertical className="h-4 w-4" />
+      </button>
+      <button onClick={onSelect} className="min-w-0 flex-1 text-left">
+        <p className={`truncate text-sm font-bold ${section.enabled ? "" : "text-muted-foreground"}`}>
+          {SECTION_LABELS[section.type]}
+        </p>
+        <p className="truncate text-[10px] uppercase tracking-wider text-muted-foreground">
+          {section.type}
+        </p>
+      </button>
+      <Switch
+        checked={section.enabled}
+        onCheckedChange={onToggle}
+        aria-label={section.enabled ? "Disable" : "Enable"}
+      />
+      {section.enabled ? (
+        <Eye className="hidden h-3.5 w-3.5 text-muted-foreground sm:block" />
+      ) : (
+        <EyeOff className="hidden h-3.5 w-3.5 text-muted-foreground sm:block" />
+      )}
+      <Button
+        size="icon"
+        variant="ghost"
+        className="h-7 w-7 opacity-0 group-hover:opacity-100"
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+      </Button>
     </div>
   );
 }
