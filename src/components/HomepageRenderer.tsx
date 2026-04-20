@@ -125,29 +125,89 @@ export default function HomepageRenderer() {
   const sections = settings?.homepage_sections ?? [];
   const builderMode = useBuilderMode();
 
-  // Notify parent (admin builder) when sections render so it can position overlays.
+  // Notify parent (admin builder) when sections render + handle inline edit / select.
   useEffect(() => {
     if (!builderMode || typeof window === "undefined") return;
-    const post = () => {
-      try {
-        window.parent?.postMessage({ type: "builder:ready" }, "*");
-      } catch {
-        /* cross-origin — ignore */
-      }
+    try {
+      window.parent?.postMessage({ type: "builder:ready" }, "*");
+    } catch {
+      /* cross-origin — ignore */
+    }
+
+    const findSectionId = (el: HTMLElement | null): string | null => {
+      const wrap = el?.closest?.("[data-section-id]") as HTMLElement | null;
+      return wrap?.getAttribute("data-section-id") ?? null;
     };
-    post();
+
+    const commit = (el: HTMLElement) => {
+      const id = findSectionId(el);
+      const key = el.getAttribute("data-edit-key");
+      if (!id || !key) return;
+      const original = el.getAttribute("data-edit-original") ?? "";
+      const next = (el.innerText ?? "").trim();
+      el.removeAttribute("contenteditable");
+      el.classList.remove("ring-2", "ring-primary", "ring-offset-2", "outline-none");
+      if (next === original) return;
+      el.setAttribute("data-edit-original", next);
+      window.parent?.postMessage({ type: "builder:edit", id, key, value: next }, "*");
+    };
+
     const onClick = (e: MouseEvent) => {
-      const el = (e.target as HTMLElement)?.closest?.("[data-section-id]") as HTMLElement | null;
-      if (!el) return;
+      const target = e.target as HTMLElement | null;
+      const editable = target?.closest?.("[data-edit-key]") as HTMLElement | null;
+      if (editable) {
+        // Start inline edit instead of selecting the section.
+        e.preventDefault();
+        e.stopPropagation();
+        if (editable.getAttribute("contenteditable") === "true") return;
+        editable.setAttribute("contenteditable", "true");
+        editable.classList.add("ring-2", "ring-primary", "ring-offset-2", "outline-none");
+        editable.focus();
+        // Select all text for quick overwrite.
+        const sel = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(editable);
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+        return;
+      }
+      const wrap = target?.closest?.("[data-section-id]") as HTMLElement | null;
+      if (!wrap) return;
       e.preventDefault();
       e.stopPropagation();
       window.parent?.postMessage(
-        { type: "builder:select", id: el.getAttribute("data-section-id") },
+        { type: "builder:select", id: wrap.getAttribute("data-section-id") },
         "*",
       );
     };
+
+    const onBlur = (e: FocusEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t?.getAttribute?.("contenteditable") === "true") commit(t);
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (!t || t.getAttribute("contenteditable") !== "true") return;
+      const multiline = t.getAttribute("data-edit-multiline") === "1";
+      if (e.key === "Enter" && !multiline) {
+        e.preventDefault();
+        t.blur();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        t.innerText = t.getAttribute("data-edit-original") ?? "";
+        t.blur();
+      }
+    };
+
     document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
+    document.addEventListener("blur", onBlur, true);
+    document.addEventListener("keydown", onKey, true);
+    return () => {
+      document.removeEventListener("click", onClick, true);
+      document.removeEventListener("blur", onBlur, true);
+      document.removeEventListener("keydown", onKey, true);
+    };
   }, [builderMode, sections.length]);
 
   return (
