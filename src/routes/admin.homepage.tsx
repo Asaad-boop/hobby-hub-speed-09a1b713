@@ -415,6 +415,12 @@ function AdminHomepagePage() {
 
       {/* Main: full-width preview + floating panels */}
       <div className="relative flex min-h-0 flex-1 gap-3">
+        <VersionHistoryPanel
+          open={historyOpen}
+          onClose={() => setHistoryOpen(false)}
+          onRestore={restoreVersion}
+          refreshKey={historyRefreshKey}
+        />
         {/* Sections panel — collapsible left */}
         {sectionsOpen && (
           <div className="flex w-64 shrink-0 min-h-0 flex-col rounded-2xl border border-border bg-background shadow-sm">
