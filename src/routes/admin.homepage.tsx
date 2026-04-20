@@ -99,6 +99,8 @@ function AdminHomepagePage() {
   const [search, setSearch] = useState("");
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const previewRef = useRef<HTMLIFrameElement>(null);
   const formRef = useRef(form);
   formRef.current = form;
