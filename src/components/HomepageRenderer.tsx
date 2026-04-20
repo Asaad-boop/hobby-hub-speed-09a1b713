@@ -816,14 +816,14 @@ function VideoHeroSection({ section }: { section: HomepageSection }) {
         />
         <div className="relative z-10 mx-auto flex h-full max-w-5xl flex-col items-center justify-center gap-3 px-4 text-center text-white">
           {heading && (
-            <h2 className="text-3xl font-extrabold tracking-tight drop-shadow md:text-5xl">
+            <Editable as="h2" editKey="heading" value={heading} className="text-3xl font-extrabold tracking-tight drop-shadow md:text-5xl">
               {heading}
-            </h2>
+            </Editable>
           )}
           {subheading && (
-            <p className="max-w-2xl text-sm leading-relaxed opacity-95 drop-shadow md:text-base">
+            <Editable as="p" editKey="subheading" value={subheading} multiline className="max-w-2xl text-sm leading-relaxed opacity-95 drop-shadow md:text-base">
               {subheading}
-            </p>
+            </Editable>
           )}
           {ctaLabel && ctaLink && (
             <a
@@ -848,8 +848,8 @@ function FaqSection({ section }: { section: HomepageSection }) {
   return (
     <section className="mx-auto max-w-3xl px-4 py-10 md:py-14">
       <div className="mb-6 text-center">
-        <h2 className="text-xl font-extrabold tracking-tight md:text-2xl">{heading}</h2>
-        {subheading && <p className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</p>}
+        <Editable as="h2" editKey="heading" value={heading} className="text-xl font-extrabold tracking-tight md:text-2xl">{heading}</Editable>
+        {subheading && <Editable as="p" editKey="subheading" value={subheading} multiline className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</Editable>}
       </div>
       <Accordion type="single" collapsible className="w-full">
         {items.map((it, i) => (
@@ -876,9 +876,9 @@ function BrandLogosSection({ section }: { section: HomepageSection }) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 md:py-10">
       {heading && (
-        <p className="mb-5 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground md:text-xs">
+        <Editable as="p" editKey="heading" value={heading} className="mb-5 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground md:text-xs">
           {heading}
-        </p>
+        </Editable>
       )}
       <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-5 md:gap-x-12">
         {items.map((it, i) => {

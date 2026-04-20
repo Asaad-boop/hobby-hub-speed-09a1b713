@@ -282,16 +282,23 @@ function AdminHomepagePage() {
   // Listen to inline-click messages from preview iframe
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
-      const d = e.data as { type?: string; id?: string } | undefined;
+      const d = e.data as
+        | { type?: string; id?: string; key?: string; value?: string }
+        | undefined;
       if (!d || typeof d !== "object") return;
       if (d.type === "builder:select" && d.id) {
         setSelectedId(d.id);
         setEditorOpen(true);
+      } else if (d.type === "builder:edit" && d.id && d.key) {
+        patchSection(d.id, (s) => ({
+          ...s,
+          config: { ...(s.config ?? {}), [d.key as string]: d.value ?? "" },
+        }));
       }
     };
     window.addEventListener("message", onMsg);
     return () => window.removeEventListener("message", onMsg);
-  }, []);
+  }, [patchSection]);
 
   const filteredSections = useMemo(() => {
     if (!search.trim()) return sections;
