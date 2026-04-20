@@ -67,6 +67,8 @@ import {
   type SiteSettings,
 } from "@/lib/site-settings";
 import SectionEditor from "@/components/admin/SectionEditor";
+import VersionHistoryPanel from "@/components/admin/VersionHistoryPanel";
+import { saveHomepageVersion } from "@/lib/version-history";
 import { useHistory, useLocalDraft, readLocalDraft, clearLocalDraft } from "@/hooks/use-history";
 import { SECTION_TEMPLATES } from "@/lib/homepage-templates";
 
@@ -97,6 +99,8 @@ function AdminHomepagePage() {
   const [search, setSearch] = useState("");
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const previewRef = useRef<HTMLIFrameElement>(null);
   const formRef = useRef(form);
   formRef.current = form;
@@ -222,6 +226,13 @@ function AdminHomepagePage() {
     setSaving(true);
     try {
       await saveSiteSettings(formRef.current);
+      // Snapshot for version history (non-blocking — failure shouldn't block publish)
+      try {
+        await saveHomepageVersion(formRef.current.homepage_sections);
+        setHistoryRefreshKey((k) => k + 1);
+      } catch (e) {
+        console.warn("Version snapshot failed", e);
+      }
       await queryClient.invalidateQueries({ queryKey: ["site_settings"] });
       clearLocalDraft(DRAFT_KEY);
       setLastSavedAt(Date.now());
@@ -233,6 +244,14 @@ function AdminHomepagePage() {
       setSaving(false);
     }
   }, [queryClient]);
+
+  const restoreVersion = useCallback(
+    (sections: HomepageSection[]) => {
+      setForm((p) => ({ ...p, homepage_sections: sections }));
+      setSelectedId(sections[0]?.id ?? null);
+    },
+    [setForm],
+  );
 
   const refreshPreview = () => previewRef.current?.contentWindow?.location.reload();
 
@@ -374,6 +393,15 @@ function AdminHomepagePage() {
             </DropdownMenuContent>
           </DropdownMenu>
 
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setHistoryOpen((o) => !o)}
+            title="Version history"
+          >
+            <History className="h-4 w-4" /> History
+          </Button>
+
           <Button variant="ghost" size="icon" className="h-9 w-9" onClick={refreshPreview} title="Refresh preview">
             <RefreshCw className="h-4 w-4" />
           </Button>
@@ -387,6 +415,12 @@ function AdminHomepagePage() {
 
       {/* Main: full-width preview + floating panels */}
       <div className="relative flex min-h-0 flex-1 gap-3">
+        <VersionHistoryPanel
+          open={historyOpen}
+          onClose={() => setHistoryOpen(false)}
+          onRestore={restoreVersion}
+          refreshKey={historyRefreshKey}
+        />
         {/* Sections panel — collapsible left */}
         {sectionsOpen && (
           <div className="flex w-64 shrink-0 min-h-0 flex-col rounded-2xl border border-border bg-background shadow-sm">

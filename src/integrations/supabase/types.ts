@@ -95,6 +95,30 @@ export type Database = {
         }
         Relationships: []
       }
+      homepage_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string | null
+          sections: Json
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+          sections: Json
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+          sections?: Json
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
