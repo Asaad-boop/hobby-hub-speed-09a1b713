@@ -492,6 +492,186 @@ function renderEditor(
         </Field>
       );
 
+    case "video_hero":
+      return (
+        <>
+          <Field label="Background video" hint="MP4/WebM, autoplay muted loop. Recommended: short, light file.">
+            <VideoUploader
+              value={cfg("video_url", "")}
+              onChange={(url) => setCfg("video_url", url)}
+              folder="video-hero"
+            />
+          </Field>
+          <Field label="Poster image (fallback while loading)">
+            <ImageUploader
+              value={cfg("poster_url", "")}
+              onChange={(url) => setCfg("poster_url", url)}
+              folder="cms"
+            />
+          </Field>
+          <Field label="Heading">
+            <Input value={cfg("heading", "")} onChange={(e) => setCfg("heading", e.target.value)} />
+          </Field>
+          <Field label="Subheading">
+            <Textarea rows={2} value={cfg("subheading", "")} onChange={(e) => setCfg("subheading", e.target.value)} />
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="CTA label">
+              <Input value={cfg("cta_label", "")} onChange={(e) => setCfg("cta_label", e.target.value)} />
+            </Field>
+            <Field label="CTA link">
+              <Input value={cfg("cta_link", "")} onChange={(e) => setCfg("cta_link", e.target.value)} />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Height">
+              <select
+                className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                value={cfg("height", "lg")}
+                onChange={(e) => setCfg("height", e.target.value)}
+              >
+                <option value="sm">Small</option>
+                <option value="md">Medium</option>
+                <option value="lg">Large</option>
+              </select>
+            </Field>
+            <Field label="Overlay opacity (0–1)">
+              <Input
+                type="number"
+                step="0.05"
+                min={0}
+                max={1}
+                value={cfg<number>("overlay_opacity", 0.45)}
+                onChange={(e) => setCfg("overlay_opacity", Number(e.target.value))}
+              />
+            </Field>
+          </div>
+        </>
+      );
+
+    case "faq": {
+      const items = cfg<Array<{ q: string; a: string }>>("items", []);
+      return (
+        <>
+          <Field label="Heading">
+            <Input value={cfg("heading", "")} onChange={(e) => setCfg("heading", e.target.value)} />
+          </Field>
+          <Field label="Subheading">
+            <Input value={cfg("subheading", "")} onChange={(e) => setCfg("subheading", e.target.value)} />
+          </Field>
+          <div className="space-y-3">
+            {items.map((it, i) => (
+              <div key={i} className="rounded-xl border border-border bg-muted/20 p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-xs font-bold">Question {i + 1}</span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setCfg("items", items.filter((_, j) => j !== i))}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Input
+                  className="mb-2"
+                  placeholder="Question"
+                  value={it.q}
+                  onChange={(e) =>
+                    setCfg("items", items.map((x, j) => (j === i ? { ...x, q: e.target.value } : x)))
+                  }
+                />
+                <Textarea
+                  rows={3}
+                  placeholder="Answer"
+                  value={it.a}
+                  onChange={(e) =>
+                    setCfg("items", items.map((x, j) => (j === i ? { ...x, a: e.target.value } : x)))
+                  }
+                />
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setCfg("items", [...items, { q: "New question", a: "" }])}
+            >
+              <Plus className="h-4 w-4" /> Add question
+            </Button>
+          </div>
+        </>
+      );
+    }
+
+    case "brand_logos": {
+      const items = cfg<Array<{ image_url: string; alt: string; link: string }>>("items", []);
+      return (
+        <>
+          <Field label="Heading (optional)">
+            <Input value={cfg("heading", "")} onChange={(e) => setCfg("heading", e.target.value)} />
+          </Field>
+          <Field label="Grayscale logos">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={cfg<boolean>("grayscale", true)}
+                onCheckedChange={(v) => setCfg("grayscale", v)}
+              />
+              <span className="text-xs text-muted-foreground">
+                Logos grayscale dekhabe, hover korle color hobe.
+              </span>
+            </div>
+          </Field>
+          <div className="space-y-3">
+            {items.map((it, i) => (
+              <div key={i} className="rounded-xl border border-border bg-muted/20 p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-xs font-bold">Logo {i + 1}</span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setCfg("items", items.filter((_, j) => j !== i))}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                <ImageUploader
+                  value={it.image_url}
+                  onChange={(url) =>
+                    setCfg("items", items.map((x, j) => (j === i ? { ...x, image_url: url } : x)))
+                  }
+                  folder="brand-logos"
+                />
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <Input
+                    value={it.alt}
+                    placeholder="Alt text"
+                    onChange={(e) =>
+                      setCfg("items", items.map((x, j) => (j === i ? { ...x, alt: e.target.value } : x)))
+                    }
+                  />
+                  <Input
+                    value={it.link}
+                    placeholder="Link (optional)"
+                    onChange={(e) =>
+                      setCfg("items", items.map((x, j) => (j === i ? { ...x, link: e.target.value } : x)))
+                    }
+                  />
+                </div>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setCfg("items", [...items, { image_url: "", alt: "", link: "" }])}
+            >
+              <Plus className="h-4 w-4" /> Add logo
+            </Button>
+          </div>
+        </>
+      );
+    }
+
     case "trust_badges":
     case "track_order":
       return (
