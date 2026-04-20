@@ -104,6 +104,8 @@ function SectionSwitcher({ section }: { section: HomepageSection }) {
   switch (section.type) {
     case "hero":
       return <HeroShowcase />;
+    case "video_hero":
+      return <VideoHeroSection section={section} />;
     case "banner":
       return <BannerSection section={section} />;
     case "categories":
@@ -128,6 +130,10 @@ function SectionSwitcher({ section }: { section: HomepageSection }) {
       return <TrustBadgesSection />;
     case "track_order":
       return <TrackOrderSection />;
+    case "faq":
+      return <FaqSection section={section} />;
+    case "brand_logos":
+      return <BrandLogosSection section={section} />;
     case "spacer":
       return <SpacerSection section={section} />;
     default:
