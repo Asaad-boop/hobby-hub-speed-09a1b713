@@ -450,8 +450,8 @@ function RichTextSection({ section }: { section: HomepageSection }) {
   return (
     <section className={`${bgClass}`}>
       <div className={`mx-auto flex max-w-4xl flex-col gap-3 px-4 py-10 md:py-14 ${alignClass}`}>
-        {heading && <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl">{heading}</h2>}
-        {body && <p className="text-sm leading-relaxed text-muted-foreground md:text-base">{body}</p>}
+        {heading && <Editable as="h2" editKey="heading" value={heading} className="text-2xl font-extrabold tracking-tight md:text-3xl">{heading}</Editable>}
+        {body && <Editable as="p" editKey="body" value={body} multiline className="text-sm leading-relaxed text-muted-foreground md:text-base">{body}</Editable>}
         {ctaLabel && ctaLink && (
           <a href={ctaLink} className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground shadow-md hover:opacity-90">
             {ctaLabel} <ArrowRight className="h-4 w-4" />
