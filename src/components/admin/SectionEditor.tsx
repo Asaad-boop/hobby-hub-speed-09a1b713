@@ -57,6 +57,69 @@ export default function SectionEditor({
       </div>
 
       {renderEditor(section.type, cfg, setCfg, settings, onSettingsChange)}
+
+      {/* ===== Universal style controls ===== */}
+      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-3">
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          Style · spacing & background
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Padding top (px)">
+            <Input
+              type="number"
+              min={0}
+              max={300}
+              value={cfg<number | "">("pad_top", "")}
+              placeholder="auto"
+              onChange={(e) =>
+                setCfg("pad_top", e.target.value === "" ? "" : Number(e.target.value))
+              }
+            />
+          </Field>
+          <Field label="Padding bottom (px)">
+            <Input
+              type="number"
+              min={0}
+              max={300}
+              value={cfg<number | "">("pad_bottom", "")}
+              placeholder="auto"
+              onChange={(e) =>
+                setCfg("pad_bottom", e.target.value === "" ? "" : Number(e.target.value))
+              }
+            />
+          </Field>
+        </div>
+        <div className="mt-3">
+          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Background color
+          </Label>
+          <div className="mt-1.5 flex items-center gap-2">
+            <input
+              type="color"
+              value={cfg<string>("bg_color", "") || "#ffffff"}
+              onChange={(e) => setCfg("bg_color", e.target.value)}
+              className="h-9 w-12 cursor-pointer rounded-md border border-input bg-transparent"
+              aria-label="Pick background color"
+            />
+            <Input
+              value={cfg<string>("bg_color", "")}
+              placeholder="#ffffff or rgba(...)"
+              onChange={(e) => setCfg("bg_color", e.target.value)}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setCfg("bg_color", "")}
+            >
+              Clear
+            </Button>
+          </div>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Khali rakhle section er default background thakbe.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

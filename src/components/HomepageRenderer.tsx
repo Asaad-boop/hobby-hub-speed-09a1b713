@@ -78,10 +78,26 @@ export default function HomepageRenderer() {
       {sections
         .filter((s) => s.enabled)
         .map((s) => (
-          <SectionSwitcher key={s.id} section={s} />
+          <SectionWrapper key={s.id} section={s}>
+            <SectionSwitcher section={s} />
+          </SectionWrapper>
         ))}
     </div>
   );
+}
+
+function SectionWrapper({ section, children }: { section: HomepageSection; children: React.ReactNode }) {
+  const padTop = Number(cfg(section, "pad_top", NaN));
+  const padBottom = Number(cfg(section, "pad_bottom", NaN));
+  const bgColor = cfg<string>(section, "bg_color", "");
+  const hasStyle =
+    !Number.isNaN(padTop) || !Number.isNaN(padBottom) || (bgColor && bgColor.trim().length > 0);
+  if (!hasStyle) return <>{children}</>;
+  const style: React.CSSProperties = {};
+  if (!Number.isNaN(padTop)) style.paddingTop = `${padTop}px`;
+  if (!Number.isNaN(padBottom)) style.paddingBottom = `${padBottom}px`;
+  if (bgColor) style.backgroundColor = bgColor;
+  return <div style={style}>{children}</div>;
 }
 
 function SectionSwitcher({ section }: { section: HomepageSection }) {
