@@ -1,6 +1,9 @@
 import { createFileRoute, useNavigate, notFound, Link } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { fetchProductByIdOrSlug, fetchAllProducts, testimonials } from "@/lib/products";
+import { fetchProductReviews, submitReview } from "@/lib/reviews";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import ProductCard from "@/components/ProductCard";
@@ -141,6 +144,32 @@ function ProductPage() {
   const allOthers = all.filter((p) => p.id !== product.id);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [userReviews, setUserReviews] = useState<NewReview[]>([]);
+  const qc = useQueryClient();
+
+  const { data: dbReviews = [] } = useQuery({
+    queryKey: ["product_reviews", product.id],
+    queryFn: () => fetchProductReviews(product.id),
+    staleTime: 30_000,
+  });
+
+  const handleReviewSubmit = async (r: NewReview) => {
+    try {
+      await submitReview({
+        product_id: product.id,
+        rating: r.rating,
+        title: r.name ? `${r.name}${r.location ? ` · ${r.location}` : ""}` : undefined,
+        comment: r.text,
+      });
+      toast.success("Review submitted! Thanks for your feedback.");
+      setUserReviews((prev) => [r, ...prev]);
+      qc.invalidateQueries({ queryKey: ["product_reviews", product.id] });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to submit review";
+      toast.error(msg);
+      throw err;
+    }
+  };
+
   const [bundle, setBundle] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = { [product.id]: true };
     allOthers.slice(0, 2).forEach((b) => (init[b.id] = true));
