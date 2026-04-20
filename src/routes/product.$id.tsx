@@ -1,6 +1,9 @@
 import { createFileRoute, useNavigate, notFound, Link } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { fetchProductByIdOrSlug, fetchAllProducts, testimonials } from "@/lib/products";
+import { fetchProductReviews, submitReview } from "@/lib/reviews";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import ProductCard from "@/components/ProductCard";
@@ -141,6 +144,32 @@ function ProductPage() {
   const allOthers = all.filter((p) => p.id !== product.id);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [userReviews, setUserReviews] = useState<NewReview[]>([]);
+  const qc = useQueryClient();
+
+  const { data: dbReviews = [] } = useQuery({
+    queryKey: ["product_reviews", product.id],
+    queryFn: () => fetchProductReviews(product.id),
+    staleTime: 30_000,
+  });
+
+  const handleReviewSubmit = async (r: NewReview) => {
+    try {
+      await submitReview({
+        product_id: product.id,
+        rating: r.rating,
+        title: r.name ? `${r.name}${r.location ? ` · ${r.location}` : ""}` : undefined,
+        comment: r.text,
+      });
+      toast.success("Review submitted! Thanks for your feedback.");
+      setUserReviews((prev) => [r, ...prev]);
+      qc.invalidateQueries({ queryKey: ["product_reviews", product.id] });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to submit review";
+      toast.error(msg);
+      throw err;
+    }
+  };
+
   const [bundle, setBundle] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = { [product.id]: true };
     allOthers.slice(0, 2).forEach((b) => (init[b.id] = true));
@@ -183,19 +212,41 @@ function ProductPage() {
   const seedHelpful = [42, 28, 19, 11];
 
   const allReviews = useMemo<DisplayReview[]>(() => {
-    const fromUser: DisplayReview[] = userReviews.map((r) => ({
-      name: r.name, location: r.location, rating: r.rating, text: r.text,
-      photos: r.photos, date: "Just now", helpful: 0, isUser: true,
-    }));
-    const fromSeed: DisplayReview[] = seedReviews.slice(0, 4).map((r, i) => ({
-      name: r.name, location: r.location, rating: r.rating, text: r.text,
-      photos: seedPhotoMap[i] ?? [],
-      date: seedDates[i % seedDates.length],
-      helpful: seedHelpful[i % seedHelpful.length],
-      isUser: false,
-    }));
-    return [...fromUser, ...fromSeed];
-  }, [userReviews, seedReviews]);
+    const fromDb: DisplayReview[] = dbReviews.map((r) => {
+      const titleParts = (r.title ?? "").split(" · ");
+      const name = r.display_name ?? titleParts[0] ?? "Verified buyer";
+      const loc = titleParts[1] ?? "";
+      const ageMs = Date.now() - new Date(r.created_at).getTime();
+      const days = Math.floor(ageMs / 86_400_000);
+      const date = days < 1 ? "Today" : days === 1 ? "1 day ago" : days < 30 ? `${days} days ago` : new Date(r.created_at).toLocaleDateString();
+      return {
+        name,
+        location: loc,
+        rating: r.rating,
+        text: r.comment ?? "",
+        photos: [],
+        date,
+        helpful: 0,
+        isUser: false,
+      };
+    });
+    const fromUserLocal: DisplayReview[] = userReviews
+      .filter((u) => !dbReviews.some((d) => d.comment === u.text && d.rating === u.rating))
+      .map((r) => ({
+        name: r.name, location: r.location, rating: r.rating, text: r.text,
+        photos: r.photos, date: "Just now", helpful: 0, isUser: true,
+      }));
+    const fromSeed: DisplayReview[] = dbReviews.length === 0
+      ? seedReviews.slice(0, 4).map((r, i) => ({
+          name: r.name, location: r.location, rating: r.rating, text: r.text,
+          photos: seedPhotoMap[i] ?? [],
+          date: seedDates[i % seedDates.length],
+          helpful: seedHelpful[i % seedHelpful.length],
+          isUser: false,
+        }))
+      : [];
+    return [...fromUserLocal, ...fromDb, ...fromSeed];
+  }, [userReviews, seedReviews, dbReviews]);
 
   const filteredReviews = useMemo(() => {
     let list = allReviews;
@@ -875,7 +926,7 @@ function ProductPage() {
         open={reviewOpen}
         onClose={() => setReviewOpen(false)}
         productTitle={product.title}
-        onSubmit={(r) => setUserReviews((prev) => [r, ...prev])}
+        onSubmit={handleReviewSubmit}
       />
     </div>
   );

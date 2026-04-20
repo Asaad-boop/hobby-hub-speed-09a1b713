@@ -13,7 +13,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   productTitle: string;
-  onSubmit: (review: NewReview) => void;
+  onSubmit: (review: NewReview) => void | Promise<void>;
 };
 
 const MAX_PHOTOS = 4;
@@ -68,7 +68,9 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
     ).then((urls) => setPhotos((p) => [...p, ...urls].slice(0, MAX_PHOTOS)));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (rating === 0) return setError("Please select a star rating");
@@ -80,9 +82,16 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
     if (trimmedText.length < 10) return setError("Review must be at least 10 characters");
     if (trimmedText.length > MAX_TEXT) return setError(`Review must be under ${MAX_TEXT} characters`);
 
-    onSubmit({ name: trimmedName, location: trimmedLoc, rating, text: trimmedText, photos });
-    setSubmitted(true);
-    setTimeout(handleClose, 1600);
+    setSubmitting(true);
+    try {
+      await onSubmit({ name: trimmedName, location: trimmedLoc, rating, text: trimmedText, photos });
+      setSubmitted(true);
+      setTimeout(handleClose, 1600);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to submit review");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (!open) return null;
@@ -245,9 +254,10 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
               </button>
               <button
                 type="submit"
-                className="flex-[1.4] rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground shadow-lg transition hover:shadow-xl"
+                disabled={submitting}
+                className="flex-[1.4] rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground shadow-lg transition hover:shadow-xl disabled:opacity-60"
               >
-                Submit Review
+                {submitting ? "Submitting…" : "Submit Review"}
               </button>
             </div>
           </form>

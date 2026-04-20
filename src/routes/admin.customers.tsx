@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Loader2,
   Search,
@@ -17,6 +18,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -78,6 +80,16 @@ type Customer = {
 };
 
 const taka = (n: number) => `৳${Math.round(n).toLocaleString()}`;
+
+type Segment = "new" | "regular" | "vip";
+const segmentOf = (orders: number): Segment =>
+  orders >= 6 ? "vip" : orders >= 2 ? "regular" : "new";
+const SegmentBadge = ({ orders }: { orders: number }) => {
+  const seg = segmentOf(orders);
+  if (seg === "vip") return <Badge className="bg-amber-500/15 text-amber-700 hover:bg-amber-500/20 dark:text-amber-400 text-[10px]"><Crown className="mr-1 h-3 w-3" />VIP</Badge>;
+  if (seg === "regular") return <Badge variant="secondary" className="text-[10px]">Regular</Badge>;
+  return <Badge variant="outline" className="text-[10px]">New</Badge>;
+};
 
 function CustomersPage() {
   const [search, setSearch] = useState("");
@@ -326,9 +338,7 @@ function CustomersPage() {
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5 font-medium">
                             <span className="truncate">{c.display_name ?? "Unknown"}</span>
-                            {isVip && (
-                              <Crown className="h-3.5 w-3.5 text-amber-500" aria-label="VIP" />
-                            )}
+                            <SegmentBadge orders={c.orders} />
                             {sortBy === "spend" && idx < 3 && (
                               <Badge variant="secondary" className="text-[10px]">
                                 #{idx + 1}
