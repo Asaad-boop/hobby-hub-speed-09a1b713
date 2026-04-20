@@ -86,34 +86,128 @@ function useBuilderMode() {
   return on;
 }
 
+/**
+ * Inline-editable text wrapper. Active only in builder mode.
+ * Click → contentEditable. Blur/Enter → postMessage to parent admin.
+ * Esc cancels and restores original text.
+ */
+function Editable({
+  as: Tag = "span",
+  value,
+  editKey,
+  multiline = false,
+  className,
+  children,
+}: {
+  as?: React.ElementType;
+  value: string;
+  editKey: string;
+  multiline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+}) {
+  const Component = Tag as React.ElementType;
+  return (
+    <Component
+      data-edit-key={editKey}
+      data-edit-multiline={multiline ? "1" : undefined}
+      data-edit-original={value}
+      suppressContentEditableWarning
+      className={className}
+    >
+      {children ?? value}
+    </Component>
+  );
+}
+
 export default function HomepageRenderer() {
   const { data: settings } = useSiteSettings();
   const sections = settings?.homepage_sections ?? [];
   const builderMode = useBuilderMode();
 
-  // Notify parent (admin builder) when sections render so it can position overlays.
+  // Notify parent (admin builder) when sections render + handle inline edit / select.
   useEffect(() => {
     if (!builderMode || typeof window === "undefined") return;
-    const post = () => {
-      try {
-        window.parent?.postMessage({ type: "builder:ready" }, "*");
-      } catch {
-        /* cross-origin — ignore */
-      }
+    try {
+      window.parent?.postMessage({ type: "builder:ready" }, "*");
+    } catch {
+      /* cross-origin — ignore */
+    }
+
+    const findSectionId = (el: HTMLElement | null): string | null => {
+      const wrap = el?.closest?.("[data-section-id]") as HTMLElement | null;
+      return wrap?.getAttribute("data-section-id") ?? null;
     };
-    post();
+
+    const commit = (el: HTMLElement) => {
+      const id = findSectionId(el);
+      const key = el.getAttribute("data-edit-key");
+      if (!id || !key) return;
+      const original = el.getAttribute("data-edit-original") ?? "";
+      const next = (el.innerText ?? "").trim();
+      el.removeAttribute("contenteditable");
+      el.classList.remove("ring-2", "ring-primary", "ring-offset-2", "outline-none");
+      if (next === original) return;
+      el.setAttribute("data-edit-original", next);
+      window.parent?.postMessage({ type: "builder:edit", id, key, value: next }, "*");
+    };
+
     const onClick = (e: MouseEvent) => {
-      const el = (e.target as HTMLElement)?.closest?.("[data-section-id]") as HTMLElement | null;
-      if (!el) return;
+      const target = e.target as HTMLElement | null;
+      const editable = target?.closest?.("[data-edit-key]") as HTMLElement | null;
+      if (editable) {
+        // Start inline edit instead of selecting the section.
+        e.preventDefault();
+        e.stopPropagation();
+        if (editable.getAttribute("contenteditable") === "true") return;
+        editable.setAttribute("contenteditable", "true");
+        editable.classList.add("ring-2", "ring-primary", "ring-offset-2", "outline-none");
+        editable.focus();
+        // Select all text for quick overwrite.
+        const sel = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(editable);
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+        return;
+      }
+      const wrap = target?.closest?.("[data-section-id]") as HTMLElement | null;
+      if (!wrap) return;
       e.preventDefault();
       e.stopPropagation();
       window.parent?.postMessage(
-        { type: "builder:select", id: el.getAttribute("data-section-id") },
+        { type: "builder:select", id: wrap.getAttribute("data-section-id") },
         "*",
       );
     };
+
+    const onBlur = (e: FocusEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t?.getAttribute?.("contenteditable") === "true") commit(t);
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (!t || t.getAttribute("contenteditable") !== "true") return;
+      const multiline = t.getAttribute("data-edit-multiline") === "1";
+      if (e.key === "Enter" && !multiline) {
+        e.preventDefault();
+        t.blur();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        t.innerText = t.getAttribute("data-edit-original") ?? "";
+        t.blur();
+      }
+    };
+
     document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
+    document.addEventListener("blur", onBlur, true);
+    document.addEventListener("keydown", onKey, true);
+    return () => {
+      document.removeEventListener("click", onClick, true);
+      document.removeEventListener("blur", onBlur, true);
+      document.removeEventListener("keydown", onKey, true);
+    };
   }, [builderMode, sections.length]);
 
   return (
@@ -248,8 +342,8 @@ function CategoriesSection({ section }: { section: HomepageSection }) {
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
             <Sparkles className="h-3 w-3" /> Browse Collections
           </span>
-          <h2 className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</h2>
-          <p className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</p>
+          <Editable as="h2" editKey="heading" value={heading} className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</Editable>
+          <Editable as="p" editKey="subheading" value={subheading} multiline className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</Editable>
         </div>
       </div>
       <div className="grid grid-cols-4 gap-2 sm:hidden">
@@ -329,8 +423,8 @@ function ProductsSection({ section }: { section: HomepageSection }) {
                 <PackageOpen className="h-3 w-3" /> {badge}
               </span>
             )}
-            <h2 className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</h2>
-            {subheading && <p className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</p>}
+            <Editable as="h2" editKey="heading" value={heading} className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</Editable>
+            {subheading && <Editable as="p" editKey="subheading" value={subheading} multiline className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</Editable>}
           </div>
         </div>
         <div className={`grid grid-cols-2 gap-4 ${colClass} md:gap-6`}>
@@ -356,8 +450,8 @@ function RichTextSection({ section }: { section: HomepageSection }) {
   return (
     <section className={`${bgClass}`}>
       <div className={`mx-auto flex max-w-4xl flex-col gap-3 px-4 py-10 md:py-14 ${alignClass}`}>
-        {heading && <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl">{heading}</h2>}
-        {body && <p className="text-sm leading-relaxed text-muted-foreground md:text-base">{body}</p>}
+        {heading && <Editable as="h2" editKey="heading" value={heading} className="text-2xl font-extrabold tracking-tight md:text-3xl">{heading}</Editable>}
+        {body && <Editable as="p" editKey="body" value={body} multiline className="text-sm leading-relaxed text-muted-foreground md:text-base">{body}</Editable>}
         {ctaLabel && ctaLink && (
           <a href={ctaLink} className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground shadow-md hover:opacity-90">
             {ctaLabel} <ArrowRight className="h-4 w-4" />
@@ -387,8 +481,8 @@ function ImageWithTextSection({ section }: { section: HomepageSection }) {
           )}
         </div>
         <div>
-          {heading && <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl">{heading}</h2>}
-          {body && <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">{body}</p>}
+          {heading && <Editable as="h2" editKey="heading" value={heading} className="text-2xl font-extrabold tracking-tight md:text-3xl">{heading}</Editable>}
+          {body && <Editable as="p" editKey="body" value={body} multiline className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">{body}</Editable>}
           {ctaLabel && ctaLink && (
             <a href={ctaLink} className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground shadow-md hover:opacity-90">
               {ctaLabel} <ArrowRight className="h-4 w-4" />
@@ -407,7 +501,7 @@ function CategoryGridSection({ section }: { section: HomepageSection }) {
   if (!items.length) return null;
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 md:py-12">
-      {heading && <h2 className="mb-5 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</h2>}
+      {heading && <Editable as="h2" editKey="heading" value={heading} className="mb-5 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</Editable>}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
         {items.map((it, i) => (
           <a key={i} href={it.link || "#"} className="group relative block overflow-hidden rounded-2xl">
@@ -438,8 +532,8 @@ function TestimonialsSection({ section }: { section: HomepageSection }) {
         <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600">
           <Star className="h-3 w-3 fill-amber-500 text-amber-500" /> Loved by Customers
         </span>
-        <h2 className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</h2>
-        <p className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</p>
+        <Editable as="h2" editKey="heading" value={heading} className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</Editable>
+        <Editable as="p" editKey="subheading" value={subheading} multiline className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</Editable>
       </div>
       <Carousel opts={{ align: "start", loop: true }} className="w-full">
         <CarouselContent className="-ml-3 md:-ml-4">
@@ -510,8 +604,8 @@ function NewsletterSection({ section }: { section: HomepageSection }) {
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
               <Mail className="h-3 w-3" /> Newsletter
             </span>
-            <h2 className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</h2>
-            <p className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</p>
+            <Editable as="h2" editKey="heading" value={heading} className="mt-2 text-xl font-extrabold tracking-tight md:text-2xl">{heading}</Editable>
+            <Editable as="p" editKey="subheading" value={subheading} multiline className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</Editable>
           </div>
           <form onSubmit={onSubmit} className="flex flex-col gap-2 sm:flex-row">
             <input
@@ -555,8 +649,8 @@ function CountdownSection({ section }: { section: HomepageSection }) {
       <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-6 text-primary-foreground md:p-10">
         <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
         <div className="relative flex flex-col items-center gap-5 text-center">
-          <h2 className="text-xl font-extrabold tracking-tight md:text-3xl">{heading}</h2>
-          {subheading && <p className="text-xs opacity-90 md:text-sm">{subheading}</p>}
+          <Editable as="h2" editKey="heading" value={heading} className="text-xl font-extrabold tracking-tight md:text-3xl">{heading}</Editable>
+          {subheading && <Editable as="p" editKey="subheading" value={subheading} multiline className="text-xs opacity-90 md:text-sm">{subheading}</Editable>}
           <div className="flex items-end gap-2 md:gap-4">
             {cells.map(([label, val]) => (
               <div key={label} className="flex flex-col items-center">
@@ -722,14 +816,14 @@ function VideoHeroSection({ section }: { section: HomepageSection }) {
         />
         <div className="relative z-10 mx-auto flex h-full max-w-5xl flex-col items-center justify-center gap-3 px-4 text-center text-white">
           {heading && (
-            <h2 className="text-3xl font-extrabold tracking-tight drop-shadow md:text-5xl">
+            <Editable as="h2" editKey="heading" value={heading} className="text-3xl font-extrabold tracking-tight drop-shadow md:text-5xl">
               {heading}
-            </h2>
+            </Editable>
           )}
           {subheading && (
-            <p className="max-w-2xl text-sm leading-relaxed opacity-95 drop-shadow md:text-base">
+            <Editable as="p" editKey="subheading" value={subheading} multiline className="max-w-2xl text-sm leading-relaxed opacity-95 drop-shadow md:text-base">
               {subheading}
-            </p>
+            </Editable>
           )}
           {ctaLabel && ctaLink && (
             <a
@@ -754,8 +848,8 @@ function FaqSection({ section }: { section: HomepageSection }) {
   return (
     <section className="mx-auto max-w-3xl px-4 py-10 md:py-14">
       <div className="mb-6 text-center">
-        <h2 className="text-xl font-extrabold tracking-tight md:text-2xl">{heading}</h2>
-        {subheading && <p className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</p>}
+        <Editable as="h2" editKey="heading" value={heading} className="text-xl font-extrabold tracking-tight md:text-2xl">{heading}</Editable>
+        {subheading && <Editable as="p" editKey="subheading" value={subheading} multiline className="mt-1 text-xs text-muted-foreground md:text-sm">{subheading}</Editable>}
       </div>
       <Accordion type="single" collapsible className="w-full">
         {items.map((it, i) => (
@@ -782,9 +876,9 @@ function BrandLogosSection({ section }: { section: HomepageSection }) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 md:py-10">
       {heading && (
-        <p className="mb-5 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground md:text-xs">
+        <Editable as="p" editKey="heading" value={heading} className="mb-5 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground md:text-xs">
           {heading}
-        </p>
+        </Editable>
       )}
       <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-5 md:gap-x-12">
         {items.map((it, i) => {
