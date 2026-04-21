@@ -13,7 +13,16 @@ export type MonthlyPnL = {
   profit: number;
 };
 
-const REVENUE_STATUSES = ["processing", "shipped", "delivered"] as const;
+const REVENUE_STATUSES = [
+  "confirmed",
+  "packaging",
+  "packed",
+  "ready_to_ship",
+  "shipped",
+  "in_transit",
+  "delivered",
+  "partial_delivered",
+] as const;
 
 /** Fetch revenue rows (sum totals from non-cancelled orders) within a date range. */
 export async function fetchRevenueByDay(from: string, to: string): Promise<RevenueRow[]> {
