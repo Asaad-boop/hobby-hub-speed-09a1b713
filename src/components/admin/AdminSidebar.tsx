@@ -18,6 +18,7 @@ import {
   Receipt,
   TrendingUp,
   ArrowRightLeft,
+  ShieldCheck,
 } from "lucide-react";
 import {
   Sidebar,
