@@ -602,163 +602,28 @@ function ProductPage() {
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-2xl font-extrabold md:text-3xl">Customer Reviews</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Real photos and feedback from verified buyers</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {eligibleOrderId
+                ? "You're a verified buyer — share your experience!"
+                : "Verified buyers can leave a review after their order is delivered."}
+            </p>
           </div>
-          <button
-            onClick={() => setReviewOpen(true)}
-            className="inline-flex items-center gap-2 rounded-full border-2 border-foreground px-4 py-2 text-xs font-bold transition hover:bg-foreground hover:text-background"
-          >
-            <MessageSquare className="h-4 w-4" /> Write a review
-          </button>
+          {eligibleOrderId && (
+            <button
+              onClick={() => setReviewOpen(true)}
+              className="inline-flex items-center gap-2 rounded-full border-2 border-foreground px-4 py-2 text-xs font-bold transition hover:bg-foreground hover:text-background"
+            >
+              <MessageSquare className="h-4 w-4" /> Write a review
+            </button>
+          )}
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          {/* Summary */}
-          <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/5 to-transparent p-5 md:col-span-1 md:sticky md:top-24 md:self-start">
-            <div className="flex items-center gap-3">
-              <p className="text-4xl font-extrabold leading-none">{product.rating}</p>
-              <div>
-                <div className="flex">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                  ))}
-                </div>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">{product.reviews.toLocaleString()} verified</p>
-              </div>
-            </div>
-            <div className="mt-4 space-y-1.5">
-              {ratingBreakdown.map((r) => (
-                <div key={r.stars} className="flex items-center gap-2 text-[11px]">
-                  <span className="inline-flex w-6 items-center gap-0.5 font-bold">{r.stars}<Star className="h-2.5 w-2.5 fill-primary text-primary" /></span>
-                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${r.pct}%` }} />
-                  </div>
-                  <span className="w-8 text-right font-semibold text-muted-foreground">{r.pct}%</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 flex items-center gap-2 rounded-xl bg-primary/10 p-2.5">
-              <ThumbsUp className="h-4 w-4 shrink-0 text-primary" />
-              <p className="text-[11px] font-bold text-primary">98% recommend this product</p>
-            </div>
-          </div>
-
-          {/* Reviews list */}
-          <div className="grid gap-3 md:col-span-2">
-            {/* Customer photo strip */}
-            <div className="rounded-xl border border-border bg-card p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <p className="inline-flex items-center gap-1.5 text-xs font-bold">
-                  <Camera className="h-3.5 w-3.5 text-primary" /> Customer photos (28)
-                </p>
-                <button className="text-[11px] font-semibold text-primary hover:underline">View all</button>
-              </div>
-              <div className="grid grid-cols-4 gap-1.5">
-                {[review1, review2, review3, review4].map((src, i) => (
-                  <button key={i} className="group relative overflow-hidden rounded-lg border border-border">
-                    <img src={src} alt="Customer photo" loading="lazy" width={512} height={512} className="aspect-square w-full object-cover transition group-hover:scale-110" />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Filter chips */}
-            <div className="flex flex-wrap items-center gap-1.5">
-              {([
-                { k: "all", l: "All" },
-                { k: "5", l: "5★" },
-                { k: "4", l: "4★" },
-                { k: "photos", l: "Photos" },
-              ] as const).map((f) => {
-                const active = filter === f.k;
-                return (
-                  <button
-                    key={f.k}
-                    onClick={() => setFilter(f.k)}
-                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${
-                      active
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-card text-foreground hover:border-primary/50"
-                    }`}
-                  >
-                    {f.l}
-                    <span className={`rounded-full px-1 text-[9px] ${active ? "bg-primary-foreground/20" : "bg-muted"}`}>
-                      {filterCounts[f.k]}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {filteredReviews.length === 0 && (
-              <div className="rounded-xl border-2 border-dashed border-border p-6 text-center">
-                <p className="text-xs font-semibold text-muted-foreground">No reviews match this filter.</p>
-                <button onClick={() => setFilter("all")} className="mt-2 text-xs font-bold text-primary hover:underline">
-                  Show all reviews
-                </button>
-              </div>
-            )}
-
-            {filteredReviews.slice(0, visibleReviews).map((r, i) => {
-              const avatars = [avatar1, avatar2, avatar3, avatar4];
-              const photoMap: Record<string, string> = { __r1: review1, __r2: review2, __r3: review3, __r4: review4 };
-              const resolvedPhotos = r.photos.map((p) => photoMap[p] ?? p);
-              return (
-                <div
-                  key={`${r.isUser ? "u" : "s"}-${i}`}
-                  className={`rounded-xl border bg-card p-3.5 ${
-                    r.isUser ? "border-primary/40 bg-primary/5" : "border-border"
-                  }`}
-                >
-                  <div className="flex items-start gap-2.5">
-                    {r.isUser ? (
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-extrabold text-primary-foreground">
-                        {r.name.charAt(0).toUpperCase()}
-                      </div>
-                    ) : (
-                      <img src={avatars[i % avatars.length]} alt={r.name} loading="lazy" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-cover" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <p className="text-xs font-bold">{r.name}</p>
-                        {r.isUser ? (
-                          <span className="rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold text-primary-foreground">New</span>
-                        ) : (
-                          <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold text-primary">
-                            <BadgeCheck className="h-2.5 w-2.5" /> Verified
-                          </span>
-                        )}
-                        <div className="flex items-center text-primary">
-                          {Array.from({ length: r.rating }).map((_, j) => (
-                            <Star key={j} className="h-3 w-3 fill-primary" />
-                          ))}
-                        </div>
-                        <span className="text-[10px] text-muted-foreground">• {r.date}</span>
-                      </div>
-                      <p className="mt-1.5 text-xs leading-relaxed text-foreground">{r.text}</p>
-                      {resolvedPhotos.length > 0 && (
-                        <div className="mt-2 grid grid-cols-4 gap-1.5 sm:grid-cols-5">
-                          {resolvedPhotos.map((src, j) => (
-                            <img key={j} src={src} alt="Review photo" loading="lazy" className="aspect-square w-full rounded-md border border-border object-cover" />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-            {visibleReviews < filteredReviews.length && (
-              <button
-                onClick={() => setVisibleReviews((n) => n + 3)}
-                className="mx-auto mt-1 inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2 text-xs font-bold transition hover:border-primary hover:text-primary"
-              >
-                Load more reviews <ChevronDown className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
-        </div>
+        <ReviewsList
+          reviews={dbReviews}
+          loading={reviewsLoading}
+          fallbackRating={Number(product.rating) || 0}
+          fallbackCount={Number(product.reviews) || 0}
+        />
       </section>
 
       {/* FAQ */}
