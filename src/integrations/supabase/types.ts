@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          new_value: Json | null
+          note: string | null
+          old_value: Json | null
+          order_id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          note?: string | null
+          old_value?: Json | null
+          order_id: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          note?: string | null
+          old_value?: Json | null
+          order_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ad_campaigns: {
         Row: {
           attribution_method: Database["public"]["Enums"]["ad_attribution_method"]
@@ -756,20 +789,33 @@ export type Database = {
           confirmed_by: string | null
           coupon_code: string | null
           created_at: string
+          device_type: string | null
           discount_amount: number
+          entry_url: string | null
+          fb_browser_pixel: string | null
+          fb_click_id: string | null
           guest_email: string | null
           guest_name: string | null
           guest_phone: string | null
           hold_reason: string | null
           hold_until: string | null
           id: string
+          ip_address: string | null
+          is_cross_sale: boolean
           is_guest_order: boolean
+          is_preorder: boolean
           last_call_at: string | null
           last_called_by: string | null
+          meta_ad_account_id: string | null
+          meta_ad_id: string | null
+          meta_ad_set_id: string | null
+          meta_campaign_id: string | null
           notes: string | null
           order_financial_id: string | null
+          order_tags: string[]
           payment_method: string | null
           rejection_reason: string | null
+          session_source: string | null
           shipment_id: string | null
           shipping_address: string | null
           shipping_city: string | null
@@ -781,7 +827,12 @@ export type Database = {
           subtotal: number
           total: number
           updated_at: string
+          user_agent: string | null
           user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
         }
         Insert: {
           admin_notes?: string | null
@@ -797,20 +848,33 @@ export type Database = {
           confirmed_by?: string | null
           coupon_code?: string | null
           created_at?: string
+          device_type?: string | null
           discount_amount?: number
+          entry_url?: string | null
+          fb_browser_pixel?: string | null
+          fb_click_id?: string | null
           guest_email?: string | null
           guest_name?: string | null
           guest_phone?: string | null
           hold_reason?: string | null
           hold_until?: string | null
           id?: string
+          ip_address?: string | null
+          is_cross_sale?: boolean
           is_guest_order?: boolean
+          is_preorder?: boolean
           last_call_at?: string | null
           last_called_by?: string | null
+          meta_ad_account_id?: string | null
+          meta_ad_id?: string | null
+          meta_ad_set_id?: string | null
+          meta_campaign_id?: string | null
           notes?: string | null
           order_financial_id?: string | null
+          order_tags?: string[]
           payment_method?: string | null
           rejection_reason?: string | null
+          session_source?: string | null
           shipment_id?: string | null
           shipping_address?: string | null
           shipping_city?: string | null
@@ -822,7 +886,12 @@ export type Database = {
           subtotal?: number
           total?: number
           updated_at?: string
+          user_agent?: string | null
           user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Update: {
           admin_notes?: string | null
@@ -838,20 +907,33 @@ export type Database = {
           confirmed_by?: string | null
           coupon_code?: string | null
           created_at?: string
+          device_type?: string | null
           discount_amount?: number
+          entry_url?: string | null
+          fb_browser_pixel?: string | null
+          fb_click_id?: string | null
           guest_email?: string | null
           guest_name?: string | null
           guest_phone?: string | null
           hold_reason?: string | null
           hold_until?: string | null
           id?: string
+          ip_address?: string | null
+          is_cross_sale?: boolean
           is_guest_order?: boolean
+          is_preorder?: boolean
           last_call_at?: string | null
           last_called_by?: string | null
+          meta_ad_account_id?: string | null
+          meta_ad_id?: string | null
+          meta_ad_set_id?: string | null
+          meta_campaign_id?: string | null
           notes?: string | null
           order_financial_id?: string | null
+          order_tags?: string[]
           payment_method?: string | null
           rejection_reason?: string | null
+          session_source?: string | null
           shipment_id?: string | null
           shipping_address?: string | null
           shipping_city?: string | null
@@ -863,7 +945,12 @@ export type Database = {
           subtotal?: number
           total?: number
           updated_at?: string
+          user_agent?: string | null
           user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Relationships: [
           {
@@ -1425,7 +1512,28 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      customer_courier_stats: {
+        Row: {
+          cancelled_orders: number | null
+          delivered_orders: number | null
+          phone: string | null
+          provider: Database["public"]["Enums"]["courier_provider"] | null
+          success_rate: number | null
+          total_orders: number | null
+        }
+        Relationships: []
+      }
+      customer_stats_by_phone: {
+        Row: {
+          cancelled_orders: number | null
+          delivered_orders: number | null
+          fake_orders: number | null
+          phone: string | null
+          success_rate: number | null
+          total_orders: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_rls_audit: {
