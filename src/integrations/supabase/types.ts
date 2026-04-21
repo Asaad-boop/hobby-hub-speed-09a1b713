@@ -271,6 +271,13 @@ export type Database = {
             referencedRelation: "coupons"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "coupon_usage_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
         ]
       }
       coupons: {
@@ -725,6 +732,13 @@ export type Database = {
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
         ]
       }
       orders: {
@@ -1038,23 +1052,35 @@ export type Database = {
       profiles: {
         Row: {
           admin_notes: string | null
+          cancellation_count: number
           created_at: string
           display_name: string | null
+          fake_order_count: number
+          flag_reason: string | null
           id: string
+          is_flagged: boolean
           updated_at: string
         }
         Insert: {
           admin_notes?: string | null
+          cancellation_count?: number
           created_at?: string
           display_name?: string | null
+          fake_order_count?: number
+          flag_reason?: string | null
           id: string
+          is_flagged?: boolean
           updated_at?: string
         }
         Update: {
           admin_notes?: string | null
+          cancellation_count?: number
           created_at?: string
           display_name?: string | null
+          fake_order_count?: number
+          flag_reason?: string | null
           id?: string
+          is_flagged?: boolean
           updated_at?: string
         }
         Relationships: []
@@ -1381,7 +1407,12 @@ export type Database = {
         | "tiktok"
         | "other"
       ad_status: "active" | "paused" | "ended"
-      app_role: "admin" | "moderator" | "customer"
+      app_role:
+        | "admin"
+        | "moderator"
+        | "customer"
+        | "customer_service"
+        | "operations"
       cash_account_type:
         | "cash"
         | "bkash"
@@ -1610,7 +1641,13 @@ export const Constants = {
         "other",
       ],
       ad_status: ["active", "paused", "ended"],
-      app_role: ["admin", "moderator", "customer"],
+      app_role: [
+        "admin",
+        "moderator",
+        "customer",
+        "customer_service",
+        "operations",
+      ],
       cash_account_type: [
         "cash",
         "bkash",
