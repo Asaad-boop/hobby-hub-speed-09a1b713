@@ -77,6 +77,7 @@ const statusMeta: Record<OrderStatus, { label: string; className: string; icon: 
   fake: { label: "Fake", className: "bg-destructive/10 text-destructive border-destructive/30", icon: XCircle },
   on_hold: { label: "On Hold", className: "bg-muted text-muted-foreground border-border", icon: Clock },
   advance_payment_pending: { label: "Advance Pending", className: "bg-yellow-500/10 text-yellow-700 border-yellow-500/30", icon: Clock },
+  incomplete: { label: "Incomplete", className: "bg-muted text-muted-foreground border-border", icon: AlertTriangle },
 };
 
 function formatDate(iso: string) {
@@ -152,6 +153,7 @@ function AdminOrdersPage() {
       fake: 0,
       on_hold: 0,
       advance_payment_pending: 0,
+      incomplete: 0,
     };
     for (const o of orders) c[o.status]++;
     return c;

@@ -93,6 +93,7 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
   fake: "Fake",
   on_hold: "On Hold",
   advance_payment_pending: "Advance Pending",
+  incomplete: "Incomplete",
 };
 
 const STATUS_TONES: Record<OrderStatus, string> = {
@@ -112,6 +113,7 @@ const STATUS_TONES: Record<OrderStatus, string> = {
   fake: "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30",
   on_hold: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 border-yellow-500/30",
   advance_payment_pending: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/30",
+  incomplete: "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/30",
 };
 
 type OrderWithItems = OrderRow & { order_items: OrderItemRow[] };
