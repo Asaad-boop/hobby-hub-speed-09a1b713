@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AdminTableSkeleton } from "@/components/admin/TableSkeleton";
 import {
   Table,
   TableBody,
@@ -181,9 +182,7 @@ function AdminReviewsPage() {
 
       <div className="overflow-hidden rounded-xl border border-border bg-card">
         {isLoading ? (
-          <div className="flex h-40 items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
+          <AdminTableSkeleton rows={6} columns={6} />
         ) : filtered.length === 0 ? (
           <div className="p-10 text-center text-sm text-muted-foreground">No reviews found.</div>
         ) : (
