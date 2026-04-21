@@ -125,17 +125,20 @@ function Checkout() {
     setSubmitting(true);
 
     const { data: { session } } = await supabase.auth.getSession();
+    const isGuest = !session;
 
-    if (session) {
-      const allItems = bump ? [...items, { product: bumpItem, qty: 1 }] : items;
-      const subtotal = allItems.reduce((s, i) => s + i.product.price * i.qty, 0);
-      const orderTotal = subtotal + shippingFee - couponDiscount;
+    const allItems = bump ? [...items, { product: bumpItem, qty: 1 }] : items;
+    const subtotal = allItems.reduce((s, i) => s + i.product.price * i.qty, 0);
+    const orderTotal = subtotal + shippingFee - couponDiscount;
 
-      const { data: order, error: orderErr } = await supabase
-        .from("orders")
-        .insert({
-          user_id: session.user.id,
-          status: "pending",
+    // Build the order row — works for both authed and guest checkouts.
+    const orderInsert = isGuest
+      ? {
+          user_id: null,
+          is_guest_order: true,
+          guest_name: form.name,
+          guest_phone: form.phone,
+          status: "new" as const,
           subtotal,
           shipping_fee: shippingFee,
           discount_amount: couponDiscount,
@@ -147,50 +150,60 @@ function Checkout() {
           shipping_address: form.address,
           shipping_city: form.city,
           shipping_district: form.district,
-        })
-        .select("id")
-        .single();
-
-      if (orderErr || !order) {
-        toast.error("Could not place order. Please try again.");
-        setSubmitting(false);
-        return;
-      }
-
-      const orderItemsPayload = allItems.map((i) => ({
-        order_id: order.id,
-        user_id: session.user.id,
-        product_id: i.product.id,
-        name: i.product.title,
-        image: i.product.image,
-        price: i.product.price,
-        quantity: i.qty,
-        variant_id: i.variantId ?? null,
-        variant_label: i.variantLabel ?? null,
-      }));
-      await supabase.from("order_items").insert(orderItemsPayload);
-
-      if (appliedCoupon && couponDiscount > 0) {
-        await supabase.from("coupon_usage").insert({
-          coupon_id: appliedCoupon.id,
-          user_id: session.user.id,
-          order_id: order.id,
+        }
+      : {
+          user_id: session!.user.id,
+          status: "new" as const,
+          subtotal,
+          shipping_fee: shippingFee,
           discount_amount: couponDiscount,
-        });
-      }
+          coupon_code: appliedCoupon?.code ?? null,
+          total: orderTotal,
+          payment_method: payMethod,
+          shipping_name: form.name,
+          shipping_phone: form.phone,
+          shipping_address: form.address,
+          shipping_city: form.city,
+          shipping_district: form.district,
+        };
 
-      clear();
-      toast.success("Order placed successfully!");
-      navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
+    const { data: order, error: orderErr } = await supabase
+      .from("orders")
+      .insert(orderInsert)
+      .select("id")
+      .single();
+
+    if (orderErr || !order) {
+      toast.error("Could not place order. Please try again.");
+      setSubmitting(false);
       return;
     }
 
-    // Guest fallback
-    if (bump) add(bumpItem);
+    const orderItemsPayload = allItems.map((i) => ({
+      order_id: order.id,
+      user_id: isGuest ? null : session!.user.id,
+      product_id: i.product.id,
+      name: i.product.title,
+      image: i.product.image,
+      price: i.product.price,
+      quantity: i.qty,
+      variant_id: i.variantId ?? null,
+      variant_label: i.variantLabel ?? null,
+    }));
+    await supabase.from("order_items").insert(orderItemsPayload);
+
+    if (!isGuest && appliedCoupon && couponDiscount > 0) {
+      await supabase.from("coupon_usage").insert({
+        coupon_id: appliedCoupon.id,
+        user_id: session!.user.id,
+        order_id: order.id,
+        discount_amount: couponDiscount,
+      });
+    }
+
     clear();
-    const tempId = `guest-${Date.now().toString(36)}`;
-    toast.success("Order placed successfully!");
-    navigate({ to: "/order-success/$orderId", params: { orderId: tempId } });
+    toast.success("Order placed! We'll call you to confirm soon.");
+    navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
   };
 
   if (items.length === 0) {

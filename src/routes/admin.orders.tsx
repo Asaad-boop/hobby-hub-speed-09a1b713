@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Search, Eye, Package, Truck, CheckCircle2, XCircle, Clock, RefreshCw } from "lucide-react";
+import { Loader2, Search, Eye, Package, Truck, CheckCircle2, XCircle, Clock, RefreshCw, Sparkles, PackageCheck, MapPin, AlertTriangle, RotateCcw, Repeat } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,14 +41,39 @@ export const Route = createFileRoute("/admin/orders")({
   component: AdminOrdersPage,
 });
 
-const STATUS_OPTIONS: OrderStatus[] = ["pending", "processing", "shipped", "delivered", "cancelled"];
+// Operations workspace covers everything from confirmed onwards.
+// New, cancelled, and fake live in /admin/web-orders and /admin/cancelled-orders.
+const STATUS_OPTIONS: OrderStatus[] = [
+  "confirmed",
+  "packaging",
+  "packed",
+  "ready_to_ship",
+  "shipped",
+  "in_transit",
+  "delivered",
+  "partial_delivered",
+  "returned",
+  "exchanged",
+  "damaged",
+];
 
 const statusMeta: Record<OrderStatus, { label: string; className: string; icon: typeof Clock }> = {
-  pending: { label: "Pending", className: "bg-amber-500/10 text-amber-700 border-amber-500/30", icon: Clock },
-  processing: { label: "Processing", className: "bg-blue-500/10 text-blue-700 border-blue-500/30", icon: Package },
-  shipped: { label: "Shipped", className: "bg-indigo-500/10 text-indigo-700 border-indigo-500/30", icon: Truck },
+  new: { label: "New", className: "bg-amber-500/10 text-amber-700 border-amber-500/30", icon: Sparkles },
+  confirmed: { label: "Confirmed", className: "bg-sky-500/10 text-sky-700 border-sky-500/30", icon: CheckCircle2 },
+  packaging: { label: "Packaging", className: "bg-blue-500/10 text-blue-700 border-blue-500/30", icon: Package },
+  packed: { label: "Packed", className: "bg-indigo-500/10 text-indigo-700 border-indigo-500/30", icon: PackageCheck },
+  ready_to_ship: { label: "Ready to Ship", className: "bg-violet-500/10 text-violet-700 border-violet-500/30", icon: Truck },
+  shipped: { label: "Shipped", className: "bg-purple-500/10 text-purple-700 border-purple-500/30", icon: Truck },
+  in_transit: { label: "In Transit", className: "bg-fuchsia-500/10 text-fuchsia-700 border-fuchsia-500/30", icon: MapPin },
   delivered: { label: "Delivered", className: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30", icon: CheckCircle2 },
+  partial_delivered: { label: "Partial Delivered", className: "bg-amber-500/10 text-amber-700 border-amber-500/30", icon: AlertTriangle },
+  returned: { label: "Returned", className: "bg-orange-500/10 text-orange-700 border-orange-500/30", icon: RotateCcw },
+  exchanged: { label: "Exchanged", className: "bg-cyan-500/10 text-cyan-700 border-cyan-500/30", icon: Repeat },
+  damaged: { label: "Damaged", className: "bg-rose-500/10 text-rose-700 border-rose-500/30", icon: AlertTriangle },
   cancelled: { label: "Cancelled", className: "bg-destructive/10 text-destructive border-destructive/30", icon: XCircle },
+  fake: { label: "Fake", className: "bg-destructive/10 text-destructive border-destructive/30", icon: XCircle },
+  on_hold: { label: "On Hold", className: "bg-muted text-muted-foreground border-border", icon: Clock },
+  advance_payment_pending: { label: "Advance Pending", className: "bg-yellow-500/10 text-yellow-700 border-yellow-500/30", icon: Clock },
 };
 
 function formatDate(iso: string) {
@@ -84,6 +109,7 @@ function AdminOrdersPage() {
       const { data, error } = await supabase
         .from("orders")
         .select("*")
+        .in("status", STATUS_OPTIONS)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as Order[];
@@ -107,11 +133,22 @@ function AdminOrdersPage() {
   const counts = useMemo(() => {
     const c: Record<OrderStatus | "all", number> = {
       all: orders.length,
-      pending: 0,
-      processing: 0,
+      new: 0,
+      confirmed: 0,
+      packaging: 0,
+      packed: 0,
+      ready_to_ship: 0,
       shipped: 0,
+      in_transit: 0,
       delivered: 0,
+      partial_delivered: 0,
+      returned: 0,
+      exchanged: 0,
+      damaged: 0,
       cancelled: 0,
+      fake: 0,
+      on_hold: 0,
+      advance_payment_pending: 0,
     };
     for (const o of orders) c[o.status]++;
     return c;
