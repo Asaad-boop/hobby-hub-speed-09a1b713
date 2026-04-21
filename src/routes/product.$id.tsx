@@ -35,14 +35,6 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import avatar1 from "@/assets/avatar-1.jpg";
-import avatar2 from "@/assets/avatar-2.jpg";
-import avatar3 from "@/assets/avatar-3.jpg";
-import avatar4 from "@/assets/avatar-4.jpg";
-import review1 from "@/assets/review-1.jpg";
-import review2 from "@/assets/review-2.jpg";
-import review3 from "@/assets/review-3.jpg";
-import review4 from "@/assets/review-4.jpg";
 
 export const Route = createFileRoute("/product/$id")({
   loader: async ({ params }) => {
