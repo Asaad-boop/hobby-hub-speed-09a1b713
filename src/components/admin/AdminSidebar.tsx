@@ -13,6 +13,7 @@ import {
   Boxes,
   Wallet,
   MessageSquare,
+  Tag,
 } from "lucide-react";
 import {
   Sidebar,
@@ -57,6 +58,7 @@ const groups: { label: string; items: NavItem[] }[] = [
       { title: "Orders", url: "/admin/orders", icon: ShoppingBag },
       { title: "Customers", url: "/admin/customers", icon: Users },
       { title: "Reviews", url: "/admin/reviews", icon: MessageSquare },
+      { title: "Coupons", url: "/admin/coupons", icon: Tag },
       { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
       { title: "Finance", url: "/admin/finance", icon: Wallet, badge: "soon" },
     ],

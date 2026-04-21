@@ -95,6 +95,98 @@ export type Database = {
         }
         Relationships: []
       }
+      coupon_usage: {
+        Row: {
+          coupon_id: string
+          created_at: string
+          discount_amount: number
+          id: string
+          order_id: string
+          user_id: string
+        }
+        Insert: {
+          coupon_id: string
+          created_at?: string
+          discount_amount?: number
+          id?: string
+          order_id: string
+          user_id: string
+        }
+        Update: {
+          coupon_id?: string
+          created_at?: string
+          discount_amount?: number
+          id?: string
+          order_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_usage_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coupons: {
+        Row: {
+          applicable_categories: Json | null
+          applicable_products: Json | null
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          max_discount: number | null
+          min_order_amount: number
+          type: Database["public"]["Enums"]["coupon_type"]
+          updated_at: string
+          usage_limit: number | null
+          used_count: number
+          valid_from: string
+          valid_until: string | null
+          value: number
+        }
+        Insert: {
+          applicable_categories?: Json | null
+          applicable_products?: Json | null
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_discount?: number | null
+          min_order_amount?: number
+          type?: Database["public"]["Enums"]["coupon_type"]
+          updated_at?: string
+          usage_limit?: number | null
+          used_count?: number
+          valid_from?: string
+          valid_until?: string | null
+          value: number
+        }
+        Update: {
+          applicable_categories?: Json | null
+          applicable_products?: Json | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_discount?: number | null
+          min_order_amount?: number
+          type?: Database["public"]["Enums"]["coupon_type"]
+          updated_at?: string
+          usage_limit?: number | null
+          used_count?: number
+          valid_from?: string
+          valid_until?: string | null
+          value?: number
+        }
+        Relationships: []
+      }
       homepage_versions: {
         Row: {
           created_at: string
@@ -165,7 +257,9 @@ export type Database = {
       }
       orders: {
         Row: {
+          coupon_code: string | null
           created_at: string
+          discount_amount: number
           id: string
           notes: string | null
           payment_method: string | null
@@ -182,7 +276,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          coupon_code?: string | null
           created_at?: string
+          discount_amount?: number
           id?: string
           notes?: string | null
           payment_method?: string | null
@@ -199,7 +295,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          coupon_code?: string | null
           created_at?: string
+          discount_amount?: number
           id?: string
           notes?: string | null
           payment_method?: string | null
@@ -481,6 +579,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "customer"
+      coupon_type: "percentage" | "fixed"
       order_status:
         | "pending"
         | "processing"
@@ -615,6 +714,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "customer"],
+      coupon_type: ["percentage", "fixed"],
       order_status: [
         "pending",
         "processing",

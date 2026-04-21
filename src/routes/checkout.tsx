@@ -4,6 +4,7 @@ import { useCart } from "@/lib/cart";
 import { useProducts } from "@/lib/products";
 import { supabase } from "@/integrations/supabase/client";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
+import { validateCoupon, type Coupon } from "@/lib/coupons";
 import { toast } from "sonner";
 import {
   Truck,
@@ -44,7 +45,8 @@ function Checkout() {
   const [payNumber, setPayNumber] = useState("");
   const [trxId, setTrxId] = useState("");
   const [coupon, setCoupon] = useState("");
-  const [couponApplied, setCouponApplied] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", city: "", district: "" });
 
   // Prefill from default address if logged in
@@ -75,17 +77,34 @@ function Checkout() {
   const bumpItem = allProducts[1] ?? allProducts[0];
   const bumpPrice = 199;
   const shippingFee = shipMethod === "inside" ? 60 : 130;
-  const couponDiscount = couponApplied ? Math.round(total * 0.05) : 0;
-  const grand = total + (bump ? bumpPrice : 0) + shippingFee - couponDiscount;
+  const subtotalWithBump = total + (bump ? bumpPrice : 0);
+  const couponDiscount = appliedCoupon
+    ? appliedCoupon.type === "percentage"
+      ? Math.min(
+          Math.round((subtotalWithBump * Number(appliedCoupon.value)) / 100),
+          appliedCoupon.max_discount ? Number(appliedCoupon.max_discount) : Infinity,
+        )
+      : Math.min(Number(appliedCoupon.value), subtotalWithBump)
+    : 0;
+  const grand = Math.max(0, subtotalWithBump + shippingFee - couponDiscount);
 
-  const applyCoupon = () => {
-    const code = coupon.trim().toUpperCase();
-    if (code === "SAVE5") {
-      setCouponApplied(true);
-      toast.success("Coupon applied — 5% off!");
-    } else {
-      toast.error("Invalid coupon code");
+  const applyCoupon = async () => {
+    if (validatingCoupon) return;
+    setValidatingCoupon(true);
+    const productIds = items.map((i) => i.product.id);
+    const result = await validateCoupon(coupon, subtotalWithBump, productIds);
+    setValidatingCoupon(false);
+    if (!result.ok) {
+      toast.error(result.error);
+      return;
     }
+    setAppliedCoupon(result.coupon);
+    toast.success(`Coupon ${result.coupon.code} applied — ৳${result.discount} off!`);
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCoupon("");
   };
 
   const phoneValid = /^01[3-9]\d{8}$/.test(form.phone.replace(/\s/g, ""));
@@ -119,6 +138,8 @@ function Checkout() {
           status: "pending",
           subtotal,
           shipping_fee: shippingFee,
+          discount_amount: couponDiscount,
+          coupon_code: appliedCoupon?.code ?? null,
           total: orderTotal,
           payment_method: payMethod,
           shipping_name: form.name,
@@ -146,6 +167,15 @@ function Checkout() {
         quantity: i.qty,
       }));
       await supabase.from("order_items").insert(orderItemsPayload);
+
+      if (appliedCoupon && couponDiscount > 0) {
+        await supabase.from("coupon_usage").insert({
+          coupon_id: appliedCoupon.id,
+          user_id: session.user.id,
+          order_id: order.id,
+          discount_amount: couponDiscount,
+        });
+      }
 
       clear();
       toast.success("Order placed successfully!");
@@ -460,14 +490,14 @@ function Checkout() {
 
             {/* Coupon */}
             <div className="mt-3 border-t border-border pt-3">
-              {couponApplied ? (
+              {appliedCoupon ? (
                 <div className="flex items-center justify-between rounded-lg bg-primary/10 px-2.5 py-1.5 text-[11px]">
                   <span className="inline-flex items-center gap-1 font-bold text-primary">
-                    <Tag className="h-3 w-3" /> SAVE5 applied
+                    <Tag className="h-3 w-3" /> {appliedCoupon.code} applied
                   </span>
                   <button
                     type="button"
-                    onClick={() => { setCouponApplied(false); setCoupon(""); }}
+                    onClick={removeCoupon}
                     className="font-semibold text-muted-foreground hover:text-destructive"
                   >
                     Remove
@@ -487,21 +517,22 @@ function Checkout() {
                   <button
                     type="button"
                     onClick={applyCoupon}
-                    className="rounded-md bg-foreground px-3 text-[11px] font-bold text-background hover:opacity-90"
+                    disabled={validatingCoupon}
+                    className="rounded-md bg-foreground px-3 text-[11px] font-bold text-background hover:opacity-90 disabled:opacity-60"
                   >
-                    Apply
+                    {validatingCoupon ? "..." : "Apply"}
                   </button>
                 </div>
               )}
-              <p className="mt-1 text-[10px] text-muted-foreground">Try: <span className="font-mono font-bold">SAVE5</span></p>
+              <p className="mt-1 text-[10px] text-muted-foreground">Have a code? Apply it above.</p>
             </div>
 
             <div className="mt-3 space-y-1 border-t border-border pt-3 text-xs">
               <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>৳{total}</span></div>
               {bump && <div className="flex justify-between"><span className="text-muted-foreground">Bonus item</span><span>৳{bumpPrice}</span></div>}
               <div className="flex justify-between"><span className="text-muted-foreground">Delivery</span><span>৳{shippingFee}</span></div>
-              {couponApplied && (
-                <div className="flex justify-between text-primary"><span>Discount (5%)</span><span>-৳{couponDiscount}</span></div>
+              {appliedCoupon && couponDiscount > 0 && (
+                <div className="flex justify-between text-primary"><span>Discount ({appliedCoupon.code})</span><span>-৳{couponDiscount}</span></div>
               )}
               <div className="mt-1 flex justify-between border-t border-border pt-2 text-sm font-extrabold"><span>Total</span><span className="text-primary">৳{grand}</span></div>
             </div>
