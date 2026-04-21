@@ -17,6 +17,7 @@ import {
   Tag,
   Receipt,
   TrendingUp,
+  ArrowRightLeft,
 } from "lucide-react";
 import {
   Sidebar,
@@ -71,6 +72,7 @@ const groups: { label: string; items: NavItem[] }[] = [
       { title: "Finance Dashboard", url: "/admin/finance", icon: TrendingUp, exact: true },
       { title: "Cash Accounts", url: "/admin/finance/accounts", icon: Wallet },
       { title: "Transactions", url: "/admin/finance/transactions", icon: Receipt },
+      { title: "COD Settlements", url: "/admin/finance/settlements", icon: ArrowRightLeft },
       { title: "Expenses", url: "/admin/expenses", icon: Receipt },
       { title: "Accounting", url: "/admin/accounting", icon: TrendingUp },
     ],
