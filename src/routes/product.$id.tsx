@@ -9,6 +9,13 @@ import { useWishlist } from "@/lib/wishlist";
 import ProductCard from "@/components/ProductCard";
 import ReviewModal, { type NewReview } from "@/components/ReviewModal";
 import ReviewsList from "@/components/ReviewsList";
+import VariantSelector from "@/components/VariantSelector";
+import {
+  fetchProductVariantData,
+  findVariantByValues,
+  buildVariantLabel,
+  variantPrice,
+} from "@/lib/variants";
 import {
   Star,
   Truck,
@@ -150,6 +157,39 @@ function ProductPage() {
     queryFn: () => fetchEligibleOrderId(product.id),
     staleTime: 60_000,
   });
+
+  // ---- Variants ----
+  const { data: variantData } = useQuery({
+    queryKey: ["product_variants", product.id],
+    queryFn: () => fetchProductVariantData(product.id),
+    staleTime: 30_000,
+  });
+  const optionTypes = variantData?.optionTypes ?? [];
+  const optionValues = variantData?.optionValues ?? [];
+  const variants = (variantData?.variants ?? []).filter((v) => v.is_active);
+  const hasVariants = optionTypes.length > 0;
+  const [selectedValues, setSelectedValues] = useState<Record<string, string>>({});
+  const allTypesSelected = hasVariants && optionTypes.every((t) => !!selectedValues[t.id]);
+  const selectedVariant = useMemo(
+    () =>
+      allTypesSelected
+        ? findVariantByValues(
+            variants,
+            optionTypes.map((t) => selectedValues[t.id]),
+          )
+        : null,
+    [allTypesSelected, variants, optionTypes, selectedValues],
+  );
+  const effectivePrice = variantPrice(selectedVariant, product.price);
+  const effectiveStock = selectedVariant ? selectedVariant.stock : product.stock;
+  const variantBlocksAddToCart = hasVariants && (!selectedVariant || effectiveStock <= 0);
+  const variantSelectionLabel = allTypesSelected
+    ? buildVariantLabel(
+        optionTypes,
+        optionValues,
+        optionTypes.map((t) => selectedValues[t.id]),
+      )
+    : null;
 
   const handleReviewSubmit = async (r: NewReview) => {
     if (!eligibleOrderId) {
