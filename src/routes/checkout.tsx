@@ -138,6 +138,8 @@ function Checkout() {
           status: "pending",
           subtotal,
           shipping_fee: shippingFee,
+          discount_amount: couponDiscount,
+          coupon_code: appliedCoupon?.code ?? null,
           total: orderTotal,
           payment_method: payMethod,
           shipping_name: form.name,
@@ -165,6 +167,15 @@ function Checkout() {
         quantity: i.qty,
       }));
       await supabase.from("order_items").insert(orderItemsPayload);
+
+      if (appliedCoupon && couponDiscount > 0) {
+        await supabase.from("coupon_usage").insert({
+          coupon_id: appliedCoupon.id,
+          user_id: session.user.id,
+          order_id: order.id,
+          discount_amount: couponDiscount,
+        });
+      }
 
       clear();
       toast.success("Order placed successfully!");
