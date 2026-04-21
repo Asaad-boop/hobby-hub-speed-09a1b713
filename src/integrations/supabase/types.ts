@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          action: string
+          details: Json | null
+          entity_id: string
+          entity_type: string
+          id: string
+          ip_address: string | null
+          performed_at: string | null
+          performed_by: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          details?: Json | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          performed_at?: string | null
+          performed_by?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          details?: Json | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          performed_at?: string | null
+          performed_by?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       activity_logs: {
         Row: {
           action: string
@@ -198,6 +234,127 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      bd_areas: {
+        Row: {
+          created_at: string | null
+          delivery_charge_pathao: number | null
+          delivery_charge_redx: number | null
+          delivery_charge_steadfast: number | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name_bn: string | null
+          name_en: string
+          pathao_area_id: string | null
+          pathao_zone_id: string | null
+          postal_code: string | null
+          zone_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          delivery_charge_pathao?: number | null
+          delivery_charge_redx?: number | null
+          delivery_charge_steadfast?: number | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name_bn?: string | null
+          name_en: string
+          pathao_area_id?: string | null
+          pathao_zone_id?: string | null
+          postal_code?: string | null
+          zone_id: string
+        }
+        Update: {
+          created_at?: string | null
+          delivery_charge_pathao?: number | null
+          delivery_charge_redx?: number | null
+          delivery_charge_steadfast?: number | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name_bn?: string | null
+          name_en?: string
+          pathao_area_id?: string | null
+          pathao_zone_id?: string | null
+          postal_code?: string | null
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bd_areas_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "bd_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bd_cities: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name_bn: string | null
+          name_en: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name_bn?: string | null
+          name_en: string
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name_bn?: string | null
+          name_en?: string
+        }
+        Relationships: []
+      }
+      bd_zones: {
+        Row: {
+          city_id: string
+          created_at: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name_bn: string | null
+          name_en: string
+        }
+        Insert: {
+          city_id: string
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name_bn?: string | null
+          name_en: string
+        }
+        Update: {
+          city_id?: string
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name_bn?: string | null
+          name_en?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bd_zones_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "bd_cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cash_accounts: {
         Row: {
@@ -637,6 +794,110 @@ export type Database = {
         }
         Relationships: []
       }
+      order_attribution: {
+        Row: {
+          captured_at: string | null
+          city: string | null
+          country: string | null
+          device_type: string | null
+          entry_url: string | null
+          facebook_browser_pixel: string | null
+          facebook_click_id: string | null
+          fbclid: string | null
+          gclid: string | null
+          id: string
+          ip_address: string | null
+          landing_page: string | null
+          meta_ad_account_id: string | null
+          meta_ad_account_name: string | null
+          meta_ad_id: string | null
+          meta_ad_name: string | null
+          meta_adset_id: string | null
+          meta_adset_name: string | null
+          meta_campaign_id: string | null
+          meta_campaign_name: string | null
+          order_id: string
+          referrer: string | null
+          source: string | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          captured_at?: string | null
+          city?: string | null
+          country?: string | null
+          device_type?: string | null
+          entry_url?: string | null
+          facebook_browser_pixel?: string | null
+          facebook_click_id?: string | null
+          fbclid?: string | null
+          gclid?: string | null
+          id?: string
+          ip_address?: string | null
+          landing_page?: string | null
+          meta_ad_account_id?: string | null
+          meta_ad_account_name?: string | null
+          meta_ad_id?: string | null
+          meta_ad_name?: string | null
+          meta_adset_id?: string | null
+          meta_adset_name?: string | null
+          meta_campaign_id?: string | null
+          meta_campaign_name?: string | null
+          order_id: string
+          referrer?: string | null
+          source?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          captured_at?: string | null
+          city?: string | null
+          country?: string | null
+          device_type?: string | null
+          entry_url?: string | null
+          facebook_browser_pixel?: string | null
+          facebook_click_id?: string | null
+          fbclid?: string | null
+          gclid?: string | null
+          id?: string
+          ip_address?: string | null
+          landing_page?: string | null
+          meta_ad_account_id?: string | null
+          meta_ad_account_name?: string | null
+          meta_ad_id?: string | null
+          meta_ad_name?: string | null
+          meta_adset_id?: string | null
+          meta_adset_name?: string | null
+          meta_campaign_id?: string | null
+          meta_campaign_name?: string | null
+          order_id?: string
+          referrer?: string | null
+          source?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_attribution_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_financials: {
         Row: {
           ads_cost_attributed: number
@@ -781,6 +1042,8 @@ export type Database = {
           advance_payment_method: string | null
           advance_payment_screenshot_url: string | null
           advance_payment_txn_id: string | null
+          assigned_to: string | null
+          auto_call_enabled: boolean | null
           call_attempt_count: number
           call_status: Database["public"]["Enums"]["call_status"]
           cancellation_reason: string | null
@@ -789,6 +1052,12 @@ export type Database = {
           confirmed_by: string | null
           coupon_code: string | null
           created_at: string
+          customer_ip_address: string | null
+          delivered_at: string | null
+          delivery_area_id: string | null
+          delivery_city_id: string | null
+          delivery_method: string | null
+          delivery_zone_id: string | null
           device_type: string | null
           discount_amount: number
           entry_url: string | null
@@ -806,6 +1075,8 @@ export type Database = {
           is_preorder: boolean
           last_call_at: string | null
           last_called_by: string | null
+          latest_note: string | null
+          merchant_ip_address: string | null
           meta_ad_account_id: string | null
           meta_ad_id: string | null
           meta_ad_set_id: string | null
@@ -813,18 +1084,26 @@ export type Database = {
           notes: string | null
           order_financial_id: string | null
           order_tags: string[]
+          packaged_at: string | null
+          packaged_by: string | null
           payment_method: string | null
           rejection_reason: string | null
           session_source: string | null
           shipment_id: string | null
+          shipped_at: string | null
+          shipped_by: string | null
           shipping_address: string | null
           shipping_city: string | null
           shipping_district: string | null
           shipping_fee: number
           shipping_name: string | null
+          shipping_note: string | null
           shipping_phone: string | null
+          source_platform: string | null
+          source_website: string | null
           status: Database["public"]["Enums"]["order_status"]
           subtotal: number
+          tags: string[] | null
           total: number
           updated_at: string
           user_agent: string | null
@@ -833,6 +1112,7 @@ export type Database = {
           utm_content: string | null
           utm_medium: string | null
           utm_source: string | null
+          verified_at: string | null
         }
         Insert: {
           admin_notes?: string | null
@@ -840,6 +1120,8 @@ export type Database = {
           advance_payment_method?: string | null
           advance_payment_screenshot_url?: string | null
           advance_payment_txn_id?: string | null
+          assigned_to?: string | null
+          auto_call_enabled?: boolean | null
           call_attempt_count?: number
           call_status?: Database["public"]["Enums"]["call_status"]
           cancellation_reason?: string | null
@@ -848,6 +1130,12 @@ export type Database = {
           confirmed_by?: string | null
           coupon_code?: string | null
           created_at?: string
+          customer_ip_address?: string | null
+          delivered_at?: string | null
+          delivery_area_id?: string | null
+          delivery_city_id?: string | null
+          delivery_method?: string | null
+          delivery_zone_id?: string | null
           device_type?: string | null
           discount_amount?: number
           entry_url?: string | null
@@ -865,6 +1153,8 @@ export type Database = {
           is_preorder?: boolean
           last_call_at?: string | null
           last_called_by?: string | null
+          latest_note?: string | null
+          merchant_ip_address?: string | null
           meta_ad_account_id?: string | null
           meta_ad_id?: string | null
           meta_ad_set_id?: string | null
@@ -872,18 +1162,26 @@ export type Database = {
           notes?: string | null
           order_financial_id?: string | null
           order_tags?: string[]
+          packaged_at?: string | null
+          packaged_by?: string | null
           payment_method?: string | null
           rejection_reason?: string | null
           session_source?: string | null
           shipment_id?: string | null
+          shipped_at?: string | null
+          shipped_by?: string | null
           shipping_address?: string | null
           shipping_city?: string | null
           shipping_district?: string | null
           shipping_fee?: number
           shipping_name?: string | null
+          shipping_note?: string | null
           shipping_phone?: string | null
+          source_platform?: string | null
+          source_website?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
+          tags?: string[] | null
           total?: number
           updated_at?: string
           user_agent?: string | null
@@ -892,6 +1190,7 @@ export type Database = {
           utm_content?: string | null
           utm_medium?: string | null
           utm_source?: string | null
+          verified_at?: string | null
         }
         Update: {
           admin_notes?: string | null
@@ -899,6 +1198,8 @@ export type Database = {
           advance_payment_method?: string | null
           advance_payment_screenshot_url?: string | null
           advance_payment_txn_id?: string | null
+          assigned_to?: string | null
+          auto_call_enabled?: boolean | null
           call_attempt_count?: number
           call_status?: Database["public"]["Enums"]["call_status"]
           cancellation_reason?: string | null
@@ -907,6 +1208,12 @@ export type Database = {
           confirmed_by?: string | null
           coupon_code?: string | null
           created_at?: string
+          customer_ip_address?: string | null
+          delivered_at?: string | null
+          delivery_area_id?: string | null
+          delivery_city_id?: string | null
+          delivery_method?: string | null
+          delivery_zone_id?: string | null
           device_type?: string | null
           discount_amount?: number
           entry_url?: string | null
@@ -924,6 +1231,8 @@ export type Database = {
           is_preorder?: boolean
           last_call_at?: string | null
           last_called_by?: string | null
+          latest_note?: string | null
+          merchant_ip_address?: string | null
           meta_ad_account_id?: string | null
           meta_ad_id?: string | null
           meta_ad_set_id?: string | null
@@ -931,18 +1240,26 @@ export type Database = {
           notes?: string | null
           order_financial_id?: string | null
           order_tags?: string[]
+          packaged_at?: string | null
+          packaged_by?: string | null
           payment_method?: string | null
           rejection_reason?: string | null
           session_source?: string | null
           shipment_id?: string | null
+          shipped_at?: string | null
+          shipped_by?: string | null
           shipping_address?: string | null
           shipping_city?: string | null
           shipping_district?: string | null
           shipping_fee?: number
           shipping_name?: string | null
+          shipping_note?: string | null
           shipping_phone?: string | null
+          source_platform?: string | null
+          source_website?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
+          tags?: string[] | null
           total?: number
           updated_at?: string
           user_agent?: string | null
@@ -951,8 +1268,30 @@ export type Database = {
           utm_content?: string | null
           utm_medium?: string | null
           utm_source?: string | null
+          verified_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_delivery_area_id_fkey"
+            columns: ["delivery_area_id"]
+            isOneToOne: false
+            referencedRelation: "bd_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_delivery_city_id_fkey"
+            columns: ["delivery_city_id"]
+            isOneToOne: false
+            referencedRelation: "bd_cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_delivery_zone_id_fkey"
+            columns: ["delivery_zone_id"]
+            isOneToOne: false
+            referencedRelation: "bd_zones"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_order_financial_id_fkey"
             columns: ["order_financial_id"]
@@ -1201,33 +1540,42 @@ export type Database = {
           admin_notes: string | null
           cancellation_count: number
           created_at: string
+          customer_segment: string | null
           display_name: string | null
           fake_order_count: number
           flag_reason: string | null
           id: string
           is_flagged: boolean
+          total_orders: number | null
+          total_spent: number | null
           updated_at: string
         }
         Insert: {
           admin_notes?: string | null
           cancellation_count?: number
           created_at?: string
+          customer_segment?: string | null
           display_name?: string | null
           fake_order_count?: number
           flag_reason?: string | null
           id: string
           is_flagged?: boolean
+          total_orders?: number | null
+          total_spent?: number | null
           updated_at?: string
         }
         Update: {
           admin_notes?: string | null
           cancellation_count?: number
           created_at?: string
+          customer_segment?: string | null
           display_name?: string | null
           fake_order_count?: number
           flag_reason?: string | null
           id?: string
           is_flagged?: boolean
+          total_orders?: number | null
+          total_spent?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -1376,6 +1724,102 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           value?: Json
+        }
+        Relationships: []
+      }
+      sms_logs: {
+        Row: {
+          delivered_at: string | null
+          error_message: string | null
+          id: string
+          message_sent: string
+          order_id: string | null
+          provider_message_id: string | null
+          provider_response: Json | null
+          recipient_phone: string
+          sent_at: string | null
+          sent_by: string | null
+          status: Database["public"]["Enums"]["sms_status"] | null
+          template_id: string | null
+        }
+        Insert: {
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          message_sent: string
+          order_id?: string | null
+          provider_message_id?: string | null
+          provider_response?: Json | null
+          recipient_phone: string
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: Database["public"]["Enums"]["sms_status"] | null
+          template_id?: string | null
+        }
+        Update: {
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          message_sent?: string
+          order_id?: string | null
+          provider_message_id?: string | null
+          provider_response?: Json | null
+          recipient_phone?: string
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: Database["public"]["Enums"]["sms_status"] | null
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_logs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sms_logs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "sms_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sms_templates: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          message_bn: string
+          message_en: string | null
+          name: string
+          type: Database["public"]["Enums"]["sms_template_type"]
+          updated_at: string | null
+          variables: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          message_bn: string
+          message_en?: string | null
+          name: string
+          type: Database["public"]["Enums"]["sms_template_type"]
+          updated_at?: string | null
+          variables?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          message_bn?: string
+          message_en?: string | null
+          name?: string
+          type?: Database["public"]["Enums"]["sms_template_type"]
+          updated_at?: string | null
+          variables?: Json | null
         }
         Relationships: []
       }
@@ -1553,6 +1997,17 @@ export type Database = {
         Args: { _order_id: string }
         Returns: undefined
       }
+      get_customer_courier_stats: {
+        Args: { p_phone: string }
+        Returns: {
+          cancelled: number
+          courier: string
+          success: number
+          success_rate: number
+          total: number
+        }[]
+      }
+      get_customer_stats: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1561,6 +2016,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      log_order_view: { Args: { p_order_id: string }; Returns: undefined }
       recalc_product_rating: {
         Args: { _product_id: string }
         Returns: undefined
@@ -1587,6 +2043,8 @@ export type Database = {
         | "customer"
         | "customer_service"
         | "operations"
+        | "packer"
+        | "accountant"
       call_status:
         | "not_called"
         | "attempting"
@@ -1645,6 +2103,7 @@ export type Database = {
         | "fake"
         | "on_hold"
         | "advance_payment_pending"
+        | "incomplete"
       return_type:
         | "full_return"
         | "partial_return"
@@ -1662,6 +2121,15 @@ export type Database = {
         | "damaged"
         | "lost"
         | "cancelled"
+      sms_status: "pending" | "sent" | "failed" | "delivered" | "undelivered"
+      sms_template_type:
+        | "reminder"
+        | "advance"
+        | "confirmation"
+        | "shipped"
+        | "delivered"
+        | "cancelled"
+        | "custom"
       transaction_category:
         | "product_sale"
         | "product_purchase"
@@ -1848,6 +2316,8 @@ export const Constants = {
         "customer",
         "customer_service",
         "operations",
+        "packer",
+        "accountant",
       ],
       call_status: [
         "not_called",
@@ -1912,6 +2382,7 @@ export const Constants = {
         "fake",
         "on_hold",
         "advance_payment_pending",
+        "incomplete",
       ],
       return_type: [
         "full_return",
@@ -1931,6 +2402,16 @@ export const Constants = {
         "damaged",
         "lost",
         "cancelled",
+      ],
+      sms_status: ["pending", "sent", "failed", "delivered", "undelivered"],
+      sms_template_type: [
+        "reminder",
+        "advance",
+        "confirmation",
+        "shipped",
+        "delivered",
+        "cancelled",
+        "custom",
       ],
       transaction_category: [
         "product_sale",
