@@ -54,21 +54,25 @@ type Order = {
 };
 
 const STEPS = [
-  { key: "pending", label: "Placed", desc: "Order received", icon: Clock },
-  { key: "confirmed", label: "Confirmed", desc: "Verified by phone", icon: Headset },
-  { key: "processing", label: "Packed", desc: "Ready to ship", icon: PackageCheck },
-  { key: "shipped", label: "Shipped", desc: "On the way", icon: Truck },
-  { key: "delivered", label: "Delivered", desc: "Order complete", icon: Check },
+  { key: "new", label: "অর্ডার পেয়েছি", desc: "🕐 কনফার্মেশন কল পাবেন", icon: Clock },
+  { key: "confirmed", label: "কনফার্ম", desc: "✅ প্যাকেজিং চলছে", icon: Headset },
+  { key: "packed", label: "প্যাকেজ রেডি", desc: "📦 কুরিয়ারে পাঠানোর জন্য প্রস্তুত", icon: PackageCheck },
+  { key: "shipped", label: "শিপড", desc: "🚚 কুরিয়ারে পাঠানো হয়েছে", icon: Truck },
+  { key: "delivered", label: "ডেলিভারি", desc: "✔️ সম্পন্ন", icon: Check },
 ];
 
-// Map DB statuses (pending|processing|shipped|delivered|cancelled) to richer step index
+// Map expanded order_status enum to timeline step index
 const statusToStepIndex = (s: string) => {
   switch (s) {
-    case "pending": return 0;
+    case "new": return 0;
     case "confirmed": return 1;
-    case "processing": return 2;
-    case "shipped": return 3;
-    case "delivered": return 4;
+    case "packaging":
+    case "packed":
+    case "ready_to_ship": return 2;
+    case "shipped":
+    case "in_transit": return 3;
+    case "delivered":
+    case "partial_delivered": return 4;
     default: return 0;
   }
 };
@@ -154,6 +158,17 @@ function TrackOrderPage() {
     );
   }
 
+  // Fake orders should not be discoverable
+  if (order.status === "fake") {
+    return (
+      <div className="mx-auto max-w-md px-4 py-16 text-center">
+        <h1 className="text-2xl font-extrabold">Order not found</h1>
+        <Link to="/" className="mt-4 inline-block text-sm font-semibold text-primary underline">
+          Go home
+        </Link>
+      </div>
+    );
+  }
   const isCancelled = order.status === "cancelled";
   const currentStep = statusToStepIndex(order.status);
   const progressPct = isCancelled ? 0 : (currentStep / (STEPS.length - 1)) * 100;

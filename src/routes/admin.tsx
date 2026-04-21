@@ -17,8 +17,11 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
-  const { loading, user, isAdmin } = useAdminAuth();
+  const { loading, user, isAdmin, hasRole } = useAdminAuth();
   const navigate = useNavigate();
+  // Customer service and operations can also access the admin shell, but with
+  // a restricted sidebar.
+  const allowedAccess = isAdmin || hasRole(["customer_service", "operations"]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -38,7 +41,7 @@ function AdminLayout() {
     return null;
   }
 
-  if (!isAdmin) {
+  if (!allowedAccess) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
@@ -47,7 +50,7 @@ function AdminLayout() {
           </div>
           <h1 className="text-xl font-bold">Access denied</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Tomar account e admin permission nei. Admin access lagle existing admin ke bolun tomar account ke admin role assign korte.
+            Tomar account e admin/staff permission nei. Admin ke bolun role assign korte.
           </p>
           <p className="mt-3 text-xs text-muted-foreground break-all">
             Logged in as: <span className="font-mono">{user.email}</span>

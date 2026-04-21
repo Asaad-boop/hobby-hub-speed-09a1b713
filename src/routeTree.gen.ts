@@ -33,6 +33,8 @@ import { Route as TrackOrderIdRouteImport } from './routes/track.$orderId'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as OrderSuccessOrderIdRouteImport } from './routes/order-success.$orderId'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
+import { Route as AdminWebOrdersRouteImport } from './routes/admin.web-orders'
+import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSecurityRouteImport } from './routes/admin.security'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
@@ -45,6 +47,7 @@ import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminCancelledOrdersRouteImport } from './routes/admin.cancelled-orders'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAccountingRouteImport } from './routes/admin.accounting'
 import { Route as AdminFinanceTransactionsRouteImport } from './routes/admin.finance.transactions'
@@ -172,6 +175,16 @@ const CategorySlugRoute = CategorySlugRouteImport.update({
   path: '/category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminWebOrdersRoute = AdminWebOrdersRouteImport.update({
+  id: '/web-orders',
+  path: '/web-orders',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminStaffRoute = AdminStaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -232,6 +245,11 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCancelledOrdersRoute = AdminCancelledOrdersRouteImport.update({
+  id: '/cancelled-orders',
+  path: '/cancelled-orders',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -285,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof WishlistRoute
   '/admin/accounting': typeof AdminAccountingRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/cancelled-orders': typeof AdminCancelledOrdersRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
@@ -297,6 +316,8 @@ export interface FileRoutesByFullPath {
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/staff': typeof AdminStaffRoute
+  '/admin/web-orders': typeof AdminWebOrdersRoute
   '/category/$slug': typeof CategorySlugRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
@@ -328,6 +349,7 @@ export interface FileRoutesByTo {
   '/wishlist': typeof WishlistRoute
   '/admin/accounting': typeof AdminAccountingRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/cancelled-orders': typeof AdminCancelledOrdersRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
@@ -340,6 +362,8 @@ export interface FileRoutesByTo {
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/staff': typeof AdminStaffRoute
+  '/admin/web-orders': typeof AdminWebOrdersRoute
   '/category/$slug': typeof CategorySlugRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
@@ -373,6 +397,7 @@ export interface FileRoutesById {
   '/wishlist': typeof WishlistRoute
   '/admin/accounting': typeof AdminAccountingRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/cancelled-orders': typeof AdminCancelledOrdersRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
@@ -385,6 +410,8 @@ export interface FileRoutesById {
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/staff': typeof AdminStaffRoute
+  '/admin/web-orders': typeof AdminWebOrdersRoute
   '/category/$slug': typeof CategorySlugRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
@@ -419,6 +446,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/admin/accounting'
     | '/admin/analytics'
+    | '/admin/cancelled-orders'
     | '/admin/categories'
     | '/admin/coupons'
     | '/admin/customers'
@@ -431,6 +459,8 @@ export interface FileRouteTypes {
     | '/admin/reviews'
     | '/admin/security'
     | '/admin/settings'
+    | '/admin/staff'
+    | '/admin/web-orders'
     | '/category/$slug'
     | '/order-success/$orderId'
     | '/product/$id'
@@ -462,6 +492,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/admin/accounting'
     | '/admin/analytics'
+    | '/admin/cancelled-orders'
     | '/admin/categories'
     | '/admin/coupons'
     | '/admin/customers'
@@ -474,6 +505,8 @@ export interface FileRouteTypes {
     | '/admin/reviews'
     | '/admin/security'
     | '/admin/settings'
+    | '/admin/staff'
+    | '/admin/web-orders'
     | '/category/$slug'
     | '/order-success/$orderId'
     | '/product/$id'
@@ -506,6 +539,7 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/admin/accounting'
     | '/admin/analytics'
+    | '/admin/cancelled-orders'
     | '/admin/categories'
     | '/admin/coupons'
     | '/admin/customers'
@@ -518,6 +552,8 @@ export interface FileRouteTypes {
     | '/admin/reviews'
     | '/admin/security'
     | '/admin/settings'
+    | '/admin/staff'
+    | '/admin/web-orders'
     | '/category/$slug'
     | '/order-success/$orderId'
     | '/product/$id'
@@ -726,6 +762,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/web-orders': {
+      id: '/admin/web-orders'
+      path: '/web-orders'
+      fullPath: '/admin/web-orders'
+      preLoaderRoute: typeof AdminWebOrdersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/staff': {
+      id: '/admin/staff'
+      path: '/staff'
+      fullPath: '/admin/staff'
+      preLoaderRoute: typeof AdminStaffRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
@@ -810,6 +860,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/cancelled-orders': {
+      id: '/admin/cancelled-orders'
+      path: '/cancelled-orders'
+      fullPath: '/admin/cancelled-orders'
+      preLoaderRoute: typeof AdminCancelledOrdersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/analytics': {
       id: '/admin/analytics'
       path: '/analytics'
@@ -876,6 +933,7 @@ const AdminFinanceRouteWithChildren = AdminFinanceRoute._addFileChildren(
 interface AdminRouteChildren {
   AdminAccountingRoute: typeof AdminAccountingRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminCancelledOrdersRoute: typeof AdminCancelledOrdersRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCouponsRoute: typeof AdminCouponsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
@@ -888,12 +946,15 @@ interface AdminRouteChildren {
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminSecurityRoute: typeof AdminSecurityRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminStaffRoute: typeof AdminStaffRoute
+  AdminWebOrdersRoute: typeof AdminWebOrdersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAccountingRoute: AdminAccountingRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminCancelledOrdersRoute: AdminCancelledOrdersRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCouponsRoute: AdminCouponsRoute,
   AdminCustomersRoute: AdminCustomersRoute,
@@ -906,6 +967,8 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminReviewsRoute: AdminReviewsRoute,
   AdminSecurityRoute: AdminSecurityRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminStaffRoute: AdminStaffRoute,
+  AdminWebOrdersRoute: AdminWebOrdersRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -939,12 +1002,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

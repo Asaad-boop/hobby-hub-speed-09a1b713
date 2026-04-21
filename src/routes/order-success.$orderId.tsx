@@ -73,9 +73,9 @@ function OrderSuccessPage() {
           <Check className="h-10 w-10" strokeWidth={3} />
           <PartyPopper className="absolute -right-2 -top-2 h-7 w-7 text-primary" />
         </div>
-        <h1 className="text-2xl font-extrabold md:text-3xl">Thank You for Your Order!</h1>
+        <h1 className="text-2xl font-extrabold md:text-3xl">আপনার অর্ডার পেয়েছি! 🎉</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          We've received your order and will start processing it right away.
+          আমরা শীঘ্রই আপনাকে কল করে কনফার্ম করব। Confirmation এর পর ২৪–৪৮ ঘন্টায় ডেলিভারি।
         </p>
 
         <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm">

@@ -19,6 +19,9 @@ import {
   TrendingUp,
   ArrowRightLeft,
   ShieldCheck,
+  PhoneCall,
+  XOctagon,
+  UserCog,
 } from "lucide-react";
 import {
   Sidebar,
@@ -35,56 +38,61 @@ import {
 } from "@/components/ui/sidebar";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
+import { useAdminAuth, type AppRole } from "@/lib/admin";
 
 type NavItem = {
   title: string;
   url: string;
   icon: typeof LayoutDashboard;
   exact?: boolean;
-  badge?: "soon";
+  /** Roles that can see this item. Admin always sees everything. */
+  roles?: AppRole[];
 };
 
 const groups: { label: string; items: NavItem[] }[] = [
   {
     label: "Overview",
-    items: [{ title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true }],
+    items: [{ title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true, roles: ["admin"] }],
   },
   {
     label: "Catalog",
     items: [
-      { title: "Products", url: "/admin/products", icon: Package },
-      { title: "Categories", url: "/admin/categories", icon: Tags },
-      { title: "Inventory", url: "/admin/inventory", icon: Boxes },
+      { title: "Products", url: "/admin/products", icon: Package, roles: ["admin"] },
+      { title: "Categories", url: "/admin/categories", icon: Tags, roles: ["admin"] },
+      { title: "Inventory", url: "/admin/inventory", icon: Boxes, roles: ["admin", "operations"] },
     ],
   },
   {
     label: "Sales",
     items: [
-      { title: "Orders", url: "/admin/orders", icon: ShoppingBag },
-      { title: "Customers", url: "/admin/customers", icon: Users },
-      { title: "Reviews", url: "/admin/reviews", icon: MessageSquare },
-      { title: "Coupons", url: "/admin/coupons", icon: Tag },
-      { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
+      { title: "Web Orders", url: "/admin/web-orders", icon: PhoneCall, roles: ["admin", "customer_service"] },
+      { title: "Order List", url: "/admin/orders", icon: ShoppingBag, roles: ["admin", "operations"] },
+      { title: "Cancelled Orders", url: "/admin/cancelled-orders", icon: XOctagon, roles: ["admin"] },
+      { title: "Customers", url: "/admin/customers", icon: Users, roles: ["admin", "customer_service", "operations"] },
+      { title: "Reviews", url: "/admin/reviews", icon: MessageSquare, roles: ["admin"] },
+      { title: "Coupons", url: "/admin/coupons", icon: Tag, roles: ["admin"] },
+      { title: "Analytics", url: "/admin/analytics", icon: BarChart3, roles: ["admin"] },
     ],
   },
   {
     label: "Finance",
     items: [
-      { title: "Finance Dashboard", url: "/admin/finance", icon: TrendingUp, exact: true },
-      { title: "Cash Accounts", url: "/admin/finance/accounts", icon: Wallet },
-      { title: "Transactions", url: "/admin/finance/transactions", icon: Receipt },
-      { title: "COD Settlements", url: "/admin/finance/settlements", icon: ArrowRightLeft },
-      { title: "Orders P&L", url: "/admin/finance/orders-pnl", icon: TrendingUp },
-      { title: "Expenses", url: "/admin/expenses", icon: Receipt },
-      { title: "Accounting", url: "/admin/accounting", icon: TrendingUp },
+      { title: "Finance Dashboard", url: "/admin/finance", icon: TrendingUp, exact: true, roles: ["admin"] },
+      { title: "Cash Accounts", url: "/admin/finance/accounts", icon: Wallet, roles: ["admin"] },
+      { title: "Transactions", url: "/admin/finance/transactions", icon: Receipt, roles: ["admin"] },
+      { title: "COD Settlements", url: "/admin/finance/settlements", icon: ArrowRightLeft, roles: ["admin"] },
+      { title: "Orders P&L", url: "/admin/finance/orders-pnl", icon: TrendingUp, roles: ["admin"] },
+      { title: "Expenses", url: "/admin/expenses", icon: Receipt, roles: ["admin"] },
+      { title: "Accounting", url: "/admin/accounting", icon: TrendingUp, roles: ["admin"] },
     ],
   },
   {
-    label: "Storefront",
+    label: "Settings",
     items: [
-      { title: "Homepage", url: "/admin/homepage", icon: Home },
-      { title: "Settings", url: "/admin/settings", icon: Settings },
-      { title: "Security Audit", url: "/admin/security", icon: ShieldCheck },
+      { title: "Staff Management", url: "/admin/staff", icon: UserCog, roles: ["admin"] },
+      { title: "Homepage", url: "/admin/homepage", icon: Home, roles: ["admin"] },
+      { title: "Site Settings", url: "/admin/settings", icon: Settings, roles: ["admin"] },
+      { title: "Security Audit", url: "/admin/security", icon: ShieldCheck, roles: ["admin"] },
     ],
   },
 ];
@@ -93,6 +101,7 @@ export default function AdminSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { hasRole } = useAdminAuth();
 
   const { data: pendingReviews = 0 } = useQuery({
     queryKey: ["admin", "reviews", "pendingCount"],
@@ -105,6 +114,20 @@ export default function AdminSidebar() {
       return count ?? 0;
     },
     refetchInterval: 60_000,
+  });
+
+  const { data: pendingWebOrders = 0 } = useQuery({
+    queryKey: ["admin", "web-orders", "pendingCount"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("orders")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "new")
+        .eq("confirmation_status", "pending");
+      if (error) return 0;
+      return count ?? 0;
+    },
+    refetchInterval: 30_000,
   });
 
   const isActive = (url: string, exact?: boolean) =>
@@ -125,54 +148,47 @@ export default function AdminSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {groups.map((group) => (
-          <SidebarGroup key={group.label}>
-            {!collapsed && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => {
-                  const active = isActive(item.url, item.exact);
-                  const isSoon = item.badge === "soon";
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild={!isSoon}
-                        isActive={active}
-                        disabled={isSoon}
-                        tooltip={collapsed ? item.title : undefined}
-                        className={isSoon ? "cursor-not-allowed opacity-60" : ""}
-                      >
-                        {isSoon ? (
-                          <div className="flex items-center gap-2">
-                            <item.icon className="h-4 w-4" />
-                            {!collapsed && (
-                              <>
-                                <span>{item.title}</span>
-                                <span className="ml-auto rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
-                                  Soon
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        ) : (
+        {groups.map((group) => {
+          const visibleItems = group.items.filter((item) => !item.roles || hasRole(item.roles));
+          if (visibleItems.length === 0) return null;
+          return (
+            <SidebarGroup key={group.label}>
+              {!collapsed && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {visibleItems.map((item) => {
+                    const active = isActive(item.url, item.exact);
+                    const badgeCount =
+                      item.url === "/admin/reviews"
+                        ? pendingReviews
+                        : item.url === "/admin/web-orders"
+                          ? pendingWebOrders
+                          : 0;
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={active}
+                          tooltip={collapsed ? item.title : undefined}
+                        >
                           <Link to={item.url} className="flex items-center gap-2">
                             <item.icon className="h-4 w-4" />
                             {!collapsed && <span>{item.title}</span>}
-                            {!collapsed && item.url === "/admin/reviews" && pendingReviews > 0 && (
-                              <span className="ml-auto rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-extrabold text-primary-foreground">
-                                {pendingReviews}
+                            {!collapsed && badgeCount > 0 && (
+                              <span className="ml-auto rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-extrabold text-destructive-foreground">
+                                {badgeCount}
                               </span>
                             )}
                           </Link>
-                        )}
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          );
+        })}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
