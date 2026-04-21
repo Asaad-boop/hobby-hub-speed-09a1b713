@@ -48,6 +48,7 @@ import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAccountingRouteImport } from './routes/admin.accounting'
 import { Route as AdminFinanceTransactionsRouteImport } from './routes/admin.finance.transactions'
 import { Route as AdminFinanceSettlementsRouteImport } from './routes/admin.finance.settlements'
+import { Route as AdminFinanceOrdersPnlRouteImport } from './routes/admin.finance.orders-pnl'
 import { Route as AdminFinanceAccountsRouteImport } from './routes/admin.finance.accounts'
 
 const WishlistRoute = WishlistRouteImport.update({
@@ -246,6 +247,11 @@ const AdminFinanceSettlementsRoute = AdminFinanceSettlementsRouteImport.update({
   path: '/settlements',
   getParentRoute: () => AdminFinanceRoute,
 } as any)
+const AdminFinanceOrdersPnlRoute = AdminFinanceOrdersPnlRouteImport.update({
+  id: '/orders-pnl',
+  path: '/orders-pnl',
+  getParentRoute: () => AdminFinanceRoute,
+} as any)
 const AdminFinanceAccountsRoute = AdminFinanceAccountsRouteImport.update({
   id: '/accounts',
   path: '/accounts',
@@ -291,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
   '/admin/finance/accounts': typeof AdminFinanceAccountsRoute
+  '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
   '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
   '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
 }
@@ -332,6 +339,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/track': typeof TrackIndexRoute
   '/admin/finance/accounts': typeof AdminFinanceAccountsRoute
+  '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
   '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
   '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
 }
@@ -375,6 +383,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
   '/admin/finance/accounts': typeof AdminFinanceAccountsRoute
+  '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
   '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
   '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
 }
@@ -419,6 +428,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/track/'
     | '/admin/finance/accounts'
+    | '/admin/finance/orders-pnl'
     | '/admin/finance/settlements'
     | '/admin/finance/transactions'
   fileRoutesByTo: FileRoutesByTo
@@ -460,6 +470,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/track'
     | '/admin/finance/accounts'
+    | '/admin/finance/orders-pnl'
     | '/admin/finance/settlements'
     | '/admin/finance/transactions'
   id:
@@ -502,6 +513,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/track/'
     | '/admin/finance/accounts'
+    | '/admin/finance/orders-pnl'
     | '/admin/finance/settlements'
     | '/admin/finance/transactions'
   fileRoutesById: FileRoutesById
@@ -807,6 +819,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFinanceSettlementsRouteImport
       parentRoute: typeof AdminFinanceRoute
     }
+    '/admin/finance/orders-pnl': {
+      id: '/admin/finance/orders-pnl'
+      path: '/orders-pnl'
+      fullPath: '/admin/finance/orders-pnl'
+      preLoaderRoute: typeof AdminFinanceOrdersPnlRouteImport
+      parentRoute: typeof AdminFinanceRoute
+    }
     '/admin/finance/accounts': {
       id: '/admin/finance/accounts'
       path: '/accounts'
@@ -819,12 +838,14 @@ declare module '@tanstack/react-router' {
 
 interface AdminFinanceRouteChildren {
   AdminFinanceAccountsRoute: typeof AdminFinanceAccountsRoute
+  AdminFinanceOrdersPnlRoute: typeof AdminFinanceOrdersPnlRoute
   AdminFinanceSettlementsRoute: typeof AdminFinanceSettlementsRoute
   AdminFinanceTransactionsRoute: typeof AdminFinanceTransactionsRoute
 }
 
 const AdminFinanceRouteChildren: AdminFinanceRouteChildren = {
   AdminFinanceAccountsRoute: AdminFinanceAccountsRoute,
+  AdminFinanceOrdersPnlRoute: AdminFinanceOrdersPnlRoute,
   AdminFinanceSettlementsRoute: AdminFinanceSettlementsRoute,
   AdminFinanceTransactionsRoute: AdminFinanceTransactionsRoute,
 }
