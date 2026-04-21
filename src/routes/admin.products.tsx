@@ -39,6 +39,7 @@ import { Badge } from "@/components/ui/badge";
 import { ImageUploader, GalleryUploader } from "@/components/admin/ImageUploader";
 import { StockHistoryDrawer } from "@/components/admin/StockHistoryDrawer";
 import { VariantManager } from "@/components/admin/VariantManager";
+import { AdminTableSkeleton } from "@/components/admin/TableSkeleton";
 
 export const Route = createFileRoute("/admin/products")({
   component: AdminProductsPage,
@@ -182,9 +183,7 @@ function AdminProductsPage() {
 
       <div className="overflow-hidden rounded-2xl border border-border bg-background">
         {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
+          <AdminTableSkeleton rows={6} columns={6} />
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <Package className="h-10 w-10 text-muted-foreground" />

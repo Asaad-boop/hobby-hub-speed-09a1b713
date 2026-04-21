@@ -31,6 +31,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
+import { AdminTableSkeleton } from "@/components/admin/TableSkeleton";
 
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 type Order = Database["public"]["Tables"]["orders"]["Row"];
@@ -179,9 +180,7 @@ function AdminOrdersPage() {
       {/* Table */}
       <div className="rounded-2xl border border-border bg-background">
         {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
+          <AdminTableSkeleton rows={6} columns={6} />
         ) : filtered.length === 0 ? (
           <div className="py-16 text-center text-sm text-muted-foreground">
             {orders.length === 0 ? "Kono order nei ekhono." : "Ei filter e match nei."}
