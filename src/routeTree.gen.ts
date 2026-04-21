@@ -50,6 +50,7 @@ import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminCancelledOrdersRouteImport } from './routes/admin.cancelled-orders'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAccountingRouteImport } from './routes/admin.accounting'
+import { Route as AdminWebOrdersOrderIdRouteImport } from './routes/admin.web-orders.$orderId'
 import { Route as AdminFinanceTransactionsRouteImport } from './routes/admin.finance.transactions'
 import { Route as AdminFinanceSettlementsRouteImport } from './routes/admin.finance.settlements'
 import { Route as AdminFinanceOrdersPnlRouteImport } from './routes/admin.finance.orders-pnl'
@@ -260,6 +261,11 @@ const AdminAccountingRoute = AdminAccountingRouteImport.update({
   path: '/accounting',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminWebOrdersOrderIdRoute = AdminWebOrdersOrderIdRouteImport.update({
+  id: '/$orderId',
+  path: '/$orderId',
+  getParentRoute: () => AdminWebOrdersRoute,
+} as any)
 const AdminFinanceTransactionsRoute =
   AdminFinanceTransactionsRouteImport.update({
     id: '/transactions',
@@ -317,7 +323,7 @@ export interface FileRoutesByFullPath {
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
-  '/admin/web-orders': typeof AdminWebOrdersRoute
+  '/admin/web-orders': typeof AdminWebOrdersRouteWithChildren
   '/category/$slug': typeof CategorySlugRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
@@ -328,6 +334,7 @@ export interface FileRoutesByFullPath {
   '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
   '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
   '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
+  '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -363,7 +370,7 @@ export interface FileRoutesByTo {
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
-  '/admin/web-orders': typeof AdminWebOrdersRoute
+  '/admin/web-orders': typeof AdminWebOrdersRouteWithChildren
   '/category/$slug': typeof CategorySlugRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
@@ -374,6 +381,7 @@ export interface FileRoutesByTo {
   '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
   '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
   '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
+  '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -411,7 +419,7 @@ export interface FileRoutesById {
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
-  '/admin/web-orders': typeof AdminWebOrdersRoute
+  '/admin/web-orders': typeof AdminWebOrdersRouteWithChildren
   '/category/$slug': typeof CategorySlugRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
@@ -422,6 +430,7 @@ export interface FileRoutesById {
   '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
   '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
   '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
+  '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -471,6 +480,7 @@ export interface FileRouteTypes {
     | '/admin/finance/orders-pnl'
     | '/admin/finance/settlements'
     | '/admin/finance/transactions'
+    | '/admin/web-orders/$orderId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -517,6 +527,7 @@ export interface FileRouteTypes {
     | '/admin/finance/orders-pnl'
     | '/admin/finance/settlements'
     | '/admin/finance/transactions'
+    | '/admin/web-orders/$orderId'
   id:
     | '__root__'
     | '/'
@@ -564,6 +575,7 @@ export interface FileRouteTypes {
     | '/admin/finance/orders-pnl'
     | '/admin/finance/settlements'
     | '/admin/finance/transactions'
+    | '/admin/web-orders/$orderId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -881,6 +893,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAccountingRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/web-orders/$orderId': {
+      id: '/admin/web-orders/$orderId'
+      path: '/$orderId'
+      fullPath: '/admin/web-orders/$orderId'
+      preLoaderRoute: typeof AdminWebOrdersOrderIdRouteImport
+      parentRoute: typeof AdminWebOrdersRoute
+    }
     '/admin/finance/transactions': {
       id: '/admin/finance/transactions'
       path: '/transactions'
@@ -930,6 +949,18 @@ const AdminFinanceRouteWithChildren = AdminFinanceRoute._addFileChildren(
   AdminFinanceRouteChildren,
 )
 
+interface AdminWebOrdersRouteChildren {
+  AdminWebOrdersOrderIdRoute: typeof AdminWebOrdersOrderIdRoute
+}
+
+const AdminWebOrdersRouteChildren: AdminWebOrdersRouteChildren = {
+  AdminWebOrdersOrderIdRoute: AdminWebOrdersOrderIdRoute,
+}
+
+const AdminWebOrdersRouteWithChildren = AdminWebOrdersRoute._addFileChildren(
+  AdminWebOrdersRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminAccountingRoute: typeof AdminAccountingRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
@@ -947,7 +978,7 @@ interface AdminRouteChildren {
   AdminSecurityRoute: typeof AdminSecurityRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminStaffRoute: typeof AdminStaffRoute
-  AdminWebOrdersRoute: typeof AdminWebOrdersRoute
+  AdminWebOrdersRoute: typeof AdminWebOrdersRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -968,7 +999,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSecurityRoute: AdminSecurityRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminStaffRoute: AdminStaffRoute,
-  AdminWebOrdersRoute: AdminWebOrdersRoute,
+  AdminWebOrdersRoute: AdminWebOrdersRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
 }
 
