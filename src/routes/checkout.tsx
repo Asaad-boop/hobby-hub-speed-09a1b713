@@ -490,14 +490,14 @@ function Checkout() {
 
             {/* Coupon */}
             <div className="mt-3 border-t border-border pt-3">
-              {couponApplied ? (
+              {appliedCoupon ? (
                 <div className="flex items-center justify-between rounded-lg bg-primary/10 px-2.5 py-1.5 text-[11px]">
                   <span className="inline-flex items-center gap-1 font-bold text-primary">
-                    <Tag className="h-3 w-3" /> SAVE5 applied
+                    <Tag className="h-3 w-3" /> {appliedCoupon.code} applied
                   </span>
                   <button
                     type="button"
-                    onClick={() => { setCouponApplied(false); setCoupon(""); }}
+                    onClick={removeCoupon}
                     className="font-semibold text-muted-foreground hover:text-destructive"
                   >
                     Remove
@@ -517,13 +517,14 @@ function Checkout() {
                   <button
                     type="button"
                     onClick={applyCoupon}
-                    className="rounded-md bg-foreground px-3 text-[11px] font-bold text-background hover:opacity-90"
+                    disabled={validatingCoupon}
+                    className="rounded-md bg-foreground px-3 text-[11px] font-bold text-background hover:opacity-90 disabled:opacity-60"
                   >
-                    Apply
+                    {validatingCoupon ? "..." : "Apply"}
                   </button>
                 </div>
               )}
-              <p className="mt-1 text-[10px] text-muted-foreground">Try: <span className="font-mono font-bold">SAVE5</span></p>
+              <p className="mt-1 text-[10px] text-muted-foreground">Have a code? Apply it above.</p>
             </div>
 
             <div className="mt-3 space-y-1 border-t border-border pt-3 text-xs">
