@@ -1,8 +1,10 @@
 import { Outlet, createRootRouteWithContext, HeadContent, Scripts, useRouterState } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
 import "@/lib/i18n";
+import { captureSessionOnFirstVisit } from "@/lib/session-tracking";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
@@ -73,6 +75,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isAdmin = pathname.startsWith("/admin");
+
+  // Capture marketing attribution on the first page of the visit.
+  useEffect(() => {
+    captureSessionOnFirstVisit();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
