@@ -4,6 +4,7 @@ import { useCart } from "@/lib/cart";
 import { useProducts } from "@/lib/products";
 import { supabase } from "@/integrations/supabase/client";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
+import { validateCoupon, type Coupon } from "@/lib/coupons";
 import { toast } from "sonner";
 import {
   Truck,
@@ -44,7 +45,8 @@ function Checkout() {
   const [payNumber, setPayNumber] = useState("");
   const [trxId, setTrxId] = useState("");
   const [coupon, setCoupon] = useState("");
-  const [couponApplied, setCouponApplied] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", city: "", district: "" });
 
   // Prefill from default address if logged in
@@ -75,17 +77,34 @@ function Checkout() {
   const bumpItem = allProducts[1] ?? allProducts[0];
   const bumpPrice = 199;
   const shippingFee = shipMethod === "inside" ? 60 : 130;
-  const couponDiscount = couponApplied ? Math.round(total * 0.05) : 0;
-  const grand = total + (bump ? bumpPrice : 0) + shippingFee - couponDiscount;
+  const subtotalWithBump = total + (bump ? bumpPrice : 0);
+  const couponDiscount = appliedCoupon
+    ? appliedCoupon.type === "percentage"
+      ? Math.min(
+          Math.round((subtotalWithBump * Number(appliedCoupon.value)) / 100),
+          appliedCoupon.max_discount ? Number(appliedCoupon.max_discount) : Infinity,
+        )
+      : Math.min(Number(appliedCoupon.value), subtotalWithBump)
+    : 0;
+  const grand = Math.max(0, subtotalWithBump + shippingFee - couponDiscount);
 
-  const applyCoupon = () => {
-    const code = coupon.trim().toUpperCase();
-    if (code === "SAVE5") {
-      setCouponApplied(true);
-      toast.success("Coupon applied — 5% off!");
-    } else {
-      toast.error("Invalid coupon code");
+  const applyCoupon = async () => {
+    if (validatingCoupon) return;
+    setValidatingCoupon(true);
+    const productIds = items.map((i) => i.product.id);
+    const result = await validateCoupon(coupon, subtotalWithBump, productIds);
+    setValidatingCoupon(false);
+    if (!result.ok) {
+      toast.error(result.error);
+      return;
     }
+    setAppliedCoupon(result.coupon);
+    toast.success(`Coupon ${result.coupon.code} applied — ৳${result.discount} off!`);
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCoupon("");
   };
 
   const phoneValid = /^01[3-9]\d{8}$/.test(form.phone.replace(/\s/g, ""));
