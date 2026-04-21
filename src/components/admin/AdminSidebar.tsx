@@ -15,6 +15,8 @@ import {
   Wallet,
   MessageSquare,
   Tag,
+  Receipt,
+  TrendingUp,
 } from "lucide-react";
 import {
   Sidebar,
@@ -61,7 +63,14 @@ const groups: { label: string; items: NavItem[] }[] = [
       { title: "Reviews", url: "/admin/reviews", icon: MessageSquare },
       { title: "Coupons", url: "/admin/coupons", icon: Tag },
       { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
-      { title: "Finance", url: "/admin/finance", icon: Wallet, badge: "soon" },
+    ],
+  },
+  {
+    label: "Finance",
+    items: [
+      { title: "Expenses", url: "/admin/expenses", icon: Receipt },
+      { title: "Accounting", url: "/admin/accounting", icon: TrendingUp },
+      { title: "Cashflow", url: "/admin/cashflow", icon: Wallet, badge: "soon" },
     ],
   },
   {
