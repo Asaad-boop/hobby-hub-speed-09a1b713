@@ -694,7 +694,7 @@ export type Database = {
           price: number
           product_id: string
           quantity: number
-          user_id: string
+          user_id: string | null
           variant_id: string | null
           variant_label: string | null
         }
@@ -707,7 +707,7 @@ export type Database = {
           price: number
           product_id: string
           quantity?: number
-          user_id: string
+          user_id?: string | null
           variant_id?: string | null
           variant_label?: string | null
         }
@@ -720,7 +720,7 @@ export type Database = {
           price?: number
           product_id?: string
           quantity?: number
-          user_id?: string
+          user_id?: string | null
           variant_id?: string | null
           variant_label?: string | null
         }
@@ -743,13 +743,33 @@ export type Database = {
       }
       orders: {
         Row: {
+          admin_notes: string | null
+          advance_payment_amount: number
+          advance_payment_method: string | null
+          advance_payment_screenshot_url: string | null
+          advance_payment_txn_id: string | null
+          call_attempt_count: number
+          call_status: Database["public"]["Enums"]["call_status"]
+          cancellation_reason: string | null
+          confirmation_status: Database["public"]["Enums"]["confirmation_status"]
+          confirmed_at: string | null
+          confirmed_by: string | null
           coupon_code: string | null
           created_at: string
           discount_amount: number
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          hold_reason: string | null
+          hold_until: string | null
           id: string
+          is_guest_order: boolean
+          last_call_at: string | null
+          last_called_by: string | null
           notes: string | null
           order_financial_id: string | null
           payment_method: string | null
+          rejection_reason: string | null
           shipment_id: string | null
           shipping_address: string | null
           shipping_city: string | null
@@ -761,16 +781,36 @@ export type Database = {
           subtotal: number
           total: number
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
+          admin_notes?: string | null
+          advance_payment_amount?: number
+          advance_payment_method?: string | null
+          advance_payment_screenshot_url?: string | null
+          advance_payment_txn_id?: string | null
+          call_attempt_count?: number
+          call_status?: Database["public"]["Enums"]["call_status"]
+          cancellation_reason?: string | null
+          confirmation_status?: Database["public"]["Enums"]["confirmation_status"]
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           coupon_code?: string | null
           created_at?: string
           discount_amount?: number
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          hold_reason?: string | null
+          hold_until?: string | null
           id?: string
+          is_guest_order?: boolean
+          last_call_at?: string | null
+          last_called_by?: string | null
           notes?: string | null
           order_financial_id?: string | null
           payment_method?: string | null
+          rejection_reason?: string | null
           shipment_id?: string | null
           shipping_address?: string | null
           shipping_city?: string | null
@@ -782,16 +822,36 @@ export type Database = {
           subtotal?: number
           total?: number
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
+          admin_notes?: string | null
+          advance_payment_amount?: number
+          advance_payment_method?: string | null
+          advance_payment_screenshot_url?: string | null
+          advance_payment_txn_id?: string | null
+          call_attempt_count?: number
+          call_status?: Database["public"]["Enums"]["call_status"]
+          cancellation_reason?: string | null
+          confirmation_status?: Database["public"]["Enums"]["confirmation_status"]
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           coupon_code?: string | null
           created_at?: string
           discount_amount?: number
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          hold_reason?: string | null
+          hold_until?: string | null
           id?: string
+          is_guest_order?: boolean
+          last_call_at?: string | null
+          last_called_by?: string | null
           notes?: string | null
           order_financial_id?: string | null
           payment_method?: string | null
+          rejection_reason?: string | null
           shipment_id?: string | null
           shipping_address?: string | null
           shipping_city?: string | null
@@ -803,7 +863,7 @@ export type Database = {
           subtotal?: number
           total?: number
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1381,6 +1441,10 @@ export type Database = {
           with_check: string
         }[]
       }
+      finalize_order_on_confirm: {
+        Args: { _order_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1393,6 +1457,8 @@ export type Database = {
         Args: { _product_id: string }
         Returns: undefined
       }
+      release_stock: { Args: { _order_id: string }; Returns: undefined }
+      reserve_stock: { Args: { _order_id: string }; Returns: undefined }
     }
     Enums: {
       ad_attribution_method:
@@ -1413,6 +1479,15 @@ export type Database = {
         | "customer"
         | "customer_service"
         | "operations"
+      call_status:
+        | "not_called"
+        | "attempting"
+        | "reached"
+        | "no_response"
+        | "wrong_number"
+        | "customer_confirmed"
+        | "customer_cancelled"
+        | "needs_followup"
       cash_account_type:
         | "cash"
         | "bkash"
@@ -1422,6 +1497,13 @@ export type Database = {
         | "pathao_pending"
         | "meta_ads_wallet"
         | "other"
+      confirmation_status:
+        | "pending"
+        | "confirmed"
+        | "rejected"
+        | "fake"
+        | "on_hold"
+        | "advance_pending"
       coupon_type: "percentage" | "fixed"
       courier_provider: "pathao" | "steadfast" | "redx" | "manual"
       damage_source:
@@ -1439,11 +1521,22 @@ export type Database = {
         | "damaged"
         | "settled"
       order_status:
-        | "pending"
-        | "processing"
+        | "new"
+        | "confirmed"
+        | "packaging"
+        | "packed"
+        | "ready_to_ship"
         | "shipped"
+        | "in_transit"
         | "delivered"
+        | "partial_delivered"
+        | "returned"
+        | "exchanged"
+        | "damaged"
         | "cancelled"
+        | "fake"
+        | "on_hold"
+        | "advance_payment_pending"
       return_type:
         | "full_return"
         | "partial_return"
@@ -1648,6 +1741,16 @@ export const Constants = {
         "customer_service",
         "operations",
       ],
+      call_status: [
+        "not_called",
+        "attempting",
+        "reached",
+        "no_response",
+        "wrong_number",
+        "customer_confirmed",
+        "customer_cancelled",
+        "needs_followup",
+      ],
       cash_account_type: [
         "cash",
         "bkash",
@@ -1657,6 +1760,14 @@ export const Constants = {
         "pathao_pending",
         "meta_ads_wallet",
         "other",
+      ],
+      confirmation_status: [
+        "pending",
+        "confirmed",
+        "rejected",
+        "fake",
+        "on_hold",
+        "advance_pending",
       ],
       coupon_type: ["percentage", "fixed"],
       courier_provider: ["pathao", "steadfast", "redx", "manual"],
@@ -1677,11 +1788,22 @@ export const Constants = {
         "settled",
       ],
       order_status: [
-        "pending",
-        "processing",
+        "new",
+        "confirmed",
+        "packaging",
+        "packed",
+        "ready_to_ship",
         "shipped",
+        "in_transit",
         "delivered",
+        "partial_delivered",
+        "returned",
+        "exchanged",
+        "damaged",
         "cancelled",
+        "fake",
+        "on_hold",
+        "advance_payment_pending",
       ],
       return_type: [
         "full_return",
