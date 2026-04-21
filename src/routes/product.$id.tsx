@@ -2,12 +2,13 @@ import { createFileRoute, useNavigate, notFound, Link } from "@tanstack/react-ro
 import { useState, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { fetchProductByIdOrSlug, fetchAllProducts, testimonials } from "@/lib/products";
-import { fetchProductReviews, submitReview } from "@/lib/reviews";
+import { fetchProductByIdOrSlug, fetchAllProducts } from "@/lib/products";
+import { fetchProductReviews, submitReview, fetchEligibleOrderId } from "@/lib/reviews";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import ProductCard from "@/components/ProductCard";
 import ReviewModal, { type NewReview } from "@/components/ReviewModal";
+import ReviewsList from "@/components/ReviewsList";
 import {
   Star,
   Truck,
@@ -34,14 +35,6 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import avatar1 from "@/assets/avatar-1.jpg";
-import avatar2 from "@/assets/avatar-2.jpg";
-import avatar3 from "@/assets/avatar-3.jpg";
-import avatar4 from "@/assets/avatar-4.jpg";
-import review1 from "@/assets/review-1.jpg";
-import review2 from "@/assets/review-2.jpg";
-import review3 from "@/assets/review-3.jpg";
-import review4 from "@/assets/review-4.jpg";
 
 export const Route = createFileRoute("/product/$id")({
   loader: async ({ params }) => {
@@ -146,21 +139,32 @@ function ProductPage() {
   const [userReviews, setUserReviews] = useState<NewReview[]>([]);
   const qc = useQueryClient();
 
-  const { data: dbReviews = [] } = useQuery({
+  const { data: dbReviews = [], isLoading: reviewsLoading } = useQuery({
     queryKey: ["product_reviews", product.id],
     queryFn: () => fetchProductReviews(product.id),
     staleTime: 30_000,
   });
 
+  const { data: eligibleOrderId } = useQuery({
+    queryKey: ["product_review_eligibility", product.id],
+    queryFn: () => fetchEligibleOrderId(product.id),
+    staleTime: 60_000,
+  });
+
   const handleReviewSubmit = async (r: NewReview) => {
+    if (!eligibleOrderId) {
+      toast.error("You must have a delivered order of this product to leave a review.");
+      throw new Error("Not eligible");
+    }
     try {
       await submitReview({
         product_id: product.id,
+        order_id: eligibleOrderId,
         rating: r.rating,
         title: r.name ? `${r.name}${r.location ? ` · ${r.location}` : ""}` : undefined,
         comment: r.text,
       });
-      toast.success("Review submitted! Thanks for your feedback.");
+      toast.success("Review submitted! Visible after admin approval.");
       setUserReviews((prev) => [r, ...prev]);
       qc.invalidateQueries({ queryKey: ["product_reviews", product.id] });
     } catch (err) {
@@ -183,86 +187,6 @@ function ProductPage() {
   const bundleOriginal = bundleItems.filter((b) => bundle[b.id]).reduce((s, b) => s + b.oldPrice, 0);
   const bundleSave = bundleOriginal - bundleTotal;
   const related = allOthers.slice(0, 4);
-  const productReviews = testimonials.filter(
-    (t) => t.productSlug === product.id || product.title.toLowerCase().includes(t.productSlug.replace(/-/g, " "))
-  );
-  const seedReviews = productReviews.length
-    ? productReviews
-    : testimonials.slice(0, 3);
-
-  const [filter, setFilter] = useState<"all" | "5" | "4" | "photos">("all");
-  const [visibleReviews, setVisibleReviews] = useState(3);
-
-  type DisplayReview = {
-    name: string;
-    location: string;
-    rating: number;
-    text: string;
-    photos: string[];
-    date: string;
-    helpful: number;
-    isUser: boolean;
-  };
-
-  const seedPhotoMap: Record<number, string[]> = {
-    0: ["__r1", "__r2"],
-    1: ["__r3", "__r4"],
-  };
-  const seedDates = ["2 days ago", "1 week ago", "2 weeks ago", "1 month ago"];
-  const seedHelpful = [42, 28, 19, 11];
-
-  const allReviews = useMemo<DisplayReview[]>(() => {
-    const fromDb: DisplayReview[] = dbReviews.map((r) => {
-      const titleParts = (r.title ?? "").split(" · ");
-      const name = r.display_name ?? titleParts[0] ?? "Verified buyer";
-      const loc = titleParts[1] ?? "";
-      const ageMs = Date.now() - new Date(r.created_at).getTime();
-      const days = Math.floor(ageMs / 86_400_000);
-      const date = days < 1 ? "Today" : days === 1 ? "1 day ago" : days < 30 ? `${days} days ago` : new Date(r.created_at).toLocaleDateString();
-      return {
-        name,
-        location: loc,
-        rating: r.rating,
-        text: r.comment ?? "",
-        photos: [],
-        date,
-        helpful: 0,
-        isUser: false,
-      };
-    });
-    const fromUserLocal: DisplayReview[] = userReviews
-      .filter((u) => !dbReviews.some((d) => d.comment === u.text && d.rating === u.rating))
-      .map((r) => ({
-        name: r.name, location: r.location, rating: r.rating, text: r.text,
-        photos: r.photos, date: "Just now", helpful: 0, isUser: true,
-      }));
-    const fromSeed: DisplayReview[] = dbReviews.length === 0
-      ? seedReviews.slice(0, 4).map((r, i) => ({
-          name: r.name, location: r.location, rating: r.rating, text: r.text,
-          photos: seedPhotoMap[i] ?? [],
-          date: seedDates[i % seedDates.length],
-          helpful: seedHelpful[i % seedHelpful.length],
-          isUser: false,
-        }))
-      : [];
-    return [...fromUserLocal, ...fromDb, ...fromSeed];
-  }, [userReviews, seedReviews, dbReviews]);
-
-  const filteredReviews = useMemo(() => {
-    let list = allReviews;
-    if (filter === "5") list = list.filter((r) => r.rating === 5);
-    else if (filter === "4") list = list.filter((r) => r.rating === 4);
-    else if (filter === "photos") list = list.filter((r) => r.photos.length > 0);
-    return list;
-  }, [allReviews, filter]);
-
-  const filterCounts = useMemo(() => ({
-    all: allReviews.length,
-    "5": allReviews.filter((r) => r.rating === 5).length,
-    "4": allReviews.filter((r) => r.rating === 4).length,
-    photos: allReviews.filter((r) => r.photos.length > 0).length,
-  }), [allReviews]);
-
   const handleBuyNow = () => {
     add(product, qty, { silent: true });
     navigate({ to: "/checkout" });
@@ -284,13 +208,6 @@ function ProductPage() {
   ];
 
   const wished = wishHas(product.id);
-  const ratingBreakdown = [
-    { stars: 5, pct: 78 },
-    { stars: 4, pct: 16 },
-    { stars: 3, pct: 4 },
-    { stars: 2, pct: 1 },
-    { stars: 1, pct: 1 },
-  ];
 
   return (
     <div className="pb-28 md:pb-0">
@@ -677,163 +594,28 @@ function ProductPage() {
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-2xl font-extrabold md:text-3xl">Customer Reviews</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Real photos and feedback from verified buyers</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {eligibleOrderId
+                ? "You're a verified buyer — share your experience!"
+                : "Verified buyers can leave a review after their order is delivered."}
+            </p>
           </div>
-          <button
-            onClick={() => setReviewOpen(true)}
-            className="inline-flex items-center gap-2 rounded-full border-2 border-foreground px-4 py-2 text-xs font-bold transition hover:bg-foreground hover:text-background"
-          >
-            <MessageSquare className="h-4 w-4" /> Write a review
-          </button>
+          {eligibleOrderId && (
+            <button
+              onClick={() => setReviewOpen(true)}
+              className="inline-flex items-center gap-2 rounded-full border-2 border-foreground px-4 py-2 text-xs font-bold transition hover:bg-foreground hover:text-background"
+            >
+              <MessageSquare className="h-4 w-4" /> Write a review
+            </button>
+          )}
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          {/* Summary */}
-          <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/5 to-transparent p-5 md:col-span-1 md:sticky md:top-24 md:self-start">
-            <div className="flex items-center gap-3">
-              <p className="text-4xl font-extrabold leading-none">{product.rating}</p>
-              <div>
-                <div className="flex">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                  ))}
-                </div>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">{product.reviews.toLocaleString()} verified</p>
-              </div>
-            </div>
-            <div className="mt-4 space-y-1.5">
-              {ratingBreakdown.map((r) => (
-                <div key={r.stars} className="flex items-center gap-2 text-[11px]">
-                  <span className="inline-flex w-6 items-center gap-0.5 font-bold">{r.stars}<Star className="h-2.5 w-2.5 fill-primary text-primary" /></span>
-                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${r.pct}%` }} />
-                  </div>
-                  <span className="w-8 text-right font-semibold text-muted-foreground">{r.pct}%</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 flex items-center gap-2 rounded-xl bg-primary/10 p-2.5">
-              <ThumbsUp className="h-4 w-4 shrink-0 text-primary" />
-              <p className="text-[11px] font-bold text-primary">98% recommend this product</p>
-            </div>
-          </div>
-
-          {/* Reviews list */}
-          <div className="grid gap-3 md:col-span-2">
-            {/* Customer photo strip */}
-            <div className="rounded-xl border border-border bg-card p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <p className="inline-flex items-center gap-1.5 text-xs font-bold">
-                  <Camera className="h-3.5 w-3.5 text-primary" /> Customer photos (28)
-                </p>
-                <button className="text-[11px] font-semibold text-primary hover:underline">View all</button>
-              </div>
-              <div className="grid grid-cols-4 gap-1.5">
-                {[review1, review2, review3, review4].map((src, i) => (
-                  <button key={i} className="group relative overflow-hidden rounded-lg border border-border">
-                    <img src={src} alt="Customer photo" loading="lazy" width={512} height={512} className="aspect-square w-full object-cover transition group-hover:scale-110" />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Filter chips */}
-            <div className="flex flex-wrap items-center gap-1.5">
-              {([
-                { k: "all", l: "All" },
-                { k: "5", l: "5★" },
-                { k: "4", l: "4★" },
-                { k: "photos", l: "Photos" },
-              ] as const).map((f) => {
-                const active = filter === f.k;
-                return (
-                  <button
-                    key={f.k}
-                    onClick={() => setFilter(f.k)}
-                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${
-                      active
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-card text-foreground hover:border-primary/50"
-                    }`}
-                  >
-                    {f.l}
-                    <span className={`rounded-full px-1 text-[9px] ${active ? "bg-primary-foreground/20" : "bg-muted"}`}>
-                      {filterCounts[f.k]}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {filteredReviews.length === 0 && (
-              <div className="rounded-xl border-2 border-dashed border-border p-6 text-center">
-                <p className="text-xs font-semibold text-muted-foreground">No reviews match this filter.</p>
-                <button onClick={() => setFilter("all")} className="mt-2 text-xs font-bold text-primary hover:underline">
-                  Show all reviews
-                </button>
-              </div>
-            )}
-
-            {filteredReviews.slice(0, visibleReviews).map((r, i) => {
-              const avatars = [avatar1, avatar2, avatar3, avatar4];
-              const photoMap: Record<string, string> = { __r1: review1, __r2: review2, __r3: review3, __r4: review4 };
-              const resolvedPhotos = r.photos.map((p) => photoMap[p] ?? p);
-              return (
-                <div
-                  key={`${r.isUser ? "u" : "s"}-${i}`}
-                  className={`rounded-xl border bg-card p-3.5 ${
-                    r.isUser ? "border-primary/40 bg-primary/5" : "border-border"
-                  }`}
-                >
-                  <div className="flex items-start gap-2.5">
-                    {r.isUser ? (
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-extrabold text-primary-foreground">
-                        {r.name.charAt(0).toUpperCase()}
-                      </div>
-                    ) : (
-                      <img src={avatars[i % avatars.length]} alt={r.name} loading="lazy" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-cover" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <p className="text-xs font-bold">{r.name}</p>
-                        {r.isUser ? (
-                          <span className="rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold text-primary-foreground">New</span>
-                        ) : (
-                          <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold text-primary">
-                            <BadgeCheck className="h-2.5 w-2.5" /> Verified
-                          </span>
-                        )}
-                        <div className="flex items-center text-primary">
-                          {Array.from({ length: r.rating }).map((_, j) => (
-                            <Star key={j} className="h-3 w-3 fill-primary" />
-                          ))}
-                        </div>
-                        <span className="text-[10px] text-muted-foreground">• {r.date}</span>
-                      </div>
-                      <p className="mt-1.5 text-xs leading-relaxed text-foreground">{r.text}</p>
-                      {resolvedPhotos.length > 0 && (
-                        <div className="mt-2 grid grid-cols-4 gap-1.5 sm:grid-cols-5">
-                          {resolvedPhotos.map((src, j) => (
-                            <img key={j} src={src} alt="Review photo" loading="lazy" className="aspect-square w-full rounded-md border border-border object-cover" />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-            {visibleReviews < filteredReviews.length && (
-              <button
-                onClick={() => setVisibleReviews((n) => n + 3)}
-                className="mx-auto mt-1 inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2 text-xs font-bold transition hover:border-primary hover:text-primary"
-              >
-                Load more reviews <ChevronDown className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
-        </div>
+        <ReviewsList
+          reviews={dbReviews}
+          loading={reviewsLoading}
+          fallbackRating={Number(product.rating) || 0}
+          fallbackCount={Number(product.reviews) || 0}
+        />
       </section>
 
       {/* FAQ */}

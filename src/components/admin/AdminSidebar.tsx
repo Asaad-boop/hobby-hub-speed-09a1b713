@@ -1,4 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard,
   Package,
@@ -77,6 +78,19 @@ export default function AdminSidebar() {
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
+  const { data: pendingReviews = 0 } = useQuery({
+    queryKey: ["admin", "reviews", "pendingCount"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("reviews")
+        .select("id", { count: "exact", head: true })
+        .eq("is_approved", false);
+      if (error) return 0;
+      return count ?? 0;
+    },
+    refetchInterval: 60_000,
+  });
+
   const isActive = (url: string, exact?: boolean) =>
     exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
 
@@ -128,6 +142,11 @@ export default function AdminSidebar() {
                           <Link to={item.url} className="flex items-center gap-2">
                             <item.icon className="h-4 w-4" />
                             {!collapsed && <span>{item.title}</span>}
+                            {!collapsed && item.url === "/admin/reviews" && pendingReviews > 0 && (
+                              <span className="ml-auto rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-extrabold text-primary-foreground">
+                                {pendingReviews}
+                              </span>
+                            )}
                           </Link>
                         )}
                       </SidebarMenuButton>
