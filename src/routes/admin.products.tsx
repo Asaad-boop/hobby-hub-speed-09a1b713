@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Search, Loader2, Package, ImageOff, History } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Loader2, Package, ImageOff, History, Layers } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +38,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ImageUploader, GalleryUploader } from "@/components/admin/ImageUploader";
 import { StockHistoryDrawer } from "@/components/admin/StockHistoryDrawer";
+import { VariantManager } from "@/components/admin/VariantManager";
 
 export const Route = createFileRoute("/admin/products")({
   component: AdminProductsPage,
@@ -92,6 +93,7 @@ function AdminProductsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [historyProduct, setHistoryProduct] = useState<ProductRow | null>(null);
+  const [variantsProduct, setVariantsProduct] = useState<ProductRow | null>(null);
 
   const { data: products, isLoading } = useQuery({
     queryKey: ["admin", "products"],
@@ -254,6 +256,14 @@ function AdminProductsPage() {
                         <Button
                           size="icon"
                           variant="ghost"
+                          title="Variants"
+                          onClick={() => setVariantsProduct(p)}
+                        >
+                          <Layers className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
                           title="Stock history"
                           onClick={() => setHistoryProduct(p)}
                         >
@@ -323,6 +333,14 @@ function AdminProductsPage() {
         onOpenChange={(o) => !o && setHistoryProduct(null)}
         productId={historyProduct?.id ?? null}
         productTitle={historyProduct?.title ?? null}
+      />
+
+      <VariantManager
+        open={!!variantsProduct}
+        onOpenChange={(o) => !o && setVariantsProduct(null)}
+        productId={variantsProduct?.id ?? null}
+        productTitle={variantsProduct?.title ?? ""}
+        productPrice={Number(variantsProduct?.price ?? 0)}
       />
     </div>
   );
