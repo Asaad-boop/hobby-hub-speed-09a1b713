@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Search, Eye, Package, Truck, CheckCircle2, XCircle, Clock, RefreshCw, Sparkles, PackageCheck, MapPin, AlertTriangle, RotateCcw, Repeat } from "lucide-react";
+import { Loader2, Search, Eye, Package, Truck, CheckCircle2, XCircle, Clock, RefreshCw, Sparkles, PackageCheck, MapPin, AlertTriangle, RotateCcw, Repeat, FileText, ClipboardList } from "lucide-react";
+import { generateInvoicePDF } from "@/lib/pdf/invoice";
+import { generatePackingListPDF } from "@/lib/pdf/packing-list";
+import { generatePickingListPDF } from "@/lib/pdf/picking-list";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -176,10 +179,22 @@ function AdminOrdersPage() {
             Customer orders manage koro — status update, details dekho.
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
-          <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              generatePickingListPDF(filtered.map((o) => o.id)).catch((e) => toast.error(e.message))
+            }
+            disabled={filtered.length === 0}
+          >
+            <ClipboardList className="h-4 w-4" /> Picking list
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Status pills */}
@@ -268,6 +283,26 @@ function AdminOrdersPage() {
                       </Select>
                       <Button size="sm" variant="outline" onClick={() => setOpenOrderId(o.id)}>
                         <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        title="Print invoice"
+                        onClick={() =>
+                          generateInvoicePDF(o.id).catch((e) => toast.error(e.message))
+                        }
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        title="Print packing list"
+                        onClick={() =>
+                          generatePackingListPDF(o.id).catch((e) => toast.error(e.message))
+                        }
+                      >
+                        <ClipboardList className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>
