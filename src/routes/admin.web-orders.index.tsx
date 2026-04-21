@@ -68,7 +68,7 @@ type OrderItem = Database["public"]["Tables"]["order_items"]["Row"];
 type CallStatus = Database["public"]["Enums"]["call_status"];
 type ConfirmationStatus = Database["public"]["Enums"]["confirmation_status"];
 
-export const Route = createFileRoute("/admin/web-orders")({
+export const Route = createFileRoute("/admin/web-orders/")({
   head: () => ({
     meta: [
       { title: "Web Order List" },
