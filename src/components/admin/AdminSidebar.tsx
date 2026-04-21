@@ -142,6 +142,11 @@ export default function AdminSidebar() {
                           <Link to={item.url} className="flex items-center gap-2">
                             <item.icon className="h-4 w-4" />
                             {!collapsed && <span>{item.title}</span>}
+                            {!collapsed && item.url === "/admin/reviews" && pendingReviews > 0 && (
+                              <span className="ml-auto rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-extrabold text-primary-foreground">
+                                {pendingReviews}
+                              </span>
+                            )}
                           </Link>
                         )}
                       </SidebarMenuButton>
