@@ -140,20 +140,33 @@ function WebOrderDetailPage() {
   const { loading: authLoading, hasRole } = useAdminAuth();
   const allowed = hasRole(["admin", "customer_service", "operations"]);
 
-  // ============ Fetch order + items ============
-  const { data: order, isLoading: orderLoading } = useQuery({
+  // ============ Fetch order + items (split — no FK relationship) ============
+  const { data: order, isLoading: orderLoading, error: orderError } = useQuery({
     queryKey: ["web_order_detail", orderId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: orderRow, error: oErr } = await supabase
         .from("orders")
-        .select("*, order_items(*)")
+        .select("*")
         .eq("id", orderId)
         .maybeSingle();
-      if (error) throw error;
-      return data as OrderWithItems | null;
+      if (oErr) throw oErr;
+      if (!orderRow) return null;
+      const { data: itemRows, error: iErr } = await supabase
+        .from("order_items")
+        .select("*")
+        .eq("order_id", orderId);
+      if (iErr) throw iErr;
+      return { ...orderRow, order_items: itemRows ?? [] } as OrderWithItems;
     },
     enabled: allowed,
   });
+
+  useEffect(() => {
+    if (orderError) {
+      console.error("[web-order-detail] order query failed:", orderError);
+      toast.error(`Failed to load order: ${(orderError as Error).message}`);
+    }
+  }, [orderError]);
 
   // ============ Phone-based stats ============
   const phone = order?.shipping_phone || order?.guest_phone || "";
