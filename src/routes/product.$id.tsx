@@ -428,20 +428,42 @@ function ProductPage() {
           {/* Price card */}
           <div className="mt-5 rounded-3xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4 sm:p-5">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className="text-4xl font-extrabold text-foreground sm:text-5xl">৳{product.price}</span>
-              <span className="text-lg text-muted-foreground line-through sm:text-xl">৳{product.oldPrice}</span>
-              <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-extrabold text-primary-foreground">-{off}%</span>
+              <span className="text-4xl font-extrabold text-foreground sm:text-5xl">৳{effectivePrice}</span>
+              {effectivePrice < product.oldPrice && (
+                <span className="text-lg text-muted-foreground line-through sm:text-xl">৳{product.oldPrice}</span>
+              )}
+              {effectivePrice < product.oldPrice && (
+                <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-extrabold text-primary-foreground">
+                  -{Math.round(((product.oldPrice - effectivePrice) / product.oldPrice) * 100)}%
+                </span>
+              )}
             </div>
-            <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary sm:text-sm">
-              <Gift className="h-3.5 w-3.5" /> You save ৳{product.oldPrice - product.price}
-            </p>
+            {effectivePrice < product.oldPrice && (
+              <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary sm:text-sm">
+                <Gift className="h-3.5 w-3.5" /> You save ৳{product.oldPrice - effectivePrice}
+              </p>
+            )}
           </div>
+
+          {/* Variant selector */}
+          {hasVariants && (
+            <VariantSelector
+              optionTypes={optionTypes}
+              optionValues={optionValues}
+              variants={variants}
+              selected={selectedValues}
+              onChange={setSelectedValues}
+            />
+          )}
 
           {/* Stock + urgency */}
           <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2">
             <div className="flex items-center justify-between gap-2 text-[11px]">
               <span className="inline-flex items-center gap-1 font-extrabold text-primary">
-                <Flame className="h-3.5 w-3.5 animate-pulse" /> Only {product.stock} left
+                <Flame className="h-3.5 w-3.5 animate-pulse" />
+                {hasVariants && !selectedVariant
+                  ? "Select options to see stock"
+                  : `Only ${effectiveStock} left`}
               </span>
               <span className="hidden items-center gap-1 text-muted-foreground sm:inline-flex">
                 <Clock className="h-3 w-3" /> Today's dispatch
@@ -450,7 +472,7 @@ function ProductPage() {
             <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-background">
               <div
                 className="h-full bg-gradient-to-r from-primary to-primary/70 transition-all"
-                style={{ width: `${Math.min(100, (product.stock / 25) * 100)}%` }}
+                style={{ width: `${Math.min(100, (effectiveStock / 25) * 100)}%` }}
               />
             </div>
           </div>
@@ -515,28 +537,41 @@ function ProductPage() {
           {/* CTA */}
           {(() => {
             const discount = qty === 3 ? 15 : qty === 2 ? 10 : 0;
-            const unitPrice = Math.round(product.price * (1 - discount / 100));
+            const unitPrice = Math.round(effectivePrice * (1 - discount / 100));
             const totalPrice = unitPrice * qty;
+            const variantOpts = selectedVariant
+              ? { variantId: selectedVariant.id, variantLabel: variantSelectionLabel }
+              : undefined;
             const handleAdd = () => {
+              if (variantBlocksAddToCart) {
+                toast.error(hasVariants && !allTypesSelected ? "Select all options first" : "Out of stock");
+                return;
+              }
               const discounted: typeof product = { ...product, price: unitPrice };
-              add(discounted, qty);
+              add(discounted, qty, variantOpts);
             };
             const handleBuy = () => {
+              if (variantBlocksAddToCart) {
+                toast.error(hasVariants && !allTypesSelected ? "Select all options first" : "Out of stock");
+                return;
+              }
               const discounted: typeof product = { ...product, price: unitPrice };
-              add(discounted, qty, { silent: true });
+              add(discounted, qty, { silent: true, ...(variantOpts ?? {}) });
               navigate({ to: "/checkout" });
             };
             return (
               <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <button
                   onClick={handleAdd}
-                  className="group inline-flex items-center justify-center gap-2 rounded-full border-2 border-foreground bg-background px-4 py-4 text-sm font-extrabold text-foreground transition hover:bg-foreground hover:text-background"
+                  disabled={variantBlocksAddToCart}
+                  className="group inline-flex items-center justify-center gap-2 rounded-full border-2 border-foreground bg-background px-4 py-4 text-sm font-extrabold text-foreground transition hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-background disabled:hover:text-foreground"
                 >
                   <ShoppingBag className="h-4 w-4 transition group-hover:scale-110" /> Add to Cart
                 </button>
                 <button
                   onClick={handleBuy}
-                  className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-primary px-4 py-4 text-sm font-extrabold text-primary-foreground shadow-[var(--shadow-card)] transition hover:shadow-2xl"
+                  disabled={variantBlocksAddToCart}
+                  className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-primary px-4 py-4 text-sm font-extrabold text-primary-foreground shadow-[var(--shadow-card)] transition hover:shadow-2xl disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                   <Zap className="h-4 w-4 fill-current" /> Buy Now — ৳{totalPrice}
