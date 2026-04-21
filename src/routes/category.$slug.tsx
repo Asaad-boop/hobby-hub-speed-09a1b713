@@ -32,7 +32,7 @@ export const Route = createFileRoute("/category/$slug")({
     const items: Product[] = all.filter((p) => p.category === meta.category);
     return { meta, items };
   },
-  head: ({ loaderData }) => ({
+  head: ({ loaderData, params }) => ({
     meta: loaderData
       ? [
           { title: `${loaderData.meta.label} — Shop in Bangladesh | HobbyShop` },
@@ -40,6 +40,27 @@ export const Route = createFileRoute("/category/$slug")({
           { property: "og:title", content: `${loaderData.meta.label} — HobbyShop` },
           { property: "og:description", content: loaderData.meta.description },
           { property: "og:image", content: loaderData.items[0]?.image },
+        ]
+      : [],
+    scripts: loaderData
+      ? [
+          {
+            type: "application/ld+json",
+            children: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Home", item: "https://hobby-hub-speed.lovable.app/" },
+                { "@type": "ListItem", position: 2, name: "Shop", item: "https://hobby-hub-speed.lovable.app/shop" },
+                {
+                  "@type": "ListItem",
+                  position: 3,
+                  name: loaderData.meta.label,
+                  item: `https://hobby-hub-speed.lovable.app/category/${params.slug}`,
+                },
+              ],
+            }),
+          },
         ]
       : [],
   }),

@@ -2,6 +2,7 @@ import { Outlet, createRootRouteWithContext, HeadContent, Scripts, useRouterStat
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import appCss from "../styles.css?url";
+import "@/lib/i18n";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
@@ -33,6 +34,21 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0e703ae1-ccad-42b5-8441-24b5fd4f0c49/id-preview-c3c60a59--2c26f5f9-694d-40ad-b719-1afc69bb0a15.lovable.app-1776579424457.png" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "HobbyShop",
+          url: "https://hobby-hub-speed.lovable.app",
+          logo: "https://hobby-hub-speed.lovable.app/favicon.ico",
+          description: "Curated gadgets, decor & gifts shipped fast across Bangladesh. Cash on Delivery nationwide.",
+          areaServed: "BD",
+          sameAs: [],
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
