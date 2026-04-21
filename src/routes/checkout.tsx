@@ -165,6 +165,8 @@ function Checkout() {
         image: i.product.image,
         price: i.product.price,
         quantity: i.qty,
+        variant_id: i.variantId ?? null,
+        variant_label: i.variantLabel ?? null,
       }));
       await supabase.from("order_items").insert(orderItemsPayload);
 
