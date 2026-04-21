@@ -5,6 +5,7 @@ import { useProducts } from "@/lib/products";
 import { supabase } from "@/integrations/supabase/client";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { validateCoupon, type Coupon } from "@/lib/coupons";
+import { getOrderAttributionPayload } from "@/lib/session-tracking";
 import { toast } from "sonner";
 import {
   Truck,
@@ -132,39 +133,34 @@ function Checkout() {
     const orderTotal = subtotal + shippingFee - couponDiscount;
 
     // Build the order row — works for both authed and guest checkouts.
+    // Capture marketing/session attribution from the visitor's session.
+    const attribution = getOrderAttributionPayload();
+    const baseOrder = {
+      status: "new" as const,
+      subtotal,
+      shipping_fee: shippingFee,
+      discount_amount: couponDiscount,
+      coupon_code: appliedCoupon?.code ?? null,
+      total: orderTotal,
+      payment_method: payMethod,
+      shipping_name: form.name,
+      shipping_phone: form.phone,
+      shipping_address: form.address,
+      shipping_city: form.city,
+      shipping_district: form.district,
+      ...attribution,
+    };
     const orderInsert = isGuest
       ? {
+          ...baseOrder,
           user_id: null,
           is_guest_order: true,
           guest_name: form.name,
           guest_phone: form.phone,
-          status: "new" as const,
-          subtotal,
-          shipping_fee: shippingFee,
-          discount_amount: couponDiscount,
-          coupon_code: appliedCoupon?.code ?? null,
-          total: orderTotal,
-          payment_method: payMethod,
-          shipping_name: form.name,
-          shipping_phone: form.phone,
-          shipping_address: form.address,
-          shipping_city: form.city,
-          shipping_district: form.district,
         }
       : {
+          ...baseOrder,
           user_id: session!.user.id,
-          status: "new" as const,
-          subtotal,
-          shipping_fee: shippingFee,
-          discount_amount: couponDiscount,
-          coupon_code: appliedCoupon?.code ?? null,
-          total: orderTotal,
-          payment_method: payMethod,
-          shipping_name: form.name,
-          shipping_phone: form.phone,
-          shipping_address: form.address,
-          shipping_city: form.city,
-          shipping_district: form.district,
         };
 
     const { data: order, error: orderErr } = await supabase
