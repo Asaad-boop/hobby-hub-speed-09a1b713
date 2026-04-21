@@ -47,6 +47,7 @@ import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAccountingRouteImport } from './routes/admin.accounting'
 import { Route as AdminFinanceTransactionsRouteImport } from './routes/admin.finance.transactions'
+import { Route as AdminFinanceSettlementsRouteImport } from './routes/admin.finance.settlements'
 import { Route as AdminFinanceAccountsRouteImport } from './routes/admin.finance.accounts'
 
 const WishlistRoute = WishlistRouteImport.update({
@@ -240,6 +241,11 @@ const AdminFinanceTransactionsRoute =
     path: '/transactions',
     getParentRoute: () => AdminFinanceRoute,
   } as any)
+const AdminFinanceSettlementsRoute = AdminFinanceSettlementsRouteImport.update({
+  id: '/settlements',
+  path: '/settlements',
+  getParentRoute: () => AdminFinanceRoute,
+} as any)
 const AdminFinanceAccountsRoute = AdminFinanceAccountsRouteImport.update({
   id: '/accounts',
   path: '/accounts',
@@ -285,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
   '/admin/finance/accounts': typeof AdminFinanceAccountsRoute
+  '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
   '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
 }
 export interface FileRoutesByTo {
@@ -325,6 +332,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/track': typeof TrackIndexRoute
   '/admin/finance/accounts': typeof AdminFinanceAccountsRoute
+  '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
   '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
 }
 export interface FileRoutesById {
@@ -367,6 +375,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
   '/admin/finance/accounts': typeof AdminFinanceAccountsRoute
+  '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
   '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
 }
 export interface FileRouteTypes {
@@ -410,6 +419,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/track/'
     | '/admin/finance/accounts'
+    | '/admin/finance/settlements'
     | '/admin/finance/transactions'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -450,6 +460,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/track'
     | '/admin/finance/accounts'
+    | '/admin/finance/settlements'
     | '/admin/finance/transactions'
   id:
     | '__root__'
@@ -491,6 +502,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/track/'
     | '/admin/finance/accounts'
+    | '/admin/finance/settlements'
     | '/admin/finance/transactions'
   fileRoutesById: FileRoutesById
 }
@@ -788,6 +800,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFinanceTransactionsRouteImport
       parentRoute: typeof AdminFinanceRoute
     }
+    '/admin/finance/settlements': {
+      id: '/admin/finance/settlements'
+      path: '/settlements'
+      fullPath: '/admin/finance/settlements'
+      preLoaderRoute: typeof AdminFinanceSettlementsRouteImport
+      parentRoute: typeof AdminFinanceRoute
+    }
     '/admin/finance/accounts': {
       id: '/admin/finance/accounts'
       path: '/accounts'
@@ -800,11 +819,13 @@ declare module '@tanstack/react-router' {
 
 interface AdminFinanceRouteChildren {
   AdminFinanceAccountsRoute: typeof AdminFinanceAccountsRoute
+  AdminFinanceSettlementsRoute: typeof AdminFinanceSettlementsRoute
   AdminFinanceTransactionsRoute: typeof AdminFinanceTransactionsRoute
 }
 
 const AdminFinanceRouteChildren: AdminFinanceRouteChildren = {
   AdminFinanceAccountsRoute: AdminFinanceAccountsRoute,
+  AdminFinanceSettlementsRoute: AdminFinanceSettlementsRoute,
   AdminFinanceTransactionsRoute: AdminFinanceTransactionsRoute,
 }
 
