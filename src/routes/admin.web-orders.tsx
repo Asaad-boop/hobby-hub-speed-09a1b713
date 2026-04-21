@@ -1,22 +1,25 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Phone,
-  PhoneCall,
-  Eye,
+  MessageCircle,
+  Copy,
   CheckCircle2,
   XCircle,
-  Ban,
-  Pause,
-  CreditCard,
   RefreshCw,
   Search,
   Volume2,
   VolumeX,
   Loader2,
   AlertTriangle,
-  MessageSquareWarning,
+  ExternalLink,
+  Settings as SettingsIcon,
+  MapPin,
+  User as UserIcon,
+  Plus,
+  Filter as FilterIcon,
+  ChevronDown,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -33,13 +36,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -47,6 +43,22 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { toast } from "sonner";
 import { useAdminAuth } from "@/lib/admin";
 import type { Database } from "@/integrations/supabase/types";
@@ -59,7 +71,7 @@ type ConfirmationStatus = Database["public"]["Enums"]["confirmation_status"];
 export const Route = createFileRoute("/admin/web-orders")({
   head: () => ({
     meta: [
-      { title: "Web Orders — Verification Queue" },
+      { title: "Web Order List" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -67,59 +79,118 @@ export const Route = createFileRoute("/admin/web-orders")({
 });
 
 const TABS = [
-  { id: "processing", label: "🔴 Processing", color: "text-red-600" },
-  { id: "no_response_soft", label: "⏳ Good but No Response", color: "text-amber-600" },
-  { id: "no_response", label: "📵 No Response", color: "text-orange-600" },
-  { id: "advance", label: "💳 Advance Payment", color: "text-violet-600" },
-  { id: "hold", label: "⏸️ On Hold", color: "text-slate-600" },
-  { id: "complete", label: "✅ Complete", color: "text-emerald-600" },
-  { id: "cancel", label: "❌ Cancel", color: "text-destructive" },
-  { id: "all", label: "📋 All (7d)", color: "text-foreground" },
+  { id: "processing", label: "⊙ Processing" },
+  { id: "incomplete", label: "📝 Incomplete" },
+  { id: "no_response_soft", label: "👍 Good But No Response" },
+  { id: "no_response", label: "💬 No Response" },
+  { id: "advance", label: "💳 Advance Payment" },
+  { id: "hold", label: "⏸ On Hold" },
+  { id: "complete", label: "✅ Complete" },
+  { id: "cancel", label: "❌ Cancel" },
+  { id: "all", label: "≡ All" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
 
-function relativeTime(iso: string) {
+function formatBDT(value: number) {
+  return `৳${Number(value || 0).toLocaleString("en-IN")}`;
+}
+
+function formatCreatedAt(iso: string) {
+  const d = new Date(iso);
+  const date = d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+  const time = d.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `${date}, ${time.toLowerCase()}`;
+}
+
+function relativeShort(iso: string | null | undefined) {
+  if (!iso) return "—";
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60_000);
   if (m < 1) return "just now";
-  if (m < 60) return `${m} min ago`;
+  if (m < 60) return `${m}m ago`;
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  const d = Math.floor(h / 24);
+  return `${d}d ago`;
+}
+
+function copyToClipboard(text: string, label = "Copied") {
+  if (!text) return;
+  navigator.clipboard
+    .writeText(text)
+    .then(() => toast.success(label))
+    .catch(() => toast.error("Copy failed"));
 }
 
 function CallDots({ count }: { count: number }) {
+  const max = 3;
   return (
-    <div className="flex gap-0.5" aria-label={`${count} call attempts`}>
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          className={`h-1.5 w-1.5 rounded-full ${i < count ? "bg-primary" : "bg-muted"}`}
-        />
-      ))}
+    <div className="flex items-center gap-1" aria-label={`${count} call attempts`}>
+      <div className="flex gap-0.5">
+        {Array.from({ length: max }).map((_, i) => (
+          <span
+            key={i}
+            className={`h-1.5 w-1.5 rounded-full ${
+              i < count ? "bg-primary" : "bg-muted"
+            }`}
+          />
+        ))}
+      </div>
+      <span className="text-[10px] font-semibold text-muted-foreground">
+        {count > 0 ? count : "—"}
+      </span>
     </div>
   );
 }
 
-function CallStatusBadge({ status }: { status: CallStatus }) {
-  const meta: Record<CallStatus, { label: string; cls: string }> = {
-    not_called: { label: "Not called", cls: "bg-muted text-muted-foreground" },
-    attempting: { label: "Attempting", cls: "bg-amber-500/10 text-amber-700" },
-    reached: { label: "Reached", cls: "bg-sky-500/10 text-sky-700" },
-    no_response: { label: "No response", cls: "bg-orange-500/10 text-orange-700" },
-    wrong_number: { label: "Wrong number", cls: "bg-rose-500/10 text-rose-700" },
-    customer_confirmed: { label: "Confirmed", cls: "bg-emerald-500/10 text-emerald-700" },
-    customer_cancelled: { label: "Cancelled", cls: "bg-destructive/10 text-destructive" },
-    needs_followup: { label: "Follow-up", cls: "bg-violet-500/10 text-violet-700" },
-  };
-  const m = meta[status];
+function SuccessRing({ rate }: { rate: number }) {
+  const r = 18;
+  const c = 2 * Math.PI * r;
+  const pct = Math.max(0, Math.min(100, rate));
+  const offset = c - (pct / 100) * c;
+  const color =
+    pct >= 90
+      ? "text-emerald-500"
+      : pct >= 70
+        ? "text-amber-500"
+        : "text-rose-500";
   return (
-    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${m.cls}`}>
-      {m.label}
-    </span>
+    <div className="relative h-12 w-12">
+      <svg viewBox="0 0 44 44" className="h-12 w-12 -rotate-90">
+        <circle cx="22" cy="22" r={r} strokeWidth="4" className="stroke-muted" fill="none" />
+        <circle
+          cx="22"
+          cy="22"
+          r={r}
+          strokeWidth="4"
+          className={`${color} stroke-current transition-all`}
+          fill="none"
+          strokeDasharray={c}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+        />
+      </svg>
+      <span
+        className={`absolute inset-0 flex items-center justify-center text-[10px] font-bold ${color}`}
+      >
+        {Math.round(pct)}%
+      </span>
+    </div>
   );
 }
+
+type CustomerStat = {
+  phone: string | null;
+  total_orders: number | null;
+  delivered_orders: number | null;
+  cancelled_orders: number | null;
+  success_rate: number | null;
+};
 
 function WebOrdersPage() {
   const { user, hasRole, loading: authLoading } = useAdminAuth();
@@ -130,8 +201,9 @@ function WebOrdersPage() {
   const [search, setSearch] = useState("");
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [soundOn, setSoundOn] = useState(false);
-  const [openOrderId, setOpenOrderId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [pageSize, setPageSize] = useState(20);
+  const [page, setPage] = useState(1);
 
   // Realtime new-order subscription
   useEffect(() => {
@@ -154,7 +226,7 @@ function WebOrdersPage() {
               } catch {}
             }
             toast.info(`🔔 New order received`, {
-              description: `${newOrder.shipping_name ?? newOrder.guest_name ?? "Customer"} • ৳${Number(newOrder.total).toLocaleString()}`,
+              description: `${newOrder.shipping_name ?? newOrder.guest_name ?? "Customer"} • ${formatBDT(Number(newOrder.total))}`,
             });
           }
         },
@@ -165,7 +237,12 @@ function WebOrdersPage() {
     };
   }, [allowed, soundOn, queryClient]);
 
-  const { data: orders = [], isLoading, refetch, isFetching } = useQuery({
+  const {
+    data: orders = [],
+    isLoading,
+    refetch,
+    isFetching,
+  } = useQuery({
     queryKey: ["web-orders"],
     queryFn: async () => {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600_000).toISOString();
@@ -181,11 +258,62 @@ function WebOrdersPage() {
     enabled: allowed,
   });
 
+  // Fetch first item per order for the Order Items column
+  const orderIds = useMemo(() => orders.map((o) => o.id), [orders]);
+  const { data: itemsByOrder = {} } = useQuery({
+    queryKey: ["web-orders-items", orderIds.join(",")],
+    enabled: allowed && orderIds.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("order_items")
+        .select("*")
+        .in("order_id", orderIds);
+      if (error) throw error;
+      const map: Record<string, OrderItem[]> = {};
+      for (const it of (data ?? []) as OrderItem[]) {
+        if (!map[it.order_id]) map[it.order_id] = [];
+        map[it.order_id].push(it);
+      }
+      return map;
+    },
+  });
+
+  // Customer success-rate stats by phone
+  const phones = useMemo(() => {
+    const set = new Set<string>();
+    for (const o of orders) {
+      const p = o.shipping_phone ?? o.guest_phone;
+      if (p) set.add(p);
+    }
+    return Array.from(set);
+  }, [orders]);
+
+  const { data: statsByPhone = {} } = useQuery({
+    queryKey: ["web-orders-stats", phones.join(",")],
+    enabled: allowed && phones.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("customer_stats_by_phone")
+        .select("*")
+        .in("phone", phones);
+      if (error) {
+        console.error("stats query failed", error);
+        return {} as Record<string, CustomerStat>;
+      }
+      const map: Record<string, CustomerStat> = {};
+      for (const row of (data ?? []) as CustomerStat[]) {
+        if (row.phone) map[row.phone] = row;
+      }
+      return map;
+    },
+  });
+
   const today = new Date().toISOString().slice(0, 10);
 
   const counts = useMemo(() => {
     const c: Record<TabId, number> = {
       processing: 0,
+      incomplete: 0,
       no_response_soft: 0,
       no_response: 0,
       advance: 0,
@@ -196,7 +324,15 @@ function WebOrdersPage() {
     };
     const oneDayAgo = Date.now() - 24 * 3600_000;
     for (const o of orders) {
-      if (o.status === "new" && o.confirmation_status === "pending" && o.call_attempt_count < 2) c.processing++;
+      if (
+        o.status === "new" &&
+        o.confirmation_status === "pending" &&
+        o.call_attempt_count < 2
+      )
+        c.processing++;
+      const phone = o.shipping_phone ?? o.guest_phone;
+      const addr = o.shipping_address;
+      if (!phone || !addr) c.incomplete++;
       if (
         o.call_status === "reached" &&
         o.confirmation_status === "pending" &&
@@ -210,7 +346,10 @@ function WebOrdersPage() {
         c.no_response++;
       if (o.confirmation_status === "advance_pending") c.advance++;
       if (o.confirmation_status === "on_hold") c.hold++;
-      if (o.confirmation_status === "confirmed" && o.confirmed_at?.slice(0, 10) === today)
+      if (
+        o.confirmation_status === "confirmed" &&
+        o.confirmed_at?.slice(0, 10) === today
+      )
         c.complete++;
       if (["rejected", "fake"].includes(o.confirmation_status)) c.cancel++;
     }
@@ -223,7 +362,16 @@ function WebOrdersPage() {
     switch (tab) {
       case "processing":
         list = list.filter(
-          (o) => o.status === "new" && o.confirmation_status === "pending" && o.call_attempt_count < 2,
+          (o) =>
+            o.status === "new" &&
+            o.confirmation_status === "pending" &&
+            o.call_attempt_count < 2,
+        );
+        break;
+      case "incomplete":
+        list = list.filter(
+          (o) =>
+            !(o.shipping_phone ?? o.guest_phone) || !o.shipping_address,
         );
         break;
       case "no_response_soft":
@@ -236,7 +384,9 @@ function WebOrdersPage() {
         break;
       case "no_response":
         list = list.filter(
-          (o) => ["no_response", "wrong_number"].includes(o.call_status) || o.call_attempt_count >= 3,
+          (o) =>
+            ["no_response", "wrong_number"].includes(o.call_status) ||
+            o.call_attempt_count >= 3,
         );
         break;
       case "advance":
@@ -247,7 +397,9 @@ function WebOrdersPage() {
         break;
       case "complete":
         list = list.filter(
-          (o) => o.confirmation_status === "confirmed" && o.confirmed_at?.slice(0, 10) === today,
+          (o) =>
+            o.confirmation_status === "confirmed" &&
+            o.confirmed_at?.slice(0, 10) === today,
         );
         break;
       case "cancel":
@@ -266,7 +418,33 @@ function WebOrdersPage() {
     );
   }, [orders, tab, search, today]);
 
-  // Mutations
+  // Reset page when filter changes
+  useEffect(() => {
+    setPage(1);
+  }, [tab, search, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const pagedOrders = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, page, pageSize]);
+
+  const allOnPageSelected =
+    pagedOrders.length > 0 && pagedOrders.every((o) => selected.has(o.id));
+
+  function togglePageSelect() {
+    setSelected((prev) => {
+      const n = new Set(prev);
+      if (allOnPageSelected) {
+        for (const o of pagedOrders) n.delete(o.id);
+      } else {
+        for (const o of pagedOrders) n.add(o.id);
+      }
+      return n;
+    });
+  }
+
+  // ===== Mutations =====
   const confirmOrder = useMutation({
     mutationFn: async (orderId: string) => {
       const { error } = await supabase
@@ -282,7 +460,7 @@ function WebOrdersPage() {
       if (error) throw error;
     },
     onSuccess: (_, id) => {
-      toast.success(`Order #${id.slice(0, 8).toUpperCase()} confirmed → Order List`);
+      toast.success(`Order #${id.slice(0, 8).toUpperCase()} confirmed`);
       queryClient.invalidateQueries({ queryKey: ["web-orders"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -299,8 +477,11 @@ function WebOrdersPage() {
         })
         .eq("id", id);
       if (error) throw error;
-      // Bump cancellation_count
-      const { data: o } = await supabase.from("orders").select("user_id").eq("id", id).single();
+      const { data: o } = await supabase
+        .from("orders")
+        .select("user_id")
+        .eq("id", id)
+        .single();
       if (o?.user_id) {
         const { data: p } = await supabase
           .from("profiles")
@@ -331,7 +512,11 @@ function WebOrdersPage() {
         })
         .eq("id", id);
       if (error) throw error;
-      const { data: o } = await supabase.from("orders").select("user_id").eq("id", id).single();
+      const { data: o } = await supabase
+        .from("orders")
+        .select("user_id")
+        .eq("id", id)
+        .single();
       if (o?.user_id) {
         const { data: p } = await supabase
           .from("profiles")
@@ -363,12 +548,32 @@ function WebOrdersPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["web-orders"] });
-      queryClient.invalidateQueries({ queryKey: ["web-order", openOrderId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // Reject/fake/hold/advance dialogs
+  // Bulk action: add tag
+  const bulkAddTag = useMutation({
+    mutationFn: async ({ ids, tag }: { ids: string[]; tag: string }) => {
+      for (const id of ids) {
+        const o = orders.find((x) => x.id === id);
+        const next = Array.from(new Set([...(o?.order_tags ?? []), tag]));
+        const { error } = await supabase
+          .from("orders")
+          .update({ order_tags: next })
+          .eq("id", id);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Tag added to selected orders");
+      setSelected(new Set());
+      queryClient.invalidateQueries({ queryKey: ["web-orders"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  // Dialogs
   const [rejectFor, setRejectFor] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [fakeFor, setFakeFor] = useState<string | null>(null);
@@ -378,6 +583,8 @@ function WebOrdersPage() {
   const [holdReason, setHoldReason] = useState("waiting_for_stock");
   const [advanceFor, setAdvanceFor] = useState<string | null>(null);
   const [advance, setAdvance] = useState({ amount: "", method: "bkash", txn: "" });
+  const [bulkTagOpen, setBulkTagOpen] = useState(false);
+  const [bulkTagValue, setBulkTagValue] = useState("");
 
   if (authLoading) {
     return (
@@ -399,21 +606,21 @@ function WebOrdersPage() {
   }
 
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <div className="space-y-4">
+      {/* Top header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Web Orders — Verification Queue</h1>
-          <p className="text-sm text-muted-foreground">
-            Pending: <span className="font-semibold text-foreground">{counts.processing}</span> · Confirmed today:{" "}
-            <span className="font-semibold text-emerald-600">{counts.complete}</span> · Cancelled:{" "}
-            <span className="font-semibold text-destructive">{counts.cancel}</span>
+          <h1 className="text-2xl font-bold tracking-tight">Web Order List</h1>
+          <p className="text-xs text-muted-foreground">
+            Total in last 7 days: <span className="font-semibold">{orders.length}</span>
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5">
             <Switch id="auto" checked={autoRefresh} onCheckedChange={setAutoRefresh} />
-            <Label htmlFor="auto" className="text-xs font-semibold">Auto-refresh</Label>
+            <Label htmlFor="auto" className="text-xs font-semibold">
+              Auto-refresh
+            </Label>
           </div>
           <Button variant="outline" size="sm" onClick={() => setSoundOn((v) => !v)}>
             {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
@@ -421,11 +628,14 @@ function WebOrdersPage() {
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
             <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
           </Button>
+          <Button variant="ghost" size="icon" aria-label="Settings">
+            <SettingsIcon className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-border pb-2">
+      {/* Tabs row */}
+      <div className="flex flex-wrap items-center gap-1 overflow-x-auto border-b border-border">
         {TABS.map((t) => {
           const active = tab === t.id;
           return (
@@ -435,107 +645,392 @@ function WebOrdersPage() {
                 setTab(t.id);
                 setSelected(new Set());
               }}
-              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+              className={`relative whitespace-nowrap px-3 py-2 text-xs font-semibold transition ${
                 active
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-background hover:bg-muted"
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {t.label} <span className="ml-1 opacity-70">({counts[t.id]})</span>
+              <span>{t.label}</span>
+              <span
+                className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] ${
+                  active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {counts[t.id]}
+              </span>
+              {active && (
+                <span className="absolute inset-x-0 -bottom-px h-0.5 bg-primary" />
+              )}
             </button>
           );
         })}
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by Order ID, phone, name…"
-          className="pl-9"
-        />
-      </div>
-
-      {/* Bulk actions */}
-      {selected.size > 0 && (
-        <div className="sticky top-14 z-10 flex items-center justify-between gap-2 rounded-xl border border-primary/40 bg-primary/5 px-3 py-2 text-sm">
-          <span className="font-semibold">{selected.size} selected</span>
-          <div className="flex gap-2">
+      {/* Filter bar */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[240px] flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Filter orders…"
+            className="pl-9"
+          />
+        </div>
+        <Button variant="outline" size="sm">
+          <Plus className="mr-1 h-3.5 w-3.5" /> New
+        </Button>
+        <Button variant="outline" size="sm">
+          <FilterIcon className="mr-1 h-3.5 w-3.5" /> Filter
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
             <Button
+              variant="outline"
               size="sm"
+              disabled={selected.size === 0}
+              className={selected.size > 0 ? "border-primary text-primary" : ""}
+            >
+              Bulk Actions ({selected.size}) <ChevronDown className="ml-1 h-3.5 w-3.5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>{selected.size} selected</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
               onClick={async () => {
                 for (const id of selected) await confirmOrder.mutateAsync(id);
                 setSelected(new Set());
               }}
             >
-              <CheckCircle2 className="mr-1 h-4 w-4" /> Bulk Confirm
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => setSelected(new Set())}>
-              Clear
-            </Button>
+              <CheckCircle2 className="mr-2 h-4 w-4" /> Bulk Confirm
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setBulkTagOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> Bulk Add Tag
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                toast.info("Bulk SMS coming soon");
+              }}
+            >
+              <MessageCircle className="mr-2 h-4 w-4" /> Bulk Send SMS
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setSelected(new Set())}>
+              Clear selection
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Table */}
+      <div className="rounded-2xl border border-border bg-card">
+        {isLoading ? (
+          <div className="flex h-64 items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
-        </div>
-      )}
+        ) : pagedOrders.length === 0 ? (
+          <div className="py-16 text-center text-sm text-muted-foreground">
+            Ei tab e kono order nei.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b bg-muted/30 hover:bg-muted/30">
+                  <TableHead className="w-10">
+                    <input
+                      type="checkbox"
+                      checked={allOnPageSelected}
+                      onChange={togglePageSelect}
+                      className="h-4 w-4 rounded border-border"
+                      aria-label="Select all on page"
+                    />
+                  </TableHead>
+                  <TableHead className="min-w-[140px]">Created At</TableHead>
+                  <TableHead>Auto Call</TableHead>
+                  <TableHead className="min-w-[220px]">Customer</TableHead>
+                  <TableHead className="min-w-[160px]">Note</TableHead>
+                  <TableHead className="min-w-[200px]">Order Items</TableHead>
+                  <TableHead className="min-w-[140px]">Success Rate</TableHead>
+                  <TableHead className="min-w-[120px]">Tags</TableHead>
+                  <TableHead>Site</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pagedOrders.map((o) => {
+                  const phone = o.shipping_phone ?? o.guest_phone ?? "";
+                  const customerName =
+                    o.shipping_name ?? o.guest_name ?? "—";
+                  const orderItems = itemsByOrder[o.id] ?? [];
+                  const firstItem = orderItems[0];
+                  const moreCount = orderItems.length - 1;
+                  const stat = phone ? statsByPhone[phone] : undefined;
+                  const successRate = Number(stat?.success_rate ?? 0);
+                  const total = stat?.total_orders ?? 0;
+                  const delivered = stat?.delivered_orders ?? 0;
+                  const idShort = o.id.slice(0, 8).toUpperCase();
+                  const isSelected = selected.has(o.id);
+                  const cityLine = [o.shipping_city, o.shipping_district]
+                    .filter(Boolean)
+                    .join(", ");
 
-      {/* Cards */}
-      {isLoading ? (
-        <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border py-16 text-center text-sm text-muted-foreground">
-          Ei tab e kono order nei.
-        </div>
-      ) : (
-        <div className="grid gap-3">
-          {filtered.map((o) => (
-            <OrderCard
-              key={o.id}
-              order={o}
-              selected={selected.has(o.id)}
-              onToggleSelect={() =>
-                setSelected((s) => {
-                  const n = new Set(s);
-                  if (n.has(o.id)) n.delete(o.id);
-                  else n.add(o.id);
-                  return n;
-                })
-              }
-              onView={() => setOpenOrderId(o.id)}
-              onConfirm={() => confirmOrder.mutate(o.id)}
-              onReject={() => {
-                setRejectFor(o.id);
-                setRejectReason("");
-              }}
-              onFake={() => {
-                setFakeFor(o.id);
-                setFakeConfirm("");
-                setFakeReason("");
-              }}
-              onHold={() => {
-                setHoldFor(o.id);
-                setHoldReason("waiting_for_stock");
-              }}
-              onAdvance={() => {
-                setAdvanceFor(o.id);
-                setAdvance({ amount: "", method: "bkash", txn: "" });
-              }}
-            />
-          ))}
-        </div>
-      )}
+                  return (
+                    <TableRow
+                      key={o.id}
+                      data-state={isSelected ? "selected" : undefined}
+                      className="align-top"
+                    >
+                      <TableCell>
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() =>
+                            setSelected((s) => {
+                              const n = new Set(s);
+                              if (n.has(o.id)) n.delete(o.id);
+                              else n.add(o.id);
+                              return n;
+                            })
+                          }
+                          className="h-4 w-4 rounded border-border"
+                          aria-label={`Select order ${idShort}`}
+                        />
+                      </TableCell>
 
-      {/* Detail drawer */}
-      <OrderDetailDrawer
-        orderId={openOrderId}
-        onClose={() => setOpenOrderId(null)}
-        onConfirm={() => openOrderId && confirmOrder.mutate(openOrderId)}
-        onUpdateField={(patch) =>
-          openOrderId && updateOrderField.mutate({ id: openOrderId, patch })
-        }
-      />
+                      {/* Created At */}
+                      <TableCell>
+                        <div className="text-xs font-semibold">
+                          {formatCreatedAt(o.created_at)}
+                        </div>
+                        <div className="mt-0.5 font-mono text-[10px] text-muted-foreground">
+                          ID: {idShort}
+                        </div>
+                      </TableCell>
+
+                      {/* Auto Call */}
+                      <TableCell>
+                        <CallDots count={o.call_attempt_count} />
+                      </TableCell>
+
+                      {/* Customer */}
+                      <TableCell>
+                        <div className="space-y-1 text-xs">
+                          <div className="flex items-center gap-1.5">
+                            <Phone className="h-3 w-3 text-muted-foreground" />
+                            {phone ? (
+                              <a
+                                href={`tel:${phone}`}
+                                className="font-semibold text-foreground hover:text-primary"
+                              >
+                                {phone}
+                              </a>
+                            ) : (
+                              <span className="text-muted-foreground">No phone</span>
+                            )}
+                            {phone && (
+                              <>
+                                <button
+                                  onClick={() => copyToClipboard(phone, "Phone copied")}
+                                  className="rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                                  aria-label="Copy phone"
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </button>
+                                <a
+                                  href={`https://wa.me/${phone.replace(/\D/g, "")}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="rounded p-0.5 text-emerald-600 hover:bg-emerald-500/10"
+                                  aria-label="WhatsApp"
+                                >
+                                  <MessageCircle className="h-3 w-3" />
+                                </a>
+                              </>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <UserIcon className="h-3 w-3 text-muted-foreground" />
+                            <span className="font-medium">{customerName}</span>
+                            {customerName !== "—" && (
+                              <button
+                                onClick={() => copyToClipboard(customerName, "Name copied")}
+                                className="rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                                aria-label="Copy name"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </button>
+                            )}
+                          </div>
+                          {cityLine && (
+                            <div className="flex items-center gap-1.5 text-muted-foreground">
+                              <MapPin className="h-3 w-3" />
+                              <span className="truncate">{cityLine}</span>
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+
+                      {/* Note */}
+                      <TableCell>
+                        {o.admin_notes ? (
+                          <div className="text-xs">
+                            <div className="text-[10px] text-muted-foreground">
+                              Updated {relativeShort(o.updated_at)}
+                            </div>
+                            <div className="mt-0.5 line-clamp-2 text-foreground">
+                              {o.admin_notes.split("\n---\n").pop()}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+
+                      {/* Order Items */}
+                      <TableCell>
+                        {firstItem ? (
+                          <div className="flex items-center gap-2">
+                            {firstItem.image ? (
+                              <img
+                                src={firstItem.image}
+                                alt={firstItem.name}
+                                className="h-10 w-10 flex-shrink-0 rounded border object-cover"
+                              />
+                            ) : (
+                              <div className="h-10 w-10 flex-shrink-0 rounded border bg-muted" />
+                            )}
+                            <div className="min-w-0 text-xs">
+                              <div className="truncate font-semibold">{firstItem.name}</div>
+                              <div className="text-muted-foreground">
+                                {firstItem.quantity}x · {formatBDT(Number(firstItem.price))}
+                              </div>
+                              {moreCount > 0 && (
+                                <div className="text-[10px] font-semibold text-primary">
+                                  +{moreCount} more
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">No items</span>
+                        )}
+                      </TableCell>
+
+                      {/* Success Rate */}
+                      <TableCell>
+                        {total > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <SuccessRing rate={successRate} />
+                            <div className="text-[10px]">
+                              <div className="font-semibold">
+                                {delivered}/{total}
+                              </div>
+                              <div className="text-muted-foreground">orders</div>
+                            </div>
+                          </div>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px]">
+                            New customer
+                          </Badge>
+                        )}
+                      </TableCell>
+
+                      {/* Tags */}
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {(o.order_tags ?? []).map((t) => (
+                            <Badge
+                              key={t}
+                              variant="secondary"
+                              className="text-[10px] font-medium"
+                            >
+                              {t}
+                            </Badge>
+                          ))}
+                          {(o.order_tags ?? []).length === 0 && (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </div>
+                      </TableCell>
+
+                      {/* Site */}
+                      <TableCell>
+                        <Badge variant="outline" className="text-[10px]">
+                          Main
+                        </Badge>
+                      </TableCell>
+
+                      {/* Actions */}
+                      <TableCell className="text-right">
+                        <Button asChild size="sm" variant="default">
+                          <Link
+                            to="/admin/web-orders/$orderId"
+                            params={{ orderId: o.id }}
+                          >
+                            Open <ExternalLink className="ml-1 h-3 w-3" />
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
+        {/* Pagination footer */}
+        {filtered.length > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3 text-xs">
+            <div className="text-muted-foreground">
+              Page <span className="font-semibold text-foreground">{page}</span> of{" "}
+              <span className="font-semibold text-foreground">{totalPages}</span> ·{" "}
+              <span className="font-semibold text-foreground">{filtered.length}</span> orders
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Label className="text-xs">Rows per page:</Label>
+                <Select
+                  value={String(pageSize)}
+                  onValueChange={(v) => setPageSize(Number(v))}
+                >
+                  <SelectTrigger className="h-7 w-20 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[10, 20, 50, 100].map((n) => (
+                      <SelectItem key={n} value={String(n)}>
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Reject dialog */}
       <Dialog open={!!rejectFor} onOpenChange={(o) => !o && setRejectFor(null)}>
@@ -545,7 +1040,9 @@ function WebOrdersPage() {
             <DialogDescription>Select reason for rejection.</DialogDescription>
           </DialogHeader>
           <Select value={rejectReason} onValueChange={setRejectReason}>
-            <SelectTrigger><SelectValue placeholder="Select reason" /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder="Select reason" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="customer_cancelled">Customer cancelled</SelectItem>
               <SelectItem value="out_of_stock">Out of stock</SelectItem>
@@ -556,7 +1053,9 @@ function WebOrdersPage() {
             </SelectContent>
           </Select>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectFor(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setRejectFor(null)}>
+              Cancel
+            </Button>
             <Button
               variant="destructive"
               disabled={!rejectReason}
@@ -571,7 +1070,7 @@ function WebOrdersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Fake dialog with strong confirm */}
+      {/* Fake dialog */}
       <Dialog open={!!fakeFor} onOpenChange={(o) => !o && setFakeFor(null)}>
         <DialogContent>
           <DialogHeader>
@@ -593,7 +1092,9 @@ function WebOrdersPage() {
             onChange={(e) => setFakeReason(e.target.value)}
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setFakeFor(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setFakeFor(null)}>
+              Cancel
+            </Button>
             <Button
               variant="destructive"
               disabled={fakeConfirm !== "FAKE" || !fakeReason}
@@ -615,7 +1116,9 @@ function WebOrdersPage() {
             <DialogTitle>Put order on hold</DialogTitle>
           </DialogHeader>
           <Select value={holdReason} onValueChange={setHoldReason}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="waiting_for_stock">Waiting for stock</SelectItem>
               <SelectItem value="customer_delay">Customer delay</SelectItem>
@@ -625,13 +1128,18 @@ function WebOrdersPage() {
             </SelectContent>
           </Select>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setHoldFor(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setHoldFor(null)}>
+              Cancel
+            </Button>
             <Button
               onClick={() => {
                 if (holdFor)
                   updateOrderField.mutate({
                     id: holdFor,
-                    patch: { confirmation_status: "on_hold" as ConfirmationStatus, hold_reason: holdReason },
+                    patch: {
+                      confirmation_status: "on_hold" as ConfirmationStatus,
+                      hold_reason: holdReason,
+                    },
                   });
                 setHoldFor(null);
               }}
@@ -663,7 +1171,9 @@ function WebOrdersPage() {
                 value={advance.method}
                 onValueChange={(v) => setAdvance({ ...advance, method: v })}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="bkash">bKash</SelectItem>
                   <SelectItem value="nagad">Nagad</SelectItem>
@@ -681,7 +1191,9 @@ function WebOrdersPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAdvanceFor(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setAdvanceFor(null)}>
+              Cancel
+            </Button>
             <Button
               disabled={!advance.amount || !advance.txn}
               onClick={() => {
@@ -703,330 +1215,38 @@ function WebOrdersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Bulk add tag dialog */}
+      <Dialog open={bulkTagOpen} onOpenChange={setBulkTagOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add tag to {selected.size} orders</DialogTitle>
+          </DialogHeader>
+          <Input
+            placeholder="Tag name (e.g. priority, vip)"
+            value={bulkTagValue}
+            onChange={(e) => setBulkTagValue(e.target.value)}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkTagOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              disabled={!bulkTagValue.trim()}
+              onClick={() => {
+                bulkAddTag.mutate({
+                  ids: Array.from(selected),
+                  tag: bulkTagValue.trim(),
+                });
+                setBulkTagOpen(false);
+                setBulkTagValue("");
+              }}
+            >
+              Add tag
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  );
-}
-
-function OrderCard({
-  order,
-  selected,
-  onToggleSelect,
-  onView,
-  onConfirm,
-  onReject,
-  onFake,
-  onHold,
-  onAdvance,
-}: {
-  order: Order;
-  selected: boolean;
-  onToggleSelect: () => void;
-  onView: () => void;
-  onConfirm: () => void;
-  onReject: () => void;
-  onFake: () => void;
-  onHold: () => void;
-  onAdvance: () => void;
-}) {
-  const customerName = order.shipping_name ?? order.guest_name ?? "—";
-  const phone = order.shipping_phone ?? order.guest_phone ?? "";
-
-  return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:border-primary/40">
-      <div className="flex items-start gap-3 p-4">
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={onToggleSelect}
-          className="mt-1 h-4 w-4 rounded border-border"
-        />
-        <div className="grid flex-1 gap-3 md:grid-cols-3">
-          {/* Left: order info */}
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold">#{order.id.slice(0, 8).toUpperCase()}</span>
-              {order.is_guest_order && (
-                <Badge variant="outline" className="text-[9px]">Guest</Badge>
-              )}
-            </div>
-            <p className="mt-1 text-sm font-semibold">{customerName}</p>
-            <p className="text-xs text-muted-foreground">{relativeTime(order.created_at)}</p>
-          </div>
-
-          {/* Center: total + city */}
-          <div className="text-sm">
-            <p className="text-lg font-extrabold text-primary">৳{Number(order.total).toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">
-              {order.shipping_city ?? "—"}
-              {order.shipping_district ? `, ${order.shipping_district}` : ""}
-            </p>
-            {order.payment_method && (
-              <Badge variant="outline" className="mt-1 text-[10px] uppercase">
-                {order.payment_method}
-              </Badge>
-            )}
-          </div>
-
-          {/* Right: phone + call info */}
-          <div className="space-y-1.5">
-            {phone && (
-              <a
-                href={`tel:${phone}`}
-                className="flex items-center gap-2 text-base font-bold text-primary hover:underline"
-              >
-                <Phone className="h-4 w-4" />
-                {phone}
-              </a>
-            )}
-            <div className="flex items-center gap-2">
-              <CallStatusBadge status={order.call_status} />
-              <CallDots count={order.call_attempt_count} />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="flex flex-wrap gap-2 border-t border-border bg-muted/30 px-4 py-2">
-        {phone && (
-          <Button asChild size="sm" variant="outline">
-            <a href={`tel:${phone}`}>
-              <PhoneCall className="mr-1 h-3.5 w-3.5" /> Call
-            </a>
-          </Button>
-        )}
-        <Button size="sm" variant="outline" onClick={onView}>
-          <Eye className="mr-1 h-3.5 w-3.5" /> Details
-        </Button>
-        <Button size="sm" onClick={onConfirm}>
-          <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Confirm
-        </Button>
-        <Button size="sm" variant="outline" onClick={onAdvance}>
-          <CreditCard className="mr-1 h-3.5 w-3.5" /> Advance
-        </Button>
-        <Button size="sm" variant="outline" onClick={onHold}>
-          <Pause className="mr-1 h-3.5 w-3.5" /> Hold
-        </Button>
-        <Button size="sm" variant="destructive" onClick={onReject}>
-          <XCircle className="mr-1 h-3.5 w-3.5" /> Reject
-        </Button>
-        <Button size="sm" variant="destructive" className="opacity-90" onClick={onFake}>
-          <Ban className="mr-1 h-3.5 w-3.5" /> Fake
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function OrderDetailDrawer({
-  orderId,
-  onClose,
-  onConfirm,
-  onUpdateField,
-}: {
-  orderId: string | null;
-  onClose: () => void;
-  onConfirm: () => void;
-  onUpdateField: (patch: Partial<Order>) => void;
-}) {
-  const { user } = useAdminAuth();
-  const { data, isLoading } = useQuery({
-    queryKey: ["web-order", orderId],
-    queryFn: async () => {
-      if (!orderId) return null;
-      const [orderRes, itemsRes] = await Promise.all([
-        supabase.from("orders").select("*").eq("id", orderId).single(),
-        supabase.from("order_items").select("*").eq("order_id", orderId),
-      ]);
-      if (orderRes.error) throw orderRes.error;
-      if (itemsRes.error) throw itemsRes.error;
-      const order = orderRes.data as Order;
-
-      let profile: { fake_order_count: number; cancellation_count: number; is_flagged: boolean } | null = null;
-      let prevOrders = 0;
-      if (order.user_id) {
-        const { data: p } = await supabase
-          .from("profiles")
-          .select("fake_order_count, cancellation_count, is_flagged")
-          .eq("id", order.user_id)
-          .maybeSingle();
-        profile = p;
-        const { count } = await supabase
-          .from("orders")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", order.user_id);
-        prevOrders = count ?? 0;
-      }
-
-      // Stock check
-      const items = (itemsRes.data ?? []) as OrderItem[];
-      const productIds = [...new Set(items.map((i) => i.product_id))];
-      const stockMap = new Map<string, number>();
-      if (productIds.length > 0) {
-        const { data: prods } = await supabase
-          .from("products")
-          .select("id, stock")
-          .in("id", productIds);
-        for (const p of prods ?? []) stockMap.set(p.id, p.stock);
-      }
-      return { order, items, profile, prevOrders, stockMap };
-    },
-    enabled: !!orderId,
-  });
-
-  const [note, setNote] = useState("");
-  useEffect(() => {
-    setNote(data?.order.admin_notes ?? "");
-  }, [data?.order.admin_notes]);
-
-  const recordCall = (status: CallStatus) => {
-    if (!data) return;
-    onUpdateField({
-      call_status: status,
-      call_attempt_count: data.order.call_attempt_count + 1,
-      last_call_at: new Date().toISOString(),
-      last_called_by: user?.id ?? null,
-    });
-    toast.success("Call attempt recorded");
-  };
-
-  return (
-    <Sheet open={!!orderId} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent side="right" className="w-full max-w-xl overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle>Order details</SheetTitle>
-          <SheetDescription>
-            {orderId ? <span className="font-mono text-xs">#{orderId.slice(0, 8).toUpperCase()}</span> : null}
-          </SheetDescription>
-        </SheetHeader>
-
-        {isLoading || !data ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        ) : (
-          <div className="mt-4 space-y-5 pb-24">
-            {/* Customer */}
-            <section className="rounded-xl border border-border bg-muted/30 p-3">
-              <h3 className="mb-2 text-sm font-bold">Customer</h3>
-              <p className="text-sm font-semibold">
-                {data.order.shipping_name ?? data.order.guest_name ?? "—"}
-              </p>
-              <a
-                href={`tel:${data.order.shipping_phone ?? data.order.guest_phone ?? ""}`}
-                className="text-sm text-primary"
-              >
-                {data.order.shipping_phone ?? data.order.guest_phone ?? "—"}
-              </a>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {data.order.shipping_address}
-                {data.order.shipping_city ? `, ${data.order.shipping_city}` : ""}
-                {data.order.shipping_district ? `, ${data.order.shipping_district}` : ""}
-              </p>
-              <div className="mt-2 flex flex-wrap gap-3 text-xs">
-                <span>Previous orders: <strong>{data.prevOrders}</strong></span>
-                {data.profile && (
-                  <>
-                    <span>Cancellations: <strong>{data.profile.cancellation_count}</strong></span>
-                    {data.profile.fake_order_count > 0 && (
-                      <span className="font-bold text-destructive">
-                        Fake orders: {data.profile.fake_order_count}
-                      </span>
-                    )}
-                    {data.profile.is_flagged && (
-                      <Badge variant="destructive" className="text-[10px]">
-                        <MessageSquareWarning className="mr-1 h-3 w-3" /> Flagged
-                      </Badge>
-                    )}
-                  </>
-                )}
-              </div>
-            </section>
-
-            {/* Items + stock */}
-            <section>
-              <h3 className="mb-2 text-sm font-bold">Items ({data.items.length})</h3>
-              <div className="space-y-2">
-                {data.items.map((it) => {
-                  const stock = data.stockMap.get(it.product_id) ?? 0;
-                  const insufficient = stock < it.quantity;
-                  return (
-                    <div
-                      key={it.id}
-                      className="flex items-center gap-3 rounded-lg border border-border bg-background p-2"
-                    >
-                      {it.image && (
-                        <img src={it.image} alt={it.name} className="h-12 w-12 rounded object-cover" />
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold">{it.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          ৳{Number(it.price).toLocaleString()} × {it.quantity}
-                        </p>
-                      </div>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${insufficient ? "bg-destructive/10 text-destructive" : "bg-emerald-500/10 text-emerald-700"}`}
-                      >
-                        Stock: {stock}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-
-            {/* Call log */}
-            <section>
-              <h3 className="mb-2 text-sm font-bold">Call activity</h3>
-              <div className="rounded-xl border border-border bg-muted/30 p-3 text-xs">
-                <div className="flex items-center justify-between">
-                  <span>Attempts: <strong>{data.order.call_attempt_count}</strong></span>
-                  <CallStatusBadge status={data.order.call_status} />
-                </div>
-                {data.order.last_call_at && (
-                  <p className="mt-1 text-muted-foreground">
-                    Last: {new Date(data.order.last_call_at).toLocaleString("en-GB")}
-                  </p>
-                )}
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {(["reached", "no_response", "wrong_number", "needs_followup"] as CallStatus[]).map((s) => (
-                  <Button key={s} size="sm" variant="outline" onClick={() => recordCall(s)}>
-                    + {s.replace(/_/g, " ")}
-                  </Button>
-                ))}
-              </div>
-            </section>
-
-            {/* Admin notes */}
-            <section>
-              <h3 className="mb-2 text-sm font-bold">Admin notes</h3>
-              <Textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Internal notes about this order…"
-              />
-              <Button
-                size="sm"
-                variant="outline"
-                className="mt-2"
-                onClick={() => onUpdateField({ admin_notes: note })}
-              >
-                Save note
-              </Button>
-            </section>
-
-            {/* Sticky actions */}
-            <div className="sticky bottom-0 -mx-6 border-t border-border bg-background p-3">
-              <div className="flex gap-2">
-                <Button className="flex-1" onClick={onConfirm}>
-                  <CheckCircle2 className="mr-1 h-4 w-4" /> Confirm order
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </SheetContent>
-    </Sheet>
   );
 }
