@@ -1342,6 +1342,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_rls_audit: {
+        Args: never
+        Returns: {
+          cmd: string
+          permissive: string
+          policyname: string
+          qual: string
+          roles: string[]
+          rowsecurity: boolean
+          tablename: string
+          with_check: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
