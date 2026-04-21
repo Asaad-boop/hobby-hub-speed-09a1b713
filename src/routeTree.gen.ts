@@ -39,12 +39,15 @@ import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminHomepageRouteImport } from './routes/admin.homepage'
+import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAccountingRouteImport } from './routes/admin.accounting'
+import { Route as AdminFinanceTransactionsRouteImport } from './routes/admin.finance.transactions'
+import { Route as AdminFinanceAccountsRouteImport } from './routes/admin.finance.accounts'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -196,6 +199,11 @@ const AdminHomepageRoute = AdminHomepageRouteImport.update({
   path: '/homepage',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminFinanceRoute = AdminFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminExpensesRoute = AdminExpensesRouteImport.update({
   id: '/expenses',
   path: '/expenses',
@@ -226,6 +234,17 @@ const AdminAccountingRoute = AdminAccountingRouteImport.update({
   path: '/accounting',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminFinanceTransactionsRoute =
+  AdminFinanceTransactionsRouteImport.update({
+    id: '/transactions',
+    path: '/transactions',
+    getParentRoute: () => AdminFinanceRoute,
+  } as any)
+const AdminFinanceAccountsRoute = AdminFinanceAccountsRouteImport.update({
+  id: '/accounts',
+  path: '/accounts',
+  getParentRoute: () => AdminFinanceRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -252,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/expenses': typeof AdminExpensesRoute
+  '/admin/finance': typeof AdminFinanceRouteWithChildren
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -264,6 +284,8 @@ export interface FileRoutesByFullPath {
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
+  '/admin/finance/accounts': typeof AdminFinanceAccountsRoute
+  '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -289,6 +311,7 @@ export interface FileRoutesByTo {
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/expenses': typeof AdminExpensesRoute
+  '/admin/finance': typeof AdminFinanceRouteWithChildren
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -301,6 +324,8 @@ export interface FileRoutesByTo {
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin': typeof AdminIndexRoute
   '/track': typeof TrackIndexRoute
+  '/admin/finance/accounts': typeof AdminFinanceAccountsRoute
+  '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -328,6 +353,7 @@ export interface FileRoutesById {
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/expenses': typeof AdminExpensesRoute
+  '/admin/finance': typeof AdminFinanceRouteWithChildren
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -340,6 +366,8 @@ export interface FileRoutesById {
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
+  '/admin/finance/accounts': typeof AdminFinanceAccountsRoute
+  '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -368,6 +396,7 @@ export interface FileRouteTypes {
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/expenses'
+    | '/admin/finance'
     | '/admin/homepage'
     | '/admin/inventory'
     | '/admin/orders'
@@ -380,6 +409,8 @@ export interface FileRouteTypes {
     | '/track/$orderId'
     | '/admin/'
     | '/track/'
+    | '/admin/finance/accounts'
+    | '/admin/finance/transactions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -405,6 +436,7 @@ export interface FileRouteTypes {
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/expenses'
+    | '/admin/finance'
     | '/admin/homepage'
     | '/admin/inventory'
     | '/admin/orders'
@@ -417,6 +449,8 @@ export interface FileRouteTypes {
     | '/track/$orderId'
     | '/admin'
     | '/track'
+    | '/admin/finance/accounts'
+    | '/admin/finance/transactions'
   id:
     | '__root__'
     | '/'
@@ -443,6 +477,7 @@ export interface FileRouteTypes {
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/expenses'
+    | '/admin/finance'
     | '/admin/homepage'
     | '/admin/inventory'
     | '/admin/orders'
@@ -455,6 +490,8 @@ export interface FileRouteTypes {
     | '/track/$orderId'
     | '/admin/'
     | '/track/'
+    | '/admin/finance/accounts'
+    | '/admin/finance/transactions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -695,6 +732,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminHomepageRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/finance': {
+      id: '/admin/finance'
+      path: '/finance'
+      fullPath: '/admin/finance'
+      preLoaderRoute: typeof AdminFinanceRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/expenses': {
       id: '/admin/expenses'
       path: '/expenses'
@@ -737,8 +781,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAccountingRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/finance/transactions': {
+      id: '/admin/finance/transactions'
+      path: '/transactions'
+      fullPath: '/admin/finance/transactions'
+      preLoaderRoute: typeof AdminFinanceTransactionsRouteImport
+      parentRoute: typeof AdminFinanceRoute
+    }
+    '/admin/finance/accounts': {
+      id: '/admin/finance/accounts'
+      path: '/accounts'
+      fullPath: '/admin/finance/accounts'
+      preLoaderRoute: typeof AdminFinanceAccountsRouteImport
+      parentRoute: typeof AdminFinanceRoute
+    }
   }
 }
+
+interface AdminFinanceRouteChildren {
+  AdminFinanceAccountsRoute: typeof AdminFinanceAccountsRoute
+  AdminFinanceTransactionsRoute: typeof AdminFinanceTransactionsRoute
+}
+
+const AdminFinanceRouteChildren: AdminFinanceRouteChildren = {
+  AdminFinanceAccountsRoute: AdminFinanceAccountsRoute,
+  AdminFinanceTransactionsRoute: AdminFinanceTransactionsRoute,
+}
+
+const AdminFinanceRouteWithChildren = AdminFinanceRoute._addFileChildren(
+  AdminFinanceRouteChildren,
+)
 
 interface AdminRouteChildren {
   AdminAccountingRoute: typeof AdminAccountingRoute
@@ -747,6 +819,7 @@ interface AdminRouteChildren {
   AdminCouponsRoute: typeof AdminCouponsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminExpensesRoute: typeof AdminExpensesRoute
+  AdminFinanceRoute: typeof AdminFinanceRouteWithChildren
   AdminHomepageRoute: typeof AdminHomepageRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
@@ -763,6 +836,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCouponsRoute: AdminCouponsRoute,
   AdminCustomersRoute: AdminCustomersRoute,
   AdminExpensesRoute: AdminExpensesRoute,
+  AdminFinanceRoute: AdminFinanceRouteWithChildren,
   AdminHomepageRoute: AdminHomepageRoute,
   AdminInventoryRoute: AdminInventoryRoute,
   AdminOrdersRoute: AdminOrdersRoute,

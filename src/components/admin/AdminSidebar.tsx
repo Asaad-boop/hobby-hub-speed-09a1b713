@@ -68,9 +68,11 @@ const groups: { label: string; items: NavItem[] }[] = [
   {
     label: "Finance",
     items: [
+      { title: "Finance Dashboard", url: "/admin/finance", icon: TrendingUp, exact: true },
+      { title: "Cash Accounts", url: "/admin/finance/accounts", icon: Wallet },
+      { title: "Transactions", url: "/admin/finance/transactions", icon: Receipt },
       { title: "Expenses", url: "/admin/expenses", icon: Receipt },
       { title: "Accounting", url: "/admin/accounting", icon: TrendingUp },
-      { title: "Cashflow", url: "/admin/cashflow", icon: Wallet, badge: "soon" },
     ],
   },
   {
