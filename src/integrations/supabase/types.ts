@@ -14,6 +14,113 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_campaigns: {
+        Row: {
+          attribution_method: Database["public"]["Enums"]["ad_attribution_method"]
+          campaign_id_external: string | null
+          campaign_name: string
+          category_id: string | null
+          created_at: string
+          daily_budget: number | null
+          end_date: string | null
+          id: string
+          notes: string | null
+          platform: Database["public"]["Enums"]["ad_platform"]
+          product_id: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["ad_status"]
+          total_spend: number
+          updated_at: string
+        }
+        Insert: {
+          attribution_method?: Database["public"]["Enums"]["ad_attribution_method"]
+          campaign_id_external?: string | null
+          campaign_name: string
+          category_id?: string | null
+          created_at?: string
+          daily_budget?: number | null
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          platform?: Database["public"]["Enums"]["ad_platform"]
+          product_id?: string | null
+          start_date: string
+          status?: Database["public"]["Enums"]["ad_status"]
+          total_spend?: number
+          updated_at?: string
+        }
+        Update: {
+          attribution_method?: Database["public"]["Enums"]["ad_attribution_method"]
+          campaign_id_external?: string | null
+          campaign_name?: string
+          category_id?: string | null
+          created_at?: string
+          daily_budget?: number | null
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          platform?: Database["public"]["Enums"]["ad_platform"]
+          product_id?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["ad_status"]
+          total_spend?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_campaigns_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_campaigns_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ad_spend_entries: {
+        Row: {
+          amount: number
+          campaign_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          spend_date: string
+          synced_from: string
+        }
+        Insert: {
+          amount: number
+          campaign_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          spend_date: string
+          synced_from?: string
+        }
+        Update: {
+          amount?: number
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          spend_date?: string
+          synced_from?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_spend_entries_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       addresses: {
         Row: {
           address_line: string
@@ -56,6 +163,42 @@ export type Database = {
           postal_code?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      cash_accounts: {
+        Row: {
+          account_number: string | null
+          created_at: string
+          current_balance: number
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          type: Database["public"]["Enums"]["cash_account_type"]
+          updated_at: string
+        }
+        Insert: {
+          account_number?: string | null
+          created_at?: string
+          current_balance?: number
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          type: Database["public"]["Enums"]["cash_account_type"]
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string | null
+          created_at?: string
+          current_balance?: number
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          type?: Database["public"]["Enums"]["cash_account_type"]
+          updated_at?: string
         }
         Relationships: []
       }
@@ -187,6 +330,139 @@ export type Database = {
         }
         Relationships: []
       }
+      courier_shipments: {
+        Row: {
+          actual_cod_charge: number
+          actual_delivery_charge: number
+          actual_return_charge: number
+          booked_at: string | null
+          cod_amount_expected: number
+          cod_amount_received: number
+          cod_settlement_batch_id: string | null
+          cod_settlement_date: string | null
+          consignment_id: string | null
+          created_at: string
+          delivered_at: string | null
+          delivery_zone: Database["public"]["Enums"]["delivery_zone"]
+          id: string
+          items_breakdown: Json
+          notes: string | null
+          order_id: string
+          provider: Database["public"]["Enums"]["courier_provider"]
+          status: Database["public"]["Enums"]["shipment_status"]
+          tracking_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_cod_charge?: number
+          actual_delivery_charge?: number
+          actual_return_charge?: number
+          booked_at?: string | null
+          cod_amount_expected?: number
+          cod_amount_received?: number
+          cod_settlement_batch_id?: string | null
+          cod_settlement_date?: string | null
+          consignment_id?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          delivery_zone?: Database["public"]["Enums"]["delivery_zone"]
+          id?: string
+          items_breakdown?: Json
+          notes?: string | null
+          order_id: string
+          provider?: Database["public"]["Enums"]["courier_provider"]
+          status?: Database["public"]["Enums"]["shipment_status"]
+          tracking_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_cod_charge?: number
+          actual_delivery_charge?: number
+          actual_return_charge?: number
+          booked_at?: string | null
+          cod_amount_expected?: number
+          cod_amount_received?: number
+          cod_settlement_batch_id?: string | null
+          cod_settlement_date?: string | null
+          consignment_id?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          delivery_zone?: Database["public"]["Enums"]["delivery_zone"]
+          id?: string
+          items_breakdown?: Json
+          notes?: string | null
+          order_id?: string
+          provider?: Database["public"]["Enums"]["courier_provider"]
+          status?: Database["public"]["Enums"]["shipment_status"]
+          tracking_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courier_shipments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      damaged_inventory: {
+        Row: {
+          cost_value: number
+          created_at: string
+          disposal_date: string | null
+          disposal_value: number
+          disposed: boolean
+          id: string
+          logged_at: string
+          logged_by: string
+          notes: string | null
+          product_id: string
+          quantity: number
+          reason: string | null
+          source: Database["public"]["Enums"]["damage_source"]
+        }
+        Insert: {
+          cost_value?: number
+          created_at?: string
+          disposal_date?: string | null
+          disposal_value?: number
+          disposed?: boolean
+          id?: string
+          logged_at?: string
+          logged_by: string
+          notes?: string | null
+          product_id: string
+          quantity: number
+          reason?: string | null
+          source: Database["public"]["Enums"]["damage_source"]
+        }
+        Update: {
+          cost_value?: number
+          created_at?: string
+          disposal_date?: string | null
+          disposal_value?: number
+          disposed?: boolean
+          id?: string
+          logged_at?: string
+          logged_by?: string
+          notes?: string | null
+          product_id?: string
+          quantity?: number
+          reason?: string | null
+          source?: Database["public"]["Enums"]["damage_source"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "damaged_inventory_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expense_categories: {
         Row: {
           created_at: string
@@ -264,6 +540,39 @@ export type Database = {
           },
         ]
       }
+      finance_audit_log: {
+        Row: {
+          action: string
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          performed_at: string
+          performed_by: string
+          record_id: string
+          table_name: string
+        }
+        Insert: {
+          action: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_at?: string
+          performed_by: string
+          record_id: string
+          table_name: string
+        }
+        Update: {
+          action?: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_at?: string
+          performed_by?: string
+          record_id?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
       homepage_versions: {
         Row: {
           created_at: string
@@ -287,6 +596,86 @@ export type Database = {
           sections?: Json
         }
         Relationships: []
+      }
+      order_financials: {
+        Row: {
+          ads_cost_attributed: number
+          cod_amount_received: number
+          cod_charge: number
+          created_at: string
+          delivery_charge: number
+          finalization_status: Database["public"]["Enums"]["order_finalization_status"]
+          finalized_at: string | null
+          gross_profit: number | null
+          id: string
+          is_backfilled: boolean
+          net_profit: number | null
+          notes: string | null
+          order_id: string
+          other_costs: number
+          packaging_cost: number
+          product_cost: number
+          profit_margin_pct: number | null
+          return_charge: number
+          revenue: number
+          total_costs: number | null
+          updated_at: string
+        }
+        Insert: {
+          ads_cost_attributed?: number
+          cod_amount_received?: number
+          cod_charge?: number
+          created_at?: string
+          delivery_charge?: number
+          finalization_status?: Database["public"]["Enums"]["order_finalization_status"]
+          finalized_at?: string | null
+          gross_profit?: number | null
+          id?: string
+          is_backfilled?: boolean
+          net_profit?: number | null
+          notes?: string | null
+          order_id: string
+          other_costs?: number
+          packaging_cost?: number
+          product_cost?: number
+          profit_margin_pct?: number | null
+          return_charge?: number
+          revenue?: number
+          total_costs?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ads_cost_attributed?: number
+          cod_amount_received?: number
+          cod_charge?: number
+          created_at?: string
+          delivery_charge?: number
+          finalization_status?: Database["public"]["Enums"]["order_finalization_status"]
+          finalized_at?: string | null
+          gross_profit?: number | null
+          id?: string
+          is_backfilled?: boolean
+          net_profit?: number | null
+          notes?: string | null
+          order_id?: string
+          other_costs?: number
+          packaging_cost?: number
+          product_cost?: number
+          profit_margin_pct?: number | null
+          return_charge?: number
+          revenue?: number
+          total_costs?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_financials_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_items: {
         Row: {
@@ -345,7 +734,9 @@ export type Database = {
           discount_amount: number
           id: string
           notes: string | null
+          order_financial_id: string | null
           payment_method: string | null
+          shipment_id: string | null
           shipping_address: string | null
           shipping_city: string | null
           shipping_district: string | null
@@ -364,7 +755,9 @@ export type Database = {
           discount_amount?: number
           id?: string
           notes?: string | null
+          order_financial_id?: string | null
           payment_method?: string | null
+          shipment_id?: string | null
           shipping_address?: string | null
           shipping_city?: string | null
           shipping_district?: string | null
@@ -383,7 +776,9 @@ export type Database = {
           discount_amount?: number
           id?: string
           notes?: string | null
+          order_financial_id?: string | null
           payment_method?: string | null
+          shipment_id?: string | null
           shipping_address?: string | null
           shipping_city?: string | null
           shipping_district?: string | null
@@ -396,7 +791,22 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_order_financial_id_fkey"
+            columns: ["order_financial_id"]
+            isOneToOne: false
+            referencedRelation: "order_financials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "courier_shipments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_option_types: {
         Row: {
@@ -544,6 +954,7 @@ export type Database = {
       }
       products: {
         Row: {
+          avg_cost: number
           benefits: Json
           category_id: string | null
           created_at: string
@@ -563,9 +974,11 @@ export type Database = {
           specs: Json
           stock: number
           title: string
+          unit_cost: number
           updated_at: string
         }
         Insert: {
+          avg_cost?: number
           benefits?: Json
           category_id?: string | null
           created_at?: string
@@ -585,9 +998,11 @@ export type Database = {
           specs?: Json
           stock?: number
           title: string
+          unit_cost?: number
           updated_at?: string
         }
         Update: {
+          avg_cost?: number
           benefits?: Json
           category_id?: string | null
           created_at?: string
@@ -607,6 +1022,7 @@ export type Database = {
           specs?: Json
           stock?: number
           title?: string
+          unit_cost?: number
           updated_at?: string
         }
         Relationships: [
@@ -642,6 +1058,72 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      returns_exchanges: {
+        Row: {
+          created_at: string
+          damage_logged_qty: number
+          exchange_issued_qty: number
+          financial_impact: number
+          id: string
+          items: Json
+          notes: string | null
+          order_id: string
+          processed_at: string
+          processed_by: string
+          reason: string | null
+          shipment_id: string | null
+          stock_restored_qty: number
+          type: Database["public"]["Enums"]["return_type"]
+        }
+        Insert: {
+          created_at?: string
+          damage_logged_qty?: number
+          exchange_issued_qty?: number
+          financial_impact?: number
+          id?: string
+          items?: Json
+          notes?: string | null
+          order_id: string
+          processed_at?: string
+          processed_by: string
+          reason?: string | null
+          shipment_id?: string | null
+          stock_restored_qty?: number
+          type: Database["public"]["Enums"]["return_type"]
+        }
+        Update: {
+          created_at?: string
+          damage_logged_qty?: number
+          exchange_issued_qty?: number
+          financial_impact?: number
+          id?: string
+          items?: Json
+          notes?: string | null
+          order_id?: string
+          processed_at?: string
+          processed_by?: string
+          reason?: string | null
+          shipment_id?: string | null
+          stock_restored_qty?: number
+          type?: Database["public"]["Enums"]["return_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "returns_exchanges_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "returns_exchanges_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "courier_shipments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -768,6 +1250,72 @@ export type Database = {
           },
         ]
       }
+      transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          category: Database["public"]["Enums"]["transaction_category"]
+          created_at: string
+          created_by: string
+          description: string | null
+          direction: Database["public"]["Enums"]["transaction_direction"]
+          id: string
+          reference_id: string | null
+          reference_type: Database["public"]["Enums"]["transaction_reference_type"]
+          reversed_at: string | null
+          reversed_by: string | null
+          transaction_date: string
+          type: Database["public"]["Enums"]["transaction_type"]
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          category?: Database["public"]["Enums"]["transaction_category"]
+          created_at?: string
+          created_by: string
+          description?: string | null
+          direction: Database["public"]["Enums"]["transaction_direction"]
+          id?: string
+          reference_id?: string | null
+          reference_type?: Database["public"]["Enums"]["transaction_reference_type"]
+          reversed_at?: string | null
+          reversed_by?: string | null
+          transaction_date?: string
+          type: Database["public"]["Enums"]["transaction_type"]
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          category?: Database["public"]["Enums"]["transaction_category"]
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          direction?: Database["public"]["Enums"]["transaction_direction"]
+          id?: string
+          reference_id?: string | null
+          reference_type?: Database["public"]["Enums"]["transaction_reference_type"]
+          reversed_at?: string | null
+          reversed_by?: string | null
+          transaction_date?: string
+          type?: Database["public"]["Enums"]["transaction_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "cash_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_reversed_by_fkey"
+            columns: ["reversed_by"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -808,14 +1356,106 @@ export type Database = {
       }
     }
     Enums: {
+      ad_attribution_method:
+        | "per_product"
+        | "per_category"
+        | "all_orders_in_period"
+      ad_platform:
+        | "meta"
+        | "facebook"
+        | "instagram"
+        | "google"
+        | "tiktok"
+        | "other"
+      ad_status: "active" | "paused" | "ended"
       app_role: "admin" | "moderator" | "customer"
+      cash_account_type:
+        | "cash"
+        | "bkash"
+        | "nagad"
+        | "rocket"
+        | "bank"
+        | "pathao_pending"
+        | "meta_ads_wallet"
+        | "other"
       coupon_type: "percentage" | "fixed"
+      courier_provider: "pathao" | "steadfast" | "redx" | "manual"
+      damage_source:
+        | "return"
+        | "warehouse"
+        | "shipment_damage"
+        | "customer_damage"
+      delivery_zone: "inside_dhaka" | "outside_dhaka" | "sub_city" | "other"
+      order_finalization_status:
+        | "pending"
+        | "delivered"
+        | "partial_delivered"
+        | "returned"
+        | "exchanged"
+        | "damaged"
+        | "settled"
       order_status:
         | "pending"
         | "processing"
         | "shipped"
         | "delivered"
         | "cancelled"
+      return_type:
+        | "full_return"
+        | "partial_return"
+        | "exchange_return"
+        | "exchange_out"
+        | "damage_return"
+      shipment_status:
+        | "booked"
+        | "pickup_pending"
+        | "in_transit"
+        | "delivered"
+        | "partial_delivered"
+        | "returned"
+        | "exchanged"
+        | "damaged"
+        | "lost"
+        | "cancelled"
+      transaction_category:
+        | "product_sale"
+        | "product_purchase"
+        | "meta_ads"
+        | "google_ads"
+        | "tiktok_ads"
+        | "courier_delivery_charge"
+        | "courier_cod_charge"
+        | "courier_return_charge"
+        | "packaging"
+        | "salary"
+        | "rent"
+        | "utilities"
+        | "return_loss"
+        | "damage_loss"
+        | "owner_drawing"
+        | "owner_investment"
+        | "bank_charge"
+        | "other"
+      transaction_direction: "in" | "out"
+      transaction_reference_type:
+        | "order"
+        | "shipment"
+        | "ad_campaign"
+        | "purchase_order"
+        | "return"
+        | "manual"
+        | "settlement"
+      transaction_type:
+        | "income"
+        | "expense"
+        | "transfer_in"
+        | "transfer_out"
+        | "cod_collection"
+        | "cod_settlement"
+        | "ads_spend"
+        | "refund"
+        | "adjustment"
+        | "reversal"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -943,14 +1583,116 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      ad_attribution_method: [
+        "per_product",
+        "per_category",
+        "all_orders_in_period",
+      ],
+      ad_platform: [
+        "meta",
+        "facebook",
+        "instagram",
+        "google",
+        "tiktok",
+        "other",
+      ],
+      ad_status: ["active", "paused", "ended"],
       app_role: ["admin", "moderator", "customer"],
+      cash_account_type: [
+        "cash",
+        "bkash",
+        "nagad",
+        "rocket",
+        "bank",
+        "pathao_pending",
+        "meta_ads_wallet",
+        "other",
+      ],
       coupon_type: ["percentage", "fixed"],
+      courier_provider: ["pathao", "steadfast", "redx", "manual"],
+      damage_source: [
+        "return",
+        "warehouse",
+        "shipment_damage",
+        "customer_damage",
+      ],
+      delivery_zone: ["inside_dhaka", "outside_dhaka", "sub_city", "other"],
+      order_finalization_status: [
+        "pending",
+        "delivered",
+        "partial_delivered",
+        "returned",
+        "exchanged",
+        "damaged",
+        "settled",
+      ],
       order_status: [
         "pending",
         "processing",
         "shipped",
         "delivered",
         "cancelled",
+      ],
+      return_type: [
+        "full_return",
+        "partial_return",
+        "exchange_return",
+        "exchange_out",
+        "damage_return",
+      ],
+      shipment_status: [
+        "booked",
+        "pickup_pending",
+        "in_transit",
+        "delivered",
+        "partial_delivered",
+        "returned",
+        "exchanged",
+        "damaged",
+        "lost",
+        "cancelled",
+      ],
+      transaction_category: [
+        "product_sale",
+        "product_purchase",
+        "meta_ads",
+        "google_ads",
+        "tiktok_ads",
+        "courier_delivery_charge",
+        "courier_cod_charge",
+        "courier_return_charge",
+        "packaging",
+        "salary",
+        "rent",
+        "utilities",
+        "return_loss",
+        "damage_loss",
+        "owner_drawing",
+        "owner_investment",
+        "bank_charge",
+        "other",
+      ],
+      transaction_direction: ["in", "out"],
+      transaction_reference_type: [
+        "order",
+        "shipment",
+        "ad_campaign",
+        "purchase_order",
+        "return",
+        "manual",
+        "settlement",
+      ],
+      transaction_type: [
+        "income",
+        "expense",
+        "transfer_in",
+        "transfer_out",
+        "cod_collection",
+        "cod_settlement",
+        "ads_spend",
+        "refund",
+        "adjustment",
+        "reversal",
       ],
     },
   },
