@@ -73,6 +73,7 @@ const groups: { label: string; items: NavItem[] }[] = [
       { title: "Cash Accounts", url: "/admin/finance/accounts", icon: Wallet },
       { title: "Transactions", url: "/admin/finance/transactions", icon: Receipt },
       { title: "COD Settlements", url: "/admin/finance/settlements", icon: ArrowRightLeft },
+      { title: "Orders P&L", url: "/admin/finance/orders-pnl", icon: TrendingUp },
       { title: "Expenses", url: "/admin/expenses", icon: Receipt },
       { title: "Accounting", url: "/admin/accounting", icon: TrendingUp },
     ],
