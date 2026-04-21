@@ -18,6 +18,7 @@ import {
   Receipt,
   TrendingUp,
   ArrowRightLeft,
+  ShieldCheck,
 } from "lucide-react";
 import {
   Sidebar,
@@ -83,6 +84,7 @@ const groups: { label: string; items: NavItem[] }[] = [
     items: [
       { title: "Homepage", url: "/admin/homepage", icon: Home },
       { title: "Settings", url: "/admin/settings", icon: Settings },
+      { title: "Security Audit", url: "/admin/security", icon: ShieldCheck },
     ],
   },
 ];
