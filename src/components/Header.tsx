@@ -5,6 +5,7 @@ import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { useAdminAuth } from "@/lib/admin";
 import { useSiteSettings } from "@/lib/site-settings";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import defaultLogo from "@/assets/logo.png";
 
 type Category = { label: string; category: string };
@@ -194,6 +195,9 @@ export default function Header() {
                 </span>
               )}
             </button>
+
+            {/* Language switcher */}
+            <LanguageSwitcher compact />
 
             <span className="mx-1 hidden h-7 w-px bg-border md:block" />
 

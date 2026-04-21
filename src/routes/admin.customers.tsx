@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AdminTableSkeleton } from "@/components/admin/TableSkeleton";
 import {
   Table,
   TableBody,
@@ -303,9 +304,7 @@ function CustomersPage() {
 
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         {isLoading ? (
-          <div className="flex h-40 items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
+          <AdminTableSkeleton rows={6} columns={6} />
         ) : filtered.length === 0 ? (
           <div className="p-10 text-center text-sm text-muted-foreground">No customers found.</div>
         ) : (
