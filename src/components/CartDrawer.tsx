@@ -1,5 +1,5 @@
 import { X, Minus, Plus, Trash2 } from "lucide-react";
-import { useCart } from "@/lib/cart";
+import { useCart, cartLineKey } from "@/lib/cart";
 import { Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 
@@ -46,29 +46,36 @@ export default function CartDrawer() {
             </div>
           ) : (
             <ul className="space-y-4">
-              {items.map(({ product, qty }) => (
-                <li key={product.id} className="flex gap-3">
-                  <img src={product.image} alt={product.title} className="h-20 w-20 rounded-lg object-cover" />
-                  <div className="flex-1">
-                    <p className="line-clamp-2 text-sm font-semibold">{product.title}</p>
-                    <p className="mt-0.5 text-sm text-primary font-bold">৳{product.price}</p>
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="inline-flex items-center rounded-full border border-border">
-                        <button onClick={() => setQty(product.id, qty - 1)} className="p-1.5 hover:bg-muted rounded-l-full" aria-label="Decrease">
-                          <Minus className="h-3 w-3" />
-                        </button>
-                        <span className="w-7 text-center text-sm font-semibold">{qty}</span>
-                        <button onClick={() => setQty(product.id, qty + 1)} className="p-1.5 hover:bg-muted rounded-r-full" aria-label="Increase">
-                          <Plus className="h-3 w-3" />
+              {items.map((item) => {
+                const { product, qty, variantLabel } = item;
+                const key = cartLineKey(item);
+                return (
+                  <li key={key} className="flex gap-3">
+                    <img src={product.image} alt={product.title} className="h-20 w-20 rounded-lg object-cover" />
+                    <div className="flex-1">
+                      <p className="line-clamp-2 text-sm font-semibold">{product.title}</p>
+                      {variantLabel && (
+                        <p className="mt-0.5 text-xs text-muted-foreground">{variantLabel}</p>
+                      )}
+                      <p className="mt-0.5 text-sm text-primary font-bold">৳{product.price}</p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <div className="inline-flex items-center rounded-full border border-border">
+                          <button onClick={() => setQty(key, qty - 1)} className="p-1.5 hover:bg-muted rounded-l-full" aria-label="Decrease">
+                            <Minus className="h-3 w-3" />
+                          </button>
+                          <span className="w-7 text-center text-sm font-semibold">{qty}</span>
+                          <button onClick={() => setQty(key, qty + 1)} className="p-1.5 hover:bg-muted rounded-r-full" aria-label="Increase">
+                            <Plus className="h-3 w-3" />
+                          </button>
+                        </div>
+                        <button onClick={() => remove(key)} className="ml-auto rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-primary" aria-label="Remove">
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
-                      <button onClick={() => remove(product.id)} className="ml-auto rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-primary" aria-label="Remove">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
                     </div>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
