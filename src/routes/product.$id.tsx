@@ -2,12 +2,13 @@ import { createFileRoute, useNavigate, notFound, Link } from "@tanstack/react-ro
 import { useState, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { fetchProductByIdOrSlug, fetchAllProducts, testimonials } from "@/lib/products";
-import { fetchProductReviews, submitReview } from "@/lib/reviews";
+import { fetchProductByIdOrSlug, fetchAllProducts } from "@/lib/products";
+import { fetchProductReviews, submitReview, fetchEligibleOrderId } from "@/lib/reviews";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import ProductCard from "@/components/ProductCard";
 import ReviewModal, { type NewReview } from "@/components/ReviewModal";
+import ReviewsList from "@/components/ReviewsList";
 import {
   Star,
   Truck,
@@ -146,21 +147,32 @@ function ProductPage() {
   const [userReviews, setUserReviews] = useState<NewReview[]>([]);
   const qc = useQueryClient();
 
-  const { data: dbReviews = [] } = useQuery({
+  const { data: dbReviews = [], isLoading: reviewsLoading } = useQuery({
     queryKey: ["product_reviews", product.id],
     queryFn: () => fetchProductReviews(product.id),
     staleTime: 30_000,
   });
 
+  const { data: eligibleOrderId } = useQuery({
+    queryKey: ["product_review_eligibility", product.id],
+    queryFn: () => fetchEligibleOrderId(product.id),
+    staleTime: 60_000,
+  });
+
   const handleReviewSubmit = async (r: NewReview) => {
+    if (!eligibleOrderId) {
+      toast.error("You must have a delivered order of this product to leave a review.");
+      throw new Error("Not eligible");
+    }
     try {
       await submitReview({
         product_id: product.id,
+        order_id: eligibleOrderId,
         rating: r.rating,
         title: r.name ? `${r.name}${r.location ? ` · ${r.location}` : ""}` : undefined,
         comment: r.text,
       });
-      toast.success("Review submitted! Thanks for your feedback.");
+      toast.success("Review submitted! Visible after admin approval.");
       setUserReviews((prev) => [r, ...prev]);
       qc.invalidateQueries({ queryKey: ["product_reviews", product.id] });
     } catch (err) {
