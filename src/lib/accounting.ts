@@ -22,7 +22,7 @@ export async function fetchRevenueByDay(from: string, to: string): Promise<Reven
     .select("created_at, total, status")
     .gte("created_at", from)
     .lte("created_at", `${to}T23:59:59`)
-    .in("status", REVENUE_STATUSES as unknown as string[])
+    .in("status", [...REVENUE_STATUSES])
     .limit(1000);
   if (error) throw error;
   const map = new Map<string, { revenue: number; orders: number }>();
