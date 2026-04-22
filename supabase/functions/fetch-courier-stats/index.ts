@@ -178,23 +178,80 @@ Deno.serve(async (req) => {
       r?.courierData ||
       r?.data?.courierData ||
       r?.data?.result?.[cleanPhone]?.Summaries ||
+      r?.data?.summaries ||
+      r?.summaries ||
       r?.summary ||
       {};
-    const totalSummary =
-      summaries?.summary ||
-      r?.data?.result?.[cleanPhone]?.totalSummary ||
-      r?.totalSummary ||
-      r?.data?.totalSummary ||
-      {};
 
+    // Dynamic key mapping — case-insensitive, whitespace-tolerant
+    const courierKeyMap: Record<string, string> = {
+      pathao: "pathao",
+      pathaocourier: "pathao",
+      steadfast: "steadfast",
+      steadfastcourierlimited: "steadfast",
+      redx: "redx",
+      paperfly: "paperfly",
+      parceldex: "parceldex",
+      carrybee: "carrybee",
+      ecourier: "ecourier",
+    };
+
+    const couriers: Record<string, ReturnType<typeof normalizeCourier>> = {
+      pathao: normalizeCourier(null),
+      steadfast: normalizeCourier(null),
+      redx: normalizeCourier(null),
+      paperfly: normalizeCourier(null),
+      parceldex: normalizeCourier(null),
+      carrybee: normalizeCourier(null),
+      ecourier: normalizeCourier(null),
+    };
+
+    const detectedKeys: string[] = [];
+    const unknownCouriers: string[] = [];
+    let totalSummary: CourierSummary = {};
+
+    // Handle both object-of-couriers and array-of-couriers shapes
+    const entries: Array<[string, unknown]> = Array.isArray(summaries)
+      ? (summaries as Array<Record<string, unknown>>).map((c) => [
+          String(c.name ?? c.courier ?? ""),
+          c,
+        ])
+      : Object.entries(summaries);
+
+    for (const [apiName, data] of entries) {
+      detectedKeys.push(apiName);
+      const lowerKey = apiName.toLowerCase().replace(/\s+/g, "");
+      if (lowerKey === "summary" || lowerKey === "totalsummary") {
+        totalSummary = (data as CourierSummary) ?? {};
+        continue;
+      }
+      const dbKey = courierKeyMap[lowerKey] || lowerKey;
+      if (couriers[dbKey]) {
+        couriers[dbKey] = normalizeCourier(data as CourierSummary);
+      } else {
+        unknownCouriers.push(apiName);
+      }
+    }
+
+    console.log("[BD Courier Parser] Detected keys:", detectedKeys);
+    if (unknownCouriers.length > 0) {
+      console.log("[BD Courier Parser] Unknown couriers (not mapped):", unknownCouriers);
+    }
+
+    // Compute overall from sum of couriers (more reliable than API summary)
+    const sumTotal = Object.values(couriers).reduce((s, c) => s + c.total, 0);
+    const sumSuccess = Object.values(couriers).reduce((s, c) => s + c.success, 0);
+    const sumCancel = Object.values(couriers).reduce((s, c) => s + c.cancel, 0);
+
+    // Prefer API summary if present, else use sum
     const overall_total = Number(
-      totalSummary.total ?? totalSummary.totalParcel ?? totalSummary.total_parcel ?? 0,
+      totalSummary.total ?? totalSummary.total_parcel ?? sumTotal,
     );
     const overall_success = Number(
-      totalSummary.success ?? totalSummary.successParcel ?? totalSummary.success_parcel ?? 0,
+      totalSummary.success ?? totalSummary.success_parcel ?? sumSuccess,
     );
     const overall_cancel = Number(
-      totalSummary.cancel ?? totalSummary.cancelParcel ?? totalSummary.cancelled_parcel ?? 0,
+      totalSummary.cancel ?? totalSummary.cancelled_parcel ?? sumCancel,
     );
     const overall_success_rate =
       totalSummary.success_ratio != null
@@ -203,18 +260,19 @@ Deno.serve(async (req) => {
           ? Number(((overall_success / overall_total) * 100).toFixed(1))
           : 0;
 
+    // Note: ecourier column may not exist in DB yet — exclude from upsert if so
     const normalized = {
       phone: cleanPhone,
       overall_total,
       overall_success,
       overall_cancel,
       overall_success_rate,
-      pathao: normalizeCourier(summaries.Pathao || summaries.pathao),
-      redx: normalizeCourier(summaries.Redx || summaries.redx || summaries.RedX),
-      steadfast: normalizeCourier(summaries.Steadfast || summaries.steadfast),
-      paperfly: normalizeCourier(summaries.Paperfly || summaries.paperfly),
-      parceldex: normalizeCourier(summaries.Parceldex || summaries.parceldex || summaries.ParcelDex),
-      carrybee: normalizeCourier(summaries.Carrybee || summaries.carrybee || summaries.CarryBee),
+      pathao: couriers.pathao,
+      redx: couriers.redx,
+      steadfast: couriers.steadfast,
+      paperfly: couriers.paperfly,
+      parceldex: couriers.parceldex,
+      carrybee: couriers.carrybee,
       raw_response: apiResp,
       risk_level: calcRisk(overall_total, overall_success_rate),
       last_fetched_at: new Date().toISOString(),
