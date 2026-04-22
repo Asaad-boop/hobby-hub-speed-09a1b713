@@ -1188,29 +1188,34 @@ function CourierCard({
   highlight?: boolean;
 }) {
   const rate = Math.max(0, Math.min(100, Number(successRate) || 0));
+  const hasHistory = total > 0 || success > 0 || cancelled > 0;
+
   return (
     <div
-      className={`flex flex-col gap-1.5 rounded-xl border p-3 ${
+      className={`flex min-h-[132px] flex-col gap-1.5 rounded-xl border p-3 ${
         highlight ? "border-primary/40 bg-primary/5" : "border-border bg-card"
       }`}
     >
       <div className="text-sm font-semibold text-foreground">{name}</div>
       <div className="space-y-0.5 text-xs">
-        <div className="text-sky-600 dark:text-sky-400">
-          Success Rate: <span className="font-semibold">{rate}%</span>
+        <div className="text-muted-foreground">
+          Success Rate: <span className="font-semibold text-foreground">{rate}%</span>
         </div>
         <div className="text-muted-foreground">
           Total: <span className="font-semibold text-foreground">{total}</span>
         </div>
-        <div className="text-emerald-600 dark:text-emerald-400">
-          Success: <span className="font-semibold">{success}</span>
+        <div className="text-muted-foreground">
+          Success: <span className="font-semibold text-foreground">{success}</span>
         </div>
-        <div className="text-rose-600 dark:text-rose-400">
-          Cancelled: <span className="font-semibold">{cancelled}</span>
+        <div className="text-muted-foreground">
+          Cancelled: <span className="font-semibold text-foreground">{cancelled}</span>
         </div>
       </div>
-      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
-        <div className="h-full bg-emerald-500 transition-all" style={{ width: `${rate}%` }} />
+      <div className="mt-auto space-y-2 pt-1">
+        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+          <div className="h-full bg-primary transition-all" style={{ width: `${rate}%` }} />
+        </div>
+        {!hasHistory && <p className="text-[11px] text-muted-foreground">No courier history found</p>}
       </div>
     </div>
   );
