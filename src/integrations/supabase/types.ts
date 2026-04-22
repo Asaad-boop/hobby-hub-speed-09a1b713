@@ -640,6 +640,7 @@ export type Database = {
           overall_success_rate: number | null
           overall_total: number
           paperfly: Json
+          parceldex: Json
           pathao: Json
           phone: string
           raw_response: Json | null
@@ -658,6 +659,7 @@ export type Database = {
           overall_success_rate?: number | null
           overall_total?: number
           paperfly?: Json
+          parceldex?: Json
           pathao?: Json
           phone: string
           raw_response?: Json | null
@@ -676,6 +678,7 @@ export type Database = {
           overall_success_rate?: number | null
           overall_total?: number
           paperfly?: Json
+          parceldex?: Json
           pathao?: Json
           phone?: string
           raw_response?: Json | null

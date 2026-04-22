@@ -213,6 +213,7 @@ Deno.serve(async (req) => {
       redx: normalizeCourier(summaries.Redx || summaries.redx || summaries.RedX),
       steadfast: normalizeCourier(summaries.Steadfast || summaries.steadfast),
       paperfly: normalizeCourier(summaries.Paperfly || summaries.paperfly),
+      parceldex: normalizeCourier(summaries.Parceldex || summaries.parceldex || summaries.ParcelDex),
       carrybee: normalizeCourier(summaries.Carrybee || summaries.carrybee || summaries.CarryBee),
       raw_response: apiResp,
       risk_level: calcRisk(overall_total, overall_success_rate),

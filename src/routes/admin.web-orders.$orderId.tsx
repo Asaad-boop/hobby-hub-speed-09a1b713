@@ -204,6 +204,7 @@ function WebOrderDetailPage() {
     redx: CourierBucket;
     steadfast: CourierBucket;
     paperfly: CourierBucket;
+    parceldex: CourierBucket;
     carrybee: CourierBucket;
     risk_level: "low" | "moderate" | "high" | "new_customer" | null;
     last_fetched_at: string;
@@ -585,36 +586,55 @@ function WebOrderDetailPage() {
             </div>
           ) : (
             <Tabs defaultValue="overall">
-              <TabsList className="grid w-full grid-cols-4 md:w-auto md:inline-grid">
-                <TabsTrigger value="overall">Overall</TabsTrigger>
-                <TabsTrigger value="pathao">Pathao</TabsTrigger>
-                <TabsTrigger value="redx">RedX</TabsTrigger>
-                <TabsTrigger value="steadfast">Steadfast</TabsTrigger>
-                {(bdCourier?.paperfly?.total ?? 0) > 0 && (
-                  <TabsTrigger value="paperfly">Paperfly</TabsTrigger>
-                )}
-              </TabsList>
-              <TabsContent value="overall">
-                <StatBlock
-                  successRate={bdCourier?.overall_success_rate ?? phoneStats?.success_rate ?? 0}
-                  total={bdCourier?.overall_total ?? phoneStats?.total_orders ?? 0}
-                  success={bdCourier?.overall_success ?? phoneStats?.delivered_orders ?? 0}
-                  cancelled={bdCourier?.overall_cancel ?? phoneStats?.cancelled_orders ?? 0}
-                />
-              </TabsContent>
-              {(["pathao", "redx", "steadfast", "paperfly"] as const).map((p) => {
-                const b = bdCourier?.[p];
-                return (
-                  <TabsContent key={p} value={p}>
-                    <StatBlock
-                      successRate={b?.success_rate ?? 0}
-                      total={b?.total ?? 0}
-                      success={b?.success ?? 0}
-                      cancelled={b?.cancel ?? 0}
-                    />
-                  </TabsContent>
+              {(() => {
+                const allCouriers = ["pathao", "redx", "steadfast", "paperfly", "parceldex", "carrybee"] as const;
+                const visibleCouriers = allCouriers.filter(
+                  (p) => (bdCourier?.[p]?.total ?? 0) > 0,
                 );
-              })}
+                const tabCount = visibleCouriers.length + 1;
+                const labels: Record<typeof allCouriers[number], string> = {
+                  pathao: "Pathao",
+                  redx: "RedX",
+                  steadfast: "Steadfast",
+                  paperfly: "Paperfly",
+                  parceldex: "Parceldex",
+                  carrybee: "Carrybee",
+                };
+                return (
+                  <>
+                    <TabsList
+                      className="grid w-full md:w-auto md:inline-grid"
+                      style={{ gridTemplateColumns: `repeat(${tabCount}, minmax(0, 1fr))` }}
+                    >
+                      <TabsTrigger value="overall">Overall</TabsTrigger>
+                      {visibleCouriers.map((p) => (
+                        <TabsTrigger key={p} value={p}>{labels[p]}</TabsTrigger>
+                      ))}
+                    </TabsList>
+                    <TabsContent value="overall">
+                      <StatBlock
+                        successRate={bdCourier?.overall_success_rate ?? phoneStats?.success_rate ?? 0}
+                        total={bdCourier?.overall_total ?? phoneStats?.total_orders ?? 0}
+                        success={bdCourier?.overall_success ?? phoneStats?.delivered_orders ?? 0}
+                        cancelled={bdCourier?.overall_cancel ?? phoneStats?.cancelled_orders ?? 0}
+                      />
+                    </TabsContent>
+                    {visibleCouriers.map((p) => {
+                      const b = bdCourier?.[p];
+                      return (
+                        <TabsContent key={p} value={p}>
+                          <StatBlock
+                            successRate={b?.success_rate ?? 0}
+                            total={b?.total ?? 0}
+                            success={b?.success ?? 0}
+                            cancelled={b?.cancel ?? 0}
+                          />
+                        </TabsContent>
+                      );
+                    })}
+                  </>
+                );
+              })()}
             </Tabs>
           )}
         </CardContent>
