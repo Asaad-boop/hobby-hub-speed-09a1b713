@@ -5,25 +5,12 @@ import {
   Package,
   Tags,
   Settings,
-  ShoppingBag,
   LogOut,
   Store,
   Home,
-  Users,
-  BarChart3,
-  Boxes,
-  Wallet,
   MessageSquare,
   Tag,
-  Receipt,
-  TrendingUp,
-  ArrowRightLeft,
-  ShieldCheck,
   PhoneCall,
-  XOctagon,
-  UserCog,
-  Activity,
-  Ship,
 } from "lucide-react";
 import {
   Sidebar,
@@ -54,50 +41,30 @@ type NavItem = {
 const groups: { label: string; items: NavItem[] }[] = [
   {
     label: "Overview",
-    items: [{ title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true, roles: ["admin"] }],
+    items: [
+      { title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true, roles: ["admin"] },
+    ],
+  },
+  {
+    label: "Sales",
+    items: [
+      { title: "Orders", url: "/admin/web-orders", icon: PhoneCall, roles: ["admin", "customer_service"] },
+      { title: "Reviews", url: "/admin/reviews", icon: MessageSquare, roles: ["admin"] },
+      { title: "Coupons", url: "/admin/coupons", icon: Tag, roles: ["admin"] },
+    ],
   },
   {
     label: "Catalog",
     items: [
       { title: "Products", url: "/admin/products", icon: Package, roles: ["admin"] },
       { title: "Categories", url: "/admin/categories", icon: Tags, roles: ["admin"] },
-      { title: "Inventory", url: "/admin/inventory", icon: Boxes, roles: ["admin", "operations"] },
-      { title: "China Sourcing", url: "/admin/china-sourcing", icon: Ship, roles: ["admin", "operations"] },
     ],
   },
   {
-    label: "Sales",
+    label: "Storefront",
     items: [
-      { title: "Web Orders", url: "/admin/web-orders", icon: PhoneCall, roles: ["admin", "customer_service"] },
-      { title: "Order List", url: "/admin/orders", icon: ShoppingBag, roles: ["admin", "operations"] },
-      { title: "Cancelled Orders", url: "/admin/cancelled-orders", icon: XOctagon, roles: ["admin"] },
-      { title: "Customers", url: "/admin/customers", icon: Users, roles: ["admin", "customer_service", "operations"] },
-      { title: "Reviews", url: "/admin/reviews", icon: MessageSquare, roles: ["admin"] },
-      { title: "Coupons", url: "/admin/coupons", icon: Tag, roles: ["admin"] },
-      { title: "Analytics", url: "/admin/analytics", icon: BarChart3, roles: ["admin"] },
-    ],
-  },
-  {
-    label: "Finance",
-    items: [
-      { title: "Finance Dashboard", url: "/admin/finance", icon: TrendingUp, exact: true, roles: ["admin"] },
-      { title: "Cash Accounts", url: "/admin/finance/accounts", icon: Wallet, roles: ["admin"] },
-      { title: "Transactions", url: "/admin/finance/transactions", icon: Receipt, roles: ["admin"] },
-      { title: "COD Settlements", url: "/admin/finance/settlements", icon: ArrowRightLeft, roles: ["admin"] },
-      { title: "Orders P&L", url: "/admin/finance/orders-pnl", icon: TrendingUp, roles: ["admin"] },
-      { title: "Profit & Loss Report", url: "/admin/reports/profit-loss", icon: TrendingUp, roles: ["admin"] },
-      { title: "Expenses", url: "/admin/expenses", icon: Receipt, roles: ["admin"] },
-      { title: "Accounting", url: "/admin/accounting", icon: TrendingUp, roles: ["admin"] },
-    ],
-  },
-  {
-    label: "Settings",
-    items: [
-      { title: "Staff Management", url: "/admin/staff", icon: UserCog, roles: ["admin"] },
       { title: "Homepage", url: "/admin/homepage", icon: Home, roles: ["admin"] },
       { title: "Site Settings", url: "/admin/settings", icon: Settings, exact: true, roles: ["admin"] },
-      { title: "Integrations", url: "/admin/settings/integrations", icon: Activity, roles: ["admin"] },
-      { title: "Security Audit", url: "/admin/security", icon: ShieldCheck, roles: ["admin"] },
     ],
   },
 ];
