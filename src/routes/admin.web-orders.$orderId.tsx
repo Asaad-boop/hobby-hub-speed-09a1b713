@@ -345,6 +345,13 @@ function WebOrderDetailPage() {
     setStatusDraft(order.status);
   }, [order]);
 
+  // Debounce edited Mobile Number into debouncedPhone (drives BD Courier query)
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedPhone(phoneInput || ""), 800);
+    return () => clearTimeout(t);
+  }, [phoneInput]);
+
+
   // ============ Cascading address ============
   const cityOptions = useMemo(
     () => BD_DISTRICTS.find((d) => d.name === district)?.cities ?? [],
