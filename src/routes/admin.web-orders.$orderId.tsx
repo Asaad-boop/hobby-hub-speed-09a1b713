@@ -1144,6 +1144,44 @@ function StatBlock({
   );
 }
 
+function RiskBanner({
+  risk,
+  stats,
+}: {
+  risk: "low" | "moderate" | "high" | "new_customer" | null;
+  stats: { overall_total?: number; overall_success_rate?: number; overall_cancel?: number } | null | undefined;
+}) {
+  if (!risk) return null;
+  const total = stats?.overall_total ?? 0;
+  const rate = stats?.overall_success_rate ?? 0;
+  const cancelRate = total > 0 ? Number((((stats?.overall_cancel ?? 0) / total) * 100).toFixed(1)) : 0;
+
+  const map = {
+    low: {
+      cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+      label: `✅ Trusted Customer — ${total} orders, ${rate}% success`,
+    },
+    moderate: {
+      cls: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+      label: `🟡 Moderate Customer — ${rate}% success across ${total} orders, check history`,
+    },
+    high: {
+      cls: "border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300",
+      label: `⚠️ RISK CUSTOMER — ${cancelRate}% cancel rate (${total} orders)`,
+    },
+    new_customer: {
+      cls: "border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-300",
+      label: `🆕 New Customer — no courier history (consider advance payment)`,
+    },
+  }[risk];
+
+  return (
+    <div className={`rounded-lg border px-3 py-2 text-sm font-medium ${map.cls}`}>
+      {map.label}
+    </div>
+  );
+}
+
 function Stat({ label, value, tone }: { label: string; value: string; tone?: "emerald" | "rose" }) {
   const toneClass =
     tone === "emerald"
