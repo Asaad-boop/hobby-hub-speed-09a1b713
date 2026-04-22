@@ -51,6 +51,7 @@ import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAccountingRouteImport } from './routes/admin.accounting'
 import { Route as AdminWebOrdersIndexRouteImport } from './routes/admin.web-orders.index'
 import { Route as AdminWebOrdersOrderIdRouteImport } from './routes/admin.web-orders.$orderId'
+import { Route as AdminSettingsIntegrationsRouteImport } from './routes/admin.settings.integrations'
 import { Route as AdminFinanceTransactionsRouteImport } from './routes/admin.finance.transactions'
 import { Route as AdminFinanceSettlementsRouteImport } from './routes/admin.finance.settlements'
 import { Route as AdminFinanceOrdersPnlRouteImport } from './routes/admin.finance.orders-pnl'
@@ -266,6 +267,12 @@ const AdminWebOrdersOrderIdRoute = AdminWebOrdersOrderIdRouteImport.update({
   path: '/web-orders/$orderId',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSettingsIntegrationsRoute =
+  AdminSettingsIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AdminSettingsRoute,
+  } as any)
 const AdminFinanceTransactionsRoute =
   AdminFinanceTransactionsRouteImport.update({
     id: '/transactions',
@@ -321,7 +328,7 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/security': typeof AdminSecurityRoute
-  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/staff': typeof AdminStaffRoute
   '/category/$slug': typeof CategorySlugRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
@@ -333,6 +340,7 @@ export interface FileRoutesByFullPath {
   '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
   '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
   '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
+  '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
   '/admin/web-orders/': typeof AdminWebOrdersIndexRoute
 }
@@ -368,7 +376,7 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/security': typeof AdminSecurityRoute
-  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/staff': typeof AdminStaffRoute
   '/category/$slug': typeof CategorySlugRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
@@ -380,6 +388,7 @@ export interface FileRoutesByTo {
   '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
   '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
   '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
+  '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
   '/admin/web-orders': typeof AdminWebOrdersIndexRoute
 }
@@ -417,7 +426,7 @@ export interface FileRoutesById {
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/security': typeof AdminSecurityRoute
-  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/staff': typeof AdminStaffRoute
   '/category/$slug': typeof CategorySlugRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
@@ -429,6 +438,7 @@ export interface FileRoutesById {
   '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
   '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
   '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
+  '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
   '/admin/web-orders/': typeof AdminWebOrdersIndexRoute
 }
@@ -479,6 +489,7 @@ export interface FileRouteTypes {
     | '/admin/finance/orders-pnl'
     | '/admin/finance/settlements'
     | '/admin/finance/transactions'
+    | '/admin/settings/integrations'
     | '/admin/web-orders/$orderId'
     | '/admin/web-orders/'
   fileRoutesByTo: FileRoutesByTo
@@ -526,6 +537,7 @@ export interface FileRouteTypes {
     | '/admin/finance/orders-pnl'
     | '/admin/finance/settlements'
     | '/admin/finance/transactions'
+    | '/admin/settings/integrations'
     | '/admin/web-orders/$orderId'
     | '/admin/web-orders'
   id:
@@ -574,6 +586,7 @@ export interface FileRouteTypes {
     | '/admin/finance/orders-pnl'
     | '/admin/finance/settlements'
     | '/admin/finance/transactions'
+    | '/admin/settings/integrations'
     | '/admin/web-orders/$orderId'
     | '/admin/web-orders/'
   fileRoutesById: FileRoutesById
@@ -900,6 +913,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminWebOrdersOrderIdRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/settings/integrations': {
+      id: '/admin/settings/integrations'
+      path: '/integrations'
+      fullPath: '/admin/settings/integrations'
+      preLoaderRoute: typeof AdminSettingsIntegrationsRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
     '/admin/finance/transactions': {
       id: '/admin/finance/transactions'
       path: '/transactions'
@@ -949,6 +969,18 @@ const AdminFinanceRouteWithChildren = AdminFinanceRoute._addFileChildren(
   AdminFinanceRouteChildren,
 )
 
+interface AdminSettingsRouteChildren {
+  AdminSettingsIntegrationsRoute: typeof AdminSettingsIntegrationsRoute
+}
+
+const AdminSettingsRouteChildren: AdminSettingsRouteChildren = {
+  AdminSettingsIntegrationsRoute: AdminSettingsIntegrationsRoute,
+}
+
+const AdminSettingsRouteWithChildren = AdminSettingsRoute._addFileChildren(
+  AdminSettingsRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminAccountingRoute: typeof AdminAccountingRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
@@ -964,7 +996,7 @@ interface AdminRouteChildren {
   AdminProductsRoute: typeof AdminProductsRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminSecurityRoute: typeof AdminSecurityRoute
-  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSettingsRoute: typeof AdminSettingsRouteWithChildren
   AdminStaffRoute: typeof AdminStaffRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminWebOrdersOrderIdRoute: typeof AdminWebOrdersOrderIdRoute
@@ -986,7 +1018,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminProductsRoute: AdminProductsRoute,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminSecurityRoute: AdminSecurityRoute,
-  AdminSettingsRoute: AdminSettingsRoute,
+  AdminSettingsRoute: AdminSettingsRouteWithChildren,
   AdminStaffRoute: AdminStaffRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminWebOrdersOrderIdRoute: AdminWebOrdersOrderIdRoute,

@@ -22,6 +22,7 @@ import {
   PhoneCall,
   XOctagon,
   UserCog,
+  Activity,
 } from "lucide-react";
 import {
   Sidebar,
