@@ -210,16 +210,25 @@ function WebOrderDetailPage() {
   };
 
   const [refreshingCourier, setRefreshingCourier] = useState(false);
+  const [courierError, setCourierError] = useState<string | null>(null);
   const { data: bdCourier, isLoading: bdLoading, refetch: refetchBdCourier } = useQuery({
     queryKey: ["bd_courier_stats", phone],
     enabled: !!phone && /^01[3-9]\d{8}$/.test(phone),
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
-        body: { phone },
-      });
-      if (error) throw error;
-      return (data?.data ?? null) as BdCourierStats | null;
+      try {
+        const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
+          body: { phone },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        setCourierError(null);
+        return (data?.data ?? null) as BdCourierStats | null;
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "Failed to load courier stats";
+        setCourierError(message);
+        return null;
+      }
     },
   });
 
@@ -232,10 +241,13 @@ function WebOrderDetailPage() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      setCourierError(null);
       toast.success("Courier stats refreshed");
       await refetchBdCourier();
     } catch (e) {
-      toast.error((e as Error).message || "Failed to refresh courier stats");
+      const message = (e as Error).message || "Failed to refresh courier stats";
+      setCourierError(message);
+      toast.error(message);
     } finally {
       setRefreshingCourier(false);
     }
@@ -557,6 +569,12 @@ function WebOrderDetailPage() {
           </Button>
         </CardHeader>
         <CardContent className="space-y-3">
+          {courierError && (
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
+              BD Courier unavailable right now. Showing internal order history only.
+            </div>
+          )}
+
           <RiskBanner risk={bdCourier?.risk_level ?? null} stats={bdCourier} />
 
           {bdLoading && !bdCourier ? (
