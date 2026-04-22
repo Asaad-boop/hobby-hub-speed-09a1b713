@@ -53,6 +53,7 @@ import { Route as AdminAccountingRouteImport } from './routes/admin.accounting'
 import { Route as AdminWebOrdersIndexRouteImport } from './routes/admin.web-orders.index'
 import { Route as AdminWebOrdersOrderIdRouteImport } from './routes/admin.web-orders.$orderId'
 import { Route as AdminSettingsIntegrationsRouteImport } from './routes/admin.settings.integrations'
+import { Route as AdminReportsProfitLossRouteImport } from './routes/admin.reports.profit-loss'
 import { Route as AdminFinanceTransactionsRouteImport } from './routes/admin.finance.transactions'
 import { Route as AdminFinanceSettlementsRouteImport } from './routes/admin.finance.settlements'
 import { Route as AdminFinanceOrdersPnlRouteImport } from './routes/admin.finance.orders-pnl'
@@ -279,6 +280,11 @@ const AdminSettingsIntegrationsRoute =
     path: '/integrations',
     getParentRoute: () => AdminSettingsRoute,
   } as any)
+const AdminReportsProfitLossRoute = AdminReportsProfitLossRouteImport.update({
+  id: '/reports/profit-loss',
+  path: '/reports/profit-loss',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminFinanceTransactionsRoute =
   AdminFinanceTransactionsRouteImport.update({
     id: '/transactions',
@@ -347,6 +353,7 @@ export interface FileRoutesByFullPath {
   '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
   '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
   '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
+  '/admin/reports/profit-loss': typeof AdminReportsProfitLossRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
   '/admin/web-orders/': typeof AdminWebOrdersIndexRoute
@@ -396,6 +403,7 @@ export interface FileRoutesByTo {
   '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
   '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
   '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
+  '/admin/reports/profit-loss': typeof AdminReportsProfitLossRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
   '/admin/web-orders': typeof AdminWebOrdersIndexRoute
@@ -447,6 +455,7 @@ export interface FileRoutesById {
   '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
   '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
   '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
+  '/admin/reports/profit-loss': typeof AdminReportsProfitLossRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
   '/admin/web-orders/': typeof AdminWebOrdersIndexRoute
@@ -499,6 +508,7 @@ export interface FileRouteTypes {
     | '/admin/finance/orders-pnl'
     | '/admin/finance/settlements'
     | '/admin/finance/transactions'
+    | '/admin/reports/profit-loss'
     | '/admin/settings/integrations'
     | '/admin/web-orders/$orderId'
     | '/admin/web-orders/'
@@ -548,6 +558,7 @@ export interface FileRouteTypes {
     | '/admin/finance/orders-pnl'
     | '/admin/finance/settlements'
     | '/admin/finance/transactions'
+    | '/admin/reports/profit-loss'
     | '/admin/settings/integrations'
     | '/admin/web-orders/$orderId'
     | '/admin/web-orders'
@@ -598,6 +609,7 @@ export interface FileRouteTypes {
     | '/admin/finance/orders-pnl'
     | '/admin/finance/settlements'
     | '/admin/finance/transactions'
+    | '/admin/reports/profit-loss'
     | '/admin/settings/integrations'
     | '/admin/web-orders/$orderId'
     | '/admin/web-orders/'
@@ -939,6 +951,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsIntegrationsRouteImport
       parentRoute: typeof AdminSettingsRoute
     }
+    '/admin/reports/profit-loss': {
+      id: '/admin/reports/profit-loss'
+      path: '/reports/profit-loss'
+      fullPath: '/admin/reports/profit-loss'
+      preLoaderRoute: typeof AdminReportsProfitLossRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/finance/transactions': {
       id: '/admin/finance/transactions'
       path: '/transactions'
@@ -1019,6 +1038,7 @@ interface AdminRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRouteWithChildren
   AdminStaffRoute: typeof AdminStaffRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminReportsProfitLossRoute: typeof AdminReportsProfitLossRoute
   AdminWebOrdersOrderIdRoute: typeof AdminWebOrdersOrderIdRoute
   AdminWebOrdersIndexRoute: typeof AdminWebOrdersIndexRoute
 }
@@ -1042,6 +1062,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSettingsRoute: AdminSettingsRouteWithChildren,
   AdminStaffRoute: AdminStaffRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminReportsProfitLossRoute: AdminReportsProfitLossRoute,
   AdminWebOrdersOrderIdRoute: AdminWebOrdersOrderIdRoute,
   AdminWebOrdersIndexRoute: AdminWebOrdersIndexRoute,
 }

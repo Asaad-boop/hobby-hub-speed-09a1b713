@@ -85,6 +85,7 @@ const groups: { label: string; items: NavItem[] }[] = [
       { title: "Transactions", url: "/admin/finance/transactions", icon: Receipt, roles: ["admin"] },
       { title: "COD Settlements", url: "/admin/finance/settlements", icon: ArrowRightLeft, roles: ["admin"] },
       { title: "Orders P&L", url: "/admin/finance/orders-pnl", icon: TrendingUp, roles: ["admin"] },
+      { title: "Profit & Loss Report", url: "/admin/reports/profit-loss", icon: TrendingUp, roles: ["admin"] },
       { title: "Expenses", url: "/admin/expenses", icon: Receipt, roles: ["admin"] },
       { title: "Accounting", url: "/admin/accounting", icon: TrendingUp, roles: ["admin"] },
     ],
