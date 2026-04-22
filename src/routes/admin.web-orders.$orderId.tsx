@@ -627,11 +627,6 @@ function WebOrderDetailPage() {
             </div>
           )}
 
-          {courierMeta.warning && !courierError && (
-            <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-1.5 text-xs text-blue-700 dark:text-blue-300">
-              ⚠️ {courierMeta.warning}
-            </div>
-          )}
 
           <RiskBanner risk={bdCourier?.risk_level ?? null} stats={bdCourier} />
 
