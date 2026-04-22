@@ -529,41 +529,76 @@ function WebOrderDetailPage() {
         </div>
       </div>
 
-      {/* ========== COURIER SUCCESS STATS ========== */}
+      {/* ========== COURIER SUCCESS STATS (BD Courier API) ========== */}
       <Card className="rounded-2xl">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Courier Success Stats — {phone || "No phone"}</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
+          <div>
+            <CardTitle className="text-sm">
+              Courier Success Stats — {phone || "No phone"}
+            </CardTitle>
+            {bdCourier?.last_fetched_at && (
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Last updated {formatDistanceToNow(new Date(bdCourier.last_fetched_at), { addSuffix: true })}
+              </p>
+            )}
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleRefreshCourier}
+            disabled={refreshingCourier || bdLoading || !phone}
+          >
+            {refreshingCourier ? (
+              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-1 h-3.5 w-3.5" />
+            )}
+            Refresh
+          </Button>
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="overall">
-            <TabsList className="grid w-full grid-cols-4 md:w-auto md:inline-grid">
-              <TabsTrigger value="overall">Overall</TabsTrigger>
-              <TabsTrigger value="pathao">Pathao</TabsTrigger>
-              <TabsTrigger value="redx">RedX</TabsTrigger>
-              <TabsTrigger value="steadfast">Steadfast</TabsTrigger>
-            </TabsList>
-            <TabsContent value="overall">
-              <StatBlock
-                successRate={phoneStats?.success_rate ?? 0}
-                total={phoneStats?.total_orders ?? 0}
-                success={phoneStats?.delivered_orders ?? 0}
-                cancelled={phoneStats?.cancelled_orders ?? 0}
-              />
-            </TabsContent>
-            {(["pathao", "redx", "steadfast"] as const).map((p) => {
-              const stat = courierStats?.find((s) => s.provider === p);
-              return (
-                <TabsContent key={p} value={p}>
-                  <StatBlock
-                    successRate={stat?.success_rate ?? 0}
-                    total={stat?.total_orders ?? 0}
-                    success={stat?.delivered_orders ?? 0}
-                    cancelled={stat?.cancelled_orders ?? 0}
-                  />
-                </TabsContent>
-              );
-            })}
-          </Tabs>
+        <CardContent className="space-y-3">
+          <RiskBanner risk={bdCourier?.risk_level ?? null} stats={bdCourier} />
+
+          {bdLoading && !bdCourier ? (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="h-16 animate-pulse rounded-lg bg-muted" />
+              ))}
+            </div>
+          ) : (
+            <Tabs defaultValue="overall">
+              <TabsList className="grid w-full grid-cols-4 md:w-auto md:inline-grid">
+                <TabsTrigger value="overall">Overall</TabsTrigger>
+                <TabsTrigger value="pathao">Pathao</TabsTrigger>
+                <TabsTrigger value="redx">RedX</TabsTrigger>
+                <TabsTrigger value="steadfast">Steadfast</TabsTrigger>
+                {(bdCourier?.paperfly?.total ?? 0) > 0 && (
+                  <TabsTrigger value="paperfly">Paperfly</TabsTrigger>
+                )}
+              </TabsList>
+              <TabsContent value="overall">
+                <StatBlock
+                  successRate={bdCourier?.overall_success_rate ?? phoneStats?.success_rate ?? 0}
+                  total={bdCourier?.overall_total ?? phoneStats?.total_orders ?? 0}
+                  success={bdCourier?.overall_success ?? phoneStats?.delivered_orders ?? 0}
+                  cancelled={bdCourier?.overall_cancel ?? phoneStats?.cancelled_orders ?? 0}
+                />
+              </TabsContent>
+              {(["pathao", "redx", "steadfast", "paperfly"] as const).map((p) => {
+                const b = bdCourier?.[p];
+                return (
+                  <TabsContent key={p} value={p}>
+                    <StatBlock
+                      successRate={b?.success_rate ?? 0}
+                      total={b?.total ?? 0}
+                      success={b?.success ?? 0}
+                      cancelled={b?.cancel ?? 0}
+                    />
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
+          )}
         </CardContent>
       </Card>
 
