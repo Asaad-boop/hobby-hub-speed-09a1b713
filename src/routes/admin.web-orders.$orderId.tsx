@@ -582,13 +582,19 @@ function WebOrderDetailPage() {
       {/* ========== COURIER SUCCESS STATS (BD Courier API) ========== */}
       <Card className="rounded-2xl">
         <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-          <div>
-            <CardTitle className="text-sm">
-              Courier Success Stats — {phone || "No phone"}
+          <div className="min-w-0">
+            <CardTitle className="text-sm flex flex-wrap items-center gap-2">
+              <span>Courier Success Stats — {debouncedPhone || "No phone"}</span>
+              <CourierSourceBadge meta={courierMeta} fetching={bdFetching} />
             </CardTitle>
             {bdCourier?.last_fetched_at && (
               <p className="mt-0.5 text-xs text-muted-foreground">
                 Last updated {formatDistanceToNow(new Date(bdCourier.last_fetched_at), { addSuffix: true })}
+                {phoneInput && phoneInput !== debouncedPhone && (
+                  <span className="ml-2 text-amber-600 dark:text-amber-400">
+                    · waiting for new number…
+                  </span>
+                )}
               </p>
             )}
           </div>
@@ -596,7 +602,8 @@ function WebOrderDetailPage() {
             size="sm"
             variant="outline"
             onClick={handleRefreshCourier}
-            disabled={refreshingCourier || bdLoading || !phone}
+            disabled={refreshingCourier || bdLoading || !debouncedPhone}
+            title="Refresh only if data seems outdated. Cached data saves API credits."
           >
             {refreshingCourier ? (
               <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
@@ -613,16 +620,24 @@ function WebOrderDetailPage() {
             </div>
           )}
 
+          {courierMeta.warning && !courierError && (
+            <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-1.5 text-xs text-blue-700 dark:text-blue-300">
+              ⚠️ {courierMeta.warning}
+            </div>
+          )}
+
           <RiskBanner risk={bdCourier?.risk_level ?? null} stats={bdCourier} />
 
-          {bdLoading && !bdCourier ? (
+          {(bdLoading && !bdCourier) || (bdFetching && !bdCourier) ? (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {[0, 1, 2, 3].map((i) => (
                 <div key={i} className="h-32 animate-pulse rounded-lg bg-muted" />
               ))}
             </div>
           ) : (
-            <CourierStatsGrid bdCourier={bdCourier} phoneStats={phoneStats} />
+            <div className={bdFetching ? "opacity-60 transition-opacity" : ""}>
+              <CourierStatsGrid bdCourier={bdCourier} phoneStats={phoneStats} />
+            </div>
           )}
         </CardContent>
       </Card>
