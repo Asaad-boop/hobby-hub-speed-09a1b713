@@ -1,0 +1,1 @@
+ALTER TABLE public.courier_stats_cache ADD COLUMN IF NOT EXISTS parceldex jsonb NOT NULL DEFAULT '{}'::jsonb;
