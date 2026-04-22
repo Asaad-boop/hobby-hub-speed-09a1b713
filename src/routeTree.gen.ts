@@ -20,6 +20,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RequestRouteImport } from './routes/request'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as DiagnosticsRouteImport } from './routes/diagnostics'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -112,6 +113,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiagnosticsRoute = DiagnosticsRouteImport.update({
+  id: '/diagnostics',
+  path: '/diagnostics',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -315,6 +321,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/diagnostics': typeof DiagnosticsRoute
   '/faq': typeof FaqRoute
   '/privacy': typeof PrivacyRoute
   '/request': typeof RequestRoute
@@ -365,6 +372,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/diagnostics': typeof DiagnosticsRoute
   '/faq': typeof FaqRoute
   '/privacy': typeof PrivacyRoute
   '/request': typeof RequestRoute
@@ -417,6 +425,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/diagnostics': typeof DiagnosticsRoute
   '/faq': typeof FaqRoute
   '/privacy': typeof PrivacyRoute
   '/request': typeof RequestRoute
@@ -470,6 +479,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/contact'
+    | '/diagnostics'
     | '/faq'
     | '/privacy'
     | '/request'
@@ -520,6 +530,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/contact'
+    | '/diagnostics'
     | '/faq'
     | '/privacy'
     | '/request'
@@ -571,6 +582,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/contact'
+    | '/diagnostics'
     | '/faq'
     | '/privacy'
     | '/request'
@@ -623,6 +635,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
+  DiagnosticsRoute: typeof DiagnosticsRoute
   FaqRoute: typeof FaqRoute
   PrivacyRoute: typeof PrivacyRoute
   RequestRoute: typeof RequestRoute
@@ -718,6 +731,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/diagnostics': {
+      id: '/diagnostics'
+      path: '/diagnostics'
+      fullPath: '/diagnostics'
+      preLoaderRoute: typeof DiagnosticsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -1077,6 +1097,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
+  DiagnosticsRoute: DiagnosticsRoute,
   FaqRoute: FaqRoute,
   PrivacyRoute: PrivacyRoute,
   RequestRoute: RequestRoute,
