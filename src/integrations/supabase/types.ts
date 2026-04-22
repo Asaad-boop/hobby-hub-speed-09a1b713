@@ -93,11 +93,19 @@ export type Database = {
           daily_budget: number | null
           end_date: string | null
           id: string
+          last_synced_at: string | null
+          meta_ad_account_id: string | null
+          meta_bid_strategy: string | null
+          meta_buying_type: string | null
+          meta_campaign_id: string | null
+          meta_campaign_name: string | null
+          meta_objective: string | null
           notes: string | null
           platform: Database["public"]["Enums"]["ad_platform"]
           product_id: string | null
           start_date: string
           status: Database["public"]["Enums"]["ad_status"]
+          sync_enabled: boolean
           total_spend: number
           updated_at: string
         }
@@ -110,11 +118,19 @@ export type Database = {
           daily_budget?: number | null
           end_date?: string | null
           id?: string
+          last_synced_at?: string | null
+          meta_ad_account_id?: string | null
+          meta_bid_strategy?: string | null
+          meta_buying_type?: string | null
+          meta_campaign_id?: string | null
+          meta_campaign_name?: string | null
+          meta_objective?: string | null
           notes?: string | null
           platform?: Database["public"]["Enums"]["ad_platform"]
           product_id?: string | null
           start_date: string
           status?: Database["public"]["Enums"]["ad_status"]
+          sync_enabled?: boolean
           total_spend?: number
           updated_at?: string
         }
@@ -127,11 +143,19 @@ export type Database = {
           daily_budget?: number | null
           end_date?: string | null
           id?: string
+          last_synced_at?: string | null
+          meta_ad_account_id?: string | null
+          meta_bid_strategy?: string | null
+          meta_buying_type?: string | null
+          meta_campaign_id?: string | null
+          meta_campaign_name?: string | null
+          meta_objective?: string | null
           notes?: string | null
           platform?: Database["public"]["Enums"]["ad_platform"]
           product_id?: string | null
           start_date?: string
           status?: Database["public"]["Enums"]["ad_status"]
+          sync_enabled?: boolean
           total_spend?: number
           updated_at?: string
         }
@@ -604,6 +628,63 @@ export type Database = {
           },
         ]
       }
+      courier_stats_cache: {
+        Row: {
+          carrybee: Json
+          expires_at: string
+          fetch_count: number
+          id: string
+          last_fetched_at: string
+          overall_cancel: number
+          overall_success: number
+          overall_success_rate: number | null
+          overall_total: number
+          paperfly: Json
+          pathao: Json
+          phone: string
+          raw_response: Json | null
+          redx: Json
+          risk_level: string | null
+          steadfast: Json
+        }
+        Insert: {
+          carrybee?: Json
+          expires_at?: string
+          fetch_count?: number
+          id?: string
+          last_fetched_at?: string
+          overall_cancel?: number
+          overall_success?: number
+          overall_success_rate?: number | null
+          overall_total?: number
+          paperfly?: Json
+          pathao?: Json
+          phone: string
+          raw_response?: Json | null
+          redx?: Json
+          risk_level?: string | null
+          steadfast?: Json
+        }
+        Update: {
+          carrybee?: Json
+          expires_at?: string
+          fetch_count?: number
+          id?: string
+          last_fetched_at?: string
+          overall_cancel?: number
+          overall_success?: number
+          overall_success_rate?: number | null
+          overall_total?: number
+          paperfly?: Json
+          pathao?: Json
+          phone?: string
+          raw_response?: Json | null
+          redx?: Json
+          risk_level?: string | null
+          steadfast?: Json
+        }
+        Relationships: []
+      }
       damaged_inventory: {
         Row: {
           cost_value: number
@@ -793,6 +874,271 @@ export type Database = {
           sections?: Json
         }
         Relationships: []
+      }
+      integration_logs: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          endpoint: string | null
+          error: string | null
+          id: string
+          integration_name: string
+          method: string | null
+          request_payload: Json | null
+          response_payload: Json | null
+          status_code: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          endpoint?: string | null
+          error?: string | null
+          id?: string
+          integration_name: string
+          method?: string | null
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status_code?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          endpoint?: string | null
+          error?: string | null
+          id?: string
+          integration_name?: string
+          method?: string | null
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status_code?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      integrations: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          is_enabled: boolean
+          last_sync_at: string | null
+          last_sync_status: string | null
+          name: string
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          name: string
+          provider: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          name?: string
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      meta_ad_insights: {
+        Row: {
+          ad_id: string
+          captured_at: string
+          clicks: number | null
+          conversion_value: number | null
+          conversions: number | null
+          cpc: number | null
+          cpm: number | null
+          ctr: number | null
+          date_start: string
+          date_stop: string
+          frequency: number | null
+          id: string
+          impressions: number | null
+          reach: number | null
+          roas: number | null
+          spend: number | null
+        }
+        Insert: {
+          ad_id: string
+          captured_at?: string
+          clicks?: number | null
+          conversion_value?: number | null
+          conversions?: number | null
+          cpc?: number | null
+          cpm?: number | null
+          ctr?: number | null
+          date_start: string
+          date_stop: string
+          frequency?: number | null
+          id?: string
+          impressions?: number | null
+          reach?: number | null
+          roas?: number | null
+          spend?: number | null
+        }
+        Update: {
+          ad_id?: string
+          captured_at?: string
+          clicks?: number | null
+          conversion_value?: number | null
+          conversions?: number | null
+          cpc?: number | null
+          cpm?: number | null
+          ctr?: number | null
+          date_start?: string
+          date_stop?: string
+          frequency?: number | null
+          id?: string
+          impressions?: number | null
+          reach?: number | null
+          roas?: number | null
+          spend?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_ad_insights_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "meta_ads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_ad_sets: {
+        Row: {
+          campaign_id: string | null
+          created_at: string
+          daily_budget: number | null
+          end_time: string | null
+          id: string
+          last_synced_at: string | null
+          lifetime_budget: number | null
+          meta_adset_id: string
+          meta_adset_name: string | null
+          start_time: string | null
+          status: string | null
+          sync_enabled: boolean
+          targeting: Json | null
+          updated_at: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string
+          daily_budget?: number | null
+          end_time?: string | null
+          id?: string
+          last_synced_at?: string | null
+          lifetime_budget?: number | null
+          meta_adset_id: string
+          meta_adset_name?: string | null
+          start_time?: string | null
+          status?: string | null
+          sync_enabled?: boolean
+          targeting?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string
+          daily_budget?: number | null
+          end_time?: string | null
+          id?: string
+          last_synced_at?: string | null
+          lifetime_budget?: number | null
+          meta_adset_id?: string
+          meta_adset_name?: string | null
+          start_time?: string | null
+          status?: string | null
+          sync_enabled?: boolean
+          targeting?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_ad_sets_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_ads: {
+        Row: {
+          adset_id: string | null
+          created_at: string
+          creative_id: string | null
+          creative_preview_url: string | null
+          detected_product_id: string | null
+          detected_sku: string | null
+          id: string
+          last_synced_at: string | null
+          meta_ad_id: string
+          meta_ad_name: string | null
+          product_link_url: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          adset_id?: string | null
+          created_at?: string
+          creative_id?: string | null
+          creative_preview_url?: string | null
+          detected_product_id?: string | null
+          detected_sku?: string | null
+          id?: string
+          last_synced_at?: string | null
+          meta_ad_id: string
+          meta_ad_name?: string | null
+          product_link_url?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adset_id?: string | null
+          created_at?: string
+          creative_id?: string | null
+          creative_preview_url?: string | null
+          detected_product_id?: string | null
+          detected_sku?: string | null
+          id?: string
+          last_synced_at?: string | null
+          meta_ad_id?: string
+          meta_ad_name?: string | null
+          product_link_url?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_ads_adset_id_fkey"
+            columns: ["adset_id"]
+            isOneToOne: false
+            referencedRelation: "meta_ad_sets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_ads_detected_product_id_fkey"
+            columns: ["detected_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_attribution: {
         Row: {
