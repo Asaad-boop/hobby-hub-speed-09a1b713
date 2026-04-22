@@ -23,6 +23,7 @@ import {
   XOctagon,
   UserCog,
   Activity,
+  Ship,
 } from "lucide-react";
 import {
   Sidebar,
@@ -61,6 +62,7 @@ const groups: { label: string; items: NavItem[] }[] = [
       { title: "Products", url: "/admin/products", icon: Package, roles: ["admin"] },
       { title: "Categories", url: "/admin/categories", icon: Tags, roles: ["admin"] },
       { title: "Inventory", url: "/admin/inventory", icon: Boxes, roles: ["admin", "operations"] },
+      { title: "China Sourcing", url: "/admin/china-sourcing", icon: Ship, roles: ["admin", "operations"] },
     ],
   },
   {
