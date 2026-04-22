@@ -581,51 +581,11 @@ function WebOrderDetailPage() {
           {bdLoading && !bdCourier ? (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {[0, 1, 2, 3].map((i) => (
-                <div key={i} className="h-16 animate-pulse rounded-lg bg-muted" />
+                <div key={i} className="h-32 animate-pulse rounded-lg bg-muted" />
               ))}
             </div>
           ) : (
-            (() => {
-              const allCouriers = ["pathao", "redx", "steadfast", "paperfly", "parceldex", "carrybee"] as const;
-              const visibleCouriers = allCouriers;
-              const labels: Record<typeof allCouriers[number], string> = {
-                pathao: "Pathao",
-                redx: "RedX",
-                steadfast: "Steadfast",
-                paperfly: "Paperfly",
-                parceldex: "Parceldex",
-                carrybee: "Carrybee",
-              };
-              const overallRate = bdCourier?.overall_success_rate ?? phoneStats?.success_rate ?? 0;
-              const overallTotal = bdCourier?.overall_total ?? phoneStats?.total_orders ?? 0;
-              const overallSuccess = bdCourier?.overall_success ?? phoneStats?.delivered_orders ?? 0;
-              const overallCancel = bdCourier?.overall_cancel ?? phoneStats?.cancelled_orders ?? 0;
-              return (
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-                  <CourierCard
-                    name="Overall"
-                    successRate={overallRate}
-                    total={overallTotal}
-                    success={overallSuccess}
-                    cancelled={overallCancel}
-                    highlight
-                  />
-                  {visibleCouriers.map((p) => {
-                    const b = bdCourier?.[p];
-                    return (
-                      <CourierCard
-                        key={p}
-                        name={labels[p]}
-                        successRate={b?.success_rate ?? 0}
-                        total={b?.total ?? 0}
-                        success={b?.success ?? 0}
-                        cancelled={b?.cancel ?? 0}
-                      />
-                    );
-                  })}
-                </div>
-              );
-            })()
+            <CourierStatsGrid bdCourier={bdCourier} phoneStats={phoneStats} />
           )}
         </CardContent>
       </Card>
