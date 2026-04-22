@@ -192,25 +192,54 @@ function WebOrderDetailPage() {
     },
   });
 
-  const { data: courierStats } = useQuery({
-    queryKey: ["phone_stats_courier", phone],
-    enabled: !!phone,
+  // BD Courier API stats (live + cached)
+  type CourierBucket = { total: number; success: number; cancel: number; success_rate: number };
+  type BdCourierStats = {
+    phone: string;
+    overall_total: number;
+    overall_success: number;
+    overall_cancel: number;
+    overall_success_rate: number;
+    pathao: CourierBucket;
+    redx: CourierBucket;
+    steadfast: CourierBucket;
+    paperfly: CourierBucket;
+    carrybee: CourierBucket;
+    risk_level: "low" | "moderate" | "high" | "new_customer" | null;
+    last_fetched_at: string;
+  };
+
+  const [refreshingCourier, setRefreshingCourier] = useState(false);
+  const { data: bdCourier, isLoading: bdLoading, refetch: refetchBdCourier } = useQuery({
+    queryKey: ["bd_courier_stats", phone],
+    enabled: !!phone && /^01[3-9]\d{8}$/.test(phone),
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("customer_courier_stats" as never)
-        .select("*")
-        .eq("phone", phone);
-      if (error) return [];
-      return (data as Array<{
-        phone: string;
-        provider: string;
-        total_orders: number;
-        delivered_orders: number;
-        cancelled_orders: number;
-        success_rate: number | null;
-      }>) ?? [];
+      const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
+        body: { phone },
+      });
+      if (error) throw error;
+      return (data?.data ?? null) as BdCourierStats | null;
     },
   });
+
+  const handleRefreshCourier = async () => {
+    if (!phone) return;
+    setRefreshingCourier(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
+        body: { phone, force_refresh: true },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Courier stats refreshed");
+      await refetchBdCourier();
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to refresh courier stats");
+    } finally {
+      setRefreshingCourier(false);
+    }
+  };
 
   // ============ Activity logs ============
   const { data: activityLogs } = useQuery({
