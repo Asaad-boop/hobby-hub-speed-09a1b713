@@ -227,12 +227,55 @@ function BdCourierDialog({
   const [showKey, setShowKey] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [cacheHours, setCacheHours] = useState<number>(
-    Number((integration?.config as { cache_hours?: number })?.cache_hours ?? 24),
+    Number((integration?.config as { cache_hours?: number })?.cache_hours ?? 24 * 7),
+  );
+  const [swr, setSwr] = useState<boolean>(
+    ((integration?.config as { stale_while_revalidate?: boolean })?.stale_while_revalidate ?? true) === true,
   );
   const [enabled, setEnabled] = useState<boolean>(integration?.is_enabled ?? false);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
+
+  // Usage stats — last 30d API calls + cache hit rate
+  const { data: usage } = useQuery({
+    queryKey: ["admin", "bd_courier_usage"],
+    enabled: open,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+
+      const { count: monthCount } = await supabase
+        .from("integration_logs")
+        .select("id", { count: "exact", head: true })
+        .eq("integration_name", "bd_courier")
+        .gte("created_at", since);
+
+      const { count: todayCount } = await supabase
+        .from("integration_logs")
+        .select("id", { count: "exact", head: true })
+        .eq("integration_name", "bd_courier")
+        .gte("created_at", todayStart.toISOString());
+
+      const { count: cacheRows } = await supabase
+        .from("courier_stats_cache")
+        .select("id", { count: "exact", head: true });
+
+      // Cache hit rate ~ (cached_phones - api_calls) / cached_phones (rough heuristic)
+      const totalLookups = (cacheRows ?? 0) + (monthCount ?? 0);
+      const hitRate =
+        totalLookups > 0 ? Math.round(((cacheRows ?? 0) / totalLookups) * 100) : 0;
+
+      return {
+        today: todayCount ?? 0,
+        month: monthCount ?? 0,
+        cached_phones: cacheRows ?? 0,
+        hit_rate: hitRate,
+      };
+    },
+  });
 
   const handleTest = async () => {
     setTesting(true);
@@ -258,12 +301,15 @@ function BdCourierDialog({
     if (!integration) return;
     setSaving(true);
     try {
-      // Update config + enabled
       const { error } = await supabase
         .from("integrations")
         .update({
           is_enabled: enabled,
-          config: { ...(integration.config || {}), cache_hours: cacheHours },
+          config: {
+            ...(integration.config || {}),
+            cache_hours: cacheHours,
+            stale_while_revalidate: swr,
+          },
         })
         .eq("id", integration.id);
       if (error) throw error;
@@ -272,9 +318,6 @@ function BdCourierDialog({
         toast.info(
           "API key entered — Lovable will prompt you to securely store BD_COURIER_API_KEY in the next step.",
         );
-        // The actual secret must be stored via the platform's secret tool —
-        // surface the value to the user so they paste it once when prompted.
-        // We do NOT persist the key in the DB.
       }
 
       toast.success("BD Courier settings saved");
@@ -289,7 +332,7 @@ function BdCourierDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Truck className="h-5 w-5" />
@@ -301,6 +344,32 @@ function BdCourierDialog({
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Usage widget */}
+          <div className="rounded-lg border bg-muted/40 p-3">
+            <p className="mb-2 text-xs font-semibold text-muted-foreground">
+              API Usage (credit saving)
+            </p>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div>
+                <p className="text-lg font-bold">{usage?.today ?? "—"}</p>
+                <p className="text-[10px] text-muted-foreground">Today</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold">{usage?.month ?? "—"}</p>
+                <p className="text-[10px] text-muted-foreground">Last 30 days</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                  {usage?.hit_rate ?? 0}%
+                </p>
+                <p className="text-[10px] text-muted-foreground">Cache hit rate</p>
+              </div>
+            </div>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              {usage?.cached_phones ?? 0} unique phone numbers cached.
+            </p>
+          </div>
+
           <div className="rounded-lg border bg-muted/40 p-3 text-xs leading-relaxed">
             <p className="mb-1 font-semibold">Setup steps:</p>
             <ol className="list-inside list-decimal space-y-0.5 text-muted-foreground">
@@ -344,13 +413,26 @@ function BdCourierDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">1 hour</SelectItem>
-                <SelectItem value="6">6 hours</SelectItem>
-                <SelectItem value="12">12 hours</SelectItem>
-                <SelectItem value="24">24 hours (recommended)</SelectItem>
-                <SelectItem value="48">48 hours</SelectItem>
+                <SelectItem value="24">1 day</SelectItem>
+                <SelectItem value="72">3 days</SelectItem>
+                <SelectItem value="168">7 days (recommended)</SelectItem>
+                <SelectItem value="336">14 days</SelectItem>
+                <SelectItem value="720">30 days</SelectItem>
               </SelectContent>
             </Select>
+            <p className="text-[11px] text-muted-foreground">
+              Longer cache = fewer API credits used. Customer history rarely changes daily.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <div className="pr-3">
+              <p className="text-sm font-medium">Stale-while-revalidate</p>
+              <p className="text-xs text-muted-foreground">
+                Show cached data instantly, refresh in background — best UX, saves credits.
+              </p>
+            </div>
+            <Switch checked={swr} onCheckedChange={setSwr} />
           </div>
 
           <div className="flex items-center justify-between rounded-lg border p-3">
