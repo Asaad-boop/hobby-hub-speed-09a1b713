@@ -192,25 +192,54 @@ function WebOrderDetailPage() {
     },
   });
 
-  const { data: courierStats } = useQuery({
-    queryKey: ["phone_stats_courier", phone],
-    enabled: !!phone,
+  // BD Courier API stats (live + cached)
+  type CourierBucket = { total: number; success: number; cancel: number; success_rate: number };
+  type BdCourierStats = {
+    phone: string;
+    overall_total: number;
+    overall_success: number;
+    overall_cancel: number;
+    overall_success_rate: number;
+    pathao: CourierBucket;
+    redx: CourierBucket;
+    steadfast: CourierBucket;
+    paperfly: CourierBucket;
+    carrybee: CourierBucket;
+    risk_level: "low" | "moderate" | "high" | "new_customer" | null;
+    last_fetched_at: string;
+  };
+
+  const [refreshingCourier, setRefreshingCourier] = useState(false);
+  const { data: bdCourier, isLoading: bdLoading, refetch: refetchBdCourier } = useQuery({
+    queryKey: ["bd_courier_stats", phone],
+    enabled: !!phone && /^01[3-9]\d{8}$/.test(phone),
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("customer_courier_stats" as never)
-        .select("*")
-        .eq("phone", phone);
-      if (error) return [];
-      return (data as Array<{
-        phone: string;
-        provider: string;
-        total_orders: number;
-        delivered_orders: number;
-        cancelled_orders: number;
-        success_rate: number | null;
-      }>) ?? [];
+      const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
+        body: { phone },
+      });
+      if (error) throw error;
+      return (data?.data ?? null) as BdCourierStats | null;
     },
   });
+
+  const handleRefreshCourier = async () => {
+    if (!phone) return;
+    setRefreshingCourier(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
+        body: { phone, force_refresh: true },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Courier stats refreshed");
+      await refetchBdCourier();
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to refresh courier stats");
+    } finally {
+      setRefreshingCourier(false);
+    }
+  };
 
   // ============ Activity logs ============
   const { data: activityLogs } = useQuery({
@@ -500,41 +529,76 @@ function WebOrderDetailPage() {
         </div>
       </div>
 
-      {/* ========== COURIER SUCCESS STATS ========== */}
+      {/* ========== COURIER SUCCESS STATS (BD Courier API) ========== */}
       <Card className="rounded-2xl">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Courier Success Stats — {phone || "No phone"}</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
+          <div>
+            <CardTitle className="text-sm">
+              Courier Success Stats — {phone || "No phone"}
+            </CardTitle>
+            {bdCourier?.last_fetched_at && (
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Last updated {formatDistanceToNow(new Date(bdCourier.last_fetched_at), { addSuffix: true })}
+              </p>
+            )}
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleRefreshCourier}
+            disabled={refreshingCourier || bdLoading || !phone}
+          >
+            {refreshingCourier ? (
+              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-1 h-3.5 w-3.5" />
+            )}
+            Refresh
+          </Button>
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="overall">
-            <TabsList className="grid w-full grid-cols-4 md:w-auto md:inline-grid">
-              <TabsTrigger value="overall">Overall</TabsTrigger>
-              <TabsTrigger value="pathao">Pathao</TabsTrigger>
-              <TabsTrigger value="redx">RedX</TabsTrigger>
-              <TabsTrigger value="steadfast">Steadfast</TabsTrigger>
-            </TabsList>
-            <TabsContent value="overall">
-              <StatBlock
-                successRate={phoneStats?.success_rate ?? 0}
-                total={phoneStats?.total_orders ?? 0}
-                success={phoneStats?.delivered_orders ?? 0}
-                cancelled={phoneStats?.cancelled_orders ?? 0}
-              />
-            </TabsContent>
-            {(["pathao", "redx", "steadfast"] as const).map((p) => {
-              const stat = courierStats?.find((s) => s.provider === p);
-              return (
-                <TabsContent key={p} value={p}>
-                  <StatBlock
-                    successRate={stat?.success_rate ?? 0}
-                    total={stat?.total_orders ?? 0}
-                    success={stat?.delivered_orders ?? 0}
-                    cancelled={stat?.cancelled_orders ?? 0}
-                  />
-                </TabsContent>
-              );
-            })}
-          </Tabs>
+        <CardContent className="space-y-3">
+          <RiskBanner risk={bdCourier?.risk_level ?? null} stats={bdCourier} />
+
+          {bdLoading && !bdCourier ? (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="h-16 animate-pulse rounded-lg bg-muted" />
+              ))}
+            </div>
+          ) : (
+            <Tabs defaultValue="overall">
+              <TabsList className="grid w-full grid-cols-4 md:w-auto md:inline-grid">
+                <TabsTrigger value="overall">Overall</TabsTrigger>
+                <TabsTrigger value="pathao">Pathao</TabsTrigger>
+                <TabsTrigger value="redx">RedX</TabsTrigger>
+                <TabsTrigger value="steadfast">Steadfast</TabsTrigger>
+                {(bdCourier?.paperfly?.total ?? 0) > 0 && (
+                  <TabsTrigger value="paperfly">Paperfly</TabsTrigger>
+                )}
+              </TabsList>
+              <TabsContent value="overall">
+                <StatBlock
+                  successRate={bdCourier?.overall_success_rate ?? phoneStats?.success_rate ?? 0}
+                  total={bdCourier?.overall_total ?? phoneStats?.total_orders ?? 0}
+                  success={bdCourier?.overall_success ?? phoneStats?.delivered_orders ?? 0}
+                  cancelled={bdCourier?.overall_cancel ?? phoneStats?.cancelled_orders ?? 0}
+                />
+              </TabsContent>
+              {(["pathao", "redx", "steadfast", "paperfly"] as const).map((p) => {
+                const b = bdCourier?.[p];
+                return (
+                  <TabsContent key={p} value={p}>
+                    <StatBlock
+                      successRate={b?.success_rate ?? 0}
+                      total={b?.total ?? 0}
+                      success={b?.success ?? 0}
+                      cancelled={b?.cancel ?? 0}
+                    />
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
+          )}
         </CardContent>
       </Card>
 
@@ -1076,6 +1140,44 @@ function StatBlock({
       <div className="h-2 overflow-hidden rounded-full bg-muted">
         <div className="h-full bg-emerald-500 transition-all" style={{ width: `${rate}%` }} />
       </div>
+    </div>
+  );
+}
+
+function RiskBanner({
+  risk,
+  stats,
+}: {
+  risk: "low" | "moderate" | "high" | "new_customer" | null;
+  stats: { overall_total?: number; overall_success_rate?: number; overall_cancel?: number } | null | undefined;
+}) {
+  if (!risk) return null;
+  const total = stats?.overall_total ?? 0;
+  const rate = stats?.overall_success_rate ?? 0;
+  const cancelRate = total > 0 ? Number((((stats?.overall_cancel ?? 0) / total) * 100).toFixed(1)) : 0;
+
+  const map = {
+    low: {
+      cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+      label: `✅ Trusted Customer — ${total} orders, ${rate}% success`,
+    },
+    moderate: {
+      cls: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+      label: `🟡 Moderate Customer — ${rate}% success across ${total} orders, check history`,
+    },
+    high: {
+      cls: "border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300",
+      label: `⚠️ RISK CUSTOMER — ${cancelRate}% cancel rate (${total} orders)`,
+    },
+    new_customer: {
+      cls: "border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-300",
+      label: `🆕 New Customer — no courier history (consider advance payment)`,
+    },
+  }[risk];
+
+  return (
+    <div className={`rounded-lg border px-3 py-2 text-sm font-medium ${map.cls}`}>
+      {map.label}
     </div>
   );
 }
