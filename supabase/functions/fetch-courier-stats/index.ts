@@ -1,5 +1,6 @@
 // BD Courier API integration — fetches customer courier success history
 // Caches results in courier_stats_cache for 24h (configurable per integration row)
+// v2: handles courierData.{name} shape with total_parcel/success_parcel/cancelled_parcel
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
