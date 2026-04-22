@@ -587,9 +587,7 @@ function WebOrderDetailPage() {
           ) : (
             (() => {
               const allCouriers = ["pathao", "redx", "steadfast", "paperfly", "parceldex", "carrybee"] as const;
-              const visibleCouriers = allCouriers.filter(
-                (p) => (bdCourier?.[p]?.total ?? 0) > 0,
-              );
+              const visibleCouriers = allCouriers;
               const labels: Record<typeof allCouriers[number], string> = {
                 pathao: "Pathao",
                 redx: "RedX",
