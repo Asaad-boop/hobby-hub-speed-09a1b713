@@ -1132,50 +1132,246 @@ function StatBlock({
   );
 }
 
+type CourierKey = "pathao" | "redx" | "steadfast" | "paperfly" | "parceldex" | "carrybee";
+
+const COURIER_LABELS: Record<CourierKey, string> = {
+  pathao: "Pathao",
+  redx: "RedX",
+  steadfast: "Steadfast",
+  paperfly: "Paperfly",
+  parceldex: "Parceldex",
+  carrybee: "Carrybee",
+};
+
+function CourierStatsGrid({
+  bdCourier,
+  phoneStats,
+}: {
+  bdCourier:
+    | {
+        overall_total: number;
+        overall_success: number;
+        overall_cancel: number;
+        overall_success_rate: number;
+        pathao: { total: number; success: number; cancel: number; success_rate: number };
+        redx: { total: number; success: number; cancel: number; success_rate: number };
+        steadfast: { total: number; success: number; cancel: number; success_rate: number };
+        paperfly: { total: number; success: number; cancel: number; success_rate: number };
+        parceldex: { total: number; success: number; cancel: number; success_rate: number };
+        carrybee: { total: number; success: number; cancel: number; success_rate: number };
+      }
+    | null
+    | undefined;
+  phoneStats:
+    | {
+        total_orders: number;
+        delivered_orders: number;
+        cancelled_orders: number;
+        success_rate: number | null;
+      }
+    | null
+    | undefined;
+}) {
+  const [showAll, setShowAll] = useState(false);
+
+  const allKeys: CourierKey[] = ["pathao", "redx", "steadfast", "paperfly", "parceldex", "carrybee"];
+  const buckets = allKeys.map((key) => {
+    const b = bdCourier?.[key];
+    return {
+      key,
+      name: COURIER_LABELS[key],
+      total: b?.total ?? 0,
+      success: b?.success ?? 0,
+      cancel: b?.cancel ?? 0,
+      success_rate: b?.success_rate ?? 0,
+    };
+  });
+
+  const sorted = [...buckets].sort((a, b) => b.total - a.total);
+  const active = sorted.filter((b) => b.total > 0);
+  const inactive = sorted.filter((b) => b.total === 0);
+
+  const overallTotal = bdCourier?.overall_total ?? phoneStats?.total_orders ?? 0;
+  const overallSuccess = bdCourier?.overall_success ?? phoneStats?.delivered_orders ?? 0;
+  const overallCancel = bdCourier?.overall_cancel ?? phoneStats?.cancelled_orders ?? 0;
+  const overallRate = bdCourier?.overall_success_rate ?? phoneStats?.success_rate ?? 0;
+
+  // Dominant courier (>80% of orders)
+  const dominant =
+    overallTotal > 0
+      ? active.find((b) => b.total / overallTotal >= 0.8)
+      : undefined;
+
+  // Recommended: best success rate among couriers with >= 3 orders
+  const recommended = active
+    .filter((b) => b.total >= 3)
+    .sort((a, b) => b.success_rate - a.success_rate)[0];
+
+  return (
+    <div className="space-y-3">
+      {(dominant || recommended) && (
+        <div className="flex flex-wrap items-center gap-2">
+          {dominant && (
+            <div className="flex items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs text-sky-700 dark:text-sky-300">
+              <span>💡</span>
+              <span>
+                Customer primarily uses{" "}
+                <span className="font-semibold">{dominant.name}</span> (
+                {Math.round((dominant.total / overallTotal) * 100)}% of orders)
+              </span>
+            </div>
+          )}
+          {recommended && (
+            <div className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-700 dark:text-emerald-300">
+              <span>🎯</span>
+              <span>
+                Recommended: <span className="font-semibold">{recommended.name}</span> (
+                {recommended.success_rate}% success)
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+        <CourierCard
+          name="Overall"
+          successRate={overallRate}
+          total={overallTotal}
+          success={overallSuccess}
+          cancelled={overallCancel}
+          variant="summary"
+        />
+        {active.map((b) => (
+          <CourierCard
+            key={b.key}
+            name={b.name}
+            successRate={b.success_rate}
+            total={b.total}
+            success={b.success}
+            cancelled={b.cancel}
+            variant={recommended?.key === b.key ? "recommended" : "active"}
+          />
+        ))}
+        {showAll &&
+          inactive.map((b) => (
+            <CourierCard
+              key={b.key}
+              name={b.name}
+              successRate={0}
+              total={0}
+              success={0}
+              cancelled={0}
+              variant="inactive"
+            />
+          ))}
+      </div>
+
+      {inactive.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setShowAll((s) => !s)}
+          className="text-xs font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+        >
+          {showAll
+            ? `Hide couriers with no history`
+            : `Show all couriers (${inactive.length} with no history)`}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function CourierCard({
   name,
   successRate,
   total,
   success,
   cancelled,
-  highlight = false,
+  variant = "active",
 }: {
   name: string;
   successRate: number;
   total: number;
   success: number;
   cancelled: number;
-  highlight?: boolean;
+  variant?: "summary" | "active" | "recommended" | "inactive";
 }) {
   const rate = Math.max(0, Math.min(100, Number(successRate) || 0));
-  const hasHistory = total > 0 || success > 0 || cancelled > 0;
+  const isInactive = variant === "inactive";
+
+  const containerCls =
+    variant === "summary"
+      ? "border-sky-500/40 bg-sky-500/5 sm:col-span-1 lg:col-span-1"
+      : variant === "recommended"
+        ? "border-emerald-500/50 bg-emerald-500/5 ring-1 ring-emerald-500/30"
+        : variant === "inactive"
+          ? "border-border/50 bg-muted/30 opacity-60"
+          : "border-border bg-card";
 
   return (
     <div
-      className={`flex min-h-[132px] flex-col gap-1.5 rounded-xl border p-3 ${
-        highlight ? "border-primary/40 bg-primary/5" : "border-border bg-card"
-      }`}
+      className={`flex min-h-[140px] flex-col gap-1.5 rounded-xl border p-3 transition-all ${containerCls}`}
     >
-      <div className="text-sm font-semibold text-foreground">{name}</div>
+      <div className="flex items-center justify-between gap-2">
+        <div className={`text-sm font-semibold ${isInactive ? "text-muted-foreground" : "text-foreground"}`}>
+          {name}
+        </div>
+        {variant === "summary" && (
+          <Badge variant="outline" className="border-sky-500/30 bg-sky-500/10 text-[10px] text-sky-700 dark:text-sky-300">
+            Summary
+          </Badge>
+        )}
+        {variant === "recommended" && (
+          <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-[10px] text-emerald-700 dark:text-emerald-300">
+            Best
+          </Badge>
+        )}
+      </div>
       <div className="space-y-0.5 text-xs">
         <div className="text-muted-foreground">
-          Success Rate: <span className="font-semibold text-foreground">{rate}%</span>
+          Success Rate:{" "}
+          <span className={`font-semibold ${isInactive ? "text-muted-foreground" : "text-foreground"}`}>
+            {rate}%
+          </span>
         </div>
         <div className="text-muted-foreground">
-          Total: <span className="font-semibold text-foreground">{total}</span>
+          Total:{" "}
+          <span className={`font-semibold ${isInactive ? "text-muted-foreground" : "text-foreground"}`}>
+            {total}
+          </span>
         </div>
         <div className="text-muted-foreground">
-          Success: <span className="font-semibold text-foreground">{success}</span>
+          Success:{" "}
+          <span className={`font-semibold ${isInactive ? "text-muted-foreground" : "text-emerald-600 dark:text-emerald-400"}`}>
+            {success}
+          </span>
         </div>
         <div className="text-muted-foreground">
-          Cancelled: <span className="font-semibold text-foreground">{cancelled}</span>
+          Cancelled:{" "}
+          <span className={`font-semibold ${isInactive ? "text-muted-foreground" : "text-rose-600 dark:text-rose-400"}`}>
+            {cancelled}
+          </span>
         </div>
       </div>
       <div className="mt-auto space-y-2 pt-1">
         <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-          <div className="h-full bg-primary transition-all" style={{ width: `${rate}%` }} />
+          <div
+            className={`h-full transition-all ${
+              variant === "summary"
+                ? "bg-sky-500"
+                : variant === "recommended"
+                  ? "bg-emerald-500"
+                  : variant === "inactive"
+                    ? "bg-muted-foreground/30"
+                    : "bg-primary"
+            }`}
+            style={{ width: `${rate}%` }}
+          />
         </div>
-        {!hasHistory && <p className="text-[11px] text-muted-foreground">No courier history found</p>}
+        {isInactive && (
+          <p className="text-[11px] text-muted-foreground">No orders with this courier yet</p>
+        )}
       </div>
     </div>
   );
