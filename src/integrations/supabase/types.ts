@@ -452,6 +452,53 @@ export type Database = {
         }
         Relationships: []
       }
+      chart_of_accounts: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_system: boolean
+          name: string
+          parent_id: string | null
+          type: Database["public"]["Enums"]["account_type"]
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name: string
+          parent_id?: string | null
+          type: Database["public"]["Enums"]["account_type"]
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name?: string
+          parent_id?: string | null
+          type?: Database["public"]["Enums"]["account_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       china_shipment_items: {
         Row: {
           allocated_landed_cost: number
@@ -996,6 +1043,42 @@ export type Database = {
         }
         Relationships: []
       }
+      general_ledger: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          entry_date: string
+          entry_no: number
+          id: string
+          is_posted: boolean
+          source_id: string | null
+          source_type: Database["public"]["Enums"]["ledger_source"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description: string
+          entry_date?: string
+          entry_no?: number
+          id?: string
+          is_posted?: boolean
+          source_id?: string | null
+          source_type?: Database["public"]["Enums"]["ledger_source"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          entry_date?: string
+          entry_no?: number
+          id?: string
+          is_posted?: boolean
+          source_id?: string | null
+          source_type?: Database["public"]["Enums"]["ledger_source"]
+        }
+        Relationships: []
+      }
       homepage_versions: {
         Row: {
           created_at: string
@@ -1097,6 +1180,51 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      ledger_lines: {
+        Row: {
+          account_id: string
+          created_at: string
+          credit: number
+          debit: number
+          entry_id: string
+          id: string
+          memo: string | null
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          entry_id: string
+          id?: string
+          memo?: string | null
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          entry_id?: string
+          id?: string
+          memo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_lines_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "general_ledger"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       meta_ad_insights: {
         Row: {
@@ -2508,6 +2636,16 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       log_order_view: { Args: { p_order_id: string }; Returns: undefined }
+      post_ledger_entry: {
+        Args: {
+          _date: string
+          _description: string
+          _lines: Json
+          _source_id: string
+          _source_type: Database["public"]["Enums"]["ledger_source"]
+        }
+        Returns: string
+      }
       recalc_product_rating: {
         Args: { _product_id: string }
         Returns: undefined
@@ -2516,6 +2654,7 @@ export type Database = {
       reserve_stock: { Args: { _order_id: string }; Returns: undefined }
     }
     Enums: {
+      account_type: "asset" | "liability" | "equity" | "revenue" | "expense"
       ad_attribution_method:
         | "per_product"
         | "per_category"
@@ -2576,6 +2715,13 @@ export type Database = {
         | "shipment_damage"
         | "customer_damage"
       delivery_zone: "inside_dhaka" | "outside_dhaka" | "sub_city" | "other"
+      ledger_source:
+        | "order"
+        | "expense"
+        | "capital"
+        | "shipment"
+        | "manual"
+        | "adjustment"
       order_finalization_status:
         | "pending"
         | "delivered"
@@ -2794,6 +2940,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_type: ["asset", "liability", "equity", "revenue", "expense"],
       ad_attribution_method: [
         "per_product",
         "per_category",
@@ -2862,6 +3009,14 @@ export const Constants = {
         "customer_damage",
       ],
       delivery_zone: ["inside_dhaka", "outside_dhaka", "sub_city", "other"],
+      ledger_source: [
+        "order",
+        "expense",
+        "capital",
+        "shipment",
+        "manual",
+        "adjustment",
+      ],
       order_finalization_status: [
         "pending",
         "delivered",
