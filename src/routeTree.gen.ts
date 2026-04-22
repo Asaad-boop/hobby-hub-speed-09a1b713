@@ -45,6 +45,7 @@ import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
+import { Route as AdminChinaSourcingRouteImport } from './routes/admin.china-sourcing'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminCancelledOrdersRouteImport } from './routes/admin.cancelled-orders'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
@@ -237,6 +238,11 @@ const AdminCouponsRoute = AdminCouponsRouteImport.update({
   path: '/coupons',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminChinaSourcingRoute = AdminChinaSourcingRouteImport.update({
+  id: '/china-sourcing',
+  path: '/china-sourcing',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
@@ -318,6 +324,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/cancelled-orders': typeof AdminCancelledOrdersRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/china-sourcing': typeof AdminChinaSourcingRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/expenses': typeof AdminExpensesRoute
@@ -366,6 +373,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/cancelled-orders': typeof AdminCancelledOrdersRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/china-sourcing': typeof AdminChinaSourcingRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/expenses': typeof AdminExpensesRoute
@@ -416,6 +424,7 @@ export interface FileRoutesById {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/cancelled-orders': typeof AdminCancelledOrdersRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/china-sourcing': typeof AdminChinaSourcingRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/expenses': typeof AdminExpensesRoute
@@ -467,6 +476,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/cancelled-orders'
     | '/admin/categories'
+    | '/admin/china-sourcing'
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/expenses'
@@ -515,6 +525,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/cancelled-orders'
     | '/admin/categories'
+    | '/admin/china-sourcing'
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/expenses'
@@ -564,6 +575,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/cancelled-orders'
     | '/admin/categories'
+    | '/admin/china-sourcing'
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/expenses'
@@ -871,6 +883,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCouponsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/china-sourcing': {
+      id: '/admin/china-sourcing'
+      path: '/china-sourcing'
+      fullPath: '/admin/china-sourcing'
+      preLoaderRoute: typeof AdminChinaSourcingRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/categories': {
       id: '/admin/categories'
       path: '/categories'
@@ -986,6 +1005,7 @@ interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminCancelledOrdersRoute: typeof AdminCancelledOrdersRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminChinaSourcingRoute: typeof AdminChinaSourcingRoute
   AdminCouponsRoute: typeof AdminCouponsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminExpensesRoute: typeof AdminExpensesRoute
@@ -1008,6 +1028,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminCancelledOrdersRoute: AdminCancelledOrdersRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
+  AdminChinaSourcingRoute: AdminChinaSourcingRoute,
   AdminCouponsRoute: AdminCouponsRoute,
   AdminCustomersRoute: AdminCustomersRoute,
   AdminExpensesRoute: AdminExpensesRoute,

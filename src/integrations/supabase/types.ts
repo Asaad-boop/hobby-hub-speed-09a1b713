@@ -452,6 +452,148 @@ export type Database = {
         }
         Relationships: []
       }
+      china_shipment_items: {
+        Row: {
+          allocated_landed_cost: number
+          cny_unit_price: number
+          created_at: string
+          id: string
+          notes: string | null
+          per_unit_landed_cost: number
+          product_id: string | null
+          product_name_snapshot: string
+          quantity: number
+          shipment_id: string
+          variant_id: string | null
+        }
+        Insert: {
+          allocated_landed_cost?: number
+          cny_unit_price?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          per_unit_landed_cost?: number
+          product_id?: string | null
+          product_name_snapshot: string
+          quantity?: number
+          shipment_id: string
+          variant_id?: string | null
+        }
+        Update: {
+          allocated_landed_cost?: number
+          cny_unit_price?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          per_unit_landed_cost?: number
+          product_id?: string | null
+          product_name_snapshot?: string
+          quantity?: number
+          shipment_id?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "china_shipment_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "china_shipment_items_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "china_shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "china_shipment_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      china_shipments: {
+        Row: {
+          arrival_date: string | null
+          cny_amount: number
+          created_at: string
+          created_by: string | null
+          customs_duty: number
+          exchange_rate: number
+          id: string
+          international_shipping: number
+          local_transport: number
+          notes: string | null
+          order_date: string | null
+          other_costs: number
+          per_unit_landed_cost: number
+          product_cost_bdt: number
+          received_date: string | null
+          reference_no: string
+          shipped_date: string | null
+          status: Database["public"]["Enums"]["china_shipment_status"]
+          supplier_contact: string | null
+          supplier_name: string | null
+          total_landed_cost: number
+          total_quantity: number
+          updated_at: string
+        }
+        Insert: {
+          arrival_date?: string | null
+          cny_amount?: number
+          created_at?: string
+          created_by?: string | null
+          customs_duty?: number
+          exchange_rate?: number
+          id?: string
+          international_shipping?: number
+          local_transport?: number
+          notes?: string | null
+          order_date?: string | null
+          other_costs?: number
+          per_unit_landed_cost?: number
+          product_cost_bdt?: number
+          received_date?: string | null
+          reference_no: string
+          shipped_date?: string | null
+          status?: Database["public"]["Enums"]["china_shipment_status"]
+          supplier_contact?: string | null
+          supplier_name?: string | null
+          total_landed_cost?: number
+          total_quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          arrival_date?: string | null
+          cny_amount?: number
+          created_at?: string
+          created_by?: string | null
+          customs_duty?: number
+          exchange_rate?: number
+          id?: string
+          international_shipping?: number
+          local_transport?: number
+          notes?: string | null
+          order_date?: string | null
+          other_costs?: number
+          per_unit_landed_cost?: number
+          product_cost_bdt?: number
+          received_date?: string | null
+          reference_no?: string
+          shipped_date?: string | null
+          status?: Database["public"]["Enums"]["china_shipment_status"]
+          supplier_contact?: string | null
+          supplier_name?: string | null
+          total_landed_cost?: number
+          total_quantity?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coupon_usage: {
         Row: {
           coupon_id: string
@@ -2412,6 +2554,13 @@ export type Database = {
         | "pathao_pending"
         | "meta_ads_wallet"
         | "other"
+      china_shipment_status:
+        | "draft"
+        | "ordered"
+        | "in_transit"
+        | "customs"
+        | "received"
+        | "cancelled"
       confirmation_status:
         | "pending"
         | "confirmed"
@@ -2687,6 +2836,14 @@ export const Constants = {
         "pathao_pending",
         "meta_ads_wallet",
         "other",
+      ],
+      china_shipment_status: [
+        "draft",
+        "ordered",
+        "in_transit",
+        "customs",
+        "received",
+        "cancelled",
       ],
       confirmation_status: [
         "pending",
