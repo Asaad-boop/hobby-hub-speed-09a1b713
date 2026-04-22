@@ -1498,6 +1498,58 @@ function Row({ label, value, bold, mono }: { label: string; value: string; bold?
   );
 }
 
+function CourierSourceBadge({
+  meta,
+  fetching,
+}: {
+  meta: {
+    source: "fresh" | "cache" | "stale_cache" | null;
+    age_hours: number | null;
+    warning: string | null;
+  };
+  fetching: boolean;
+}) {
+  if (fetching && !meta.source) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+        <Loader2 className="h-3 w-3 animate-spin" /> Loading…
+      </span>
+    );
+  }
+  if (!meta.source) return null;
+
+  const ageLabel =
+    meta.age_hours == null
+      ? ""
+      : meta.age_hours < 1
+        ? "just now"
+        : meta.age_hours < 24
+          ? `${meta.age_hours}h ago`
+          : `${Math.floor(meta.age_hours / 24)}d ago`;
+
+  if (meta.source === "fresh") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-300">
+        ● Live data
+      </span>
+    );
+  }
+  if (meta.source === "cache") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:text-blue-300">
+        💾 Cached · {ageLabel}
+      </span>
+    );
+  }
+  // stale_cache
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300">
+      ⚠ Cached · {ageLabel} · refreshing…
+    </span>
+  );
+}
+
+
 function AttrRow({ label, value, truncate }: { label: string; value: string | null; truncate?: boolean }) {
   return (
     <div className="flex items-start justify-between gap-2">
