@@ -79,7 +79,19 @@ Deno.serve(async (req) => {
     }
 
     const apiKey = Deno.env.get("BD_COURIER_API_KEY");
-    if (!apiKey || !integration?.is_enabled) {
+    console.log("BD_COURIER_API_KEY present:", !!apiKey, "integration row:", !!integration, "is_enabled:", integration?.is_enabled);
+
+    // Auto-create/enable the integration row if missing (secret is the source of truth)
+    if (apiKey && !integration) {
+      await supabase.from("integrations").insert({
+        name: "bd_courier",
+        provider: "bdcourier",
+        is_enabled: true,
+        config: { cache_hours: 24 },
+      });
+    }
+
+    if (!apiKey) {
       // Fall back to stale cache if available
       const { data: stale } = await supabase
         .from("courier_stats_cache")
