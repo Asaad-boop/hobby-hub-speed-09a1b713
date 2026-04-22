@@ -12,18 +12,26 @@ interface CourierSummary {
   total?: number;
   success?: number;
   cancel?: number;
+  total_parcel?: number;
+  success_parcel?: number;
+  cancelled_parcel?: number;
+  success_ratio?: number;
 }
 
 function normalizeCourier(data: CourierSummary | undefined | null) {
-  if (!data || !data.total) return { total: 0, success: 0, cancel: 0, success_rate: 0 };
-  const total = Number(data.total) || 0;
-  const success = Number(data.success) || 0;
-  const cancel = Number(data.cancel) || 0;
+  if (!data) return { total: 0, success: 0, cancel: 0, success_rate: 0 };
+  const total = Number(data.total ?? data.total_parcel ?? 0) || 0;
+  const success = Number(data.success ?? data.success_parcel ?? 0) || 0;
+  const cancel = Number(data.cancel ?? data.cancelled_parcel ?? 0) || 0;
+  if (!total) return { total: 0, success: 0, cancel: 0, success_rate: 0 };
   return {
     total,
     success,
     cancel,
-    success_rate: total > 0 ? Number(((success / total) * 100).toFixed(1)) : 0,
+    success_rate:
+      data.success_ratio != null
+        ? Number(Number(data.success_ratio).toFixed(1))
+        : Number(((success / total) * 100).toFixed(1)),
   };
 }
 
@@ -166,23 +174,33 @@ Deno.serve(async (req) => {
     // deno-lint-ignore no-explicit-any
     const r: any = apiResp;
     const summaries =
-      r?.data?.result?.[cleanPhone]?.Summaries ||
       r?.courierData ||
       r?.data?.courierData ||
+      r?.data?.result?.[cleanPhone]?.Summaries ||
       r?.summary ||
       {};
     const totalSummary =
+      summaries?.summary ||
       r?.data?.result?.[cleanPhone]?.totalSummary ||
       r?.totalSummary ||
       r?.data?.totalSummary ||
-      r?.summary?.total ||
       {};
 
-    const overall_total = Number(totalSummary.total ?? totalSummary.totalParcel ?? 0);
-    const overall_success = Number(totalSummary.success ?? totalSummary.successParcel ?? 0);
-    const overall_cancel = Number(totalSummary.cancel ?? totalSummary.cancelParcel ?? 0);
+    const overall_total = Number(
+      totalSummary.total ?? totalSummary.totalParcel ?? totalSummary.total_parcel ?? 0,
+    );
+    const overall_success = Number(
+      totalSummary.success ?? totalSummary.successParcel ?? totalSummary.success_parcel ?? 0,
+    );
+    const overall_cancel = Number(
+      totalSummary.cancel ?? totalSummary.cancelParcel ?? totalSummary.cancelled_parcel ?? 0,
+    );
     const overall_success_rate =
-      overall_total > 0 ? Number(((overall_success / overall_total) * 100).toFixed(1)) : 0;
+      totalSummary.success_ratio != null
+        ? Number(Number(totalSummary.success_ratio).toFixed(1))
+        : overall_total > 0
+          ? Number(((overall_success / overall_total) * 100).toFixed(1))
+          : 0;
 
     const normalized = {
       phone: cleanPhone,
