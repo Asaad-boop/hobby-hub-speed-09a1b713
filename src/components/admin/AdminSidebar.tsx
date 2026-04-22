@@ -91,7 +91,8 @@ const groups: { label: string; items: NavItem[] }[] = [
     items: [
       { title: "Staff Management", url: "/admin/staff", icon: UserCog, roles: ["admin"] },
       { title: "Homepage", url: "/admin/homepage", icon: Home, roles: ["admin"] },
-      { title: "Site Settings", url: "/admin/settings", icon: Settings, roles: ["admin"] },
+      { title: "Site Settings", url: "/admin/settings", icon: Settings, exact: true, roles: ["admin"] },
+      { title: "Integrations", url: "/admin/settings/integrations", icon: Activity, roles: ["admin"] },
       { title: "Security Audit", url: "/admin/security", icon: ShieldCheck, roles: ["admin"] },
     ],
   },
