@@ -194,102 +194,12 @@ function WebOrderDetailPage() {
     },
   });
 
-  // BD Courier API stats (live + cached)
-  type CourierBucket = { total: number; success: number; cancel: number; success_rate: number };
-  type BdCourierStats = {
-    phone: string;
-    overall_total: number;
-    overall_success: number;
-    overall_cancel: number;
-    overall_success_rate: number;
-    pathao: CourierBucket;
-    redx: CourierBucket;
-    steadfast: CourierBucket;
-    paperfly: CourierBucket;
-    parceldex: CourierBucket;
-    carrybee: CourierBucket;
-    risk_level: "low" | "moderate" | "high" | "new_customer" | null;
-    last_fetched_at: string;
-  };
-  type CourierMeta = {
-    source: "fresh" | "cache" | "stale_cache" | null;
-    age_hours: number | null;
-    warning: string | null;
-  };
-
-  // Debounce phone input changes so we don't call the paid API on every keystroke
+  // BD Courier API & courier_stats_cache removed (ERP cleanup).
+  // Debounced phone kept so input edits work smoothly elsewhere.
   const [debouncedPhone, setDebouncedPhone] = useState(orderPhone);
   useEffect(() => {
     setDebouncedPhone(orderPhone);
   }, [orderPhone]);
-  // phoneInput is declared further below — wire its debounce there via effect
-
-  const [refreshingCourier, setRefreshingCourier] = useState(false);
-  const [courierError, setCourierError] = useState<string | null>(null);
-  const [courierMeta, setCourierMeta] = useState<CourierMeta>({
-    source: null,
-    age_hours: null,
-    warning: null,
-  });
-
-  const isValidBdPhone = (p: string) => /^01[3-9]\d{8}$/.test((p || "").replace(/\D/g, "").slice(-11));
-
-  const { data: bdCourier, isLoading: bdLoading, isFetching: bdFetching, refetch: refetchBdCourier } = useQuery({
-    queryKey: ["bd_courier_stats", debouncedPhone],
-    enabled: !!debouncedPhone && isValidBdPhone(debouncedPhone),
-    // Aggressive caching — courier history rarely changes; rely on manual refresh
-    staleTime: 24 * 60 * 60 * 1000, // 24h
-    gcTime: 24 * 60 * 60 * 1000,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    queryFn: async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
-          body: { phone: debouncedPhone },
-        });
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
-        setCourierError(null);
-        setCourierMeta({
-          source: (data?.source ?? null) as CourierMeta["source"],
-          age_hours: typeof data?.age_hours === "number" ? data.age_hours : null,
-          warning: data?.warning ?? null,
-        });
-        return (data?.data ?? null) as BdCourierStats | null;
-      } catch (e) {
-        const message = e instanceof Error ? e.message : "Failed to load courier stats";
-        setCourierError(message);
-        return null;
-      }
-    },
-  });
-
-  const handleRefreshCourier = async () => {
-    if (!debouncedPhone) return;
-    setRefreshingCourier(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
-        body: { phone: debouncedPhone, force_refresh: true },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      setCourierError(null);
-      setCourierMeta({
-        source: (data?.source ?? null) as CourierMeta["source"],
-        age_hours: typeof data?.age_hours === "number" ? data.age_hours : null,
-        warning: data?.warning ?? null,
-      });
-      toast.success("Courier stats refreshed");
-      await refetchBdCourier();
-    } catch (e) {
-      const message = (e as Error).message || "Failed to refresh courier stats";
-      setCourierError(message);
-      toast.error(message);
-    } finally {
-      setRefreshingCourier(false);
-    }
-  };
 
   // ============ Activity logs ============
   const { data: activityLogs } = useQuery({
@@ -337,7 +247,7 @@ function WebOrderDetailPage() {
     setArea("");
     setShippingFee(Number(order.shipping_fee) || 0);
     setDiscount(Number(order.discount_amount) || 0);
-    setAdvance(Number(order.advance_payment_amount) || 0);
+    setAdvance(0);
     setTags(order.order_tags ?? []);
     setIsPreorder(order.is_preorder ?? false);
     setIsCrossSale(order.is_cross_sale ?? false);
@@ -399,7 +309,6 @@ function WebOrderDetailPage() {
         notes: shippingNote || null,
         shipping_fee: shippingFee,
         discount_amount: discount,
-        advance_payment_amount: advance,
         order_tags: tags,
         is_preorder: isPreorder,
         is_cross_sale: isCrossSale,
