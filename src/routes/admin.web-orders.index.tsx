@@ -192,6 +192,15 @@ type CustomerStat = {
   success_rate: number | null;
 };
 
+type CourierStat = {
+  phone: string;
+  overall_total: number;
+  overall_success: number;
+  overall_cancel: number;
+  overall_success_rate: number | null;
+  last_fetched_at: string;
+};
+
 function WebOrdersPage() {
   const { user, hasRole, loading: authLoading } = useAdminAuth();
   const allowed = hasRole(["admin", "customer_service"]);
