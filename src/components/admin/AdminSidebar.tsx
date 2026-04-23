@@ -173,6 +173,16 @@ export default function AdminSidebar() {
 
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
+          {hasRole(["admin"]) && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip={collapsed ? "Enterprise ERP" : undefined}>
+                <Link to="/erp" className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  {!collapsed && <span>Enterprise ERP</span>}
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={collapsed ? "View storefront" : undefined}>
               <Link to="/" className="flex items-center gap-2">
