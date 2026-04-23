@@ -4,6 +4,9 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { nitro } from "nitro/vite";
 
-export default defineConfig(({ mode }) => ({
-  plugins: mode === "development" ? [] : [nitro()],
-}));
+const isVercel = process.env.VERCEL === "1";
+
+export default defineConfig({
+  cloudflare: isVercel ? false : undefined,
+  plugins: isVercel ? [nitro()] : [],
+});
