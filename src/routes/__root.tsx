@@ -101,10 +101,12 @@ function RootComponent() {
               <main className="flex-1">
                 <Outlet />
               </main>
-              <Footer />
-              <CartDrawer />
-              <WhatsAppButton />
-              <MobileBottomNav />
+              <Suspense fallback={null}>
+                <Footer />
+                <CartDrawer />
+                <WhatsAppButton />
+                <MobileBottomNav />
+              </Suspense>
             </div>
           )}
         </CartProvider>
