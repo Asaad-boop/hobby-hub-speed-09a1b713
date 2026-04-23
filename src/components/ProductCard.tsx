@@ -98,12 +98,26 @@ export default function ProductCard({ product }: { product: Product }) {
           <button
             onClick={() => {
               add(product);
-              toast.success("Added to cart");
+              setAdding(true);
+              setTimeout(() => setAdding(false), 700);
             }}
             aria-label="Add to cart"
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground transition active:scale-95 hover:border-foreground hover:bg-muted md:h-10 md:w-10"
+            className={`relative inline-flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border transition-all duration-300 active:scale-90 md:h-10 md:w-10 ${
+              adding
+                ? "border-primary bg-primary text-primary-foreground scale-110"
+                : "border-border bg-background text-foreground hover:border-foreground hover:bg-muted"
+            }`}
           >
-            <ShoppingBag className="h-3.5 w-3.5 md:h-4 md:w-4" />
+            <ShoppingBag
+              className={`h-3.5 w-3.5 transition-all duration-300 md:h-4 md:w-4 ${
+                adding ? "scale-0 rotate-45 opacity-0" : "scale-100 opacity-100"
+              }`}
+            />
+            <Check
+              className={`absolute h-3.5 w-3.5 transition-all duration-300 md:h-4 md:w-4 ${
+                adding ? "scale-100 opacity-100" : "scale-0 opacity-0"
+              }`}
+            />
           </button>
           <button
             onClick={() => {
