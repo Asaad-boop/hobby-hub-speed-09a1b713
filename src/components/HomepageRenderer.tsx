@@ -335,7 +335,7 @@ function BannerSection({ section }: { section: HomepageSection }) {
 function CategoriesSection({ section }: { section: HomepageSection }) {
   const heading = cfg(section, "heading", "Shop by Category");
   const subheading = cfg(section, "subheading", "Find exactly what you need across our curated collections");
-  const { data: allProducts = [] } = useProducts();
+  const { data: allProducts = [], isLoading: productsLoading } = useProducts();
 
   const countBySlug = useMemo(() => {
     const map = new Map<string, number>();
@@ -345,7 +345,8 @@ function CategoriesSection({ section }: { section: HomepageSection }) {
     return map;
   }, [allProducts]);
 
-  const formatCount = (slug: string) => {
+  const formatCount = (slug: string): string | null => {
+    if (productsLoading) return null;
     const n = slug === "__all__" ? allProducts.length : (countBySlug.get(slug) ?? 0);
     return String(n);
   };
