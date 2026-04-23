@@ -29,8 +29,8 @@ export const Route = createFileRoute("/")({
     ],
     links: [
       // Warm up Supabase connection earlier so product images / API calls start sooner.
-      { rel: "preconnect", href: "https://kbtxrofquzgkwapfdgmd.supabase.co", crossOrigin: "anonymous" },
-      { rel: "dns-prefetch", href: "https://kbtxrofquzgkwapfdgmd.supabase.co" },
+      { rel: "preconnect", href: "https://bgsspipkjeuceftuatue.supabase.co", crossOrigin: "anonymous" },
+      { rel: "dns-prefetch", href: "https://bgsspipkjeuceftuatue.supabase.co" },
     ],
   }),
   component: Index,
