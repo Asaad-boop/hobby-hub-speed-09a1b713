@@ -317,8 +317,50 @@ function WebOrdersPage() {
     },
   });
 
-  // BD Courier stats cache table removed — keep an empty map so downstream code is unchanged.
-  const courierByPhone: Record<string, CourierStat> = {};
+  // BD Courier success-rate stats by phone (from courier_stats_cache)
+  const { data: courierByPhone = {} } = useQuery({
+    queryKey: ["web-orders-courier-stats", phones.join(",")],
+    enabled: allowed && phones.length > 0,
+    refetchInterval: autoRefresh ? 60_000 : false,
+    queryFn: async () => {
+      const cleanPhones = phones
+        .map((p) => p.replace(/[^0-9]/g, "").slice(-11))
+        .filter((p) => /^01[3-9]\d{8}$/.test(p));
+      if (cleanPhones.length === 0) return {} as Record<string, CourierStat>;
+
+      const { data, error } = await supabase
+        .from("courier_stats_cache")
+        .select(
+          "phone, overall_total, overall_success, overall_cancel, overall_success_rate, last_fetched_at",
+        )
+        .in("phone", cleanPhones);
+      if (error) {
+        console.error("courier stats query failed", error);
+        return {} as Record<string, CourierStat>;
+      }
+      const map: Record<string, CourierStat> = {};
+      for (const row of (data ?? []) as CourierStat[]) {
+        map[row.phone] = row;
+      }
+
+      // Fire-and-forget: fetch missing phones in background via edge function
+      const missing = cleanPhones.filter((p) => !map[p]);
+      if (missing.length > 0) {
+        // Limit to 5 per refresh to avoid hammering the API
+        for (const p of missing.slice(0, 5)) {
+          supabase.functions
+            .invoke("fetch-courier-stats", { body: { phone: p } })
+            .then(() => {
+              queryClient.invalidateQueries({
+                queryKey: ["web-orders-courier-stats"],
+              });
+            })
+            .catch((e) => console.warn("courier fetch failed", p, e));
+        }
+      }
+      return map;
+    },
+  });
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -1244,7 +1286,9 @@ function WebOrdersPage() {
                     id: advanceFor,
                     patch: {
                       confirmation_status: "advance_pending" as ConfirmationStatus,
-                      admin_notes: `Advance: ৳${advance.amount} via ${advance.method} (TXN: ${advance.txn})`,
+                      advance_payment_amount: Number(advance.amount),
+                      advance_payment_method: advance.method,
+                      advance_payment_txn_id: advance.txn,
                     },
                   });
                 setAdvanceFor(null);

@@ -42,12 +42,23 @@ import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminHomepageRouteImport } from './routes/admin.homepage'
+import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
+import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
+import { Route as AdminChinaSourcingRouteImport } from './routes/admin.china-sourcing'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminCancelledOrdersRouteImport } from './routes/admin.cancelled-orders'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as AdminAccountingRouteImport } from './routes/admin.accounting'
 import { Route as AdminWebOrdersIndexRouteImport } from './routes/admin.web-orders.index'
 import { Route as AdminWebOrdersOrderIdRouteImport } from './routes/admin.web-orders.$orderId'
+import { Route as AdminSettingsIntegrationsRouteImport } from './routes/admin.settings.integrations'
+import { Route as AdminReportsProfitLossRouteImport } from './routes/admin.reports.profit-loss'
+import { Route as AdminFinanceTransactionsRouteImport } from './routes/admin.finance.transactions'
+import { Route as AdminFinanceSettlementsRouteImport } from './routes/admin.finance.settlements'
+import { Route as AdminFinanceOrdersPnlRouteImport } from './routes/admin.finance.orders-pnl'
+import { Route as AdminFinanceAccountsRouteImport } from './routes/admin.finance.accounts'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -214,6 +225,16 @@ const AdminHomepageRoute = AdminHomepageRouteImport.update({
   path: '/homepage',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminFinanceRoute = AdminFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminExpensesRoute = AdminExpensesRouteImport.update({
+  id: '/expenses',
+  path: '/expenses',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCustomersRoute = AdminCustomersRouteImport.update({
   id: '/customers',
   path: '/customers',
@@ -222,6 +243,11 @@ const AdminCustomersRoute = AdminCustomersRouteImport.update({
 const AdminCouponsRoute = AdminCouponsRouteImport.update({
   id: '/coupons',
   path: '/coupons',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminChinaSourcingRoute = AdminChinaSourcingRouteImport.update({
+  id: '/china-sourcing',
+  path: '/china-sourcing',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
@@ -234,6 +260,16 @@ const AdminCancelledOrdersRoute = AdminCancelledOrdersRouteImport.update({
   path: '/cancelled-orders',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAccountingRoute = AdminAccountingRouteImport.update({
+  id: '/accounting',
+  path: '/accounting',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminWebOrdersIndexRoute = AdminWebOrdersIndexRouteImport.update({
   id: '/web-orders/',
   path: '/web-orders/',
@@ -243,6 +279,38 @@ const AdminWebOrdersOrderIdRoute = AdminWebOrdersOrderIdRouteImport.update({
   id: '/web-orders/$orderId',
   path: '/web-orders/$orderId',
   getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsIntegrationsRoute =
+  AdminSettingsIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AdminSettingsRoute,
+  } as any)
+const AdminReportsProfitLossRoute = AdminReportsProfitLossRouteImport.update({
+  id: '/reports/profit-loss',
+  path: '/reports/profit-loss',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFinanceTransactionsRoute =
+  AdminFinanceTransactionsRouteImport.update({
+    id: '/transactions',
+    path: '/transactions',
+    getParentRoute: () => AdminFinanceRoute,
+  } as any)
+const AdminFinanceSettlementsRoute = AdminFinanceSettlementsRouteImport.update({
+  id: '/settlements',
+  path: '/settlements',
+  getParentRoute: () => AdminFinanceRoute,
+} as any)
+const AdminFinanceOrdersPnlRoute = AdminFinanceOrdersPnlRouteImport.update({
+  id: '/orders-pnl',
+  path: '/orders-pnl',
+  getParentRoute: () => AdminFinanceRoute,
+} as any)
+const AdminFinanceAccountsRoute = AdminFinanceAccountsRouteImport.update({
+  id: '/accounts',
+  path: '/accounts',
+  getParentRoute: () => AdminFinanceRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -265,17 +333,22 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/accounting': typeof AdminAccountingRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/cancelled-orders': typeof AdminCancelledOrdersRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/china-sourcing': typeof AdminChinaSourcingRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/expenses': typeof AdminExpensesRoute
+  '/admin/finance': typeof AdminFinanceRouteWithChildren
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/security': typeof AdminSecurityRoute
-  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/staff': typeof AdminStaffRoute
   '/category/$slug': typeof CategorySlugRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
@@ -283,6 +356,12 @@ export interface FileRoutesByFullPath {
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
+  '/admin/finance/accounts': typeof AdminFinanceAccountsRoute
+  '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
+  '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
+  '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
+  '/admin/reports/profit-loss': typeof AdminReportsProfitLossRoute
+  '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
   '/admin/web-orders/': typeof AdminWebOrdersIndexRoute
 }
@@ -305,17 +384,22 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/accounting': typeof AdminAccountingRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/cancelled-orders': typeof AdminCancelledOrdersRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/china-sourcing': typeof AdminChinaSourcingRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/expenses': typeof AdminExpensesRoute
+  '/admin/finance': typeof AdminFinanceRouteWithChildren
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/security': typeof AdminSecurityRoute
-  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/staff': typeof AdminStaffRoute
   '/category/$slug': typeof CategorySlugRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
@@ -323,6 +407,12 @@ export interface FileRoutesByTo {
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin': typeof AdminIndexRoute
   '/track': typeof TrackIndexRoute
+  '/admin/finance/accounts': typeof AdminFinanceAccountsRoute
+  '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
+  '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
+  '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
+  '/admin/reports/profit-loss': typeof AdminReportsProfitLossRoute
+  '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
   '/admin/web-orders': typeof AdminWebOrdersIndexRoute
 }
@@ -347,17 +437,22 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/accounting': typeof AdminAccountingRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/cancelled-orders': typeof AdminCancelledOrdersRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/china-sourcing': typeof AdminChinaSourcingRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/expenses': typeof AdminExpensesRoute
+  '/admin/finance': typeof AdminFinanceRouteWithChildren
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/security': typeof AdminSecurityRoute
-  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/staff': typeof AdminStaffRoute
   '/category/$slug': typeof CategorySlugRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
@@ -365,6 +460,12 @@ export interface FileRoutesById {
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
+  '/admin/finance/accounts': typeof AdminFinanceAccountsRoute
+  '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
+  '/admin/finance/settlements': typeof AdminFinanceSettlementsRoute
+  '/admin/finance/transactions': typeof AdminFinanceTransactionsRoute
+  '/admin/reports/profit-loss': typeof AdminReportsProfitLossRoute
+  '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
   '/admin/web-orders/': typeof AdminWebOrdersIndexRoute
 }
@@ -390,10 +491,15 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/wishlist'
+    | '/admin/accounting'
+    | '/admin/analytics'
     | '/admin/cancelled-orders'
     | '/admin/categories'
+    | '/admin/china-sourcing'
     | '/admin/coupons'
     | '/admin/customers'
+    | '/admin/expenses'
+    | '/admin/finance'
     | '/admin/homepage'
     | '/admin/inventory'
     | '/admin/orders'
@@ -408,6 +514,12 @@ export interface FileRouteTypes {
     | '/track/$orderId'
     | '/admin/'
     | '/track/'
+    | '/admin/finance/accounts'
+    | '/admin/finance/orders-pnl'
+    | '/admin/finance/settlements'
+    | '/admin/finance/transactions'
+    | '/admin/reports/profit-loss'
+    | '/admin/settings/integrations'
     | '/admin/web-orders/$orderId'
     | '/admin/web-orders/'
   fileRoutesByTo: FileRoutesByTo
@@ -430,10 +542,15 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/wishlist'
+    | '/admin/accounting'
+    | '/admin/analytics'
     | '/admin/cancelled-orders'
     | '/admin/categories'
+    | '/admin/china-sourcing'
     | '/admin/coupons'
     | '/admin/customers'
+    | '/admin/expenses'
+    | '/admin/finance'
     | '/admin/homepage'
     | '/admin/inventory'
     | '/admin/orders'
@@ -448,6 +565,12 @@ export interface FileRouteTypes {
     | '/track/$orderId'
     | '/admin'
     | '/track'
+    | '/admin/finance/accounts'
+    | '/admin/finance/orders-pnl'
+    | '/admin/finance/settlements'
+    | '/admin/finance/transactions'
+    | '/admin/reports/profit-loss'
+    | '/admin/settings/integrations'
     | '/admin/web-orders/$orderId'
     | '/admin/web-orders'
   id:
@@ -471,10 +594,15 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/wishlist'
+    | '/admin/accounting'
+    | '/admin/analytics'
     | '/admin/cancelled-orders'
     | '/admin/categories'
+    | '/admin/china-sourcing'
     | '/admin/coupons'
     | '/admin/customers'
+    | '/admin/expenses'
+    | '/admin/finance'
     | '/admin/homepage'
     | '/admin/inventory'
     | '/admin/orders'
@@ -489,6 +617,12 @@ export interface FileRouteTypes {
     | '/track/$orderId'
     | '/admin/'
     | '/track/'
+    | '/admin/finance/accounts'
+    | '/admin/finance/orders-pnl'
+    | '/admin/finance/settlements'
+    | '/admin/finance/transactions'
+    | '/admin/reports/profit-loss'
+    | '/admin/settings/integrations'
     | '/admin/web-orders/$orderId'
     | '/admin/web-orders/'
   fileRoutesById: FileRoutesById
@@ -753,6 +887,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminHomepageRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/finance': {
+      id: '/admin/finance'
+      path: '/finance'
+      fullPath: '/admin/finance'
+      preLoaderRoute: typeof AdminFinanceRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/expenses': {
+      id: '/admin/expenses'
+      path: '/expenses'
+      fullPath: '/admin/expenses'
+      preLoaderRoute: typeof AdminExpensesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/customers': {
       id: '/admin/customers'
       path: '/customers'
@@ -765,6 +913,13 @@ declare module '@tanstack/react-router' {
       path: '/coupons'
       fullPath: '/admin/coupons'
       preLoaderRoute: typeof AdminCouponsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/china-sourcing': {
+      id: '/admin/china-sourcing'
+      path: '/china-sourcing'
+      fullPath: '/admin/china-sourcing'
+      preLoaderRoute: typeof AdminChinaSourcingRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/categories': {
@@ -781,6 +936,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCancelledOrdersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/accounting': {
+      id: '/admin/accounting'
+      path: '/accounting'
+      fullPath: '/admin/accounting'
+      preLoaderRoute: typeof AdminAccountingRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/web-orders/': {
       id: '/admin/web-orders/'
       path: '/web-orders'
@@ -795,41 +964,125 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminWebOrdersOrderIdRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/settings/integrations': {
+      id: '/admin/settings/integrations'
+      path: '/integrations'
+      fullPath: '/admin/settings/integrations'
+      preLoaderRoute: typeof AdminSettingsIntegrationsRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/reports/profit-loss': {
+      id: '/admin/reports/profit-loss'
+      path: '/reports/profit-loss'
+      fullPath: '/admin/reports/profit-loss'
+      preLoaderRoute: typeof AdminReportsProfitLossRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/finance/transactions': {
+      id: '/admin/finance/transactions'
+      path: '/transactions'
+      fullPath: '/admin/finance/transactions'
+      preLoaderRoute: typeof AdminFinanceTransactionsRouteImport
+      parentRoute: typeof AdminFinanceRoute
+    }
+    '/admin/finance/settlements': {
+      id: '/admin/finance/settlements'
+      path: '/settlements'
+      fullPath: '/admin/finance/settlements'
+      preLoaderRoute: typeof AdminFinanceSettlementsRouteImport
+      parentRoute: typeof AdminFinanceRoute
+    }
+    '/admin/finance/orders-pnl': {
+      id: '/admin/finance/orders-pnl'
+      path: '/orders-pnl'
+      fullPath: '/admin/finance/orders-pnl'
+      preLoaderRoute: typeof AdminFinanceOrdersPnlRouteImport
+      parentRoute: typeof AdminFinanceRoute
+    }
+    '/admin/finance/accounts': {
+      id: '/admin/finance/accounts'
+      path: '/accounts'
+      fullPath: '/admin/finance/accounts'
+      preLoaderRoute: typeof AdminFinanceAccountsRouteImport
+      parentRoute: typeof AdminFinanceRoute
+    }
   }
 }
 
+interface AdminFinanceRouteChildren {
+  AdminFinanceAccountsRoute: typeof AdminFinanceAccountsRoute
+  AdminFinanceOrdersPnlRoute: typeof AdminFinanceOrdersPnlRoute
+  AdminFinanceSettlementsRoute: typeof AdminFinanceSettlementsRoute
+  AdminFinanceTransactionsRoute: typeof AdminFinanceTransactionsRoute
+}
+
+const AdminFinanceRouteChildren: AdminFinanceRouteChildren = {
+  AdminFinanceAccountsRoute: AdminFinanceAccountsRoute,
+  AdminFinanceOrdersPnlRoute: AdminFinanceOrdersPnlRoute,
+  AdminFinanceSettlementsRoute: AdminFinanceSettlementsRoute,
+  AdminFinanceTransactionsRoute: AdminFinanceTransactionsRoute,
+}
+
+const AdminFinanceRouteWithChildren = AdminFinanceRoute._addFileChildren(
+  AdminFinanceRouteChildren,
+)
+
+interface AdminSettingsRouteChildren {
+  AdminSettingsIntegrationsRoute: typeof AdminSettingsIntegrationsRoute
+}
+
+const AdminSettingsRouteChildren: AdminSettingsRouteChildren = {
+  AdminSettingsIntegrationsRoute: AdminSettingsIntegrationsRoute,
+}
+
+const AdminSettingsRouteWithChildren = AdminSettingsRoute._addFileChildren(
+  AdminSettingsRouteChildren,
+)
+
 interface AdminRouteChildren {
+  AdminAccountingRoute: typeof AdminAccountingRoute
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminCancelledOrdersRoute: typeof AdminCancelledOrdersRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminChinaSourcingRoute: typeof AdminChinaSourcingRoute
   AdminCouponsRoute: typeof AdminCouponsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
+  AdminExpensesRoute: typeof AdminExpensesRoute
+  AdminFinanceRoute: typeof AdminFinanceRouteWithChildren
   AdminHomepageRoute: typeof AdminHomepageRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminSecurityRoute: typeof AdminSecurityRoute
-  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSettingsRoute: typeof AdminSettingsRouteWithChildren
   AdminStaffRoute: typeof AdminStaffRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminReportsProfitLossRoute: typeof AdminReportsProfitLossRoute
   AdminWebOrdersOrderIdRoute: typeof AdminWebOrdersOrderIdRoute
   AdminWebOrdersIndexRoute: typeof AdminWebOrdersIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAccountingRoute: AdminAccountingRoute,
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminCancelledOrdersRoute: AdminCancelledOrdersRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
+  AdminChinaSourcingRoute: AdminChinaSourcingRoute,
   AdminCouponsRoute: AdminCouponsRoute,
   AdminCustomersRoute: AdminCustomersRoute,
+  AdminExpensesRoute: AdminExpensesRoute,
+  AdminFinanceRoute: AdminFinanceRouteWithChildren,
   AdminHomepageRoute: AdminHomepageRoute,
   AdminInventoryRoute: AdminInventoryRoute,
   AdminOrdersRoute: AdminOrdersRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminSecurityRoute: AdminSecurityRoute,
-  AdminSettingsRoute: AdminSettingsRoute,
+  AdminSettingsRoute: AdminSettingsRouteWithChildren,
   AdminStaffRoute: AdminStaffRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminReportsProfitLossRoute: AdminReportsProfitLossRoute,
   AdminWebOrdersOrderIdRoute: AdminWebOrdersOrderIdRoute,
   AdminWebOrdersIndexRoute: AdminWebOrdersIndexRoute,
 }

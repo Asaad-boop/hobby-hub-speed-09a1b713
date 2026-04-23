@@ -22,12 +22,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" },
-      { name: "theme-color", content: "#E60023" },
-      { name: "mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-      { name: "format-detection", content: "telephone=yes" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "HobbyShop — Unique Gadgets & Gifts at Unbeatable Prices" },
       { name: "description", content: "Shop trending gadgets, DIY kits, home decor and gifts. Cash on delivery, fast shipping across Bangladesh." },
       { name: "author", content: "HobbyShop" },
@@ -93,7 +88,7 @@ function RootComponent() {
           {isAdmin ? (
             <Outlet />
           ) : (
-            <div className="flex min-h-screen flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
+            <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
               <Header />
               <main className="flex-1">
                 <Outlet />

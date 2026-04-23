@@ -83,6 +83,137 @@ export type Database = {
         }
         Relationships: []
       }
+      ad_campaigns: {
+        Row: {
+          attribution_method: Database["public"]["Enums"]["ad_attribution_method"]
+          campaign_id_external: string | null
+          campaign_name: string
+          category_id: string | null
+          created_at: string
+          daily_budget: number | null
+          end_date: string | null
+          id: string
+          last_synced_at: string | null
+          meta_ad_account_id: string | null
+          meta_bid_strategy: string | null
+          meta_buying_type: string | null
+          meta_campaign_id: string | null
+          meta_campaign_name: string | null
+          meta_objective: string | null
+          notes: string | null
+          platform: Database["public"]["Enums"]["ad_platform"]
+          product_id: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["ad_status"]
+          sync_enabled: boolean
+          total_spend: number
+          updated_at: string
+        }
+        Insert: {
+          attribution_method?: Database["public"]["Enums"]["ad_attribution_method"]
+          campaign_id_external?: string | null
+          campaign_name: string
+          category_id?: string | null
+          created_at?: string
+          daily_budget?: number | null
+          end_date?: string | null
+          id?: string
+          last_synced_at?: string | null
+          meta_ad_account_id?: string | null
+          meta_bid_strategy?: string | null
+          meta_buying_type?: string | null
+          meta_campaign_id?: string | null
+          meta_campaign_name?: string | null
+          meta_objective?: string | null
+          notes?: string | null
+          platform?: Database["public"]["Enums"]["ad_platform"]
+          product_id?: string | null
+          start_date: string
+          status?: Database["public"]["Enums"]["ad_status"]
+          sync_enabled?: boolean
+          total_spend?: number
+          updated_at?: string
+        }
+        Update: {
+          attribution_method?: Database["public"]["Enums"]["ad_attribution_method"]
+          campaign_id_external?: string | null
+          campaign_name?: string
+          category_id?: string | null
+          created_at?: string
+          daily_budget?: number | null
+          end_date?: string | null
+          id?: string
+          last_synced_at?: string | null
+          meta_ad_account_id?: string | null
+          meta_bid_strategy?: string | null
+          meta_buying_type?: string | null
+          meta_campaign_id?: string | null
+          meta_campaign_name?: string | null
+          meta_objective?: string | null
+          notes?: string | null
+          platform?: Database["public"]["Enums"]["ad_platform"]
+          product_id?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["ad_status"]
+          sync_enabled?: boolean
+          total_spend?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_campaigns_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_campaigns_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ad_spend_entries: {
+        Row: {
+          amount: number
+          campaign_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          spend_date: string
+          synced_from: string
+        }
+        Insert: {
+          amount: number
+          campaign_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          spend_date: string
+          synced_from?: string
+        }
+        Update: {
+          amount?: number
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          spend_date?: string
+          synced_from?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_spend_entries_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       addresses: {
         Row: {
           address_line: string
@@ -249,6 +380,42 @@ export type Database = {
           },
         ]
       }
+      cash_accounts: {
+        Row: {
+          account_number: string | null
+          created_at: string
+          current_balance: number
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          type: Database["public"]["Enums"]["cash_account_type"]
+          updated_at: string
+        }
+        Insert: {
+          account_number?: string | null
+          created_at?: string
+          current_balance?: number
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          type: Database["public"]["Enums"]["cash_account_type"]
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string | null
+          created_at?: string
+          current_balance?: number
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          type?: Database["public"]["Enums"]["cash_account_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -281,6 +448,195 @@ export type Database = {
           is_active?: boolean
           name?: string
           slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      chart_of_accounts: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_system: boolean
+          name: string
+          parent_id: string | null
+          type: Database["public"]["Enums"]["account_type"]
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name: string
+          parent_id?: string | null
+          type: Database["public"]["Enums"]["account_type"]
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name?: string
+          parent_id?: string | null
+          type?: Database["public"]["Enums"]["account_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      china_shipment_items: {
+        Row: {
+          allocated_landed_cost: number
+          cny_unit_price: number
+          created_at: string
+          id: string
+          notes: string | null
+          per_unit_landed_cost: number
+          product_id: string | null
+          product_name_snapshot: string
+          quantity: number
+          shipment_id: string
+          variant_id: string | null
+        }
+        Insert: {
+          allocated_landed_cost?: number
+          cny_unit_price?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          per_unit_landed_cost?: number
+          product_id?: string | null
+          product_name_snapshot: string
+          quantity?: number
+          shipment_id: string
+          variant_id?: string | null
+        }
+        Update: {
+          allocated_landed_cost?: number
+          cny_unit_price?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          per_unit_landed_cost?: number
+          product_id?: string | null
+          product_name_snapshot?: string
+          quantity?: number
+          shipment_id?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "china_shipment_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "china_shipment_items_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "china_shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "china_shipment_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      china_shipments: {
+        Row: {
+          arrival_date: string | null
+          cny_amount: number
+          created_at: string
+          created_by: string | null
+          customs_duty: number
+          exchange_rate: number
+          id: string
+          international_shipping: number
+          local_transport: number
+          notes: string | null
+          order_date: string | null
+          other_costs: number
+          per_unit_landed_cost: number
+          product_cost_bdt: number
+          received_date: string | null
+          reference_no: string
+          shipped_date: string | null
+          status: Database["public"]["Enums"]["china_shipment_status"]
+          supplier_contact: string | null
+          supplier_name: string | null
+          total_landed_cost: number
+          total_quantity: number
+          updated_at: string
+        }
+        Insert: {
+          arrival_date?: string | null
+          cny_amount?: number
+          created_at?: string
+          created_by?: string | null
+          customs_duty?: number
+          exchange_rate?: number
+          id?: string
+          international_shipping?: number
+          local_transport?: number
+          notes?: string | null
+          order_date?: string | null
+          other_costs?: number
+          per_unit_landed_cost?: number
+          product_cost_bdt?: number
+          received_date?: string | null
+          reference_no: string
+          shipped_date?: string | null
+          status?: Database["public"]["Enums"]["china_shipment_status"]
+          supplier_contact?: string | null
+          supplier_name?: string | null
+          total_landed_cost?: number
+          total_quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          arrival_date?: string | null
+          cny_amount?: number
+          created_at?: string
+          created_by?: string | null
+          customs_duty?: number
+          exchange_rate?: number
+          id?: string
+          international_shipping?: number
+          local_transport?: number
+          notes?: string | null
+          order_date?: string | null
+          other_costs?: number
+          per_unit_landed_cost?: number
+          product_cost_bdt?: number
+          received_date?: string | null
+          reference_no?: string
+          shipped_date?: string | null
+          status?: Database["public"]["Enums"]["china_shipment_status"]
+          supplier_contact?: string | null
+          supplier_name?: string | null
+          total_landed_cost?: number
+          total_quantity?: number
           updated_at?: string
         }
         Relationships: []
@@ -461,6 +817,268 @@ export type Database = {
           },
         ]
       }
+      courier_stats_cache: {
+        Row: {
+          carrybee: Json
+          expires_at: string
+          fetch_count: number
+          id: string
+          last_fetched_at: string
+          overall_cancel: number
+          overall_success: number
+          overall_success_rate: number | null
+          overall_total: number
+          paperfly: Json
+          parceldex: Json
+          pathao: Json
+          phone: string
+          raw_response: Json | null
+          redx: Json
+          risk_level: string | null
+          steadfast: Json
+        }
+        Insert: {
+          carrybee?: Json
+          expires_at?: string
+          fetch_count?: number
+          id?: string
+          last_fetched_at?: string
+          overall_cancel?: number
+          overall_success?: number
+          overall_success_rate?: number | null
+          overall_total?: number
+          paperfly?: Json
+          parceldex?: Json
+          pathao?: Json
+          phone: string
+          raw_response?: Json | null
+          redx?: Json
+          risk_level?: string | null
+          steadfast?: Json
+        }
+        Update: {
+          carrybee?: Json
+          expires_at?: string
+          fetch_count?: number
+          id?: string
+          last_fetched_at?: string
+          overall_cancel?: number
+          overall_success?: number
+          overall_success_rate?: number | null
+          overall_total?: number
+          paperfly?: Json
+          parceldex?: Json
+          pathao?: Json
+          phone?: string
+          raw_response?: Json | null
+          redx?: Json
+          risk_level?: string | null
+          steadfast?: Json
+        }
+        Relationships: []
+      }
+      damaged_inventory: {
+        Row: {
+          cost_value: number
+          created_at: string
+          disposal_date: string | null
+          disposal_value: number
+          disposed: boolean
+          id: string
+          logged_at: string
+          logged_by: string
+          notes: string | null
+          product_id: string
+          quantity: number
+          reason: string | null
+          source: Database["public"]["Enums"]["damage_source"]
+        }
+        Insert: {
+          cost_value?: number
+          created_at?: string
+          disposal_date?: string | null
+          disposal_value?: number
+          disposed?: boolean
+          id?: string
+          logged_at?: string
+          logged_by: string
+          notes?: string | null
+          product_id: string
+          quantity: number
+          reason?: string | null
+          source: Database["public"]["Enums"]["damage_source"]
+        }
+        Update: {
+          cost_value?: number
+          created_at?: string
+          disposal_date?: string | null
+          disposal_value?: number
+          disposed?: boolean
+          id?: string
+          logged_at?: string
+          logged_by?: string
+          notes?: string | null
+          product_id?: string
+          quantity?: number
+          reason?: string | null
+          source?: Database["public"]["Enums"]["damage_source"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "damaged_inventory_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_categories: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      expenses: {
+        Row: {
+          amount: number
+          category_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          expense_date: string
+          id: string
+          payment_method: string | null
+          receipt_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          expense_date?: string
+          id?: string
+          payment_method?: string | null
+          receipt_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          expense_date?: string
+          id?: string
+          payment_method?: string | null
+          receipt_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "expense_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      finance_audit_log: {
+        Row: {
+          action: string
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          performed_at: string
+          performed_by: string
+          record_id: string
+          table_name: string
+        }
+        Insert: {
+          action: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_at?: string
+          performed_by: string
+          record_id: string
+          table_name: string
+        }
+        Update: {
+          action?: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_at?: string
+          performed_by?: string
+          record_id?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
+      general_ledger: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          entry_date: string
+          entry_no: number
+          id: string
+          is_posted: boolean
+          source_id: string | null
+          source_type: Database["public"]["Enums"]["ledger_source"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description: string
+          entry_date?: string
+          entry_no?: number
+          id?: string
+          is_posted?: boolean
+          source_id?: string | null
+          source_type?: Database["public"]["Enums"]["ledger_source"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          entry_date?: string
+          entry_no?: number
+          id?: string
+          is_posted?: boolean
+          source_id?: string | null
+          source_type?: Database["public"]["Enums"]["ledger_source"]
+        }
+        Relationships: []
+      }
       homepage_versions: {
         Row: {
           created_at: string
@@ -484,6 +1102,500 @@ export type Database = {
           sections?: Json
         }
         Relationships: []
+      }
+      integration_logs: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          endpoint: string | null
+          error: string | null
+          id: string
+          integration_name: string
+          method: string | null
+          request_payload: Json | null
+          response_payload: Json | null
+          status_code: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          endpoint?: string | null
+          error?: string | null
+          id?: string
+          integration_name: string
+          method?: string | null
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status_code?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          endpoint?: string | null
+          error?: string | null
+          id?: string
+          integration_name?: string
+          method?: string | null
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status_code?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      integrations: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          is_enabled: boolean
+          last_sync_at: string | null
+          last_sync_status: string | null
+          name: string
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          name: string
+          provider: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          name?: string
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ledger_lines: {
+        Row: {
+          account_id: string
+          created_at: string
+          credit: number
+          debit: number
+          entry_id: string
+          id: string
+          memo: string | null
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          entry_id: string
+          id?: string
+          memo?: string | null
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          entry_id?: string
+          id?: string
+          memo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_lines_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "general_ledger"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_ad_insights: {
+        Row: {
+          ad_id: string
+          captured_at: string
+          clicks: number | null
+          conversion_value: number | null
+          conversions: number | null
+          cpc: number | null
+          cpm: number | null
+          ctr: number | null
+          date_start: string
+          date_stop: string
+          frequency: number | null
+          id: string
+          impressions: number | null
+          reach: number | null
+          roas: number | null
+          spend: number | null
+        }
+        Insert: {
+          ad_id: string
+          captured_at?: string
+          clicks?: number | null
+          conversion_value?: number | null
+          conversions?: number | null
+          cpc?: number | null
+          cpm?: number | null
+          ctr?: number | null
+          date_start: string
+          date_stop: string
+          frequency?: number | null
+          id?: string
+          impressions?: number | null
+          reach?: number | null
+          roas?: number | null
+          spend?: number | null
+        }
+        Update: {
+          ad_id?: string
+          captured_at?: string
+          clicks?: number | null
+          conversion_value?: number | null
+          conversions?: number | null
+          cpc?: number | null
+          cpm?: number | null
+          ctr?: number | null
+          date_start?: string
+          date_stop?: string
+          frequency?: number | null
+          id?: string
+          impressions?: number | null
+          reach?: number | null
+          roas?: number | null
+          spend?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_ad_insights_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "meta_ads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_ad_sets: {
+        Row: {
+          campaign_id: string | null
+          created_at: string
+          daily_budget: number | null
+          end_time: string | null
+          id: string
+          last_synced_at: string | null
+          lifetime_budget: number | null
+          meta_adset_id: string
+          meta_adset_name: string | null
+          start_time: string | null
+          status: string | null
+          sync_enabled: boolean
+          targeting: Json | null
+          updated_at: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string
+          daily_budget?: number | null
+          end_time?: string | null
+          id?: string
+          last_synced_at?: string | null
+          lifetime_budget?: number | null
+          meta_adset_id: string
+          meta_adset_name?: string | null
+          start_time?: string | null
+          status?: string | null
+          sync_enabled?: boolean
+          targeting?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string
+          daily_budget?: number | null
+          end_time?: string | null
+          id?: string
+          last_synced_at?: string | null
+          lifetime_budget?: number | null
+          meta_adset_id?: string
+          meta_adset_name?: string | null
+          start_time?: string | null
+          status?: string | null
+          sync_enabled?: boolean
+          targeting?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_ad_sets_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_ads: {
+        Row: {
+          adset_id: string | null
+          created_at: string
+          creative_id: string | null
+          creative_preview_url: string | null
+          detected_product_id: string | null
+          detected_sku: string | null
+          id: string
+          last_synced_at: string | null
+          meta_ad_id: string
+          meta_ad_name: string | null
+          product_link_url: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          adset_id?: string | null
+          created_at?: string
+          creative_id?: string | null
+          creative_preview_url?: string | null
+          detected_product_id?: string | null
+          detected_sku?: string | null
+          id?: string
+          last_synced_at?: string | null
+          meta_ad_id: string
+          meta_ad_name?: string | null
+          product_link_url?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adset_id?: string | null
+          created_at?: string
+          creative_id?: string | null
+          creative_preview_url?: string | null
+          detected_product_id?: string | null
+          detected_sku?: string | null
+          id?: string
+          last_synced_at?: string | null
+          meta_ad_id?: string
+          meta_ad_name?: string | null
+          product_link_url?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_ads_adset_id_fkey"
+            columns: ["adset_id"]
+            isOneToOne: false
+            referencedRelation: "meta_ad_sets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_ads_detected_product_id_fkey"
+            columns: ["detected_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_attribution: {
+        Row: {
+          captured_at: string | null
+          city: string | null
+          country: string | null
+          device_type: string | null
+          entry_url: string | null
+          facebook_browser_pixel: string | null
+          facebook_click_id: string | null
+          fbclid: string | null
+          gclid: string | null
+          id: string
+          ip_address: string | null
+          landing_page: string | null
+          meta_ad_account_id: string | null
+          meta_ad_account_name: string | null
+          meta_ad_id: string | null
+          meta_ad_name: string | null
+          meta_adset_id: string | null
+          meta_adset_name: string | null
+          meta_campaign_id: string | null
+          meta_campaign_name: string | null
+          order_id: string
+          referrer: string | null
+          source: string | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          captured_at?: string | null
+          city?: string | null
+          country?: string | null
+          device_type?: string | null
+          entry_url?: string | null
+          facebook_browser_pixel?: string | null
+          facebook_click_id?: string | null
+          fbclid?: string | null
+          gclid?: string | null
+          id?: string
+          ip_address?: string | null
+          landing_page?: string | null
+          meta_ad_account_id?: string | null
+          meta_ad_account_name?: string | null
+          meta_ad_id?: string | null
+          meta_ad_name?: string | null
+          meta_adset_id?: string | null
+          meta_adset_name?: string | null
+          meta_campaign_id?: string | null
+          meta_campaign_name?: string | null
+          order_id: string
+          referrer?: string | null
+          source?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          captured_at?: string | null
+          city?: string | null
+          country?: string | null
+          device_type?: string | null
+          entry_url?: string | null
+          facebook_browser_pixel?: string | null
+          facebook_click_id?: string | null
+          fbclid?: string | null
+          gclid?: string | null
+          id?: string
+          ip_address?: string | null
+          landing_page?: string | null
+          meta_ad_account_id?: string | null
+          meta_ad_account_name?: string | null
+          meta_ad_id?: string | null
+          meta_ad_name?: string | null
+          meta_adset_id?: string | null
+          meta_adset_name?: string | null
+          meta_campaign_id?: string | null
+          meta_campaign_name?: string | null
+          order_id?: string
+          referrer?: string | null
+          source?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_attribution_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_financials: {
+        Row: {
+          ads_cost_attributed: number
+          cod_amount_received: number
+          cod_charge: number
+          created_at: string
+          delivery_charge: number
+          finalization_status: Database["public"]["Enums"]["order_finalization_status"]
+          finalized_at: string | null
+          gross_profit: number | null
+          id: string
+          is_backfilled: boolean
+          net_profit: number | null
+          notes: string | null
+          order_id: string
+          other_costs: number
+          packaging_cost: number
+          product_cost: number
+          profit_margin_pct: number | null
+          return_charge: number
+          revenue: number
+          total_costs: number | null
+          updated_at: string
+        }
+        Insert: {
+          ads_cost_attributed?: number
+          cod_amount_received?: number
+          cod_charge?: number
+          created_at?: string
+          delivery_charge?: number
+          finalization_status?: Database["public"]["Enums"]["order_finalization_status"]
+          finalized_at?: string | null
+          gross_profit?: number | null
+          id?: string
+          is_backfilled?: boolean
+          net_profit?: number | null
+          notes?: string | null
+          order_id: string
+          other_costs?: number
+          packaging_cost?: number
+          product_cost?: number
+          profit_margin_pct?: number | null
+          return_charge?: number
+          revenue?: number
+          total_costs?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ads_cost_attributed?: number
+          cod_amount_received?: number
+          cod_charge?: number
+          created_at?: string
+          delivery_charge?: number
+          finalization_status?: Database["public"]["Enums"]["order_finalization_status"]
+          finalized_at?: string | null
+          gross_profit?: number | null
+          id?: string
+          is_backfilled?: boolean
+          net_profit?: number | null
+          notes?: string | null
+          order_id?: string
+          other_costs?: number
+          packaging_cost?: number
+          product_cost?: number
+          profit_margin_pct?: number | null
+          return_charge?: number
+          revenue?: number
+          total_costs?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_financials_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_items: {
         Row: {
@@ -545,6 +1657,10 @@ export type Database = {
       orders: {
         Row: {
           admin_notes: string | null
+          advance_payment_amount: number
+          advance_payment_method: string | null
+          advance_payment_screenshot_url: string | null
+          advance_payment_txn_id: string | null
           assigned_to: string | null
           auto_call_enabled: boolean | null
           call_attempt_count: number
@@ -555,30 +1671,43 @@ export type Database = {
           confirmed_by: string | null
           coupon_code: string | null
           created_at: string
+          customer_ip_address: string | null
           delivered_at: string | null
           delivery_area_id: string | null
           delivery_city_id: string | null
           delivery_method: string | null
           delivery_zone_id: string | null
+          device_type: string | null
           discount_amount: number
+          entry_url: string | null
+          fb_browser_pixel: string | null
+          fb_click_id: string | null
           guest_email: string | null
           guest_name: string | null
           guest_phone: string | null
           hold_reason: string | null
           hold_until: string | null
           id: string
+          ip_address: string | null
           is_cross_sale: boolean
           is_guest_order: boolean
           is_preorder: boolean
           last_call_at: string | null
           last_called_by: string | null
           latest_note: string | null
+          merchant_ip_address: string | null
+          meta_ad_account_id: string | null
+          meta_ad_id: string | null
+          meta_ad_set_id: string | null
+          meta_campaign_id: string | null
           notes: string | null
+          order_financial_id: string | null
           order_tags: string[]
           packaged_at: string | null
           packaged_by: string | null
           payment_method: string | null
           rejection_reason: string | null
+          session_source: string | null
           shipment_id: string | null
           shipped_at: string | null
           shipped_by: string | null
@@ -596,11 +1725,20 @@ export type Database = {
           tags: string[] | null
           total: number
           updated_at: string
+          user_agent: string | null
           user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
           verified_at: string | null
         }
         Insert: {
           admin_notes?: string | null
+          advance_payment_amount?: number
+          advance_payment_method?: string | null
+          advance_payment_screenshot_url?: string | null
+          advance_payment_txn_id?: string | null
           assigned_to?: string | null
           auto_call_enabled?: boolean | null
           call_attempt_count?: number
@@ -611,30 +1749,43 @@ export type Database = {
           confirmed_by?: string | null
           coupon_code?: string | null
           created_at?: string
+          customer_ip_address?: string | null
           delivered_at?: string | null
           delivery_area_id?: string | null
           delivery_city_id?: string | null
           delivery_method?: string | null
           delivery_zone_id?: string | null
+          device_type?: string | null
           discount_amount?: number
+          entry_url?: string | null
+          fb_browser_pixel?: string | null
+          fb_click_id?: string | null
           guest_email?: string | null
           guest_name?: string | null
           guest_phone?: string | null
           hold_reason?: string | null
           hold_until?: string | null
           id?: string
+          ip_address?: string | null
           is_cross_sale?: boolean
           is_guest_order?: boolean
           is_preorder?: boolean
           last_call_at?: string | null
           last_called_by?: string | null
           latest_note?: string | null
+          merchant_ip_address?: string | null
+          meta_ad_account_id?: string | null
+          meta_ad_id?: string | null
+          meta_ad_set_id?: string | null
+          meta_campaign_id?: string | null
           notes?: string | null
+          order_financial_id?: string | null
           order_tags?: string[]
           packaged_at?: string | null
           packaged_by?: string | null
           payment_method?: string | null
           rejection_reason?: string | null
+          session_source?: string | null
           shipment_id?: string | null
           shipped_at?: string | null
           shipped_by?: string | null
@@ -652,11 +1803,20 @@ export type Database = {
           tags?: string[] | null
           total?: number
           updated_at?: string
+          user_agent?: string | null
           user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
           verified_at?: string | null
         }
         Update: {
           admin_notes?: string | null
+          advance_payment_amount?: number
+          advance_payment_method?: string | null
+          advance_payment_screenshot_url?: string | null
+          advance_payment_txn_id?: string | null
           assigned_to?: string | null
           auto_call_enabled?: boolean | null
           call_attempt_count?: number
@@ -667,30 +1827,43 @@ export type Database = {
           confirmed_by?: string | null
           coupon_code?: string | null
           created_at?: string
+          customer_ip_address?: string | null
           delivered_at?: string | null
           delivery_area_id?: string | null
           delivery_city_id?: string | null
           delivery_method?: string | null
           delivery_zone_id?: string | null
+          device_type?: string | null
           discount_amount?: number
+          entry_url?: string | null
+          fb_browser_pixel?: string | null
+          fb_click_id?: string | null
           guest_email?: string | null
           guest_name?: string | null
           guest_phone?: string | null
           hold_reason?: string | null
           hold_until?: string | null
           id?: string
+          ip_address?: string | null
           is_cross_sale?: boolean
           is_guest_order?: boolean
           is_preorder?: boolean
           last_call_at?: string | null
           last_called_by?: string | null
           latest_note?: string | null
+          merchant_ip_address?: string | null
+          meta_ad_account_id?: string | null
+          meta_ad_id?: string | null
+          meta_ad_set_id?: string | null
+          meta_campaign_id?: string | null
           notes?: string | null
+          order_financial_id?: string | null
           order_tags?: string[]
           packaged_at?: string | null
           packaged_by?: string | null
           payment_method?: string | null
           rejection_reason?: string | null
+          session_source?: string | null
           shipment_id?: string | null
           shipped_at?: string | null
           shipped_by?: string | null
@@ -708,7 +1881,12 @@ export type Database = {
           tags?: string[] | null
           total?: number
           updated_at?: string
+          user_agent?: string | null
           user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
           verified_at?: string | null
         }
         Relationships: [
@@ -731,6 +1909,13 @@ export type Database = {
             columns: ["delivery_zone_id"]
             isOneToOne: false
             referencedRelation: "bd_zones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_order_financial_id_fkey"
+            columns: ["order_financial_id"]
+            isOneToOne: false
+            referencedRelation: "order_financials"
             referencedColumns: ["id"]
           },
           {
@@ -1352,6 +2537,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "cash_accounts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "transactions_reversed_by_fkey"
             columns: ["reversed_by"]
             isOneToOne: false
@@ -1420,6 +2612,20 @@ export type Database = {
           with_check: string
         }[]
       }
+      finalize_order_on_confirm: {
+        Args: { _order_id: string }
+        Returns: undefined
+      }
+      get_customer_courier_stats: {
+        Args: { p_phone: string }
+        Returns: {
+          cancelled: number
+          courier: string
+          success: number
+          success_rate: number
+          total: number
+        }[]
+      }
       get_customer_stats: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
         Args: {
@@ -1430,6 +2636,16 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       log_order_view: { Args: { p_order_id: string }; Returns: undefined }
+      post_ledger_entry: {
+        Args: {
+          _date: string
+          _description: string
+          _lines: Json
+          _source_id: string
+          _source_type: Database["public"]["Enums"]["ledger_source"]
+        }
+        Returns: string
+      }
       recalc_product_rating: {
         Args: { _product_id: string }
         Returns: undefined
@@ -1438,6 +2654,19 @@ export type Database = {
       reserve_stock: { Args: { _order_id: string }; Returns: undefined }
     }
     Enums: {
+      account_type: "asset" | "liability" | "equity" | "revenue" | "expense"
+      ad_attribution_method:
+        | "per_product"
+        | "per_category"
+        | "all_orders_in_period"
+      ad_platform:
+        | "meta"
+        | "facebook"
+        | "instagram"
+        | "google"
+        | "tiktok"
+        | "other"
+      ad_status: "active" | "paused" | "ended"
       app_role:
         | "admin"
         | "moderator"
@@ -1455,6 +2684,22 @@ export type Database = {
         | "customer_confirmed"
         | "customer_cancelled"
         | "needs_followup"
+      cash_account_type:
+        | "cash"
+        | "bkash"
+        | "nagad"
+        | "rocket"
+        | "bank"
+        | "pathao_pending"
+        | "meta_ads_wallet"
+        | "other"
+      china_shipment_status:
+        | "draft"
+        | "ordered"
+        | "in_transit"
+        | "customs"
+        | "received"
+        | "cancelled"
       confirmation_status:
         | "pending"
         | "confirmed"
@@ -1464,7 +2709,27 @@ export type Database = {
         | "advance_pending"
       coupon_type: "percentage" | "fixed"
       courier_provider: "pathao" | "steadfast" | "redx" | "manual"
+      damage_source:
+        | "return"
+        | "warehouse"
+        | "shipment_damage"
+        | "customer_damage"
       delivery_zone: "inside_dhaka" | "outside_dhaka" | "sub_city" | "other"
+      ledger_source:
+        | "order"
+        | "expense"
+        | "capital"
+        | "shipment"
+        | "manual"
+        | "adjustment"
+      order_finalization_status:
+        | "pending"
+        | "delivered"
+        | "partial_delivered"
+        | "returned"
+        | "exchanged"
+        | "damaged"
+        | "settled"
       order_status:
         | "new"
         | "confirmed"
@@ -1675,6 +2940,21 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_type: ["asset", "liability", "equity", "revenue", "expense"],
+      ad_attribution_method: [
+        "per_product",
+        "per_category",
+        "all_orders_in_period",
+      ],
+      ad_platform: [
+        "meta",
+        "facebook",
+        "instagram",
+        "google",
+        "tiktok",
+        "other",
+      ],
+      ad_status: ["active", "paused", "ended"],
       app_role: [
         "admin",
         "moderator",
@@ -1694,6 +2974,24 @@ export const Constants = {
         "customer_cancelled",
         "needs_followup",
       ],
+      cash_account_type: [
+        "cash",
+        "bkash",
+        "nagad",
+        "rocket",
+        "bank",
+        "pathao_pending",
+        "meta_ads_wallet",
+        "other",
+      ],
+      china_shipment_status: [
+        "draft",
+        "ordered",
+        "in_transit",
+        "customs",
+        "received",
+        "cancelled",
+      ],
       confirmation_status: [
         "pending",
         "confirmed",
@@ -1704,7 +3002,30 @@ export const Constants = {
       ],
       coupon_type: ["percentage", "fixed"],
       courier_provider: ["pathao", "steadfast", "redx", "manual"],
+      damage_source: [
+        "return",
+        "warehouse",
+        "shipment_damage",
+        "customer_damage",
+      ],
       delivery_zone: ["inside_dhaka", "outside_dhaka", "sub_city", "other"],
+      ledger_source: [
+        "order",
+        "expense",
+        "capital",
+        "shipment",
+        "manual",
+        "adjustment",
+      ],
+      order_finalization_status: [
+        "pending",
+        "delivered",
+        "partial_delivered",
+        "returned",
+        "exchanged",
+        "damaged",
+        "settled",
+      ],
       order_status: [
         "new",
         "confirmed",
