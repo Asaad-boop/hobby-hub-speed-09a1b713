@@ -11,6 +11,8 @@ import {
   MessageSquare,
   Tag,
   PhoneCall,
+  Users,
+  Building2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -58,6 +60,12 @@ const groups: { label: string; items: NavItem[] }[] = [
     items: [
       { title: "Products", url: "/admin/products", icon: Package, roles: ["admin"] },
       { title: "Categories", url: "/admin/categories", icon: Tags, roles: ["admin"] },
+    ],
+  },
+  {
+    label: "Customers",
+    items: [
+      { title: "Customers", url: "/admin/customers", icon: Users, roles: ["admin", "customer_service"] },
     ],
   },
   {
