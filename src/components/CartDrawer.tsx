@@ -1,28 +1,39 @@
 import { X, Minus, Plus, Trash2 } from "lucide-react";
 import { useCart, cartLineKey } from "@/lib/cart";
 import { Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function CartDrawer() {
   const { open, setOpen, items, total, setQty, remove } = useCart();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
+    if (open) {
+      setMounted(true);
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      // keep mounted during exit animation
+      const t = setTimeout(() => setMounted(false), 320);
+      return () => clearTimeout(t);
+    }
     return () => {
       document.body.style.overflow = "";
     };
   }, [open]);
 
+  if (!mounted && !open) return null;
+
   return (
     <>
       <div
         onClick={() => setOpen(false)}
-        className={`fixed inset-0 z-50 bg-black/40 transition-opacity ${
+        className={`fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
       <aside
-        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-background shadow-[var(--shadow-elevated)] transition-transform ${
+        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-background shadow-[var(--shadow-elevated)] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
