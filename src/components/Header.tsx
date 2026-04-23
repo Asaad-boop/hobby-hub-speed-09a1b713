@@ -192,10 +192,8 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-all duration-500 ${
-        scrolled
-          ? "bg-background/85 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.18)] backdrop-blur-2xl"
-          : "bg-background"
+      className={`sticky top-0 z-40 bg-background transition-shadow duration-300 ${
+        scrolled ? "shadow-[0_4px_20px_-8px_rgba(0,0,0,0.15)]" : ""
       }`}
     >
       {/* Announcement bar */}
