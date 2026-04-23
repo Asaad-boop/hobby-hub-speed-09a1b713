@@ -192,6 +192,15 @@ type CustomerStat = {
   success_rate: number | null;
 };
 
+type CourierStat = {
+  phone: string;
+  overall_total: number;
+  overall_success: number;
+  overall_cancel: number;
+  overall_success_rate: number | null;
+  last_fetched_at: string;
+};
+
 function WebOrdersPage() {
   const { user, hasRole, loading: authLoading } = useAdminAuth();
   const allowed = hasRole(["admin", "customer_service"]);
@@ -303,6 +312,51 @@ function WebOrdersPage() {
       const map: Record<string, CustomerStat> = {};
       for (const row of (data ?? []) as CustomerStat[]) {
         if (row.phone) map[row.phone] = row;
+      }
+      return map;
+    },
+  });
+
+  // BD Courier success-rate stats by phone (from courier_stats_cache)
+  const { data: courierByPhone = {} } = useQuery({
+    queryKey: ["web-orders-courier-stats", phones.join(",")],
+    enabled: allowed && phones.length > 0,
+    refetchInterval: autoRefresh ? 60_000 : false,
+    queryFn: async () => {
+      const cleanPhones = phones
+        .map((p) => p.replace(/[^0-9]/g, "").slice(-11))
+        .filter((p) => /^01[3-9]\d{8}$/.test(p));
+      if (cleanPhones.length === 0) return {} as Record<string, CourierStat>;
+
+      const { data, error } = await supabase
+        .from("courier_stats_cache")
+        .select(
+          "phone, overall_total, overall_success, overall_cancel, overall_success_rate, last_fetched_at",
+        )
+        .in("phone", cleanPhones);
+      if (error) {
+        console.error("courier stats query failed", error);
+        return {} as Record<string, CourierStat>;
+      }
+      const map: Record<string, CourierStat> = {};
+      for (const row of (data ?? []) as CourierStat[]) {
+        map[row.phone] = row;
+      }
+
+      // Fire-and-forget: fetch missing phones in background via edge function
+      const missing = cleanPhones.filter((p) => !map[p]);
+      if (missing.length > 0) {
+        // Limit to 5 per refresh to avoid hammering the API
+        for (const p of missing.slice(0, 5)) {
+          supabase.functions
+            .invoke("fetch-courier-stats", { body: { phone: p } })
+            .then(() => {
+              queryClient.invalidateQueries({
+                queryKey: ["web-orders-courier-stats"],
+              });
+            })
+            .catch((e) => console.warn("courier fetch failed", p, e));
+        }
       }
       return map;
     },
@@ -762,15 +816,26 @@ function WebOrdersPage() {
               <TableBody>
                 {pagedOrders.map((o) => {
                   const phone = o.shipping_phone ?? o.guest_phone ?? "";
+                  const cleanPhone = phone.replace(/[^0-9]/g, "").slice(-11);
                   const customerName =
                     o.shipping_name ?? o.guest_name ?? "—";
                   const orderItems = itemsByOrder[o.id] ?? [];
                   const firstItem = orderItems[0];
                   const moreCount = orderItems.length - 1;
-                  const stat = phone ? statsByPhone[phone] : undefined;
-                  const successRate = Number(stat?.success_rate ?? 0);
-                  const total = stat?.total_orders ?? 0;
-                  const delivered = stat?.delivered_orders ?? 0;
+                  const courier = cleanPhone ? courierByPhone[cleanPhone] : undefined;
+                  const internalStat = phone ? statsByPhone[phone] : undefined;
+                  // Prefer BD Courier data; fall back to internal delivered/total
+                  const successRate = courier
+                    ? Number(courier.overall_success_rate ?? 0)
+                    : Number(internalStat?.success_rate ?? 0);
+                  const total = courier
+                    ? courier.overall_total
+                    : (internalStat?.total_orders ?? 0);
+                  const delivered = courier
+                    ? courier.overall_success
+                    : (internalStat?.delivered_orders ?? 0);
+                  const cancelled = courier ? courier.overall_cancel : 0;
+                  const isCourierSource = !!courier;
                   const idShort = o.id.slice(0, 8).toUpperCase();
                   const isSelected = selected.has(o.id);
                   const cityLine = [o.shipping_city, o.shipping_district]
@@ -919,18 +984,37 @@ function WebOrdersPage() {
                         )}
                       </TableCell>
 
-                      {/* Success Rate */}
+                      {/* Success Rate (BD Courier) */}
                       <TableCell>
                         {total > 0 ? (
-                          <div className="flex items-center gap-2">
+                          <div
+                            className="flex items-center gap-2"
+                            title={
+                              isCourierSource
+                                ? "BD Courier history (Pathao + Steadfast + RedX + Paperfly)"
+                                : "Internal delivery stats"
+                            }
+                          >
                             <SuccessRing rate={successRate} />
-                            <div className="text-[10px]">
-                              <div className="font-semibold">
-                                {delivered}/{total}
+                            <div className="space-y-0.5 text-[10px] leading-tight">
+                              <div className="font-semibold text-emerald-600">
+                                Success: {Math.round(successRate)}%
                               </div>
-                              <div className="text-muted-foreground">orders</div>
+                              <div className="text-muted-foreground">
+                                Order: {delivered}/{total}
+                              </div>
+                              {cancelled > 0 && (
+                                <div className="text-rose-500">
+                                  Cancel: {cancelled}
+                                </div>
+                              )}
                             </div>
                           </div>
+                        ) : cleanPhone ? (
+                          <Badge variant="outline" className="text-[10px]">
+                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                            Loading...
+                          </Badge>
                         ) : (
                           <Badge variant="outline" className="text-[10px]">
                             New customer
