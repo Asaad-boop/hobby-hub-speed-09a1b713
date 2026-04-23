@@ -495,63 +495,7 @@ function WebOrderDetailPage() {
         </div>
       </div>
 
-      {/* ========== COURIER SUCCESS STATS (BD Courier API) ========== */}
-      <Card className="rounded-2xl">
-        <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-          <div className="min-w-0">
-            <CardTitle className="text-sm flex flex-wrap items-center gap-2">
-              <span>Courier Success Stats — {debouncedPhone || "No phone"}</span>
-              <CourierSourceBadge meta={courierMeta} fetching={bdFetching} />
-            </CardTitle>
-            {bdCourier?.last_fetched_at && (
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Last updated {formatDistanceToNow(new Date(bdCourier.last_fetched_at), { addSuffix: true })}
-                {phoneInput && phoneInput !== debouncedPhone && (
-                  <span className="ml-2 text-amber-600 dark:text-amber-400">
-                    · waiting for new number…
-                  </span>
-                )}
-              </p>
-            )}
-          </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleRefreshCourier}
-            disabled={refreshingCourier || bdLoading || !debouncedPhone}
-            title="Refresh only if data seems outdated. Cached data saves API credits."
-          >
-            {refreshingCourier ? (
-              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <RefreshCw className="mr-1 h-3.5 w-3.5" />
-            )}
-            Refresh
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {courierError && (
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
-              BD Courier unavailable right now. Showing internal order history only.
-            </div>
-          )}
-
-
-          <RiskBanner risk={bdCourier?.risk_level ?? null} stats={bdCourier} />
-
-          {(bdLoading && !bdCourier) || (bdFetching && !bdCourier) ? (
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {[0, 1, 2, 3].map((i) => (
-                <div key={i} className="h-32 animate-pulse rounded-lg bg-muted" />
-              ))}
-            </div>
-          ) : (
-            <div className={bdFetching ? "opacity-60 transition-opacity" : ""}>
-              <CourierStatsGrid bdCourier={bdCourier} phoneStats={phoneStats} />
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* BD Courier success stats removed (ERP cleanup) */}
 
       {/* ========== MAIN GRID (left main + right sidebar) ========== */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_380px]">
@@ -876,10 +820,7 @@ function WebOrderDetailPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Source</span>
-                <span className="flex items-center gap-1 text-xs">
-                  <Facebook className="h-3 w-3 text-blue-600" />
-                  {order.session_source ?? "Direct"}
-                </span>
+                <span className="text-xs">Web</span>
               </div>
             </CardContent>
           </Card>
@@ -984,52 +925,7 @@ function WebOrderDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Attribution */}
-          <Card className="rounded-2xl">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Attribution</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs">
-              <div className="flex flex-wrap gap-1">
-                {order.utm_source && <Badge variant="outline">{order.utm_source}</Badge>}
-                {order.utm_medium && <Badge variant="outline">{order.utm_medium}</Badge>}
-                {order.utm_campaign && <Badge variant="outline">{order.utm_campaign}</Badge>}
-              </div>
-              <AttrRow label="Meta Ad Account" value={order.meta_ad_account_id} />
-              <AttrRow label="Campaign" value={order.meta_campaign_id} />
-              <AttrRow label="Ad Set" value={order.meta_ad_set_id} />
-              <AttrRow label="Ad" value={order.meta_ad_id} />
-              <Separator className="my-2" />
-              <AttrRow label="FB Click ID" value={order.fb_click_id} truncate />
-              <AttrRow label="Browser Pixel" value={order.fb_browser_pixel} truncate />
-            </CardContent>
-          </Card>
-
-          {/* Session Info */}
-          <Card className="rounded-2xl">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Session Info</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-1.5 text-xs">
-              <div className="flex items-center gap-1.5">
-                <Smartphone className="h-3.5 w-3.5 text-muted-foreground" />
-                <span>{order.device_type ?? "Unknown device"}</span>
-              </div>
-              <AttrRow label="IP" value={order.ip_address} />
-              <AttrRow label="Source" value={order.session_source} truncate />
-              {order.entry_url && (
-                <a
-                  href={order.entry_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-1 text-blue-600 hover:underline"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  Entry URL
-                </a>
-              )}
-            </CardContent>
-          </Card>
+          {/* Attribution & Session info panels removed (ERP cleanup) */}
 
           {/* Activity Log */}
           <Card className="rounded-2xl">
