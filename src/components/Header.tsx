@@ -7,7 +7,7 @@ import { useAdminAuth } from "@/lib/admin";
 import { useSiteSettings } from "@/lib/site-settings";
 import { useProducts, type Product } from "@/lib/products";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import defaultLogo from "@/assets/logo.png";
+import defaultLogo from "@/assets/logo.webp";
 
 const RECENT_KEY = "recent_searches_v1";
 const MAX_RECENT = 5;

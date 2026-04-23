@@ -5,14 +5,17 @@ import { useEffect } from "react";
 import appCss from "../styles.css?url";
 import "@/lib/i18n";
 import { captureSessionOnFirstVisit } from "@/lib/session-tracking";
+import { lazy, Suspense } from "react";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import CartDrawer from "@/components/CartDrawer";
-import MobileBottomNav from "@/components/MobileBottomNav";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import NotFound from "@/components/NotFound";
 import { CartProvider } from "@/lib/cart";
 import { WishlistProvider } from "@/lib/wishlist";
+
+// Lazy-load below-the-fold / non-critical UI to shrink the initial JS payload.
+const Footer = lazy(() => import("@/components/Footer"));
+const CartDrawer = lazy(() => import("@/components/CartDrawer"));
+const MobileBottomNav = lazy(() => import("@/components/MobileBottomNav"));
+const WhatsAppButton = lazy(() => import("@/components/WhatsAppButton"));
 
 interface RouterContext {
   queryClient: QueryClient;
@@ -98,10 +101,12 @@ function RootComponent() {
               <main className="flex-1">
                 <Outlet />
               </main>
-              <Footer />
-              <CartDrawer />
-              <WhatsAppButton />
-              <MobileBottomNav />
+              <Suspense fallback={null}>
+                <Footer />
+                <CartDrawer />
+                <WhatsAppButton />
+                <MobileBottomNav />
+              </Suspense>
             </div>
           )}
         </CartProvider>

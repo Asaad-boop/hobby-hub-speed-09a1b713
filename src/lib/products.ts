@@ -92,11 +92,17 @@ export const productsQueryOptions = () =>
   queryOptions({
     queryKey: ["products", "all"],
     queryFn: fetchProducts,
-    staleTime: 30_000,
+    // Treat list as fresh for 5 min — avoids re-fetch waterfalls on nav.
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
 export function useProducts() {
-  return useQuery(productsQueryOptions());
+  return useQuery({
+    ...productsQueryOptions(),
+    // Render instantly with empty list while real data streams in.
+    placeholderData: [] as Product[],
+  });
 }
 
 export function useProduct(id: string | undefined) {
