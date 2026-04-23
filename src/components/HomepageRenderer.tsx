@@ -387,7 +387,14 @@ function CategoriesSection({ section }: { section: HomepageSection }) {
               <span className={`cat-icon-wiggle flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${tone} text-white shadow-md transition-transform duration-300 group-hover:scale-110`}>
                 <Icon className="h-5 w-5" />
               </span>
-              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground transition-colors duration-300 group-hover:bg-primary/10 group-hover:text-primary">{formatCount(slug)}</span>
+              {(() => {
+                const c = formatCount(slug);
+                return c === null ? (
+                  <span className="inline-block h-4 w-8 animate-pulse rounded-full bg-muted" aria-label="Loading count" />
+                ) : (
+                  <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground transition-colors duration-300 group-hover:bg-primary/10 group-hover:text-primary">{c}</span>
+                );
+              })()}
             </div>
             <div className="relative mt-3">
               <h3 className="text-sm font-bold leading-tight text-foreground transition-transform duration-300 group-hover:translate-x-0.5">{name}</h3>
