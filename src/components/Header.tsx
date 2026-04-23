@@ -1,12 +1,39 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, User, ShoppingBag, Menu, X, Heart, Phone, Shield } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Search, User, ShoppingBag, Menu, X, Heart, Phone, Shield, Clock, TrendingUp } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { useAdminAuth } from "@/lib/admin";
 import { useSiteSettings } from "@/lib/site-settings";
+import { useProducts, type Product } from "@/lib/products";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import defaultLogo from "@/assets/logo.png";
+
+const RECENT_KEY = "recent_searches_v1";
+const MAX_RECENT = 5;
+const MAX_SUGGESTIONS = 6;
+
+function loadRecent(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter((x) => typeof x === "string").slice(0, MAX_RECENT) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecent(q: string) {
+  if (typeof window === "undefined" || !q.trim()) return;
+  try {
+    const cur = loadRecent().filter((x) => x.toLowerCase() !== q.toLowerCase());
+    const next = [q, ...cur].slice(0, MAX_RECENT);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+  } catch {
+    /* ignore */
+  }
+}
 
 type Category = { label: string; category: string };
 
@@ -32,7 +59,39 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [progress, setProgress] = useState(0);
+  const [recent, setRecent] = useState<string[]>([]);
+  const [activeIdx, setActiveIdx] = useState(-1);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchWrapperRef = useRef<HTMLDivElement>(null);
+  const { data: allProducts = [] } = useProducts();
+
+  // Compute autocomplete suggestions
+  const suggestions = useMemo<Product[]>(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    const scored = allProducts
+      .map((p) => {
+        const title = p.title.toLowerCase();
+        const cat = (p.category || "").toLowerCase();
+        let score = 0;
+        if (title.startsWith(q)) score = 100;
+        else if (title.includes(q)) score = 70;
+        else if (cat.includes(q)) score = 40;
+        else if (p.benefits.some((b) => b.toLowerCase().includes(q))) score = 20;
+        return { p, score };
+      })
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score || b.p.rating - a.p.rating)
+      .slice(0, MAX_SUGGESTIONS)
+      .map((x) => x.p);
+    return scored;
+  }, [searchQuery, allProducts]);
+
+  const trendingProducts = useMemo<Product[]>(() => {
+    return [...allProducts]
+      .sort((a, b) => b.reviews - a.reviews || b.rating - a.rating)
+      .slice(0, 4);
+  }, [allProducts]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -60,24 +119,76 @@ export default function Header() {
     };
   }, [mobileOpen]);
 
-  // Focus search input when opened
+  // Focus search input when opened + load recent
   useEffect(() => {
     if (searchOpen) {
+      setRecent(loadRecent());
+      setActiveIdx(-1);
       const t = setTimeout(() => searchInputRef.current?.focus(), 50);
       return () => clearTimeout(t);
     }
   }, [searchOpen]);
 
-  const submitSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const q = searchQuery.trim();
-    navigate({
-      to: "/shop",
-      search: { category: "All", sort: "popular", q: q || undefined } as any,
-    });
+  // Close suggestions on outside click
+  useEffect(() => {
+    if (!searchOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (searchWrapperRef.current && !searchWrapperRef.current.contains(e.target as Node)) {
+        setSearchOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSearchOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [searchOpen]);
+
+  const goToProduct = (p: Product) => {
+    saveRecent(p.title);
     setSearchOpen(false);
     setMobileOpen(false);
+    setSearchQuery("");
+    navigate({ to: "/product/$id", params: { id: p.id } });
   };
+
+  const goToSearch = (q: string) => {
+    const term = q.trim();
+    if (term) saveRecent(term);
+    setSearchOpen(false);
+    setMobileOpen(false);
+    navigate({
+      to: "/shop",
+      search: { category: "All", sort: "popular", q: term || undefined } as any,
+    });
+  };
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // If a suggestion is highlighted, go to it
+    if (activeIdx >= 0 && activeIdx < suggestions.length) {
+      goToProduct(suggestions[activeIdx]);
+      return;
+    }
+    goToSearch(searchQuery);
+  };
+
+  const handleSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (suggestions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIdx((i) => (i + 1) % suggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIdx((i) => (i <= 0 ? suggestions.length - 1 : i - 1));
+    }
+  };
+
+  const showDropdown = searchOpen && (suggestions.length > 0 || (!searchQuery.trim() && (recent.length > 0 || trendingProducts.length > 0)));
 
   return (
     <header
