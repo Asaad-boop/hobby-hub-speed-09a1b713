@@ -984,18 +984,37 @@ function WebOrdersPage() {
                         )}
                       </TableCell>
 
-                      {/* Success Rate */}
+                      {/* Success Rate (BD Courier) */}
                       <TableCell>
                         {total > 0 ? (
-                          <div className="flex items-center gap-2">
+                          <div
+                            className="flex items-center gap-2"
+                            title={
+                              isCourierSource
+                                ? "BD Courier history (Pathao + Steadfast + RedX + Paperfly)"
+                                : "Internal delivery stats"
+                            }
+                          >
                             <SuccessRing rate={successRate} />
-                            <div className="text-[10px]">
-                              <div className="font-semibold">
-                                {delivered}/{total}
+                            <div className="space-y-0.5 text-[10px] leading-tight">
+                              <div className="font-semibold text-emerald-600">
+                                Success: {Math.round(successRate)}%
                               </div>
-                              <div className="text-muted-foreground">orders</div>
+                              <div className="text-muted-foreground">
+                                Order: {delivered}/{total}
+                              </div>
+                              {cancelled > 0 && (
+                                <div className="text-rose-500">
+                                  Cancel: {cancelled}
+                                </div>
+                              )}
                             </div>
                           </div>
+                        ) : cleanPhone ? (
+                          <Badge variant="outline" className="text-[10px]">
+                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                            Loading...
+                          </Badge>
                         ) : (
                           <Badge variant="outline" className="text-[10px]">
                             New customer
