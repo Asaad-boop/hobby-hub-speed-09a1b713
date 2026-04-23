@@ -816,15 +816,26 @@ function WebOrdersPage() {
               <TableBody>
                 {pagedOrders.map((o) => {
                   const phone = o.shipping_phone ?? o.guest_phone ?? "";
+                  const cleanPhone = phone.replace(/[^0-9]/g, "").slice(-11);
                   const customerName =
                     o.shipping_name ?? o.guest_name ?? "—";
                   const orderItems = itemsByOrder[o.id] ?? [];
                   const firstItem = orderItems[0];
                   const moreCount = orderItems.length - 1;
-                  const stat = phone ? statsByPhone[phone] : undefined;
-                  const successRate = Number(stat?.success_rate ?? 0);
-                  const total = stat?.total_orders ?? 0;
-                  const delivered = stat?.delivered_orders ?? 0;
+                  const courier = cleanPhone ? courierByPhone[cleanPhone] : undefined;
+                  const internalStat = phone ? statsByPhone[phone] : undefined;
+                  // Prefer BD Courier data; fall back to internal delivered/total
+                  const successRate = courier
+                    ? Number(courier.overall_success_rate ?? 0)
+                    : Number(internalStat?.success_rate ?? 0);
+                  const total = courier
+                    ? courier.overall_total
+                    : (internalStat?.total_orders ?? 0);
+                  const delivered = courier
+                    ? courier.overall_success
+                    : (internalStat?.delivered_orders ?? 0);
+                  const cancelled = courier ? courier.overall_cancel : 0;
+                  const isCourierSource = !!courier;
                   const idShort = o.id.slice(0, 8).toUpperCase();
                   const isSelected = selected.has(o.id);
                   const cityLine = [o.shipping_city, o.shipping_district]
