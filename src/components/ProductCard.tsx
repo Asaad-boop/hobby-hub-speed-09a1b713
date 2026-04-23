@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Star, ShoppingBag, Zap, Heart } from "lucide-react";
+import { Star, ShoppingBag, Zap, Heart, Check } from "lucide-react";
+import { useState } from "react";
 import type { Product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
@@ -10,6 +11,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const { has, toggle } = useWishlist();
   const navigate = useNavigate();
   const liked = has(product.id);
+  const [adding, setAdding] = useState(false);
   const off = Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100);
   const lowStock = product.stock <= 8;
 
