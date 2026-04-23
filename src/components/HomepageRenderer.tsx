@@ -120,9 +120,19 @@ function Editable({
   );
 }
 
+const FALLBACK_SECTIONS: HomepageSection[] = [
+  { id: "_fallback_hero", type: "hero", enabled: true, config: {} },
+  { id: "_fallback_categories", type: "categories", enabled: true, config: {} },
+];
+
 export default function HomepageRenderer() {
   const { data: settings } = useSiteSettings();
-  const sections = settings?.homepage_sections ?? [];
+  // While settings are loading, render a sensible default (Hero first) so the
+  // user sees the hero immediately instead of a blank page.
+  const sections =
+    settings?.homepage_sections && settings.homepage_sections.length > 0
+      ? settings.homepage_sections
+      : FALLBACK_SECTIONS;
   const builderMode = useBuilderMode();
 
   // Notify parent (admin builder) when sections render + handle inline edit / select.
