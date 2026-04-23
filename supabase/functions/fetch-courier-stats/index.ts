@@ -4,6 +4,8 @@
 // Carrybee/Ecourier may be missing even when shown on the dashboard — this is an upstream limitation.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
+type EdgeSupabaseClient = ReturnType<typeof createClient<any>>;
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -54,7 +56,7 @@ const COURIER_WARNING =
   "BD Courier API may omit some couriers (e.g. Carrybee, eCourier). Numbers reflect what the upstream API returns.";
 
 async function fetchAndCache(
-  supabase: ReturnType<typeof createClient>,
+  supabase: EdgeSupabaseClient,
   cleanPhone: string,
   apiKey: string,
   cacheHours: number,
