@@ -11,6 +11,8 @@ import {
   MessageSquare,
   Tag,
   PhoneCall,
+  Users,
+  Building2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -58,6 +60,12 @@ const groups: { label: string; items: NavItem[] }[] = [
     items: [
       { title: "Products", url: "/admin/products", icon: Package, roles: ["admin"] },
       { title: "Categories", url: "/admin/categories", icon: Tags, roles: ["admin"] },
+    ],
+  },
+  {
+    label: "Customers",
+    items: [
+      { title: "Customers", url: "/admin/customers", icon: Users, roles: ["admin", "customer_service"] },
     ],
   },
   {
@@ -165,6 +173,16 @@ export default function AdminSidebar() {
 
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
+          {hasRole(["admin"]) && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip={collapsed ? "Enterprise ERP" : undefined}>
+                <Link to="/erp" className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  {!collapsed && <span>Enterprise ERP</span>}
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={collapsed ? "View storefront" : undefined}>
               <Link to="/" className="flex items-center gap-2">
