@@ -10,6 +10,7 @@ import ProductCard from "@/components/ProductCard";
 import ReviewModal, { type NewReview } from "@/components/ReviewModal";
 import ReviewsList from "@/components/ReviewsList";
 import VariantSelector from "@/components/VariantSelector";
+import ProductGallery from "@/components/ProductGallery";
 import {
   fetchProductVariantData,
   findVariantByValues,
