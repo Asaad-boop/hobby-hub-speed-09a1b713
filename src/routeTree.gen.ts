@@ -20,7 +20,6 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RequestRouteImport } from './routes/request'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as FaqRouteImport } from './routes/faq'
-import { Route as ErpRouteImport } from './routes/erp'
 import { Route as DiagnosticsRouteImport } from './routes/diagnostics'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -30,7 +29,6 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrackIndexRouteImport } from './routes/track.index'
-import { Route as ErpIndexRouteImport } from './routes/erp.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TrackOrderIdRouteImport } from './routes/track.$orderId'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
@@ -117,11 +115,6 @@ const FaqRoute = FaqRouteImport.update({
   path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ErpRoute = ErpRouteImport.update({
-  id: '/erp',
-  path: '/erp',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DiagnosticsRoute = DiagnosticsRouteImport.update({
   id: '/diagnostics',
   path: '/diagnostics',
@@ -166,11 +159,6 @@ const TrackIndexRoute = TrackIndexRouteImport.update({
   id: '/track/',
   path: '/track/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const ErpIndexRoute = ErpIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ErpRoute,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
@@ -334,7 +322,6 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/diagnostics': typeof DiagnosticsRoute
-  '/erp': typeof ErpRouteWithChildren
   '/faq': typeof FaqRoute
   '/privacy': typeof PrivacyRoute
   '/request': typeof RequestRoute
@@ -368,7 +355,6 @@ export interface FileRoutesByFullPath {
   '/product/$id': typeof ProductIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
-  '/erp/': typeof ErpIndexRoute
   '/track/': typeof TrackIndexRoute
   '/admin/finance/accounts': typeof AdminFinanceAccountsRoute
   '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
@@ -420,7 +406,6 @@ export interface FileRoutesByTo {
   '/product/$id': typeof ProductIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin': typeof AdminIndexRoute
-  '/erp': typeof ErpIndexRoute
   '/track': typeof TrackIndexRoute
   '/admin/finance/accounts': typeof AdminFinanceAccountsRoute
   '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
@@ -441,7 +426,6 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/diagnostics': typeof DiagnosticsRoute
-  '/erp': typeof ErpRouteWithChildren
   '/faq': typeof FaqRoute
   '/privacy': typeof PrivacyRoute
   '/request': typeof RequestRoute
@@ -475,7 +459,6 @@ export interface FileRoutesById {
   '/product/$id': typeof ProductIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
-  '/erp/': typeof ErpIndexRoute
   '/track/': typeof TrackIndexRoute
   '/admin/finance/accounts': typeof AdminFinanceAccountsRoute
   '/admin/finance/orders-pnl': typeof AdminFinanceOrdersPnlRoute
@@ -497,7 +480,6 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/diagnostics'
-    | '/erp'
     | '/faq'
     | '/privacy'
     | '/request'
@@ -531,7 +513,6 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/track/$orderId'
     | '/admin/'
-    | '/erp/'
     | '/track/'
     | '/admin/finance/accounts'
     | '/admin/finance/orders-pnl'
@@ -583,7 +564,6 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/track/$orderId'
     | '/admin'
-    | '/erp'
     | '/track'
     | '/admin/finance/accounts'
     | '/admin/finance/orders-pnl'
@@ -603,7 +583,6 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/diagnostics'
-    | '/erp'
     | '/faq'
     | '/privacy'
     | '/request'
@@ -637,7 +616,6 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/track/$orderId'
     | '/admin/'
-    | '/erp/'
     | '/track/'
     | '/admin/finance/accounts'
     | '/admin/finance/orders-pnl'
@@ -658,7 +636,6 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   DiagnosticsRoute: typeof DiagnosticsRoute
-  ErpRoute: typeof ErpRouteWithChildren
   FaqRoute: typeof FaqRoute
   PrivacyRoute: typeof PrivacyRoute
   RequestRoute: typeof RequestRoute
@@ -756,13 +733,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/erp': {
-      id: '/erp'
-      path: '/erp'
-      fullPath: '/erp'
-      preLoaderRoute: typeof ErpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/diagnostics': {
       id: '/diagnostics'
       path: '/diagnostics'
@@ -825,13 +795,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/track/'
       preLoaderRoute: typeof TrackIndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/erp/': {
-      id: '/erp/'
-      path: '/'
-      fullPath: '/erp/'
-      preLoaderRoute: typeof ErpIndexRouteImport
-      parentRoute: typeof ErpRoute
     }
     '/admin/': {
       id: '/admin/'
@@ -1126,16 +1089,6 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface ErpRouteChildren {
-  ErpIndexRoute: typeof ErpIndexRoute
-}
-
-const ErpRouteChildren: ErpRouteChildren = {
-  ErpIndexRoute: ErpIndexRoute,
-}
-
-const ErpRouteWithChildren = ErpRoute._addFileChildren(ErpRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -1145,7 +1098,6 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   DiagnosticsRoute: DiagnosticsRoute,
-  ErpRoute: ErpRouteWithChildren,
   FaqRoute: FaqRoute,
   PrivacyRoute: PrivacyRoute,
   RequestRoute: RequestRoute,
