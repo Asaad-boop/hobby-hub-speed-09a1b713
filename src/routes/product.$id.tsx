@@ -300,86 +300,15 @@ function ProductPage() {
             >
               <Share2 className="h-4 w-4" />
             </button>
-            {(() => {
-              const imgs = product.gallery;
-              const curIdx = Math.max(0, imgs.indexOf(activeImg));
-              const goto = (i: number) => setActiveImg(imgs[(i + imgs.length) % imgs.length]);
-              const handleSwipeEnd = (sx: number | undefined, ex: number) => {
-                if (sx == null) return;
-                const dx = ex - sx;
-                if (Math.abs(dx) < 40) return;
-                goto(dx < 0 ? curIdx + 1 : curIdx - 1);
-              };
-              return (
-                <>
-                  <div
-                    className="relative cursor-grab touch-pan-y select-none active:cursor-grabbing"
-                    onTouchStart={(e) => ((e.currentTarget as any)._sx = e.touches[0].clientX)}
-                    onTouchEnd={(e) => handleSwipeEnd((e.currentTarget as any)._sx, e.changedTouches[0].clientX)}
-                    onMouseDown={(e) => {
-                      (e.currentTarget as any)._sx = e.clientX;
-                      (e.currentTarget as any)._dragging = true;
-                    }}
-                    onMouseUp={(e) => {
-                      if (!(e.currentTarget as any)._dragging) return;
-                      (e.currentTarget as any)._dragging = false;
-                      handleSwipeEnd((e.currentTarget as any)._sx, e.clientX);
-                    }}
-                    onMouseLeave={(e) => ((e.currentTarget as any)._dragging = false)}
-                  >
-                    <div className="overflow-hidden">
-                      <div
-                        className="flex transition-transform duration-500 ease-out"
-                        style={{ transform: `translateX(-${curIdx * 100}%)` }}
-                      >
-                        {imgs.map((src: string, i: number) => (
-                          <img
-                            key={i}
-                            src={src}
-                            alt={product.title}
-                            width={1024}
-                            height={1024}
-                            className="aspect-square h-full w-full shrink-0 object-cover"
-                            draggable={false}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => goto(curIdx - 1)}
-                    aria-label="Previous image"
-                    className="absolute left-3 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/90 shadow-md backdrop-blur transition hover:scale-110 md:inline-flex"
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => goto(curIdx + 1)}
-                    aria-label="Next image"
-                    className="absolute right-3 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/90 shadow-md backdrop-blur transition hover:scale-110 md:inline-flex"
-                  >
-                    <ChevronRight className="h-5 w-5" />
-                  </button>
-                  <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5">
-                    {imgs.map((_: string, i: number) => (
-                      <button
-                        key={i}
-                        onClick={() => goto(i)}
-                        aria-label={`Go to image ${i + 1}`}
-                        className={`h-1.5 rounded-full transition-all ${
-                          i === curIdx ? "w-6 bg-primary" : "w-1.5 bg-background/80"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <div className="absolute right-3 bottom-3 z-10 rounded-full bg-background/90 px-2 py-1 text-[11px] font-bold backdrop-blur">
-                    {curIdx + 1}/{imgs.length}
-                  </div>
-                </>
-              );
-            })()}
+            <ProductGallery
+              images={product.gallery}
+              title={product.title}
+              activeImg={activeImg}
+              setActiveImg={setActiveImg}
+            />
+            <div className="absolute right-3 bottom-3 z-10 rounded-full bg-background/90 px-2 py-1 text-[11px] font-bold backdrop-blur md:hidden">
+              {Math.max(0, product.gallery.indexOf(activeImg)) + 1}/{product.gallery.length}
+            </div>
           </div>
           <div className="mt-3 grid max-w-sm grid-cols-4 gap-2 md:max-w-md">
             {product.gallery.map((src: string, i: number) => (
