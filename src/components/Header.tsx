@@ -1,12 +1,39 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, User, ShoppingBag, Menu, X, Heart, Phone, Shield } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Search, User, ShoppingBag, Menu, X, Heart, Phone, Shield, Clock, TrendingUp } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { useAdminAuth } from "@/lib/admin";
 import { useSiteSettings } from "@/lib/site-settings";
+import { useProducts, type Product } from "@/lib/products";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import defaultLogo from "@/assets/logo.png";
+
+const RECENT_KEY = "recent_searches_v1";
+const MAX_RECENT = 5;
+const MAX_SUGGESTIONS = 6;
+
+function loadRecent(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter((x) => typeof x === "string").slice(0, MAX_RECENT) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecent(q: string) {
+  if (typeof window === "undefined" || !q.trim()) return;
+  try {
+    const cur = loadRecent().filter((x) => x.toLowerCase() !== q.toLowerCase());
+    const next = [q, ...cur].slice(0, MAX_RECENT);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+  } catch {
+    /* ignore */
+  }
+}
 
 type Category = { label: string; category: string };
 
@@ -32,7 +59,39 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [progress, setProgress] = useState(0);
+  const [recent, setRecent] = useState<string[]>([]);
+  const [activeIdx, setActiveIdx] = useState(-1);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchWrapperRef = useRef<HTMLDivElement>(null);
+  const { data: allProducts = [] } = useProducts();
+
+  // Compute autocomplete suggestions
+  const suggestions = useMemo<Product[]>(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    const scored = allProducts
+      .map((p) => {
+        const title = p.title.toLowerCase();
+        const cat = (p.category || "").toLowerCase();
+        let score = 0;
+        if (title.startsWith(q)) score = 100;
+        else if (title.includes(q)) score = 70;
+        else if (cat.includes(q)) score = 40;
+        else if (p.benefits.some((b) => b.toLowerCase().includes(q))) score = 20;
+        return { p, score };
+      })
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score || b.p.rating - a.p.rating)
+      .slice(0, MAX_SUGGESTIONS)
+      .map((x) => x.p);
+    return scored;
+  }, [searchQuery, allProducts]);
+
+  const trendingProducts = useMemo<Product[]>(() => {
+    return [...allProducts]
+      .sort((a, b) => b.reviews - a.reviews || b.rating - a.rating)
+      .slice(0, 4);
+  }, [allProducts]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -60,24 +119,76 @@ export default function Header() {
     };
   }, [mobileOpen]);
 
-  // Focus search input when opened
+  // Focus search input when opened + load recent
   useEffect(() => {
     if (searchOpen) {
+      setRecent(loadRecent());
+      setActiveIdx(-1);
       const t = setTimeout(() => searchInputRef.current?.focus(), 50);
       return () => clearTimeout(t);
     }
   }, [searchOpen]);
 
-  const submitSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const q = searchQuery.trim();
-    navigate({
-      to: "/shop",
-      search: { category: "All", sort: "popular", q: q || undefined } as any,
-    });
+  // Close suggestions on outside click
+  useEffect(() => {
+    if (!searchOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (searchWrapperRef.current && !searchWrapperRef.current.contains(e.target as Node)) {
+        setSearchOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSearchOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [searchOpen]);
+
+  const goToProduct = (p: Product) => {
+    saveRecent(p.title);
     setSearchOpen(false);
     setMobileOpen(false);
+    setSearchQuery("");
+    navigate({ to: "/product/$id", params: { id: p.id } });
   };
+
+  const goToSearch = (q: string) => {
+    const term = q.trim();
+    if (term) saveRecent(term);
+    setSearchOpen(false);
+    setMobileOpen(false);
+    navigate({
+      to: "/shop",
+      search: { category: "All", sort: "popular", q: term || undefined } as any,
+    });
+  };
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // If a suggestion is highlighted, go to it
+    if (activeIdx >= 0 && activeIdx < suggestions.length) {
+      goToProduct(suggestions[activeIdx]);
+      return;
+    }
+    goToSearch(searchQuery);
+  };
+
+  const handleSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (suggestions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIdx((i) => (i + 1) % suggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIdx((i) => (i <= 0 ? suggestions.length - 1 : i - 1));
+    }
+  };
+
+  const showDropdown = searchOpen && (suggestions.length > 0 || (!searchQuery.trim() && (recent.length > 0 || trendingProducts.length > 0)));
 
   return (
     <header
@@ -243,31 +354,144 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Expandable search */}
-        <form
-          onSubmit={submitSearch}
-          className={`mx-auto max-w-7xl overflow-hidden px-4 transition-all duration-300 md:px-6 ${
-            searchOpen ? "mt-3 max-h-20 opacity-100" : "max-h-0 opacity-0"
+        {/* Expandable search with autocomplete */}
+        <div
+          ref={searchWrapperRef}
+          className={`mx-auto max-w-7xl overflow-visible px-4 transition-all duration-300 md:px-6 ${
+            searchOpen ? "mt-3 opacity-100" : "pointer-events-none mt-0 max-h-0 opacity-0"
           }`}
         >
-          <div className="relative rounded-full border border-border bg-background shadow-[0_8px_30px_-10px_rgba(0,0,0,0.15)]">
-            <Search className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              ref={searchInputRef}
-              type="search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search gadgets, gifts, decor…"
-              className="h-12 w-full rounded-full bg-transparent pl-12 pr-28 text-sm outline-none focus:ring-4 focus:ring-primary/15"
-            />
-            <button
-              type="submit"
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full bg-primary px-5 py-2 text-xs font-bold text-primary-foreground transition hover:scale-105 active:scale-95"
-            >
-              Search
-            </button>
-          </div>
-        </form>
+          <form onSubmit={submitSearch} className="relative">
+            <div className="relative rounded-full border border-border bg-background shadow-[0_8px_30px_-10px_rgba(0,0,0,0.15)]">
+              <Search className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                ref={searchInputRef}
+                type="search"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setActiveIdx(-1);
+                }}
+                onKeyDown={handleSearchKey}
+                placeholder="Search gadgets, gifts, decor…"
+                className="h-12 w-full rounded-full bg-transparent pl-12 pr-28 text-sm outline-none focus:ring-4 focus:ring-primary/15"
+                autoComplete="off"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  aria-label="Clear"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setActiveIdx(-1);
+                    searchInputRef.current?.focus();
+                  }}
+                  className="absolute right-24 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+              <button
+                type="submit"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full bg-primary px-5 py-2 text-xs font-bold text-primary-foreground transition hover:scale-105 active:scale-95"
+              >
+                Search
+              </button>
+            </div>
+
+            {showDropdown && (
+              <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-border bg-background p-2 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)]">
+                {suggestions.length > 0 ? (
+                  <div>
+                    <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Products</p>
+                    {suggestions.map((p, i) => (
+                      <button
+                        type="button"
+                        key={p.id}
+                        onMouseEnter={() => setActiveIdx(i)}
+                        onClick={() => goToProduct(p)}
+                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition ${
+                          activeIdx === i ? "bg-primary/10" : "hover:bg-muted/60"
+                        }`}
+                      >
+                        <img src={p.image} alt={p.title} loading="lazy" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-foreground">{p.title}</p>
+                          <p className="truncate text-[11px] text-muted-foreground">{p.category}</p>
+                        </div>
+                        <span className="shrink-0 text-sm font-bold text-primary">৳{p.price.toLocaleString()}</span>
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => goToSearch(searchQuery)}
+                      className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border px-3 py-2 text-xs font-semibold text-foreground/80 transition hover:border-primary hover:bg-primary/5 hover:text-primary"
+                    >
+                      <Search className="h-3.5 w-3.5" /> See all results for &ldquo;{searchQuery}&rdquo;
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {recent.length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between px-3 py-1.5">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Recent</p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              try { localStorage.removeItem(RECENT_KEY); } catch { /* ignore */ }
+                              setRecent([]);
+                            }}
+                            className="text-[10px] font-medium text-muted-foreground hover:text-primary"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 px-3 pb-1">
+                          {recent.map((r) => (
+                            <button
+                              type="button"
+                              key={r}
+                              onClick={() => {
+                                setSearchQuery(r);
+                                searchInputRef.current?.focus();
+                              }}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs text-foreground transition hover:border-primary hover:bg-primary/5 hover:text-primary"
+                            >
+                              <Clock className="h-3 w-3" /> {r}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {trendingProducts.length > 0 && (
+                      <div>
+                        <p className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          <TrendingUp className="h-3 w-3" /> Trending
+                        </p>
+                        {trendingProducts.map((p) => (
+                          <button
+                            type="button"
+                            key={p.id}
+                            onClick={() => goToProduct(p)}
+                            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition hover:bg-muted/60"
+                          >
+                            <img src={p.image} alt={p.title} loading="lazy" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium text-foreground">{p.title}</p>
+                              <p className="truncate text-[11px] text-muted-foreground">{p.category}</p>
+                            </div>
+                            <span className="shrink-0 text-sm font-bold text-primary">৳{p.price.toLocaleString()}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </form>
+        </div>
 
         {/* Mobile drawer */}
         <div
