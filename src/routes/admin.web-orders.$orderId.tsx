@@ -23,9 +23,6 @@ import {
   Star,
   Send,
   Activity,
-  ExternalLink,
-  Smartphone,
-  Facebook,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -194,102 +191,12 @@ function WebOrderDetailPage() {
     },
   });
 
-  // BD Courier API stats (live + cached)
-  type CourierBucket = { total: number; success: number; cancel: number; success_rate: number };
-  type BdCourierStats = {
-    phone: string;
-    overall_total: number;
-    overall_success: number;
-    overall_cancel: number;
-    overall_success_rate: number;
-    pathao: CourierBucket;
-    redx: CourierBucket;
-    steadfast: CourierBucket;
-    paperfly: CourierBucket;
-    parceldex: CourierBucket;
-    carrybee: CourierBucket;
-    risk_level: "low" | "moderate" | "high" | "new_customer" | null;
-    last_fetched_at: string;
-  };
-  type CourierMeta = {
-    source: "fresh" | "cache" | "stale_cache" | null;
-    age_hours: number | null;
-    warning: string | null;
-  };
-
-  // Debounce phone input changes so we don't call the paid API on every keystroke
+  // BD Courier API & courier_stats_cache removed (ERP cleanup).
+  // Debounced phone kept so input edits work smoothly elsewhere.
   const [debouncedPhone, setDebouncedPhone] = useState(orderPhone);
   useEffect(() => {
     setDebouncedPhone(orderPhone);
   }, [orderPhone]);
-  // phoneInput is declared further below — wire its debounce there via effect
-
-  const [refreshingCourier, setRefreshingCourier] = useState(false);
-  const [courierError, setCourierError] = useState<string | null>(null);
-  const [courierMeta, setCourierMeta] = useState<CourierMeta>({
-    source: null,
-    age_hours: null,
-    warning: null,
-  });
-
-  const isValidBdPhone = (p: string) => /^01[3-9]\d{8}$/.test((p || "").replace(/\D/g, "").slice(-11));
-
-  const { data: bdCourier, isLoading: bdLoading, isFetching: bdFetching, refetch: refetchBdCourier } = useQuery({
-    queryKey: ["bd_courier_stats", debouncedPhone],
-    enabled: !!debouncedPhone && isValidBdPhone(debouncedPhone),
-    // Aggressive caching — courier history rarely changes; rely on manual refresh
-    staleTime: 24 * 60 * 60 * 1000, // 24h
-    gcTime: 24 * 60 * 60 * 1000,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    queryFn: async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
-          body: { phone: debouncedPhone },
-        });
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
-        setCourierError(null);
-        setCourierMeta({
-          source: (data?.source ?? null) as CourierMeta["source"],
-          age_hours: typeof data?.age_hours === "number" ? data.age_hours : null,
-          warning: data?.warning ?? null,
-        });
-        return (data?.data ?? null) as BdCourierStats | null;
-      } catch (e) {
-        const message = e instanceof Error ? e.message : "Failed to load courier stats";
-        setCourierError(message);
-        return null;
-      }
-    },
-  });
-
-  const handleRefreshCourier = async () => {
-    if (!debouncedPhone) return;
-    setRefreshingCourier(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
-        body: { phone: debouncedPhone, force_refresh: true },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      setCourierError(null);
-      setCourierMeta({
-        source: (data?.source ?? null) as CourierMeta["source"],
-        age_hours: typeof data?.age_hours === "number" ? data.age_hours : null,
-        warning: data?.warning ?? null,
-      });
-      toast.success("Courier stats refreshed");
-      await refetchBdCourier();
-    } catch (e) {
-      const message = (e as Error).message || "Failed to refresh courier stats";
-      setCourierError(message);
-      toast.error(message);
-    } finally {
-      setRefreshingCourier(false);
-    }
-  };
 
   // ============ Activity logs ============
   const { data: activityLogs } = useQuery({
@@ -337,7 +244,7 @@ function WebOrderDetailPage() {
     setArea("");
     setShippingFee(Number(order.shipping_fee) || 0);
     setDiscount(Number(order.discount_amount) || 0);
-    setAdvance(Number(order.advance_payment_amount) || 0);
+    setAdvance(0);
     setTags(order.order_tags ?? []);
     setIsPreorder(order.is_preorder ?? false);
     setIsCrossSale(order.is_cross_sale ?? false);
@@ -399,7 +306,6 @@ function WebOrderDetailPage() {
         notes: shippingNote || null,
         shipping_fee: shippingFee,
         discount_amount: discount,
-        advance_payment_amount: advance,
         order_tags: tags,
         is_preorder: isPreorder,
         is_cross_sale: isCrossSale,
@@ -586,63 +492,7 @@ function WebOrderDetailPage() {
         </div>
       </div>
 
-      {/* ========== COURIER SUCCESS STATS (BD Courier API) ========== */}
-      <Card className="rounded-2xl">
-        <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-          <div className="min-w-0">
-            <CardTitle className="text-sm flex flex-wrap items-center gap-2">
-              <span>Courier Success Stats — {debouncedPhone || "No phone"}</span>
-              <CourierSourceBadge meta={courierMeta} fetching={bdFetching} />
-            </CardTitle>
-            {bdCourier?.last_fetched_at && (
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Last updated {formatDistanceToNow(new Date(bdCourier.last_fetched_at), { addSuffix: true })}
-                {phoneInput && phoneInput !== debouncedPhone && (
-                  <span className="ml-2 text-amber-600 dark:text-amber-400">
-                    · waiting for new number…
-                  </span>
-                )}
-              </p>
-            )}
-          </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleRefreshCourier}
-            disabled={refreshingCourier || bdLoading || !debouncedPhone}
-            title="Refresh only if data seems outdated. Cached data saves API credits."
-          >
-            {refreshingCourier ? (
-              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <RefreshCw className="mr-1 h-3.5 w-3.5" />
-            )}
-            Refresh
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {courierError && (
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
-              BD Courier unavailable right now. Showing internal order history only.
-            </div>
-          )}
-
-
-          <RiskBanner risk={bdCourier?.risk_level ?? null} stats={bdCourier} />
-
-          {(bdLoading && !bdCourier) || (bdFetching && !bdCourier) ? (
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {[0, 1, 2, 3].map((i) => (
-                <div key={i} className="h-32 animate-pulse rounded-lg bg-muted" />
-              ))}
-            </div>
-          ) : (
-            <div className={bdFetching ? "opacity-60 transition-opacity" : ""}>
-              <CourierStatsGrid bdCourier={bdCourier} phoneStats={phoneStats} />
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* BD Courier success stats removed (ERP cleanup) */}
 
       {/* ========== MAIN GRID (left main + right sidebar) ========== */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_380px]">
@@ -967,10 +817,7 @@ function WebOrderDetailPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Source</span>
-                <span className="flex items-center gap-1 text-xs">
-                  <Facebook className="h-3 w-3 text-blue-600" />
-                  {order.session_source ?? "Direct"}
-                </span>
+                <span className="text-xs">Web</span>
               </div>
             </CardContent>
           </Card>
@@ -1075,52 +922,7 @@ function WebOrderDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Attribution */}
-          <Card className="rounded-2xl">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Attribution</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs">
-              <div className="flex flex-wrap gap-1">
-                {order.utm_source && <Badge variant="outline">{order.utm_source}</Badge>}
-                {order.utm_medium && <Badge variant="outline">{order.utm_medium}</Badge>}
-                {order.utm_campaign && <Badge variant="outline">{order.utm_campaign}</Badge>}
-              </div>
-              <AttrRow label="Meta Ad Account" value={order.meta_ad_account_id} />
-              <AttrRow label="Campaign" value={order.meta_campaign_id} />
-              <AttrRow label="Ad Set" value={order.meta_ad_set_id} />
-              <AttrRow label="Ad" value={order.meta_ad_id} />
-              <Separator className="my-2" />
-              <AttrRow label="FB Click ID" value={order.fb_click_id} truncate />
-              <AttrRow label="Browser Pixel" value={order.fb_browser_pixel} truncate />
-            </CardContent>
-          </Card>
-
-          {/* Session Info */}
-          <Card className="rounded-2xl">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Session Info</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-1.5 text-xs">
-              <div className="flex items-center gap-1.5">
-                <Smartphone className="h-3.5 w-3.5 text-muted-foreground" />
-                <span>{order.device_type ?? "Unknown device"}</span>
-              </div>
-              <AttrRow label="IP" value={order.ip_address} />
-              <AttrRow label="Source" value={order.session_source} truncate />
-              {order.entry_url && (
-                <a
-                  href={order.entry_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-1 text-blue-600 hover:underline"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  Entry URL
-                </a>
-              )}
-            </CardContent>
-          </Card>
+          {/* Attribution & Session info panels removed (ERP cleanup) */}
 
           {/* Activity Log */}
           <Card className="rounded-2xl">
@@ -1159,399 +961,11 @@ function WebOrderDetailPage() {
 }
 
 // ============ small helpers ============
-function StatBlock({
-  successRate,
-  total,
-  success,
-  cancelled,
-}: {
-  successRate: number;
-  total: number;
-  success: number;
-  cancelled: number;
-}) {
-  const rate = Math.max(0, Math.min(100, Number(successRate) || 0));
-  return (
-    <div className="mt-3 space-y-2">
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <Stat label="Success Rate" value={`${rate}%`} tone="emerald" />
-        <Stat label="Total" value={String(total)} />
-        <Stat label="Success" value={String(success)} tone="emerald" />
-        <Stat label="Cancelled" value={String(cancelled)} tone="rose" />
-      </div>
-      <div className="h-2 overflow-hidden rounded-full bg-muted">
-        <div className="h-full bg-emerald-500 transition-all" style={{ width: `${rate}%` }} />
-      </div>
-    </div>
-  );
-}
-
-type CourierKey = "pathao" | "redx" | "steadfast" | "paperfly" | "parceldex" | "carrybee";
-
-const COURIER_LABELS: Record<CourierKey, string> = {
-  pathao: "Pathao",
-  redx: "RedX",
-  steadfast: "Steadfast",
-  paperfly: "Paperfly",
-  parceldex: "Parceldex",
-  carrybee: "Carrybee",
-};
-
-function CourierStatsGrid({
-  bdCourier,
-  phoneStats,
-}: {
-  bdCourier:
-    | {
-        overall_total: number;
-        overall_success: number;
-        overall_cancel: number;
-        overall_success_rate: number;
-        pathao: { total: number; success: number; cancel: number; success_rate: number };
-        redx: { total: number; success: number; cancel: number; success_rate: number };
-        steadfast: { total: number; success: number; cancel: number; success_rate: number };
-        paperfly: { total: number; success: number; cancel: number; success_rate: number };
-        parceldex: { total: number; success: number; cancel: number; success_rate: number };
-        carrybee: { total: number; success: number; cancel: number; success_rate: number };
-      }
-    | null
-    | undefined;
-  phoneStats:
-    | {
-        total_orders: number;
-        delivered_orders: number;
-        cancelled_orders: number;
-        success_rate: number | null;
-      }
-    | null
-    | undefined;
-}) {
-  const [showAll, setShowAll] = useState(false);
-
-  const allKeys: CourierKey[] = ["pathao", "redx", "steadfast", "paperfly", "parceldex", "carrybee"];
-  const buckets = allKeys.map((key) => {
-    const b = bdCourier?.[key];
-    return {
-      key,
-      name: COURIER_LABELS[key],
-      total: b?.total ?? 0,
-      success: b?.success ?? 0,
-      cancel: b?.cancel ?? 0,
-      success_rate: b?.success_rate ?? 0,
-    };
-  });
-
-  const sorted = [...buckets].sort((a, b) => b.total - a.total);
-  const active = sorted.filter((b) => b.total > 0);
-  const inactive = sorted.filter((b) => b.total === 0);
-
-  const overallTotal = bdCourier?.overall_total ?? phoneStats?.total_orders ?? 0;
-  const overallSuccess = bdCourier?.overall_success ?? phoneStats?.delivered_orders ?? 0;
-  const overallCancel = bdCourier?.overall_cancel ?? phoneStats?.cancelled_orders ?? 0;
-  const overallRate = bdCourier?.overall_success_rate ?? phoneStats?.success_rate ?? 0;
-
-  // Dominant courier (>80% of orders)
-  const dominant =
-    overallTotal > 0
-      ? active.find((b) => b.total / overallTotal >= 0.8)
-      : undefined;
-
-  // Recommended: best success rate among couriers with >= 3 orders
-  const recommended = active
-    .filter((b) => b.total >= 3)
-    .sort((a, b) => b.success_rate - a.success_rate)[0];
-
-  return (
-    <div className="space-y-3">
-      {(dominant || recommended) && (
-        <div className="flex flex-wrap items-center gap-2">
-          {dominant && (
-            <div className="flex items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs text-sky-700 dark:text-sky-300">
-              <span>💡</span>
-              <span>
-                Customer primarily uses{" "}
-                <span className="font-semibold">{dominant.name}</span> (
-                {Math.round((dominant.total / overallTotal) * 100)}% of orders)
-              </span>
-            </div>
-          )}
-          {recommended && (
-            <div className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-700 dark:text-emerald-300">
-              <span>🎯</span>
-              <span>
-                Recommended: <span className="font-semibold">{recommended.name}</span> (
-                {recommended.success_rate}% success)
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-        <CourierCard
-          name="Overall"
-          successRate={overallRate}
-          total={overallTotal}
-          success={overallSuccess}
-          cancelled={overallCancel}
-          variant="summary"
-        />
-        {active.map((b) => (
-          <CourierCard
-            key={b.key}
-            name={b.name}
-            successRate={b.success_rate}
-            total={b.total}
-            success={b.success}
-            cancelled={b.cancel}
-            variant={recommended?.key === b.key ? "recommended" : "active"}
-          />
-        ))}
-        {showAll &&
-          inactive.map((b) => (
-            <CourierCard
-              key={b.key}
-              name={b.name}
-              successRate={0}
-              total={0}
-              success={0}
-              cancelled={0}
-              variant="inactive"
-            />
-          ))}
-      </div>
-
-      {inactive.length > 0 && (
-        <button
-          type="button"
-          onClick={() => setShowAll((s) => !s)}
-          className="text-xs font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-        >
-          {showAll
-            ? `Hide couriers with no history`
-            : `Show all couriers (${inactive.length} with no history)`}
-        </button>
-      )}
-    </div>
-  );
-}
-
-function CourierCard({
-  name,
-  successRate,
-  total,
-  success,
-  cancelled,
-  variant = "active",
-}: {
-  name: string;
-  successRate: number;
-  total: number;
-  success: number;
-  cancelled: number;
-  variant?: "summary" | "active" | "recommended" | "inactive";
-}) {
-  const rate = Math.max(0, Math.min(100, Number(successRate) || 0));
-  const isInactive = variant === "inactive";
-
-  const containerCls =
-    variant === "summary"
-      ? "border-sky-500/40 bg-sky-500/5 sm:col-span-1 lg:col-span-1"
-      : variant === "recommended"
-        ? "border-emerald-500/50 bg-emerald-500/5 ring-1 ring-emerald-500/30"
-        : variant === "inactive"
-          ? "border-border/50 bg-muted/30 opacity-60"
-          : "border-border bg-card";
-
-  return (
-    <div
-      className={`flex min-h-[140px] flex-col gap-1.5 rounded-xl border p-3 transition-all ${containerCls}`}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <div className={`text-sm font-semibold ${isInactive ? "text-muted-foreground" : "text-foreground"}`}>
-          {name}
-        </div>
-        {variant === "summary" && (
-          <Badge variant="outline" className="border-sky-500/30 bg-sky-500/10 text-[10px] text-sky-700 dark:text-sky-300">
-            Summary
-          </Badge>
-        )}
-        {variant === "recommended" && (
-          <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-[10px] text-emerald-700 dark:text-emerald-300">
-            Best
-          </Badge>
-        )}
-      </div>
-      <div className="space-y-0.5 text-xs">
-        <div className="text-muted-foreground">
-          Success Rate:{" "}
-          <span className={`font-semibold ${isInactive ? "text-muted-foreground" : "text-foreground"}`}>
-            {rate}%
-          </span>
-        </div>
-        <div className="text-muted-foreground">
-          Total:{" "}
-          <span className={`font-semibold ${isInactive ? "text-muted-foreground" : "text-foreground"}`}>
-            {total}
-          </span>
-        </div>
-        <div className="text-muted-foreground">
-          Success:{" "}
-          <span className={`font-semibold ${isInactive ? "text-muted-foreground" : "text-emerald-600 dark:text-emerald-400"}`}>
-            {success}
-          </span>
-        </div>
-        <div className="text-muted-foreground">
-          Cancelled:{" "}
-          <span className={`font-semibold ${isInactive ? "text-muted-foreground" : "text-rose-600 dark:text-rose-400"}`}>
-            {cancelled}
-          </span>
-        </div>
-      </div>
-      <div className="mt-auto space-y-2 pt-1">
-        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-          <div
-            className={`h-full transition-all ${
-              variant === "summary"
-                ? "bg-sky-500"
-                : variant === "recommended"
-                  ? "bg-emerald-500"
-                  : variant === "inactive"
-                    ? "bg-muted-foreground/30"
-                    : "bg-primary"
-            }`}
-            style={{ width: `${rate}%` }}
-          />
-        </div>
-        {isInactive && (
-          <p className="text-[11px] text-muted-foreground">No orders with this courier yet</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function RiskBanner({
-  risk,
-  stats,
-}: {
-  risk: "low" | "moderate" | "high" | "new_customer" | null;
-  stats: { overall_total?: number; overall_success_rate?: number; overall_cancel?: number } | null | undefined;
-}) {
-  if (!risk) return null;
-  const total = stats?.overall_total ?? 0;
-  const rate = stats?.overall_success_rate ?? 0;
-  const cancelRate = total > 0 ? Number((((stats?.overall_cancel ?? 0) / total) * 100).toFixed(1)) : 0;
-
-  const map = {
-    low: {
-      cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-      label: `✅ Trusted Customer — ${total} orders, ${rate}% success`,
-    },
-    moderate: {
-      cls: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
-      label: `🟡 Moderate Customer — ${rate}% success across ${total} orders, check history`,
-    },
-    high: {
-      cls: "border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300",
-      label: `⚠️ RISK CUSTOMER — ${cancelRate}% cancel rate (${total} orders)`,
-    },
-    new_customer: {
-      cls: "border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-300",
-      label: `🆕 New Customer — no courier history (consider advance payment)`,
-    },
-  }[risk];
-
-  return (
-    <div className={`rounded-lg border px-3 py-2 text-sm font-medium ${map.cls}`}>
-      {map.label}
-    </div>
-  );
-}
-
-function Stat({ label, value, tone }: { label: string; value: string; tone?: "emerald" | "rose" }) {
-  const toneClass =
-    tone === "emerald"
-      ? "text-emerald-600 dark:text-emerald-400"
-      : tone === "rose"
-        ? "text-rose-600 dark:text-rose-400"
-        : "text-foreground";
-  return (
-    <div className="rounded-lg border bg-card p-2.5">
-      <p className="text-[11px] text-muted-foreground">{label}</p>
-      <p className={`text-lg font-semibold ${toneClass}`}>{value}</p>
-    </div>
-  );
-}
-
 function Row({ label, value, bold, mono }: { label: string; value: string; bold?: boolean; mono?: boolean }) {
   return (
     <div className="flex justify-between">
       <span className="text-muted-foreground">{label}</span>
       <span className={`${bold ? "font-semibold" : ""} ${mono ? "font-mono" : ""}`}>{value}</span>
-    </div>
-  );
-}
-
-function CourierSourceBadge({
-  meta,
-  fetching,
-}: {
-  meta: {
-    source: "fresh" | "cache" | "stale_cache" | null;
-    age_hours: number | null;
-    warning: string | null;
-  };
-  fetching: boolean;
-}) {
-  if (fetching && !meta.source) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-        <Loader2 className="h-3 w-3 animate-spin" /> Loading…
-      </span>
-    );
-  }
-  if (!meta.source) return null;
-
-  const ageLabel =
-    meta.age_hours == null
-      ? ""
-      : meta.age_hours < 1
-        ? "just now"
-        : meta.age_hours < 24
-          ? `${meta.age_hours}h ago`
-          : `${Math.floor(meta.age_hours / 24)}d ago`;
-
-  if (meta.source === "fresh") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-300">
-        ● Live data
-      </span>
-    );
-  }
-  if (meta.source === "cache") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:text-blue-300">
-        💾 Cached · {ageLabel}
-      </span>
-    );
-  }
-  // stale_cache
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300">
-      ⚠ Cached · {ageLabel} · refreshing…
-    </span>
-  );
-}
-
-
-function AttrRow({ label, value, truncate }: { label: string; value: string | null; truncate?: boolean }) {
-  return (
-    <div className="flex items-start justify-between gap-2">
-      <span className="shrink-0 text-muted-foreground">{label}</span>
-      <span className={`text-right font-mono text-[11px] ${truncate ? "max-w-[180px] truncate" : ""}`}>
-        {value || "—"}
-      </span>
     </div>
   );
 }
