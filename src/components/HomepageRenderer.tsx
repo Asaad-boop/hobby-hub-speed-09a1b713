@@ -335,6 +335,20 @@ function BannerSection({ section }: { section: HomepageSection }) {
 function CategoriesSection({ section }: { section: HomepageSection }) {
   const heading = cfg(section, "heading", "Shop by Category");
   const subheading = cfg(section, "subheading", "Find exactly what you need across our curated collections");
+  const { data: allProducts = [] } = useProducts();
+
+  const countBySlug = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const p of allProducts) {
+      if (p.categorySlug) map.set(p.categorySlug, (map.get(p.categorySlug) ?? 0) + 1);
+    }
+    return map;
+  }, [allProducts]);
+
+  const formatCount = (slug: string) => {
+    const n = slug === "__all__" ? allProducts.length : (countBySlug.get(slug) ?? 0);
+    return String(n);
+  };
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 md:py-12">
       <div className="mb-5 flex items-end justify-between gap-4 md:mb-6">
@@ -361,7 +375,7 @@ function CategoriesSection({ section }: { section: HomepageSection }) {
         ))}
       </div>
       <div className="hidden grid-cols-3 gap-3 sm:grid lg:grid-cols-4">
-        {fallbackCategories.map(({ name, icon: Icon, count, tone }, i) => (
+        {fallbackCategories.map(({ name, slug, icon: Icon, tone }, i) => (
           <button
             key={name}
             style={{ animationDelay: `${i * 80}ms` }}
@@ -372,7 +386,7 @@ function CategoriesSection({ section }: { section: HomepageSection }) {
               <span className={`cat-icon-wiggle flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${tone} text-white shadow-md transition-transform duration-300 group-hover:scale-110`}>
                 <Icon className="h-5 w-5" />
               </span>
-              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground transition-colors duration-300 group-hover:bg-primary/10 group-hover:text-primary">{count}</span>
+              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground transition-colors duration-300 group-hover:bg-primary/10 group-hover:text-primary">{formatCount(slug)}</span>
             </div>
             <div className="relative mt-3">
               <h3 className="text-sm font-bold leading-tight text-foreground transition-transform duration-300 group-hover:translate-x-0.5">{name}</h3>
