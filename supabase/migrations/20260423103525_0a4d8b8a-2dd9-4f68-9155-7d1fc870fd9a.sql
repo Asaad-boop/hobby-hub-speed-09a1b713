@@ -1,0 +1,56 @@
+INSERT INTO products (slug,title,description,price,old_price,image,gallery,benefits,stock,category_id,is_active,is_featured,is_new_arrival) VALUES
+('4-in-1-rechargeable-table-lamp','4-in-1 Rechargeable Table Lamp','💡 LED light source for energy-efficient lighting
+
+🕒 Clock & temperature display for added functionality
+
+✏️ Built-in pen holder for organized workspaces
+
+🔌 USB plugging/charging for convenience
+
+⚡ 7W power, 5V voltage for reliable performance
+
+🏡 Ideal for living room, bedroom, and study',1790.0,NULL,'https://cdn.shopify.com/s/files/1/0938/0331/5501/files/WhatsApp-Image-2024-11-03-at-11.04.00-scaled-1-600x600.jpg?v=1762258015','["https://cdn.shopify.com/s/files/1/0938/0331/5501/files/WhatsApp-Image-2024-11-03-at-11.04.00-scaled-1-600x600.jpg?v=1762258015"]'::jsonb,'["💡 LED light source for energy-efficient lighting", "🕒 Clock & temperature display for added functionality", "✏️ Built-in pen holder for organized workspaces", "🔌 USB plugging/charging for convenience", "⚡ 7W power, 5V voltage for reliable performance", "🏡 Ideal for living room, bedroom, and study"]'::jsonb,0,'7d723459-0b39-47ba-8046-fae342d4634e',true,false,false),
+('a4-fireworks-in-moscow-scratch-art-hue-board-4-design-combo','A4 fireworks in Moscow Scratch Art Hue board 4 Design Combo','🌈 Scratch Art Hue Board – কল্পনা আর রঙের জাদুর অসাধারণ বোর্ড! শুধু হালকা আঁচড় দিলেই লুকিয়ে থাকা রঙিন ডিজাইন ভেসে উঠবে। শিশুদের সৃজনশীলতা বাড়াতে আর বড়দের জন্য রিল্যাক্স করার পারফেক্ট চয়েস। 🖌️✨',990.0,NULL,'https://cdn.shopify.com/s/files/1/0938/0331/5501/files/Cappadocia-Hot-Air-Balloon-3-280x280.png?v=1762258016','["https://cdn.shopify.com/s/files/1/0938/0331/5501/files/Cappadocia-Hot-Air-Balloon-3-280x280.png?v=1762258016"]'::jsonb,'["🌈 Scratch Art Hue Board – কল্পনা আর রঙের জাদুর অসাধারণ বোর্ড! শুধু হালকা আঁচড় দিলেই লুকিয়ে থাকা রঙিন ডিজাইন ভেসে উঠবে। শিশুদের সৃজনশীলতা বাড়াতে আর বড়দের জন্য রিল্যাক্স করার পারফেক্ট চয়েস। 🖌️✨"]'::jsonb,0,'8542bd2b-e654-4ee6-8a19-ffb4e37a93f4',true,false,false),
+('ae86-pop-up-headlight-key-hanger','AE86 Pop-Up Headlight Key Hanger','Iconic AE86–inspired key hook with pop-up headlights! 😍
+Perfect for car lovers — stylish, durable & totally JDM vibes 🔑🚗',490.0,NULL,'https://cdn.shopify.com/s/files/1/0938/0331/5501/files/O1CN017MAkGy2AglsBuKekQ_22194021.webp?v=1761569979','["https://cdn.shopify.com/s/files/1/0938/0331/5501/files/O1CN017MAkGy2AglsBuKekQ_22194021.webp?v=1761569979", "https://cdn.shopify.com/s/files/1/0938/0331/5501/files/O1CN01iEMasZ2AglsBCCr2q_22194021.webp?v=1761569979", "https://cdn.shopify.com/s/files/1/0938/0331/5501/files/O1CN01fBXnzU1JnwT7MHHQf_22207598.webp?v=1761569979"]'::jsonb,'["Iconic AE86–inspired key hook with pop-up headlights! 😍", "Perfect for car lovers — stylish, durable & totally JDM vibes 🔑🚗"]'::jsonb,0,'7d723459-0b39-47ba-8046-fae342d4634e',true,false,false),
+('air-31-wireless-earbuds-headphones','Air 31 Wireless Earbuds Headphones','🔇 Active noise-cancellation for distraction-free sound
+
+🔊 Volume control for effortless adjustments
+
+❌ No control button for a minimalist design
+
+🛠️ Durable ABS material for long-lasting use
+
+🎶 Ideal for music, calls, and entertainment',990.0,NULL,'https://cdn.shopify.com/s/files/1/0938/0331/5501/files/Air-31-Wireless-Earbuds-Headphones-600x600.webp?v=1762258016','["https://cdn.shopify.com/s/files/1/0938/0331/5501/files/Air-31-Wireless-Earbuds-Headphones-600x600.webp?v=1762258016"]'::jsonb,'["🔇 Active noise-cancellation for distraction-free sound", "🔊 Volume control for effortless adjustments", "❌ No control button for a minimalist design", "🛠️ Durable ABS material for long-lasting use", "🎶 Ideal for music, calls, and entertainment"]'::jsonb,0,'b7ffc0e0-a962-46ce-b03e-06e826086f8a',true,false,false),
+('air-plane-car-combo-2design-combo-origami-paper','Air Plane+ Car Combo 2design Combo Origami paper','',1390.0,NULL,'https://cdn.shopify.com/s/files/1/0938/0331/5501/files/WhatsApp-Image-2025-06-26-at-23.53.11_c19e98a0-600x600.jpg?v=1762258019','["https://cdn.shopify.com/s/files/1/0938/0331/5501/files/WhatsApp-Image-2025-06-26-at-23.53.11_c19e98a0-600x600.jpg?v=1762258019"]'::jsonb,'[]'::jsonb,0,'8542bd2b-e654-4ee6-8a19-ffb4e37a93f4',true,false,false),
+('air-plane-car-combo-2design-combo-origami-paper-1','Air Plane+ Car Combo 2design Combo Origami paper','Origami Paper Kit  হলো বাচ্চাদের জন্য একটি আনন্দদায়ক উপহার যা শুধু খেলার মাধ্যম নয়, শেখার এক অসাধারণ অভিজ্ঞতাও। শিশুরা পেপার ফোল্ডিং-এর মাধ্যমে তৈরি করতে পারবে নানা রঙিন ও আকর্ষণীয় আকৃতি—যা বৃদ্ধি করবে শিশুদের মনোযোগ, ধৈর্য এবং কল্পনাশক্তি। এটি শুধু সময় কাটানোর মজার খেলা নয়, বরং একটি সৃজনশীল অভ্যাসের চর্চা যা শিশুর মানসিক বিকাশে অপরিসীম ভূমিকা রাখবে।',1190.0,1390.0,'https://cdn.shopify.com/s/files/1/0938/0331/5501/files/WhatsApp-Image-2025-06-26-at-23.53.11_c19e98a0-1536x1536.jpg?v=1764571467','["https://cdn.shopify.com/s/files/1/0938/0331/5501/files/WhatsApp-Image-2025-06-26-at-23.53.11_c19e98a0-1536x1536.jpg?v=1764571467", "https://cdn.shopify.com/s/files/1/0938/0331/5501/files/Toy-Hero-1.webp?v=1764571550", "https://cdn.shopify.com/s/files/1/0938/0331/5501/files/Toy-BoxInsideWithVideo.webp?v=1764571549", "https://cdn.shopify.com/s/files/1/0938/0331/5501/files/WhatsApp-Image-2025-06-26-at-00.01.17_79439546.jpg?v=1764571550", "https://cdn.shopify.com/s/files/1/0938/0331/5501/files/WhatsApp-Image-2025-06-26-at-00.01.36_17b35751.jpg?v=1764571550"]'::jsonb,'[]'::jsonb,0,'8542bd2b-e654-4ee6-8a19-ffb4e37a93f4',true,false,false),
+('air-plane-origami-paper-kit-for-kids','Air Plane Origami paper kit for kids','',695.0,NULL,'https://cdn.shopify.com/s/files/1/0938/0331/5501/files/WhatsApp-Image-2025-06-26-at-00.01.07_30d36433-600x600.jpg?v=1762258018','["https://cdn.shopify.com/s/files/1/0938/0331/5501/files/WhatsApp-Image-2025-06-26-at-00.01.07_30d36433-600x600.jpg?v=1762258018"]'::jsonb,'[]'::jsonb,0,'8542bd2b-e654-4ee6-8a19-ffb4e37a93f4',true,false,false),
+('air-plane-pistol-combo-2design-combo-origami-paper','Air Plane+ Pistol Combo 2design Combo Origami paper','',1390.0,NULL,'https://cdn.shopify.com/s/files/1/0938/0331/5501/files/WhatsApp-Image-2025-06-26-at-15.13.44_aaeab68e-1-600x600.jpg?v=1762258021','["https://cdn.shopify.com/s/files/1/0938/0331/5501/files/WhatsApp-Image-2025-06-26-at-15.13.44_aaeab68e-1-600x600.jpg?v=1762258021"]'::jsonb,'[]'::jsonb,0,'8542bd2b-e654-4ee6-8a19-ffb4e37a93f4',true,false,false),
+('astronaut-galaxy-projector-with-bluetooth-speaker','Astronaut Galaxy Projector With Bluetooth Speaker','✨ Modes: 16 Nebula + 1 (Starry & Moon) Effects
+
+🎵 Music System: Bluetooth Speaker + Music Sync 🎶
+
+💡 Brightness: 10% – 30% – 60% – 100%
+
+🎛 Control: Remote (Battery-Free) + On-Device Button
+
+⏳ Timer: 1H / 2H Auto-Off
+
+🔄 Rotation: 360° Adjustable Angle
+
+🌙 Extra Sounds: 8 Soothing Sounds for Relaxation 🌟
+
+🔌 USB Plug & Play: Power Bank, Adapter, or PC Compatible',2399.0,NULL,'https://cdn.shopify.com/s/files/1/0938/0331/5501/files/Astronaut-Galaxy-Projector-Night-Light-with-Music-Bluetooth-Speaker-01-600x600.jpg?v=1762258022','["https://cdn.shopify.com/s/files/1/0938/0331/5501/files/Astronaut-Galaxy-Projector-Night-Light-with-Music-Bluetooth-Speaker-01-600x600.jpg?v=1762258022"]'::jsonb,'["✨ Modes: 16 Nebula + 1 (Starry & Moon) Effects", "🎵 Music System: Bluetooth Speaker + Music Sync 🎶", "💡 Brightness: 10% – 30% – 60% – 100%", "🎛 Control: Remote (Battery-Free) + On-Device Button", "⏳ Timer: 1H / 2H Auto-Off", "🔄 Rotation: 360° Adjustable Angle"]'::jsonb,0,'7d723459-0b39-47ba-8046-fae342d4634e',true,false,false),
+('aurora-galaxy-ripple-lamp-4-way-use-light','Aurora Galaxy Ripple Lamp – 4 way use Light','🌌 একটাই ল্যাম্প—১৬টা কালার + ৪ভাবে ইউজ! (Galaxy/Ocean Projector Lamp)
+
+✅ ১৬টা কালার চেঞ্জ করা যায় 🌈✅ ৪ভাবে ব্যবহার করতে পারবেন:1️⃣ Table/Study Lamp 📚 – পড়াশোনা/ওয়ার্ক ডেস্কে পারফেক্ট2️⃣ Bedside Night Lamp 😴 – সফট আলো, ঘুমের আগে রিল্যাক্সিং3️⃣ Full Room Mood Light / Galaxy Effect ✨ – পুরো রুমে লাইট প্রজেক্ট করে4️⃣ Party / Romantic Setup Light 🎉💜 – পার্টি/ডেট/গেস্টের জন্য দারুণ অ্যাম্বিয়েন্স
+
+🎛️ Remote Control Features:🔹 Brightness Control (লো/মিড/হাই)🔹 ৪টা মোড: Flash / Strobe / Fade / Smooth🔹 এক ক্লিকে রঙ + মোড বদলান ✅
+
+🏠 কোথায় ইউজ করবেন?Bedroom | Living Room | Kids Room | Gaming Setup | Gift Item 🎁',1290.0,NULL,'https://cdn.shopify.com/s/files/1/0938/0331/5501/files/ChatGPTImageFeb2_2026_11_43_15PM.png?v=1770054209','["https://cdn.shopify.com/s/files/1/0938/0331/5501/files/ChatGPTImageFeb2_2026_11_43_15PM.png?v=1770054209", "https://cdn.shopify.com/s/files/1/0938/0331/5501/files/1776099922390-019d87cd-7652-70d9-b0fa-7c749a073859.png?v=1776404574", "https://cdn.shopify.com/s/files/1/0938/0331/5501/files/a7eeafc2-4d33-4edc-aab0-aa6d260b0c01.webp?v=1776404574", "https://cdn.shopify.com/s/files/1/0938/0331/5501/files/O1CN01ztvefC1zN77f7uZjd__2218629626701-0-cib.jpg?v=1776404574", "https://cdn.shopify.com/s/files/1/0938/0331/5501/files/ChatGPT_Image_Feb_2_2026_11_37_43_PM.png?v=1776404574", "https://cdn.shopify.com/s/files/1/0938/0331/5501/files/O1CN01Crazjv1zN77eQlel6__2218629626701-0-cib.jpg?v=1776404574", "https://cdn.shopify.com/s/files/1/0938/0331/5501/files/O1CN01bkLQ271zN77faR3BA__2218629626701-0-cib.jpg?v=1776404574", "https://cdn.shopify.com/s/files/1/0938/0331/5501/files/71FcVsfTCSL.jpg?v=1776404574", "https://cdn.shopify.com/s/files/1/0938/0331/5501/files/D_NQ_NP_628351-CBT105111913101_012026-O.webp?v=1776404574"]'::jsonb,'["🌌 একটাই ল্যাম্প—১৬টা কালার + ৪ভাবে ইউজ! (Galaxy/Ocean Projector Lamp)", "🎛️ Remote Control Features:🔹 Brightness Control (লো/মিড/হাই)🔹 ৪টা মোড: Flash / Strobe / Fade / Smooth🔹 এক ক্লিকে রঙ + মোড বদলান ✅", "🏠 কোথায় ইউজ করবেন?Bedroom | Living Room | Kids Room | Gaming Setup | Gift Item 🎁"]'::jsonb,0,'7d723459-0b39-47ba-8046-fae342d4634e',true,false,false),
+('cappadocia-hot-air-balloon-a3-scratch-art-hue-board','Cappadocia Hot Air Balloon – A3 Scratch Art Hue Board','🌈 Scratch Art Hue Board – কল্পনা আর রঙের জাদুর অসাধারণ বোর্ড! শুধু হালকা আঁচড় দিলেই লুকিয়ে থাকা রঙিন ডিজাইন ভেসে উঠবে। শিশুদের সৃজনশীলতা বাড়াতে আর বড়দের জন্য রিল্যাক্স করার পারফেক্ট চয়েস। 🖌️✨',790.0,NULL,'https://cdn.shopify.com/s/files/1/0938/0331/5501/files/Cappadocia-Hot-Air-Balloon-280x280.png?v=1762258022','["https://cdn.shopify.com/s/files/1/0938/0331/5501/files/Cappadocia-Hot-Air-Balloon-280x280.png?v=1762258022"]'::jsonb,'["🌈 Scratch Art Hue Board – কল্পনা আর রঙের জাদুর অসাধারণ বোর্ড! শুধু হালকা আঁচড় দিলেই লুকিয়ে থাকা রঙিন ডিজাইন ভেসে উঠবে। শিশুদের সৃজনশীলতা বাড়াতে আর বড়দের জন্য রিল্যাক্স করার পারফেক্ট চয়েস। 🖌️✨"]'::jsonb,0,'8542bd2b-e654-4ee6-8a19-ffb4e37a93f4',true,false,false),
+('car-origami-paper-kit-for-kids','Car Origami paper kit for kids','',695.0,NULL,'https://cdn.shopify.com/s/files/1/0938/0331/5501/files/WhatsApp-Image-2025-06-26-at-15.13.36_25c733af-1-600x600.jpg?v=1762258024','["https://cdn.shopify.com/s/files/1/0938/0331/5501/files/WhatsApp-Image-2025-06-26-at-15.13.36_25c733af-1-600x600.jpg?v=1762258024"]'::jsonb,'[]'::jsonb,0,'8542bd2b-e654-4ee6-8a19-ffb4e37a93f4',true,false,false)
+ON CONFLICT (slug) DO UPDATE SET
+  title=EXCLUDED.title,description=EXCLUDED.description,price=EXCLUDED.price,
+  old_price=EXCLUDED.old_price,image=EXCLUDED.image,gallery=EXCLUDED.gallery,
+  benefits=EXCLUDED.benefits,category_id=EXCLUDED.category_id,updated_at=now();
