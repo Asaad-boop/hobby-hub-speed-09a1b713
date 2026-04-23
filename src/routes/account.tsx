@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useWishlist } from "@/lib/wishlist";
 import { useProducts } from "@/lib/products";
 import { toast } from "sonner";
-import { Loader2, LogOut, User as UserIcon, Heart, Package, MapPin, Plus, Trash2, Star, ChevronRight } from "lucide-react";
+import { Loader2, LogOut, User as UserIcon, Heart, Package, MapPin, Plus, Trash2, Star, ChevronRight, AlertCircle, RefreshCw } from "lucide-react";
 
 export const Route = createFileRoute("/account")({
   head: () => ({
@@ -59,6 +59,8 @@ function AccountPage() {
   const wishlist = useWishlist();
   const { data: allProductsData = [] } = useProducts();
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [displayName, setDisplayName] = useState("");
@@ -70,23 +72,43 @@ function AccountPage() {
   });
 
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setLoadError(null);
+
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) navigate({ to: "/auth" });
       else setUser(session.user);
     });
 
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!data.session) {
-        navigate({ to: "/auth" });
-        return;
-      }
-      setUser(data.session.user);
-      await loadAll(data.session.user.id);
-      setLoading(false);
-    });
+    const TIMEOUT_MS = 10000;
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("Auth check timed out. Please check your connection.")), TIMEOUT_MS),
+    );
 
-    return () => sub.subscription.unsubscribe();
-  }, [navigate]);
+    (async () => {
+      try {
+        const { data } = await Promise.race([supabase.auth.getSession(), timeoutPromise]);
+        if (cancelled) return;
+        if (!data.session) {
+          navigate({ to: "/auth" });
+          return;
+        }
+        setUser(data.session.user);
+        await Promise.race([loadAll(data.session.user.id), timeoutPromise]);
+        if (!cancelled) setLoading(false);
+      } catch (err) {
+        if (cancelled) return;
+        setLoadError(err instanceof Error ? err.message : "Failed to load your account.");
+        setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, [navigate, retryKey]);
 
   const loadAll = async (uid: string) => {
     const [profileRes, ordersRes, addrRes] = await Promise.all([
@@ -153,10 +175,35 @@ function AccountPage() {
     await loadAll(user.id);
   };
 
+  if (loadError) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="p-8 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
+              <AlertCircle className="h-7 w-7 text-destructive" />
+            </div>
+            <h2 className="text-lg font-bold">Couldn't load your account</h2>
+            <p className="mt-2 text-sm text-muted-foreground">{loadError}</p>
+            <div className="mt-5 flex justify-center gap-2">
+              <Button onClick={() => setRetryKey((k) => k + 1)}>
+                <RefreshCw className="mr-2 h-4 w-4" /> Try again
+              </Button>
+              <Button variant="outline" onClick={() => navigate({ to: "/auth" })}>
+                Sign in
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <p className="text-xs text-muted-foreground">Loading your account…</p>
       </div>
     );
   }
