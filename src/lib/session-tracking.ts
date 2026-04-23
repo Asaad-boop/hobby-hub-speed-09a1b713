@@ -1,10 +1,10 @@
 /**
- * Session-level attribution tracking.
- * Captures UTM, referrer, fbclid, fbp, fbc, entry URL and device info
- * on first visit, then exposes it for order submissions.
+ * Session-level attribution tracking (storefront-only, sessionStorage).
  *
- * Stored in sessionStorage so it persists for the visit but doesn't
- * leak across browser sessions.
+ * NOTE: ERP attribution columns on the `orders` table were removed.
+ * This module now only captures attribution in sessionStorage so that
+ * other client code (e.g. analytics pixels) can still read it. It does
+ * NOT push anything into the database anymore.
  */
 
 const STORAGE_KEY = "hs_attribution_v1";
@@ -19,10 +19,6 @@ export type SessionAttribution = {
   utm_term: string | null;
   fb_click_id: string | null;
   fb_browser_pixel: string | null;
-  meta_ad_id: string | null;
-  meta_ad_set_id: string | null;
-  meta_campaign_id: string | null;
-  meta_ad_account_id: string | null;
   device_type: string | null;
   user_agent: string | null;
   session_source: string | null;
@@ -61,10 +57,7 @@ function inferSource(params: URLSearchParams, referrer: string): string {
   return "direct";
 }
 
-/**
- * Call once per page load early in the app lifecycle.
- * Idempotent — only writes on the first visit of a session.
- */
+/** Call once per page load early in the app lifecycle. Idempotent. */
 export function captureSessionOnFirstVisit(): void {
   if (typeof window === "undefined") return;
   try {
@@ -89,13 +82,6 @@ export function captureSessionOnFirstVisit(): void {
       utm_term: params.get("utm_term"),
       fb_click_id: fbclid || fbc || null,
       fb_browser_pixel: fbp || null,
-      meta_ad_id: params.get("ad_id") || params.get("hsa_ad") || null,
-      meta_ad_set_id: params.get("adset_id") || params.get("hsa_grp") || null,
-      meta_campaign_id:
-        params.get("campaign_id") ||
-        params.get("hsa_cam") ||
-        params.get("utm_campaign"),
-      meta_ad_account_id: params.get("hsa_acc") || null,
       device_type: detectDevice(ua),
       user_agent: ua,
       session_source: inferSource(params, referrer),
@@ -108,11 +94,6 @@ export function captureSessionOnFirstVisit(): void {
   }
 }
 
-/**
- * Returns the captured attribution data for the current session,
- * or null if none was stored. Always re-reads the latest fbp/fbc
- * cookies in case Pixel set them after first visit.
- */
 export function getSessionAttribution(): SessionAttribution | null {
   if (typeof window === "undefined") return null;
   try {
@@ -120,7 +101,6 @@ export function getSessionAttribution(): SessionAttribution | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as SessionAttribution;
 
-    // Refresh fb cookies if newer values are available now.
     const fbp = readCookie("_fbp");
     const fbc = readCookie("_fbc");
     if (fbp && !parsed.fb_browser_pixel) parsed.fb_browser_pixel = fbp;
@@ -133,26 +113,10 @@ export function getSessionAttribution(): SessionAttribution | null {
 }
 
 /**
- * Returns a partial orders-table payload for attribution columns.
- * Safe to spread directly into supabase.from('orders').insert(...).
+ * Returns a payload safe to spread into supabase.from('orders').insert(...).
+ * The orders table no longer stores any attribution columns, so this returns
+ * an empty object. Kept for backwards compatibility with checkout code.
  */
-export function getOrderAttributionPayload(): Record<string, string | null> {
-  const a = getSessionAttribution();
-  if (!a) return {};
-  return {
-    entry_url: a.entry_url,
-    session_source: a.session_source,
-    device_type: a.device_type,
-    user_agent: a.user_agent,
-    utm_source: a.utm_source,
-    utm_medium: a.utm_medium,
-    utm_campaign: a.utm_campaign,
-    utm_content: a.utm_content,
-    fb_click_id: a.fb_click_id,
-    fb_browser_pixel: a.fb_browser_pixel,
-    meta_ad_id: a.meta_ad_id,
-    meta_ad_set_id: a.meta_ad_set_id,
-    meta_campaign_id: a.meta_campaign_id,
-    meta_ad_account_id: a.meta_ad_account_id,
-  };
+export function getOrderAttributionPayload(): Record<string, never> {
+  return {};
 }
