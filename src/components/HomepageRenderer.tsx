@@ -47,14 +47,14 @@ import { useSiteSettings, type HomepageSection } from "@/lib/site-settings";
 import { lookupOrder } from "@/lib/order-lookup.functions";
 
 const fallbackCategories = [
-  { name: "All Product", icon: LayoutGrid, count: "500+", tone: "from-foreground to-foreground/70" },
-  { name: "Kitchen & Home", icon: ChefHat, count: "120+", tone: "from-orange-500 to-red-500" },
-  { name: "Decor & Lighting", icon: Lamp, count: "85+", tone: "from-amber-400 to-pink-500" },
-  { name: "Gift Items", icon: Gift, count: "60+", tone: "from-rose-500 to-primary" },
-  { name: "DIY & Hobby Kits", icon: Wrench, count: "45+", tone: "from-emerald-500 to-teal-600" },
-  { name: "Kids & Toys", icon: ToyBrick, count: "70+", tone: "from-sky-400 to-indigo-500" },
-  { name: "Smart Products", icon: Sparkles, count: "90+", tone: "from-violet-500 to-fuchsia-500" },
-  { name: "Gadgets & Tech", icon: Cpu, count: "110+", tone: "from-slate-700 to-primary" },
+  { name: "All Product", slug: "__all__", icon: LayoutGrid, tone: "from-foreground to-foreground/70" },
+  { name: "Kitchen & Home", slug: "kitchen-home", icon: ChefHat, tone: "from-orange-500 to-red-500" },
+  { name: "Decor & Lighting", slug: "decor-lighting", icon: Lamp, tone: "from-amber-400 to-pink-500" },
+  { name: "Gift Items", slug: "gift-items", icon: Gift, tone: "from-rose-500 to-primary" },
+  { name: "DIY & Hobby Kits", slug: "diy-hobby", icon: Wrench, tone: "from-emerald-500 to-teal-600" },
+  { name: "Kids & Toys", slug: "kids-toys", icon: ToyBrick, tone: "from-sky-400 to-indigo-500" },
+  { name: "Smart Products", slug: "smart-products", icon: Sparkles, tone: "from-violet-500 to-fuchsia-500" },
+  { name: "Gadgets & Tech", slug: "gadgets-tech", icon: Cpu, tone: "from-slate-700 to-primary" },
 ];
 
 const trustItems = [
