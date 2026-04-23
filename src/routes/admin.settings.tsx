@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, Rocket } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { ImageUploader } from "@/components/admin/ImageUploader";
+import { triggerVercelRedeploy } from "@/lib/vercel-deploy.functions";
 import {
   DEFAULT_SETTINGS,
   saveSiteSettings,
@@ -25,6 +26,25 @@ function AdminSettingsPage() {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<SiteSettings>(DEFAULT_SETTINGS);
   const [saving, setSaving] = useState(false);
+  const [deploying, setDeploying] = useState(false);
+  const [lastDeploy, setLastDeploy] = useState<string | null>(null);
+
+  const onRedeploy = async () => {
+    setDeploying(true);
+    try {
+      const res = await triggerVercelRedeploy();
+      if (res.success) {
+        setLastDeploy(res.triggeredAt ?? new Date().toISOString());
+        toast.success("Vercel redeploy triggered — 1-2 minute lagbe live hote.");
+      } else {
+        toast.error(res.error ?? "Redeploy failed");
+      }
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setDeploying(false);
+    }
+  };
 
   useEffect(() => {
     if (data) setForm(data);
@@ -181,6 +201,32 @@ function AdminSettingsPage() {
             onChange={(e) => set("hero_subheading", e.target.value)}
           />
         </Field>
+      </Section>
+
+      {/* Deployment */}
+      <Section
+        title="Deployment"
+        description="Vercel e latest commit redeploy koro — revert er por live site update korte ei button use koro."
+      >
+        <div className="flex flex-wrap items-center gap-3">
+          <Button onClick={onRedeploy} disabled={deploying} variant="default">
+            {deploying ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Rocket className="h-4 w-4" />
+            )}
+            Redeploy on Vercel
+          </Button>
+          {lastDeploy && (
+            <span className="text-xs text-muted-foreground">
+              Last triggered: {new Date(lastDeploy).toLocaleString()}
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Setup: Vercel → Project Settings → Git → Deploy Hooks. Hook URL ti{" "}
+          <code className="rounded bg-muted px-1">VERCEL_DEPLOY_HOOK_URL</code> secret e save koro.
+        </p>
       </Section>
 
       <div className="flex justify-end">
