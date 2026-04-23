@@ -12,12 +12,12 @@ const siteSettingsQueryOptions = () =>
   });
 
 export const Route = createFileRoute("/")({
-  // Prefetch in parallel on the server so first paint already has data.
+  // Only await site_settings (small + needed for hero text/banner).
+  // Kick off products fetch in background — hero has fallback content,
+  // so we don't block first paint on the larger products query.
   loader: async ({ context: { queryClient } }) => {
-    await Promise.all([
-      queryClient.prefetchQuery(siteSettingsQueryOptions()),
-      queryClient.prefetchQuery(productsQueryOptions()),
-    ]);
+    void queryClient.prefetchQuery(productsQueryOptions());
+    await queryClient.prefetchQuery(siteSettingsQueryOptions());
     return null;
   },
   head: () => ({
@@ -26,6 +26,11 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Trending gadgets, DIY kits, home decor and gifts. Cash on delivery across Bangladesh." },
       { property: "og:title", content: "HobbyShop — Upgrade Your Space Instantly" },
       { property: "og:description", content: "Unique gadgets & gifts at unbeatable prices." },
+    ],
+    links: [
+      // Warm up Supabase connection earlier so product images / API calls start sooner.
+      { rel: "preconnect", href: "https://bgsspipkjeuceftuatue.supabase.co", crossOrigin: "anonymous" },
+      { rel: "dns-prefetch", href: "https://bgsspipkjeuceftuatue.supabase.co" },
     ],
   }),
   component: Index,
