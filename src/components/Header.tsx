@@ -192,8 +192,10 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-40 bg-background transition-shadow duration-300 ${
-        scrolled ? "shadow-[0_4px_20px_-8px_rgba(0,0,0,0.15)]" : ""
+      className={`sticky top-0 z-40 bg-background/95 backdrop-blur-md transition-all duration-300 ${
+        scrolled
+          ? "shadow-[0_8px_30px_-12px_rgba(0,0,0,0.18)] border-b border-border/60"
+          : "border-b border-border/30"
       }`}
     >
       {/* Announcement bar */}
@@ -210,7 +212,9 @@ export default function Header() {
           </p>
           <p className="sm:hidden">🚚 Free delivery over ৳{freeThreshold.toLocaleString()}</p>
           <div className="hidden items-center gap-4 md:flex">
-            <span className="opacity-80">💰 Cash on Delivery</span>
+            <span className="inline-flex items-center gap-1.5 opacity-85"><Clock className="h-3 w-3" /> Same-day dispatch</span>
+            <span className="h-3 w-px bg-background/30" />
+            <span className="opacity-85">💰 Cash on Delivery</span>
             {phone && (
               <>
                 <span className="h-3 w-px bg-background/30" />
@@ -225,10 +229,16 @@ export default function Header() {
 
       {/* Main navbar */}
       <div
-        className={`transition-all duration-500 ${
-          scrolled ? "py-1" : "py-1.5 md:py-2"
+        className={`relative transition-all duration-500 ${
+          scrolled ? "py-1.5" : "py-2.5 md:py-3"
         }`}
       >
+        {/* Subtle gradient accent line at bottom when scrolled */}
+        <span
+          className={`pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent transition-opacity duration-300 ${
+            scrolled ? "opacity-100" : "opacity-0"
+          }`}
+        />
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 md:gap-6 md:px-6">
           {/* Logo */}
           <Link
