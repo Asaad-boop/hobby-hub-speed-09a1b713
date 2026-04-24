@@ -188,7 +188,11 @@ const FAQS = [
 ];
 
 function LandingPage() {
-  const { product } = Route.useLoaderData() as { product: Product | null };
+  const { combo, plane, car } = Route.useLoaderData() as {
+    combo: Product | null;
+    plane: Product | null;
+    car: Product | null;
+  };
   const navigate = useNavigate();
 
   const [variant, setVariant] = useState<"single" | "combo">("combo");
@@ -204,18 +208,24 @@ function LandingPage() {
   const SINGLE_OLD = 795;
   const COMBO_OLD = 1390;
 
+  // Pick the active product based on variant + singleKit choice.
+  const activeProduct: Product | null =
+    variant === "combo" ? combo : singleKit === "plane" ? plane : car;
+  // For "no product found" gate — combo is the primary fallback.
+  const fallbackProduct = combo ?? plane ?? car;
+
   const unitPrice = variant === "combo" ? COMBO_PRICE : SINGLE_PRICE;
   const oldPrice = variant === "combo" ? COMBO_OLD : SINGLE_OLD;
 
   useEffect(() => {
-    if (!product) return;
+    if (!activeProduct) return;
     fbTrack("ViewContent", {
-      content_ids: [product.id],
-      content_name: product.title,
+      content_ids: [activeProduct.id],
+      content_name: activeProduct.title,
       value: unitPrice,
       currency: META_CURRENCY,
     });
-  }, [product, unitPrice]);
+  }, [activeProduct, unitPrice]);
 
   const subtotal = unitPrice * qty;
   const shippingFee = shipMethod === "inside" ? SHIPPING_INSIDE : SHIPPING_OUTSIDE;
