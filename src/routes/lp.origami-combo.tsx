@@ -851,18 +851,22 @@ function LandingPage() {
               </FormField>
 
               <FormField id="lp-district" label="জেলা *" icon={<MapPin className="h-3.5 w-3.5" />}>
-                <Select value={form.district} onValueChange={(v) => setForm({ ...form, district: v })}>
-                  <SelectTrigger id="lp-district" className="h-11 rounded-lg">
-                    <SelectValue placeholder="আপনার জেলা সিলেক্ট করুন" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BD_DISTRICTS.map((d) => (
-                      <SelectItem key={d.name} value={d.name}>
-                        {d.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <select
+                  id="lp-district"
+                  value={form.district}
+                  onChange={(e) => setForm({ ...form, district: e.target.value })}
+                  className="flex h-11 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  required
+                >
+                  <option value="" disabled>
+                    আপনার জেলা সিলেক্ট করুন
+                  </option>
+                  {BD_DISTRICTS.map((d) => (
+                    <option key={d.name} value={d.name}>
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
               </FormField>
 
               <FormField id="lp-address" label="সঠিক ঠিকানা *" icon={<MapPin className="h-3.5 w-3.5" />}>
