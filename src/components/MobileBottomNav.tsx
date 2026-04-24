@@ -8,6 +8,9 @@ export default function MobileBottomNav() {
   const { count, setOpen } = useCart();
   const { count: wishCount } = useWishlist();
 
+  // Hide on checkout — the sticky "Place Order" CTA owns the bottom area there.
+  if (pathname.startsWith("/checkout")) return null;
+
   const isActive = (path: string) =>
     path === "/" ? pathname === "/" : pathname.startsWith(path);
 
