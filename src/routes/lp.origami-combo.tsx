@@ -504,6 +504,93 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* VIDEO INSTRUCTIONS */}
+      <section className="bg-muted/40 px-5 py-10">
+        <SectionHeading kicker="How to build" title="ভিডিও ইনস্ট্রাকশন" />
+        <p className="-mt-4 mb-6 text-center text-sm text-muted-foreground">
+          প্রতিটি ডিজাইনের জন্য আলাদা step-by-step ভিডিও — QR scan করলেই মোবাইলে দেখা যাবে।
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          {VIDEOS.map((v) => (
+            <div
+              key={v.title}
+              className="group overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]"
+            >
+              <div
+                className="relative flex aspect-video items-center justify-center text-5xl"
+                style={{ background: "var(--gradient-dark)" }}
+              >
+                <span className="opacity-90">{v.thumb}</span>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <PlayCircle className="h-12 w-12 text-white drop-shadow-lg" strokeWidth={1.5} />
+                </div>
+                <span className="absolute bottom-1.5 right-1.5 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                  {v.duration}
+                </span>
+              </div>
+              <p className="p-3 text-xs font-semibold leading-snug text-foreground">{v.title}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-5 text-center text-xs text-muted-foreground">
+          📦 প্রোডাক্ট বক্সের ভিতরে QR কোড পাবেন — স্ক্যান করলেই সব ভিডিও।
+        </p>
+      </section>
+
+      {/* CUSTOMER REVIEWS */}
+      <section className="px-5 py-10">
+        <SectionHeading kicker="Trusted by parents" title="কাস্টমার রিভিউ" />
+        <div className="mb-6 flex items-center justify-center gap-3">
+          <div className="flex">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+            ))}
+          </div>
+          <p className="text-sm font-semibold text-foreground">
+            ৪.৮ <span className="text-muted-foreground">/ ৫ ({REVIEWS.length * 87}+ reviews)</span>
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {REVIEWS.map((r) => (
+            <div
+              key={r.name}
+              className="relative rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+            >
+              <Quote className="absolute right-4 top-4 h-6 w-6 text-primary/15" />
+              <div className="mb-2 flex">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star
+                    key={i}
+                    className={`h-3.5 w-3.5 ${
+                      i <= r.rating ? "fill-yellow-400 text-yellow-400" : "text-muted"
+                    }`}
+                  />
+                ))}
+              </div>
+              <p className="mb-3 text-sm leading-relaxed text-foreground">"{r.text}"</p>
+              <div className="flex items-center gap-2.5 border-t border-border pt-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                  {r.name.charAt(0)}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-semibold text-foreground">
+                    {r.name}
+                    {r.verified && (
+                      <span className="ml-1.5 inline-flex items-center gap-0.5 text-[10px] font-medium text-primary">
+                        <CheckCircle2 className="h-2.5 w-2.5" /> Verified
+                      </span>
+                    )}
+                  </p>
+                  <p className="truncate text-[10px] text-muted-foreground">
+                    {r.location} · {r.date}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* PRICING */}
       <section className="px-5 py-10">
         <SectionHeading kicker="Pricing" title="আপনার জন্য সেরা অফার" />
