@@ -15,7 +15,8 @@ import {
   Send,
   ArrowLeft,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as supabaseTyped } from "@/integrations/supabase/client";
+const supabase = supabaseTyped as any;
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
