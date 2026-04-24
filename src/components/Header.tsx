@@ -217,13 +217,14 @@ export default function Header() {
             <Link
               to="/account"
               aria-label="Account"
-              className="group hidden shrink-0 items-center gap-2.5 rounded-full border border-border bg-background px-3.5 py-2 text-left transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[0_8px_24px_-10px_oklch(0.585_0.245_27.5/0.5)] md:inline-flex"
+              className="group relative hidden shrink-0 items-center gap-2.5 overflow-hidden rounded-full border border-border bg-gradient-to-br from-background to-muted/40 px-3.5 py-2 text-left transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-[0_10px_28px_-12px_oklch(0.585_0.245_27.5/0.55)] md:inline-flex"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+              <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-primary/10 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+              <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-[0_0_0_4px_oklch(0.585_0.245_27.5/0.15)]">
                 <User className="h-4 w-4" />
               </span>
-              <span className="flex flex-col leading-tight">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Account</span>
+              <span className="relative flex flex-col leading-tight">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Account</span>
                 <span className="text-xs font-bold text-foreground">Sign in</span>
               </span>
             </Link>
