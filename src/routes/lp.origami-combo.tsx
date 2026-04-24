@@ -559,6 +559,23 @@ function LandingPage() {
         </p>
       </section>
 
+      {/* WHY THIS PRODUCT */}
+      <section className="bg-muted/30 px-5 py-10">
+        <SectionHeading kicker="Why this product" title="কেন এই Origami Kit নিবেন?" />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {WHY_THIS_PRODUCT.map((item) => (
+            <div
+              key={item.title}
+              className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]"
+            >
+              <div className="mb-2 text-3xl">{item.icon}</div>
+              <h3 className="mb-1 text-sm font-bold text-foreground">{item.title}</h3>
+              <p className="text-xs leading-relaxed text-muted-foreground">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* CUSTOMER REVIEWS */}
       <section className="px-5 py-10">
         <SectionHeading kicker="Trusted by parents" title="কাস্টমার রিভিউ" />
@@ -569,10 +586,11 @@ function LandingPage() {
             ))}
           </div>
           <p className="text-sm font-semibold text-foreground">
-            ৪.৮ <span className="text-muted-foreground">/ ৫ ({REVIEWS.length * 87}+ reviews)</span>
+            ৫.০ <span className="text-muted-foreground">/ ৫ — Verified customer</span>
           </p>
         </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="mx-auto grid max-w-2xl grid-cols-1 gap-3">
+
           {REVIEWS.map((r) => (
             <div
               key={r.name}
