@@ -356,7 +356,7 @@ function LandingPage() {
             </span>
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/70">
-            A+ সাইজ হার্ড পেপারে ১২টি Plane ডিজাইন, হার্ড কার্ডবোর্ডে ১০টি 3D Car — বাংলা ম্যানুয়াল সহ।
+            A+ সাইজ হার্ড পেপারে ১২টি Plane ডিজাইন, হার্ড কার্ডবোর্ডে ১০টি 3D Car — প্রতিটি ডিজাইনের জন্য আলাদা ভিডিও ইনস্ট্রাকশন।
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
