@@ -83,30 +83,30 @@ export default function Header() {
     <header
       className={`sticky top-0 z-40 transition-all duration-500 ${
         scrolled
-          ? "bg-background/85 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.18)] backdrop-blur-2xl"
+          ? "bg-background/75 shadow-[0_10px_40px_-18px_rgba(0,0,0,0.25)] backdrop-blur-2xl ring-1 ring-border/40"
           : "bg-background"
       }`}
     >
       {/* Announcement bar */}
       <div
-        className={`relative overflow-hidden bg-gradient-to-r from-foreground via-[oklch(0.22_0.02_20)] to-foreground text-background transition-all duration-500 ${
+        className={`relative overflow-hidden bg-gradient-to-r from-foreground via-[oklch(0.20_0.02_20)] to-foreground text-background transition-all duration-500 ${
           scrolled ? "max-h-0 opacity-0" : "max-h-10 opacity-100"
         }`}
       >
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/40 to-transparent bg-[length:200%_100%] animate-[shimmer_5s_linear_infinite]" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent bg-[length:200%_100%] animate-[shimmer_6s_linear_infinite]" />
         <div className="relative mx-auto flex h-9 max-w-7xl items-center justify-between gap-4 px-4 text-[12px]">
           <p className="hidden items-center gap-1.5 sm:flex">
-            <span>🚚</span>
+            <span className="animate-bounce-slow">🚚</span>
             <span>Free delivery on orders over <span className="font-bold text-primary-foreground">৳{freeThreshold.toLocaleString()}</span></span>
           </p>
           <p className="sm:hidden">🚚 Free delivery over ৳{freeThreshold.toLocaleString()}</p>
           <div className="hidden items-center gap-4 md:flex">
-            <span className="opacity-80">💰 Cash on Delivery</span>
+            <span className="inline-flex items-center gap-1 opacity-85">💰 <span>Cash on Delivery</span></span>
             {phone && (
               <>
                 <span className="h-3 w-px bg-background/30" />
-                <a href={`tel:${phone}`} className="inline-flex items-center gap-1.5 opacity-90 transition hover:text-primary hover:opacity-100">
-                  <Phone className="h-3 w-3" /> {phone}
+                <a href={`tel:${phone}`} className="group inline-flex items-center gap-1.5 opacity-90 transition hover:text-primary hover:opacity-100">
+                  <Phone className="h-3 w-3 transition-transform group-hover:rotate-12" /> {phone}
                 </a>
               </>
             )}
