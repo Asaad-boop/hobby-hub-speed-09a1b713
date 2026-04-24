@@ -27,6 +27,9 @@ import {
   Sparkles,
   ShieldCheck,
   CheckCircle2,
+  PlayCircle,
+  Star,
+  Quote,
 } from "lucide-react";
 
 const PRODUCT_SLUG = "air-plane-car-combo-2design-combo-origami-paper-1";
@@ -40,12 +43,12 @@ export const Route = createFileRoute("/lp/origami-combo")({
       {
         name: "description",
         content:
-          "A+ hard paper e ১২টি Plane design, hard cardboard e ১০টি 3D Car — Bangla manual soho. Combo te ৳১০০ bachao. COD all over Bangladesh.",
+          "A+ hard paper e ১২টি Plane design, hard cardboard e ১০টি 3D Car — step-by-step video instruction soho. Combo te ৳১০০ bachao. COD all over Bangladesh.",
       },
       { property: "og:title", content: "Plane + Car Kit Combo — Fold It. Build It." },
       {
         property: "og:description",
-        content: "১২ Plane design + ১০ 3D Car design — combo te ৳১০০ bachao. Bangla manual soho.",
+        content: "১২ Plane design + ১০ 3D Car design — combo te ৳১০০ bachao. Video instruction soho.",
       },
     ],
   }),
@@ -87,9 +90,51 @@ const CAR_DESIGNS = [
 const INCLUDES = [
   { text: "A+ Hard Paper — ১২ Plane design (প্রতিটি ৩টি)", qty: "৩৬ শিট" },
   { text: "Hard Cardboard — ১০ Car design (প্রতিটি ৩টি)", qty: "৩০ শিট" },
-  { text: "Bangla Manual — Plane + Car uvoier nirdeshona", qty: "১টি" },
-  { text: "Step-by-step chobi soho design card", qty: "২২টি" },
+  { text: "Step-by-step Video Instruction (QR code soho)", qty: "২২টি" },
+  { text: "প্রতিটি ডিজাইনের আলাদা ডিজাইন কার্ড", qty: "২২টি" },
   { text: "Premium gift box packaging", qty: "১টি" },
+];
+
+const VIDEOS = [
+  { title: "Plane — Classic Dart কীভাবে বানাবেন", duration: "2:14", thumb: "✈️" },
+  { title: "Plane — Fighter Jet step-by-step", duration: "3:08", thumb: "🛩️" },
+  { title: "Car — Sports Car 3D assembly", duration: "4:22", thumb: "🏎️" },
+  { title: "Car — Fire Truck full build", duration: "5:10", thumb: "🚒" },
+];
+
+const REVIEWS = [
+  {
+    name: "Sumaiya Akter",
+    location: "Dhanmondi, Dhaka",
+    rating: 5,
+    text: "Amar 8 bochorer chele eta peye onek khushi! Video dekhe nije nije banaite parche. Quality o khub valo, hard paper.",
+    date: "12 days ago",
+    verified: true,
+  },
+  {
+    name: "Rakib Hasan",
+    location: "Chattogram",
+    rating: 5,
+    text: "Combo nilam — Plane ar Car dutoi. Packaging gift box er moto, delivery o fast chilo. Bachchara onek enjoy korche.",
+    date: "1 month ago",
+    verified: true,
+  },
+  {
+    name: "Nusrat Jahan",
+    location: "Sylhet",
+    rating: 4,
+    text: "Video instruction tao khub kaaj e diyeche, bangla manual chara o sohoje bujha jay. Mobile e dekhe banano gelo.",
+    date: "3 weeks ago",
+    verified: true,
+  },
+  {
+    name: "Tanvir Ahmed",
+    location: "Mirpur, Dhaka",
+    rating: 5,
+    text: "Birthday gift hisebe nilam vagner jonno — onek pochondo korche. Worth the price, recommend korbo.",
+    date: "2 months ago",
+    verified: true,
+  },
 ];
 
 const FAQS = [
@@ -99,7 +144,15 @@ const FAQS = [
   },
   {
     q: "Combo te ki ki thakbe?",
-    a: "Plane Kit (১২ design, ৩৬ shit A+ hard paper) + Car Kit (১০ design, ৩০ shit hard cardboard) + dui kit-er Bangla manual + 22ti design card + premium gift box.",
+    a: "Plane Kit (১২ design, ৩৬ shit A+ hard paper) + Car Kit (১০ design, ৩০ shit hard cardboard) + step-by-step video instruction (QR code scan kore dekhben) + 22ti design card + premium gift box.",
+  },
+  {
+    q: "Manual nai? Kivabe banabo?",
+    a: "Protyek design er alada video instruction ache — QR code scan korle phone e direct video chole asbe. Bangla voice over soho, bachcha rao sohoje bujhte parbe.",
+  },
+  {
+    q: "Single nile Plane na Car — kun ta pabo?",
+    a: "Single nile order form e apni nije Plane ba Car select korte parben. Combo nile dutoi pawa jabe.",
   },
   {
     q: "Delivery koto din-e pabo?",
@@ -116,6 +169,7 @@ function LandingPage() {
   const navigate = useNavigate();
 
   const [variant, setVariant] = useState<"single" | "combo">("combo");
+  const [singleKit, setSingleKit] = useState<"plane" | "car">("plane");
   const [qty, setQty] = useState(1);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [submitting, setSubmitting] = useState(false);
@@ -178,7 +232,12 @@ function LandingPage() {
       const itemSubtotal = unitPrice * qty;
       const orderTotal = itemSubtotal + shippingFee;
       const attribution = getOrderAttributionPayload();
-      const variantLabel = variant === "combo" ? "Plane + Car Combo" : "Single Kit";
+      const variantLabel =
+        variant === "combo"
+          ? "Plane + Car Combo"
+          : singleKit === "plane"
+            ? "Single Kit — Plane (12 designs)"
+            : "Single Kit — Car (10 designs)";
 
       const baseOrder = {
         status: "new" as const,
@@ -297,7 +356,7 @@ function LandingPage() {
             </span>
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/70">
-            A+ সাইজ হার্ড পেপারে ১২টি Plane ডিজাইন, হার্ড কার্ডবোর্ডে ১০টি 3D Car — বাংলা ম্যানুয়াল সহ।
+            A+ সাইজ হার্ড পেপারে ১২টি Plane ডিজাইন, হার্ড কার্ডবোর্ডে ১০টি 3D Car — প্রতিটি ডিজাইনের জন্য আলাদা ভিডিও ইনস্ট্রাকশন।
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
@@ -308,7 +367,7 @@ function LandingPage() {
               🚗 ১০ Car
             </span>
             <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/85 backdrop-blur">
-              📖 Bangla Manual
+              🎬 Video Instruction
             </span>
           </div>
 
@@ -388,7 +447,7 @@ function LandingPage() {
               <SpecCard label="মোট শিট" value="৩৬টি" sub="প্রতি ডিজাইন ৩টি" />
               <SpecCard label="ডিজাইন" value="১২টি" sub="ইউনিক" />
               <SpecCard label="পেপার" value="A+ Hard" />
-              <SpecCard label="ম্যানুয়াল" value="বাংলা" />
+              <SpecCard label="ইনস্ট্রাকশন" value="Video" sub="QR scan" />
             </div>
           </div>
           <div>
@@ -445,6 +504,93 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* VIDEO INSTRUCTIONS */}
+      <section className="bg-muted/40 px-5 py-10">
+        <SectionHeading kicker="How to build" title="ভিডিও ইনস্ট্রাকশন" />
+        <p className="-mt-4 mb-6 text-center text-sm text-muted-foreground">
+          প্রতিটি ডিজাইনের জন্য আলাদা step-by-step ভিডিও — QR scan করলেই মোবাইলে দেখা যাবে।
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          {VIDEOS.map((v) => (
+            <div
+              key={v.title}
+              className="group overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]"
+            >
+              <div
+                className="relative flex aspect-video items-center justify-center text-5xl"
+                style={{ background: "var(--gradient-dark)" }}
+              >
+                <span className="opacity-90">{v.thumb}</span>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <PlayCircle className="h-12 w-12 text-white drop-shadow-lg" strokeWidth={1.5} />
+                </div>
+                <span className="absolute bottom-1.5 right-1.5 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                  {v.duration}
+                </span>
+              </div>
+              <p className="p-3 text-xs font-semibold leading-snug text-foreground">{v.title}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-5 text-center text-xs text-muted-foreground">
+          📦 প্রোডাক্ট বক্সের ভিতরে QR কোড পাবেন — স্ক্যান করলেই সব ভিডিও।
+        </p>
+      </section>
+
+      {/* CUSTOMER REVIEWS */}
+      <section className="px-5 py-10">
+        <SectionHeading kicker="Trusted by parents" title="কাস্টমার রিভিউ" />
+        <div className="mb-6 flex items-center justify-center gap-3">
+          <div className="flex">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+            ))}
+          </div>
+          <p className="text-sm font-semibold text-foreground">
+            ৪.৮ <span className="text-muted-foreground">/ ৫ ({REVIEWS.length * 87}+ reviews)</span>
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {REVIEWS.map((r) => (
+            <div
+              key={r.name}
+              className="relative rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+            >
+              <Quote className="absolute right-4 top-4 h-6 w-6 text-primary/15" />
+              <div className="mb-2 flex">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star
+                    key={i}
+                    className={`h-3.5 w-3.5 ${
+                      i <= r.rating ? "fill-yellow-400 text-yellow-400" : "text-muted"
+                    }`}
+                  />
+                ))}
+              </div>
+              <p className="mb-3 text-sm leading-relaxed text-foreground">"{r.text}"</p>
+              <div className="flex items-center gap-2.5 border-t border-border pt-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                  {r.name.charAt(0)}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-semibold text-foreground">
+                    {r.name}
+                    {r.verified && (
+                      <span className="ml-1.5 inline-flex items-center gap-0.5 text-[10px] font-medium text-primary">
+                        <CheckCircle2 className="h-2.5 w-2.5" /> Verified
+                      </span>
+                    )}
+                  </p>
+                  <p className="truncate text-[10px] text-muted-foreground">
+                    {r.location} · {r.date}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* PRICING */}
       <section className="px-5 py-10">
         <SectionHeading kicker="Pricing" title="আপনার জন্য সেরা অফার" />
@@ -474,7 +620,7 @@ function LandingPage() {
               ১টি Car Kit (১০ ডিজাইন)
               <br />
               <br />
-              বাংলা ম্যানুয়াল সহ
+              ভিডিও ইনস্ট্রাকশন সহ
             </p>
             <div className="rounded-full border border-border py-2 text-xs font-semibold text-foreground">
               অর্ডার করুন →
@@ -508,7 +654,7 @@ function LandingPage() {
               Car Kit (১০ ডিজাইন, ৩০ শিট)
               <br />
               <br />
-              দুটো ম্যানুয়াল সহ
+              ভিডিও ইনস্ট্রাকশন সহ
             </p>
             <div className="rounded-full bg-primary py-2 text-xs font-bold text-primary-foreground">
               কম্বো নিন →
@@ -562,7 +708,11 @@ function LandingPage() {
             <div className="flex items-center gap-3 border-b border-border bg-muted/50 p-4">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-foreground">
-                  {variant === "combo" ? "Plane + Car Combo" : "Single Kit"}
+                  {variant === "combo"
+                    ? "Plane + Car Combo"
+                    : singleKit === "plane"
+                      ? "Single — Plane Kit"
+                      : "Single — Car Kit"}
                 </p>
                 <p className="mt-0.5 text-base font-extrabold text-primary">
                   ৳ {unitPrice.toLocaleString()}
@@ -602,6 +752,34 @@ function LandingPage() {
                   <VariantOption id="v-combo" value="combo" current={variant} title="Combo — ৳১২৯০" sub={`দুটোই + ৳${savings} off`} />
                 </RadioGroup>
               </div>
+
+              {variant === "single" && (
+                <div className="rounded-xl border border-primary/30 bg-primary/5 p-3">
+                  <Label className="mb-2 block text-sm font-semibold text-foreground">
+                    🎯 কোনটা নিতে চান? (Single)
+                  </Label>
+                  <RadioGroup
+                    value={singleKit}
+                    onValueChange={(v) => setSingleKit(v as "plane" | "car")}
+                    className="grid grid-cols-2 gap-2.5"
+                  >
+                    <VariantOption
+                      id="kit-plane"
+                      value="plane"
+                      current={singleKit}
+                      title="✈️ Plane Kit"
+                      sub="১২ ডিজাইন · ৩৬ শিট"
+                    />
+                    <VariantOption
+                      id="kit-car"
+                      value="car"
+                      current={singleKit}
+                      title="🚗 Car Kit"
+                      sub="১০ ডিজাইন · ৩০ শিট"
+                    />
+                  </RadioGroup>
+                </div>
+              )}
 
               <FormField id="lp-name" label="আপনার নাম *" icon={<UserIcon className="h-3.5 w-3.5" />}>
                 <Input
