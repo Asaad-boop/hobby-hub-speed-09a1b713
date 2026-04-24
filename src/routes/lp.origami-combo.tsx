@@ -1070,21 +1070,28 @@ function VariantOption({
   current,
   title,
   sub,
+  badge,
 }: {
   id: string;
   value: string;
   current: string;
   title: string;
   sub: string;
+  badge?: string;
 }) {
   const active = current === value;
   return (
     <label
       htmlFor={id}
-      className={`flex cursor-pointer items-center gap-2 rounded-xl border p-3 transition ${
+      className={`relative flex cursor-pointer items-center gap-2 rounded-xl border p-3 transition ${
         active ? "border-2 border-primary bg-primary/5" : "border-border hover:border-foreground/20"
       }`}
     >
+      {badge && (
+        <span className="absolute -top-2 right-2 rounded-full bg-primary px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground shadow">
+          {badge}
+        </span>
+      )}
       <RadioGroupItem id={id} value={value} />
       <div className="flex-1 text-sm">
         <p className="font-semibold text-foreground">{title}</p>
