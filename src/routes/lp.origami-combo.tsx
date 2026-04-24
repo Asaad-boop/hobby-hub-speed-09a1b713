@@ -43,12 +43,12 @@ export const Route = createFileRoute("/lp/origami-combo")({
       {
         name: "description",
         content:
-          "A+ hard paper e ১২টি Plane design, hard cardboard e ১০টি 3D Car — Bangla manual soho. Combo te ৳১০০ bachao. COD all over Bangladesh.",
+          "A+ hard paper e ১২টি Plane design, hard cardboard e ১০টি 3D Car — step-by-step video instruction soho. Combo te ৳১০০ bachao. COD all over Bangladesh.",
       },
       { property: "og:title", content: "Plane + Car Kit Combo — Fold It. Build It." },
       {
         property: "og:description",
-        content: "১২ Plane design + ১০ 3D Car design — combo te ৳১০০ bachao. Bangla manual soho.",
+        content: "১২ Plane design + ১০ 3D Car design — combo te ৳১০০ bachao. Video instruction soho.",
       },
     ],
   }),
