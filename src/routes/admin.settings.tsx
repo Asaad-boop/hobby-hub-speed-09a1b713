@@ -292,14 +292,14 @@ function DeployStatusPanel({
   checking,
   onRefresh,
 }: {
-  status: DeployStatus | null;
+  status: CommitStatus | null;
   checking: boolean;
   onRefresh: () => void;
 }) {
   if (!status) {
     return (
       <div className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
-        {checking ? "Checking deployment status…" : "No status yet."}
+        {checking ? "Loading latest commit…" : "No status yet."}
       </div>
     );
   }
@@ -309,7 +309,7 @@ function DeployStatusPanel({
         <div className="flex items-start gap-2">
           <AlertTriangle className="mt-0.5 h-4 w-4 text-destructive" />
           <div>
-            <p className="font-semibold text-destructive">Cannot read status</p>
+            <p className="font-semibold text-destructive">Cannot read commit</p>
             <p className="text-muted-foreground">{status.error}</p>
           </div>
         </div>
@@ -317,27 +317,10 @@ function DeployStatusPanel({
     );
   }
 
-  const { vercel, github, inSync } = status;
-  const syncBadge =
-    inSync === true ? (
-      <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/20">
-        <CheckCircle2 className="h-3 w-3" /> Up to date
-      </Badge>
-    ) : inSync === false ? (
-      <Badge variant="destructive" className="gap-1">
-        <AlertTriangle className="h-3 w-3" /> Behind GitHub
-      </Badge>
-    ) : (
-      <Badge variant="secondary">Unknown</Badge>
-    );
-
   return (
     <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3 text-sm">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold">Production status</span>
-          {syncBadge}
-        </div>
+        <span className="font-semibold">Latest GitHub commit (main)</span>
         <button
           onClick={onRefresh}
           disabled={checking}
@@ -347,52 +330,22 @@ function DeployStatusPanel({
         </button>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="rounded-md border border-border bg-background p-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Vercel (live)
-          </p>
-          {vercel.shortSha ? (
-            <>
-              <p className="font-mono text-sm">{vercel.shortSha}</p>
-              {vercel.commitMessage && (
-                <p className="truncate text-xs text-muted-foreground">
-                  {vercel.commitMessage}
-                </p>
-              )}
-              {vercel.deployedAt && (
-                <p className="text-xs text-muted-foreground">
-                  Deployed: {new Date(vercel.deployedAt).toLocaleString()}
-                </p>
-              )}
-            </>
-          ) : (
-            <p className="text-xs text-muted-foreground">No production deployment found</p>
-          )}
-        </div>
-
-        <div className="rounded-md border border-border bg-background p-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            GitHub (main)
-          </p>
-          {github.shortSha ? (
-            <>
-              <p className="font-mono text-sm">{github.shortSha}</p>
-              {github.commitMessage && (
-                <p className="truncate text-xs text-muted-foreground">
-                  {github.commitMessage}
-                </p>
-              )}
-              {github.committedAt && (
-                <p className="text-xs text-muted-foreground">
-                  Committed: {new Date(github.committedAt).toLocaleString()}
-                </p>
-              )}
-            </>
-          ) : (
-            <p className="text-xs text-muted-foreground">{github.error ?? "Unavailable"}</p>
-          )}
-        </div>
+      <div className="rounded-md border border-border bg-background p-3 space-y-1">
+        <a
+          href={status.commitUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-mono text-sm text-primary hover:underline"
+        >
+          {status.shortSha}
+        </a>
+        <p className="truncate text-sm">{status.commitMessage}</p>
+        <p className="text-xs text-muted-foreground">
+          Committed: {new Date(status.committedAt).toLocaleString()}
+        </p>
+        <p className="text-xs text-muted-foreground pt-1">
+          Vercel auto-deploys ei commit ti production e — push er por 1-2 min wait koren.
+        </p>
       </div>
     </div>
   );
