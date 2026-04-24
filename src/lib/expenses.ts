@@ -15,7 +15,7 @@ export type Expense = {
   category_id: string;
   amount: number;
   description: string | null;
-  expense_date: string; // YYYY-MM-DD
+  expense_date: string;
   receipt_url: string | null;
   payment_method: string | null;
   created_by: string;
@@ -26,8 +26,10 @@ export type Expense = {
 
 export const PAYMENT_METHODS = ["Cash", "bKash", "Nagad", "Bank Transfer", "Card", "Other"] as const;
 
+const expenseSupabase = supabase as any;
+
 export async function fetchExpenseCategories(includeInactive = false): Promise<ExpenseCategory[]> {
-  let q = supabase.from("expense_categories").select("*").order("display_order").order("name");
+  let q = expenseSupabase.from("expense_categories").select("*").order("display_order").order("name");
   if (!includeInactive) q = q.eq("is_active", true);
   const { data, error } = await q;
   if (error) throw error;
@@ -36,10 +38,10 @@ export async function fetchExpenseCategories(includeInactive = false): Promise<E
 
 export async function fetchExpenses(filters?: {
   categoryId?: string | null;
-  from?: string | null; // YYYY-MM-DD
+  from?: string | null;
   to?: string | null;
 }): Promise<Expense[]> {
-  let q = supabase
+  let q = expenseSupabase
     .from("expenses")
     .select("*, category:expense_categories(*)")
     .order("expense_date", { ascending: false })
@@ -49,7 +51,7 @@ export async function fetchExpenses(filters?: {
   if (filters?.to) q = q.lte("expense_date", filters.to);
   const { data, error } = await q.limit(1000);
   if (error) throw error;
-  return (data ?? []) as unknown as Expense[];
+  return (data ?? []) as Expense[];
 }
 
 export async function createExpense(input: {
@@ -60,9 +62,11 @@ export async function createExpense(input: {
   receipt_url?: string | null;
   payment_method?: string | null;
 }) {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
-  const { error } = await supabase.from("expenses").insert({
+  const { error } = await expenseSupabase.from("expenses").insert({
     ...input,
     created_by: user.id,
   });
@@ -73,25 +77,25 @@ export async function updateExpense(
   id: string,
   patch: Partial<Pick<Expense, "category_id" | "amount" | "description" | "expense_date" | "receipt_url" | "payment_method">>,
 ) {
-  const { error } = await supabase.from("expenses").update(patch).eq("id", id);
+  const { error } = await expenseSupabase.from("expenses").update(patch).eq("id", id);
   if (error) throw error;
 }
 
 export async function deleteExpense(id: string) {
-  const { error } = await supabase.from("expenses").delete().eq("id", id);
+  const { error } = await expenseSupabase.from("expenses").delete().eq("id", id);
   if (error) throw error;
 }
 
 export async function upsertExpenseCategory(input: { id?: string; name: string; is_active?: boolean }) {
   const slug = input.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   if (input.id) {
-    const { error } = await supabase
+    const { error } = await expenseSupabase
       .from("expense_categories")
       .update({ name: input.name, slug, is_active: input.is_active ?? true })
       .eq("id", input.id);
     if (error) throw error;
   } else {
-    const { error } = await supabase
+    const { error } = await expenseSupabase
       .from("expense_categories")
       .insert({ name: input.name, slug, is_active: input.is_active ?? true });
     if (error) throw error;

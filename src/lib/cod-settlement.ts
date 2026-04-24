@@ -1,6 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { createTransaction, type CashAccount } from "./finance";
 
+const codSupabase = supabase as any;
+
 export type PendingShipment = {
   id: string;
   order_id: string;
@@ -22,7 +24,7 @@ export async function fetchPendingCodShipments(): Promise<PendingShipment[]> {
   const { data, error } = await supabase
     .from("courier_shipments")
     .select(
-      "id, order_id, tracking_id, consignment_id, status, delivered_at, cod_amount_expected, cod_amount_received, actual_delivery_charge, actual_cod_charge, provider, cod_settlement_date, orders:order_id(total, shipping_name)"
+      "id, order_id, tracking_id, consignment_id, status, delivered_at, cod_amount_expected, cod_amount_received, actual_delivery_charge, actual_cod_charge, provider, cod_settlement_date, orders:order_id(total, shipping_name)",
     )
     .in("status", ["delivered", "partial_delivered"])
     .is("cod_settlement_date", null)
@@ -48,22 +50,15 @@ export async function fetchPendingCodShipments(): Promise<PendingShipment[]> {
 
 export type SettlementInput = {
   shipmentIds: string[];
-  fromAccountId: string;        // typically Pathao Pending COD
-  toAccountId: string;          // bKash / Bank
-  amountReceived: number;       // actual amount Pathao deposited
-  expectedAmount: number;       // sum of (expected - charges) for selected
-  settlementDate: string;       // YYYY-MM-DD
-  reference?: string;           // batch reference / payout id
+  fromAccountId: string;
+  toAccountId: string;
+  amountReceived: number;
+  expectedAmount: number;
+  settlementDate: string;
+  reference?: string;
   notes?: string;
 };
 
-/**
- * Record a Pathao COD settlement batch.
- * - Creates paired transfer_out / transfer_in transactions on the ledger.
- * - If amountReceived < expected, also records the shortfall as an expense
- *   against the source account (category=courier_cod_charge) so balances reconcile.
- * - Marks every selected shipment with the settlement date + batch id.
- */
 export async function recordCodSettlement(input: SettlementInput): Promise<string> {
   if (input.shipmentIds.length === 0) throw new Error("Select at least one shipment");
   if (input.fromAccountId === input.toAccountId) throw new Error("From and To accounts must differ");
@@ -73,7 +68,6 @@ export async function recordCodSettlement(input: SettlementInput): Promise<strin
   const ref = input.reference?.trim() || batchId.slice(0, 8);
   const desc = `Pathao COD settlement #${ref} (${input.shipmentIds.length} shipments)`;
 
-  // 1. Out from Pathao Pending
   await createTransaction({
     account_id: input.fromAccountId,
     type: "cod_settlement",
@@ -86,7 +80,6 @@ export async function recordCodSettlement(input: SettlementInput): Promise<strin
     transaction_date: new Date(`${input.settlementDate}T12:00:00`).toISOString(),
   });
 
-  // 2. In to destination (bKash / Bank)
   await createTransaction({
     account_id: input.toAccountId,
     type: "cod_settlement",
@@ -99,7 +92,6 @@ export async function recordCodSettlement(input: SettlementInput): Promise<strin
     transaction_date: new Date(`${input.settlementDate}T12:00:00`).toISOString(),
   });
 
-  // 3. Reconciliation shortfall (if any) — keeps Pathao Pending honest
   const shortfall = +(input.expectedAmount - input.amountReceived).toFixed(2);
   if (shortfall > 0.01) {
     await createTransaction({
@@ -127,8 +119,6 @@ export async function recordCodSettlement(input: SettlementInput): Promise<strin
     });
   }
 
-  // 4. Mark shipments + per-order received amount (pro-rata by expected)
-  const totalExpected = input.expectedAmount || 1;
   const { data: shipments } = await supabase
     .from("courier_shipments")
     .select("id, order_id, cod_amount_expected, actual_delivery_charge, actual_cod_charge")
@@ -137,11 +127,10 @@ export async function recordCodSettlement(input: SettlementInput): Promise<strin
   for (const s of shipments ?? []) {
     const net = Math.max(
       0,
-      Number(s.cod_amount_expected ?? 0) -
-        Number(s.actual_delivery_charge ?? 0) -
-        Number(s.actual_cod_charge ?? 0)
+      Number(s.cod_amount_expected ?? 0) - Number(s.actual_delivery_charge ?? 0) - Number(s.actual_cod_charge ?? 0),
     );
-    const share = +(input.amountReceived * (net / totalExpected)).toFixed(2);
+    const share = +(input.amountReceived * (net / (input.expectedAmount || 1))).toFixed(2);
+
     await supabase
       .from("courier_shipments")
       .update({
@@ -152,8 +141,7 @@ export async function recordCodSettlement(input: SettlementInput): Promise<strin
       })
       .eq("id", s.id);
 
-    // Update per-order P&L finalization
-    await supabase
+    await codSupabase
       .from("order_financials")
       .update({
         cod_amount_received: share,
