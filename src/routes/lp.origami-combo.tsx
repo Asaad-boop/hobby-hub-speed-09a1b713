@@ -27,6 +27,9 @@ import {
   Sparkles,
   ShieldCheck,
   CheckCircle2,
+  PlayCircle,
+  Star,
+  Quote,
 } from "lucide-react";
 
 const PRODUCT_SLUG = "air-plane-car-combo-2design-combo-origami-paper-1";
