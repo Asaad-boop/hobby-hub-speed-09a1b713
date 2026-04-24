@@ -211,7 +211,7 @@ function AdminSettingsPage() {
       {/* Deployment */}
       <Section
         title="Deployment"
-        description="GitHub main commit ar Vercel production deployment compare koro, ar latest code force redeploy koro."
+        description="GitHub e push korar 1-2 min er moddhe Vercel auto-deploy hoye live hoy. Latest commit ar Vercel dashboard ekhane."
       >
         <DeployStatusPanel
           status={status}
@@ -219,13 +219,15 @@ function AdminSettingsPage() {
           onRefresh={onCheckStatus}
         />
         <div className="flex flex-wrap items-center gap-3 pt-2">
-          <Button onClick={onRedeploy} disabled={deploying} variant="default">
-            {deploying ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Rocket className="h-4 w-4" />
-            )}
-            Force redeploy to Production
+          <Button asChild variant="default">
+            <a
+              href="https://vercel.com/dashboard"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Open Vercel dashboard
+            </a>
           </Button>
           <Button
             onClick={onCheckStatus}
@@ -238,7 +240,7 @@ function AdminSettingsPage() {
             ) : (
               <RefreshCw className="h-4 w-4" />
             )}
-            Re-check status
+            Re-check commit
           </Button>
         </div>
       </Section>
