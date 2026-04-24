@@ -33,7 +33,11 @@ import {
   Quote,
 } from "lucide-react";
 
-const PRODUCT_SLUG = "air-plane-car-combo-2design-combo-origami-paper-1";
+const PRODUCT_SLUGS = {
+  combo: "air-plane-car-combo-2design-combo-origami-paper-1",
+  plane: "air-plane-origami-paper-kit-for-kids",
+  car: "car-origami-paper-kit-for-kids",
+} as const;
 const SHIPPING_INSIDE = 70;
 const SHIPPING_OUTSIDE = 130;
 
@@ -54,8 +58,12 @@ export const Route = createFileRoute("/lp/origami-combo")({
     ],
   }),
   loader: async () => {
-    const product = await fetchProductByIdOrSlug(PRODUCT_SLUG);
-    return { product };
+    const [combo, plane, car] = await Promise.all([
+      fetchProductByIdOrSlug(PRODUCT_SLUGS.combo),
+      fetchProductByIdOrSlug(PRODUCT_SLUGS.plane),
+      fetchProductByIdOrSlug(PRODUCT_SLUGS.car),
+    ]);
+    return { combo, plane, car };
   },
   component: LandingPage,
 });
