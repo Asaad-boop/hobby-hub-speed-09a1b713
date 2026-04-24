@@ -2,15 +2,21 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Save, Rocket } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Loader2, RefreshCw, Rocket, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { ImageUploader } from "@/components/admin/ImageUploader";
-import { triggerVercelRedeploy } from "@/lib/vercel-deploy.functions";
+import {
+  getDeploymentStatus,
+  triggerVercelRedeploy,
+} from "@/lib/vercel-deploy.functions";
+
+type DeployStatus = Awaited<ReturnType<typeof getDeploymentStatus>>;
 import {
   DEFAULT_SETTINGS,
   saveSiteSettings,
@@ -26,18 +32,41 @@ function AdminSettingsPage() {
   const { data, isLoading } = useSiteSettings();
   const queryClient = useQueryClient();
   const redeployOnVercel = useServerFn(triggerVercelRedeploy);
+  const checkDeployStatus = useServerFn(getDeploymentStatus);
   const [form, setForm] = useState<SiteSettings>(DEFAULT_SETTINGS);
   const [saving, setSaving] = useState(false);
   const [deploying, setDeploying] = useState(false);
-  const [lastDeploy, setLastDeploy] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [status, setStatus] = useState<DeployStatus | null>(null);
+
+  const onCheckStatus = async () => {
+    setChecking(true);
+    try {
+      const res = await checkDeployStatus();
+      setStatus(res);
+      if (!res.success) toast.error(res.error);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  useEffect(() => {
+    void onCheckStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onRedeploy = async () => {
     setDeploying(true);
     try {
       const res = await redeployOnVercel();
       if (res.success) {
-        setLastDeploy(res.triggeredAt ?? new Date().toISOString());
-        toast.success("Vercel redeploy triggered — 1-2 minute lagbe live hote.");
+        toast.success(
+          `Redeploy triggered (${"sha" in res ? res.sha : res.method}) — 1-2 min lagbe live hote.`,
+        );
+        // refresh status after a beat
+        setTimeout(() => void onCheckStatus(), 3000);
       } else {
         toast.error(res.error ?? "Redeploy failed");
       }
@@ -208,27 +237,36 @@ function AdminSettingsPage() {
       {/* Deployment */}
       <Section
         title="Deployment"
-        description="Vercel e latest commit redeploy koro — revert er por live site update korte ei button use koro."
+        description="GitHub main commit ar Vercel production deployment compare koro, ar latest code force redeploy koro."
       >
-        <div className="flex flex-wrap items-center gap-3">
+        <DeployStatusPanel
+          status={status}
+          checking={checking}
+          onRefresh={onCheckStatus}
+        />
+        <div className="flex flex-wrap items-center gap-3 pt-2">
           <Button onClick={onRedeploy} disabled={deploying} variant="default">
             {deploying ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <Rocket className="h-4 w-4" />
             )}
-            Redeploy on Vercel
+            Force redeploy to Production
           </Button>
-          {lastDeploy && (
-            <span className="text-xs text-muted-foreground">
-              Last triggered: {new Date(lastDeploy).toLocaleString()}
-            </span>
-          )}
+          <Button
+            onClick={onCheckStatus}
+            disabled={checking}
+            variant="outline"
+            size="sm"
+          >
+            {checking ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            Re-check status
+          </Button>
         </div>
-        <p className="text-xs text-muted-foreground">
-          Setup: Vercel → Project Settings → Git → Deploy Hooks. Hook URL ti{" "}
-          <code className="rounded bg-muted px-1">VERCEL_DEPLOY_HOOK_URL</code> secret e save koro.
-        </p>
       </Section>
 
       <div className="flex justify-end">
@@ -269,6 +307,117 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
         {label}
       </Label>
       {children}
+    </div>
+  );
+}
+
+function DeployStatusPanel({
+  status,
+  checking,
+  onRefresh,
+}: {
+  status: DeployStatus | null;
+  checking: boolean;
+  onRefresh: () => void;
+}) {
+  if (!status) {
+    return (
+      <div className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
+        {checking ? "Checking deployment status…" : "No status yet."}
+      </div>
+    );
+  }
+  if (!status.success) {
+    return (
+      <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">
+        <div className="flex items-start gap-2">
+          <AlertTriangle className="mt-0.5 h-4 w-4 text-destructive" />
+          <div>
+            <p className="font-semibold text-destructive">Cannot read status</p>
+            <p className="text-muted-foreground">{status.error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const { vercel, github, inSync } = status;
+  const syncBadge =
+    inSync === true ? (
+      <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/20">
+        <CheckCircle2 className="h-3 w-3" /> Up to date
+      </Badge>
+    ) : inSync === false ? (
+      <Badge variant="destructive" className="gap-1">
+        <AlertTriangle className="h-3 w-3" /> Behind GitHub
+      </Badge>
+    ) : (
+      <Badge variant="secondary">Unknown</Badge>
+    );
+
+  return (
+    <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3 text-sm">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="font-semibold">Production status</span>
+          {syncBadge}
+        </div>
+        <button
+          onClick={onRefresh}
+          disabled={checking}
+          className="text-xs text-muted-foreground hover:text-foreground"
+        >
+          {checking ? "Checking…" : "Refresh"}
+        </button>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="rounded-md border border-border bg-background p-3">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Vercel (live)
+          </p>
+          {vercel.shortSha ? (
+            <>
+              <p className="font-mono text-sm">{vercel.shortSha}</p>
+              {vercel.commitMessage && (
+                <p className="truncate text-xs text-muted-foreground">
+                  {vercel.commitMessage}
+                </p>
+              )}
+              {vercel.deployedAt && (
+                <p className="text-xs text-muted-foreground">
+                  Deployed: {new Date(vercel.deployedAt).toLocaleString()}
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-xs text-muted-foreground">No production deployment found</p>
+          )}
+        </div>
+
+        <div className="rounded-md border border-border bg-background p-3">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            GitHub (main)
+          </p>
+          {github.shortSha ? (
+            <>
+              <p className="font-mono text-sm">{github.shortSha}</p>
+              {github.commitMessage && (
+                <p className="truncate text-xs text-muted-foreground">
+                  {github.commitMessage}
+                </p>
+              )}
+              {github.committedAt && (
+                <p className="text-xs text-muted-foreground">
+                  Committed: {new Date(github.committedAt).toLocaleString()}
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-xs text-muted-foreground">{github.error ?? "Unavailable"}</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
