@@ -6,6 +6,7 @@ import { fetchProductByIdOrSlug, fetchAllProducts } from "@/lib/products";
 import { fetchProductReviews, submitReview, fetchEligibleOrderId } from "@/lib/reviews";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
+import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
 import ProductCard from "@/components/ProductCard";
 import ReviewModal, { type NewReview } from "@/components/ReviewModal";
 import ReviewsList from "@/components/ReviewsList";
@@ -157,6 +158,17 @@ function ProductPage() {
     queryFn: () => fetchEligibleOrderId(product.id),
     staleTime: 60_000,
   });
+
+  // Meta Pixel: ViewContent (once per product visit)
+  useEffect(() => {
+    fbTrack("ViewContent", {
+      content_ids: [product.id],
+      content_name: product.title,
+      content_type: "product",
+      value: product.price,
+      currency: META_CURRENCY,
+    });
+  }, [product.id, product.title, product.price]);
 
   // ---- Variants ----
   const { data: variantData } = useQuery({

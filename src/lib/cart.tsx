@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, ReactNode, useMemo } from "react";
 import type { Product } from "./products";
+import { fbTrack, META_CURRENCY } from "./meta-pixel";
 
 export type CartItem = {
   product: Product;
@@ -54,6 +55,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return [...cur, { product: p, qty, variantId, variantLabel }];
     });
     if (!opts?.silent) setOpen(true);
+
+    // Meta Pixel: AddToCart
+    fbTrack("AddToCart", {
+      content_ids: [p.id],
+      content_name: p.title,
+      content_type: "product",
+      contents: [{ id: p.id, quantity: qty, item_price: p.price }],
+      value: p.price * qty,
+      currency: META_CURRENCY,
+    });
   }, []);
 
   const remove = useCallback((lineKey: string) => {

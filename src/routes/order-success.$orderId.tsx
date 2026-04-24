@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Check, Package, Truck, Copy, Home, ShoppingBag, MapPin, Loader2, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
+import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
 
 export const Route = createFileRoute("/order-success/$orderId")({
   head: ({ params }) => ({
@@ -45,8 +46,29 @@ function OrderSuccessPage() {
         .select("*, order_items(id,name,image,price,quantity)")
         .eq("id", orderId)
         .maybeSingle();
-      setOrder(data as Order | null);
+      const o = data as Order | null;
+      setOrder(o);
       setLoading(false);
+
+      // Meta Pixel: Purchase (dedupe per order via sessionStorage)
+      if (o && typeof window !== "undefined") {
+        const key = `fb_purchase_fired_${o.id}`;
+        if (!sessionStorage.getItem(key)) {
+          fbTrack("Purchase", {
+            content_ids: o.order_items.map((it) => it.id),
+            contents: o.order_items.map((it) => ({
+              id: it.id,
+              quantity: it.quantity,
+              item_price: it.price,
+            })),
+            num_items: o.order_items.reduce((s, it) => s + it.quantity, 0),
+            value: o.total,
+            currency: META_CURRENCY,
+            order_id: o.id,
+          });
+          sessionStorage.setItem(key, "1");
+        }
+      }
     })();
   }, [orderId]);
 

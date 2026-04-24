@@ -1,10 +1,11 @@
 import { Outlet, createRootRouteWithContext, HeadContent, Scripts, useRouterState } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import appCss from "../styles.css?url";
 import "@/lib/i18n";
 import { captureSessionOnFirstVisit } from "@/lib/session-tracking";
+import { META_PIXEL_ID, fbTrack } from "@/lib/meta-pixel";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
@@ -50,6 +51,12 @@ export const Route = createRootRouteWithContext<RouterContext>()({
           sameAs: [],
         }),
       },
+      {
+        // Meta (Facebook) Pixel base code — initializes fbq and fires the
+        // initial PageView. Subsequent SPA navigations fire PageView from
+        // the router subscription in RootComponent (see below).
+        children: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${META_PIXEL_ID}');fbq('track','PageView');`,
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -64,6 +71,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+            alt=""
+          />
+        </noscript>
         {children}
         <Scripts />
       </body>
@@ -80,6 +96,18 @@ function RootComponent() {
   useEffect(() => {
     captureSessionOnFirstVisit();
   }, []);
+
+  // Fire Meta Pixel PageView on SPA route changes. The first PageView is
+  // already sent by the base snippet during initial HTML load, so skip the
+  // first effect run to avoid a duplicate event.
+  const firstPathRef = useRef(true);
+  useEffect(() => {
+    if (firstPathRef.current) {
+      firstPathRef.current = false;
+      return;
+    }
+    fbTrack("PageView");
+  }, [pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
