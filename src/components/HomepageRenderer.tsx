@@ -361,9 +361,11 @@ function CategoriesSection({ section }: { section: HomepageSection }) {
         </div>
       </div>
       <div className="grid grid-cols-4 gap-2 sm:hidden">
-        {fallbackCategories.map(({ name, icon: Icon, tone }, i) => (
-          <button
+        {fallbackCategories.map(({ name, slug, icon: Icon, tone }, i) => (
+          <Link
             key={name}
+            to="/shop"
+            search={{ category: slug === "__all__" ? "All" : name, sort: "popular" } as never}
             style={{ animationDelay: `${i * 60}ms` }}
             className="group animate-cat-pop flex flex-col items-center gap-1.5 rounded-xl p-1.5 text-center transition active:scale-95"
           >
@@ -371,13 +373,15 @@ function CategoriesSection({ section }: { section: HomepageSection }) {
               <Icon className="h-5 w-5" />
             </span>
             <span className="line-clamp-2 text-[10px] font-semibold leading-tight text-foreground">{name}</span>
-          </button>
+          </Link>
         ))}
       </div>
       <div className="hidden grid-cols-3 gap-3 sm:grid lg:grid-cols-4">
         {fallbackCategories.map(({ name, slug, icon: Icon, tone }, i) => (
-          <button
+          <Link
             key={name}
+            to="/shop"
+            search={{ category: slug === "__all__" ? "All" : name, sort: "popular" } as never}
             style={{ animationDelay: `${i * 80}ms` }}
             className="group cat-shine animate-cat-pop relative overflow-hidden rounded-2xl border border-border bg-card p-4 text-left transition-all duration-500 hover:-translate-y-1.5 hover:border-primary/60 hover:shadow-[var(--shadow-elevated)]"
           >
@@ -394,7 +398,7 @@ function CategoriesSection({ section }: { section: HomepageSection }) {
                 Shop now <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
               </span>
             </div>
-          </button>
+          </Link>
         ))}
       </div>
     </section>
