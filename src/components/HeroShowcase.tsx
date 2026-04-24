@@ -199,7 +199,7 @@ export default function HeroShowcase() {
                   <div className="flex flex-col gap-2 pt-2">
                     <Link
                       to="/product/$id"
-                      params={{ id: current.id }}
+                      params={{ id: current.slug || current.id }}
                       className="group inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-[0_15px_35px_-10px_var(--primary)] transition hover:scale-[1.03]"
                     >
                       View Product <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

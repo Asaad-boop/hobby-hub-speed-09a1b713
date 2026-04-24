@@ -573,7 +573,7 @@ function TestimonialsSection({ section }: { section: HomepageSection }) {
                   </div>
                   <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-foreground">"{r.text}"</p>
                   {product && (
-                    <Link to="/product/$id" params={{ id: product.id }} className="mt-3 flex items-center gap-2 rounded-lg bg-muted/60 p-2 hover:bg-muted">
+                    <Link to="/product/$id" params={{ id: product.slug || product.id }} className="mt-3 flex items-center gap-2 rounded-lg bg-muted/60 p-2 hover:bg-muted">
                       <img src={product.image} alt={product.title} loading="lazy" className="h-9 w-9 shrink-0 rounded-md object-cover" />
                       <span className="line-clamp-1 text-[11px] font-semibold text-foreground">{product.title}</span>
                     </Link>
