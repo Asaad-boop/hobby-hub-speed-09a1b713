@@ -101,16 +101,19 @@ export function useProducts() {
   return useQuery(productsQueryOptions());
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function useProduct(id: string | undefined) {
   return useQuery({
     queryKey: ["products", "one", id],
     queryFn: async () => {
       if (!id) return null;
+      const filter = UUID_RE.test(id) ? `id.eq.${id},slug.eq.${id}` : `slug.eq.${id}`;
       const { data, error } = await supabase
         .from("products")
         .select(SELECT_COLS)
         .eq("is_active", true)
-        .or(`id.eq.${id},slug.eq.${id}`)
+        .or(filter)
         .maybeSingle();
       if (error) throw error;
       return data ? toProduct(data as unknown as ProductRow) : null;
@@ -126,11 +129,12 @@ export async function fetchAllProducts(): Promise<Product[]> {
 }
 
 export async function fetchProductByIdOrSlug(idOrSlug: string): Promise<Product | null> {
+  const filter = UUID_RE.test(idOrSlug) ? `id.eq.${idOrSlug},slug.eq.${idOrSlug}` : `slug.eq.${idOrSlug}`;
   const { data, error } = await supabase
     .from("products")
     .select(SELECT_COLS)
     .eq("is_active", true)
-    .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`)
+    .or(filter)
     .maybeSingle();
   if (error) throw error;
   return data ? toProduct(data as unknown as ProductRow) : null;
