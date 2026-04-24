@@ -237,7 +237,10 @@ function LandingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!product) return;
+    if (!activeProduct) {
+      toast.error("Product information missing — page reload korun.");
+      return;
+    }
 
     const trimmedName = form.name.trim();
     const trimmedAddress = form.address.trim();
@@ -317,9 +320,9 @@ function LandingPage() {
         {
           order_id: order.id,
           user_id: isGuest ? null : session!.user.id,
-          product_id: product.id,
-          name: `${product.title} — ${variantLabel}`,
-          image: product.image,
+          product_id: activeProduct.id,
+          name: `${activeProduct.title} — ${variantLabel}`,
+          image: activeProduct.image,
           price: unitPrice,
           quantity: qty,
           variant_id: null,
@@ -336,7 +339,7 @@ function LandingPage() {
       }
 
       fbTrack("Purchase", {
-        content_ids: [product.id],
+        content_ids: [activeProduct.id],
         value: orderTotal,
         currency: META_CURRENCY,
       });
@@ -350,7 +353,7 @@ function LandingPage() {
     }
   };
 
-  if (!product) {
+  if (!fallbackProduct) {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center">
         <h1 className="text-2xl font-bold text-foreground">Product paowa jay ni</h1>
