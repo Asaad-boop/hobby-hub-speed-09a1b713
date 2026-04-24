@@ -137,22 +137,9 @@ export function getSessionAttribution(): SessionAttribution | null {
  * Safe to spread directly into supabase.from('orders').insert(...).
  */
 export function getOrderAttributionPayload(): Record<string, string | null> {
-  const a = getSessionAttribution();
-  if (!a) return {};
-  return {
-    entry_url: a.entry_url,
-    session_source: a.session_source,
-    device_type: a.device_type,
-    user_agent: a.user_agent,
-    utm_source: a.utm_source,
-    utm_medium: a.utm_medium,
-    utm_campaign: a.utm_campaign,
-    utm_content: a.utm_content,
-    fb_click_id: a.fb_click_id,
-    fb_browser_pixel: a.fb_browser_pixel,
-    meta_ad_id: a.meta_ad_id,
-    meta_ad_set_id: a.meta_ad_set_id,
-    meta_campaign_id: a.meta_campaign_id,
-    meta_ad_account_id: a.meta_ad_account_id,
-  };
+  // Attribution columns are not present on the `orders` table yet.
+  // Returning an empty payload avoids PGRST204 "column not found" errors
+  // when inserting orders. Re-enable individual fields here once the
+  // matching columns are added to the database.
+  return {};
 }
