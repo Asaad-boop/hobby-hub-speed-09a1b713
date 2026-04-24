@@ -733,7 +733,11 @@ function TrackOrderSection() {
       sessionStorage.setItem(`order:${res.order.id}`, JSON.stringify(res.order));
       navigate({ to: "/track/$orderId", params: { orderId: res.order.id } });
     } catch (e: any) {
-      setErr(e?.message || "Lookup failed");
+      const msg =
+        e?.message && !/SUPABASE_|environment variables/i.test(e.message)
+          ? e.message
+          : "Order tracking is temporarily unavailable. Please try again.";
+      setErr(msg);
     } finally {
       setLoading(false);
     }
@@ -775,7 +779,18 @@ function TrackOrderSection() {
               </button>
             </div>
             <div className="flex items-center justify-between gap-2 px-1">
-              {err ? <p className="text-[11px] font-semibold text-destructive">{err}</p> : <span />}
+              {err ? (
+                <div className="flex items-center gap-2">
+                  <p className="text-[11px] font-semibold text-destructive">{err}</p>
+                  <button
+                    type="button"
+                    onClick={() => { setErr(""); if (q.trim()) submit({ preventDefault: () => {} } as React.FormEvent); }}
+                    className="inline-flex items-center gap-1 rounded-full border border-destructive/40 px-2 py-0.5 text-[10px] font-bold text-destructive hover:bg-destructive/10"
+                  >
+                    <RotateCcw className="h-3 w-3" /> Retry
+                  </button>
+                </div>
+              ) : <span />}
               <Link to="/track" className="ml-auto text-[11px] font-semibold text-muted-foreground hover:text-primary">
                 Open full tracker →
               </Link>

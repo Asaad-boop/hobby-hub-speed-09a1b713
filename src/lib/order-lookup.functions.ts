@@ -10,6 +10,13 @@ export const lookupOrder = createServerFn({ method: "POST" })
     return { query };
   })
   .handler(async ({ data }) => {
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return {
+        ok: false as const,
+        error:
+          "Order tracking is temporarily unavailable. Please try again in a moment.",
+      };
+    }
     const { query } = data;
     const isEmail = query.includes("@");
     const digits = normalizePhone(query);
