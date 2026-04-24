@@ -1,10 +1,11 @@
 import { Outlet, createRootRouteWithContext, HeadContent, Scripts, useRouterState } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import appCss from "../styles.css?url";
 import "@/lib/i18n";
 import { captureSessionOnFirstVisit } from "@/lib/session-tracking";
+import { META_PIXEL_ID, fbTrack } from "@/lib/meta-pixel";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
