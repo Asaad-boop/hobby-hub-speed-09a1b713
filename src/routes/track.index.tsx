@@ -35,6 +35,11 @@ function TrackLanding() {
     try {
       const res = await lookupOrder({ data: { query: q } });
       if (!res.ok) {
+        if ((res as any).code === "unauthorized") {
+          toast.info(res.error);
+          navigate({ to: "/auth" });
+          return;
+        }
         setError(res.error);
         toast.error(res.error);
         return;
@@ -42,26 +47,7 @@ function TrackLanding() {
       sessionStorage.setItem(`order:${res.order.id}`, JSON.stringify(res.order));
       navigate({ to: "/track/$orderId", params: { orderId: res.order.id } });
     } catch (err: any) {
-      // Server function may throw a raw Response (from middleware) — handle it
-      let status = 0;
-      let raw = "";
-      if (err instanceof Response) {
-        status = err.status;
-        try { raw = await err.text(); } catch { /* ignore */ }
-      } else {
-        raw = err?.message || String(err || "");
-        const m = raw.match(/\b(401|403|500)\b/);
-        if (m) status = Number(m[1]);
-      }
-
-      if (status === 401 || /Unauthorized|No authorization|No token|Invalid token/i.test(raw)) {
-        toast.info("Please sign in to track your order");
-        navigate({ to: "/auth" });
-        return;
-      }
-      const friendly = status === 500 || /SUPABASE_|environment variables/i.test(raw)
-        ? "Order tracking is temporarily unavailable. Please try again in a moment."
-        : raw || "Lookup failed. Please try again.";
+      const friendly = err?.message || "Lookup failed. Please try again.";
       setError(friendly);
       toast.error(friendly);
     } finally {
