@@ -42,16 +42,28 @@ function TrackLanding() {
       sessionStorage.setItem(`order:${res.order.id}`, JSON.stringify(res.order));
       navigate({ to: "/track/$orderId", params: { orderId: res.order.id } });
     } catch (err: any) {
-      const raw = err?.message || "";
-      if (/Unauthorized|No authorization|No token/i.test(raw)) {
+      // Server function may throw a raw Response (from middleware) — handle it
+      let status = 0;
+      let raw = "";
+      if (err instanceof Response) {
+        status = err.status;
+        try { raw = await err.text(); } catch { /* ignore */ }
+      } else {
+        raw = err?.message || String(err || "");
+        const m = raw.match(/\b(401|403|500)\b/);
+        if (m) status = Number(m[1]);
+      }
+
+      if (status === 401 || /Unauthorized|No authorization|No token|Invalid token/i.test(raw)) {
         toast.info("Please sign in to track your order");
         navigate({ to: "/auth" });
         return;
       }
-      const friendly = /SUPABASE_|environment variables/i.test(raw)
+      const friendly = status === 500 || /SUPABASE_|environment variables/i.test(raw)
         ? "Order tracking is temporarily unavailable. Please try again in a moment."
         : raw || "Lookup failed. Please try again.";
       setError(friendly);
+      toast.error(friendly);
     } finally {
       setLoading(false);
     }
