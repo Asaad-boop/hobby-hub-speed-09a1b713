@@ -1,18 +1,31 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 /**
  * Get latest commit info from GitHub main branch.
- * Vercel auto-deploys on every push to main, so this commit will be live within ~1-2 min.
+ * ADMIN ONLY — exposes repo identity and commit metadata.
  */
-export const getLatestGithubCommit = createServerFn({ method: "GET" }).handler(
-  async () => {
+export const getLatestGithubCommit = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    // Verify admin role
+    const { data: rolesRow } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin");
+    if (!rolesRow || rolesRow.length === 0) {
+      return { success: false as const, error: "Forbidden" };
+    }
+
     const githubToken = process.env.GITHUB_TOKEN;
-    const githubRepo = process.env.GITHUB_REPO; // format: "owner/repo"
+    const githubRepo = process.env.GITHUB_REPO;
 
     if (!githubToken || !githubRepo) {
       return {
         success: false as const,
-        error: "GITHUB_TOKEN or GITHUB_REPO not set",
+        error: "Deployment info not configured",
       };
     }
 
@@ -29,9 +42,13 @@ export const getLatestGithubCommit = createServerFn({ method: "GET" }).handler(
         },
       );
       if (!ghRes.ok) {
+        // Generic error to caller; details kept server-side only
+        console.error(
+          `GitHub API error ${ghRes.status}: ${(await ghRes.text()).slice(0, 200)}`,
+        );
         return {
           success: false as const,
-          error: `GitHub API ${ghRes.status}: ${(await ghRes.text()).slice(0, 200)}`,
+          error: "Failed to fetch deployment info",
         };
       }
       const ghJson = (await ghRes.json()) as {
@@ -49,10 +66,10 @@ export const getLatestGithubCommit = createServerFn({ method: "GET" }).handler(
         checkedAt: new Date().toISOString(),
       };
     } catch (e) {
+      console.error("GitHub commit fetch failed:", e);
       return {
         success: false as const,
-        error: e instanceof Error ? e.message : String(e),
+        error: "Failed to fetch deployment info",
       };
     }
-  },
-);
+  });
