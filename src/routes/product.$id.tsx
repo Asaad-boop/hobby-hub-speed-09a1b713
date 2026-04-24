@@ -159,6 +159,17 @@ function ProductPage() {
     staleTime: 60_000,
   });
 
+  // Meta Pixel: ViewContent (once per product visit)
+  useEffect(() => {
+    fbTrack("ViewContent", {
+      content_ids: [product.id],
+      content_name: product.title,
+      content_type: "product",
+      value: product.price,
+      currency: META_CURRENCY,
+    });
+  }, [product.id, product.title, product.price]);
+
   // ---- Variants ----
   const { data: variantData } = useQuery({
     queryKey: ["product_variants", product.id],
