@@ -97,6 +97,18 @@ function RootComponent() {
     captureSessionOnFirstVisit();
   }, []);
 
+  // Fire Meta Pixel PageView on SPA route changes. The first PageView is
+  // already sent by the base snippet during initial HTML load, so skip the
+  // first effect run to avoid a duplicate event.
+  const firstPathRef = useRef(true);
+  useEffect(() => {
+    if (firstPathRef.current) {
+      firstPathRef.current = false;
+      return;
+    }
+    fbTrack("PageView");
+  }, [pathname]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <WishlistProvider>
