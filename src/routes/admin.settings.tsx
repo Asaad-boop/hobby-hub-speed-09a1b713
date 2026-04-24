@@ -32,18 +32,41 @@ function AdminSettingsPage() {
   const { data, isLoading } = useSiteSettings();
   const queryClient = useQueryClient();
   const redeployOnVercel = useServerFn(triggerVercelRedeploy);
+  const checkDeployStatus = useServerFn(getDeploymentStatus);
   const [form, setForm] = useState<SiteSettings>(DEFAULT_SETTINGS);
   const [saving, setSaving] = useState(false);
   const [deploying, setDeploying] = useState(false);
-  const [lastDeploy, setLastDeploy] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [status, setStatus] = useState<DeployStatus | null>(null);
+
+  const onCheckStatus = async () => {
+    setChecking(true);
+    try {
+      const res = await checkDeployStatus();
+      setStatus(res);
+      if (!res.success) toast.error(res.error);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  useEffect(() => {
+    void onCheckStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onRedeploy = async () => {
     setDeploying(true);
     try {
       const res = await redeployOnVercel();
       if (res.success) {
-        setLastDeploy(res.triggeredAt ?? new Date().toISOString());
-        toast.success("Vercel redeploy triggered — 1-2 minute lagbe live hote.");
+        toast.success(
+          `Redeploy triggered (${"sha" in res ? res.sha : res.method}) — 1-2 min lagbe live hote.`,
+        );
+        // refresh status after a beat
+        setTimeout(() => void onCheckStatus(), 3000);
       } else {
         toast.error(res.error ?? "Redeploy failed");
       }
