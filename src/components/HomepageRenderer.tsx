@@ -398,7 +398,7 @@ function CategoriesSection({ section }: { section: HomepageSection }) {
                 Shop now <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
               </span>
             </div>
-          </button>
+          </Link>
         ))}
       </div>
     </section>
