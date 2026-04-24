@@ -2,15 +2,21 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Save, Rocket } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Loader2, RefreshCw, Rocket, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { ImageUploader } from "@/components/admin/ImageUploader";
-import { triggerVercelRedeploy } from "@/lib/vercel-deploy.functions";
+import {
+  getDeploymentStatus,
+  triggerVercelRedeploy,
+} from "@/lib/vercel-deploy.functions";
+
+type DeployStatus = Awaited<ReturnType<typeof getDeploymentStatus>>;
 import {
   DEFAULT_SETTINGS,
   saveSiteSettings,
