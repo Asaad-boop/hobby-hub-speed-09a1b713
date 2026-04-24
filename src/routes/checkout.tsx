@@ -126,105 +126,166 @@ function Checkout() {
     setCoupon("");
   };
 
-  const phoneValid = /^01[3-9]\d{8}$/.test(form.phone.replace(/\s/g, ""));
+  // Normalize BD phone: strip spaces/dashes/+88 prefix, then validate.
+  const normalizePhone = (raw: string): string => {
+    let p = (raw || "").replace(/[\s\-()]/g, "");
+    if (p.startsWith("+88")) p = p.slice(3);
+    else if (p.startsWith("88") && p.length === 13) p = p.slice(2);
+    return p;
+  };
+  const normalizedPhone = normalizePhone(form.phone);
+  const phoneValid = /^01[3-9]\d{8}$/.test(normalizedPhone);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (submitting) return;
 
-    if (!form.name || !form.phone || !form.address) {
-      toast.error("Please fill in all required fields");
+    // ---- Pre-flight validation ----
+    if (items.length === 0) {
+      toast.error("Your cart is empty.");
+      return;
+    }
+    const trimmedName = form.name.trim();
+    const trimmedAddress = form.address.trim();
+    if (!trimmedName || !form.phone || !trimmedAddress) {
+      toast.error("Please fill in name, phone and address.");
       return;
     }
     if (!phoneValid) {
-      toast.error("Please enter a valid Bangladeshi phone number");
+      toast.error("Please enter a valid Bangladeshi phone number (e.g. 01712345678).");
+      return;
+    }
+    if (!form.district) {
+      toast.error("Please select your district.");
       return;
     }
 
     setSubmitting(true);
+    let createdOrderId: string | null = null;
 
-    const { data: { session } } = await supabase.auth.getSession();
-    const isGuest = !session;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const isGuest = !session;
 
-    const allItems = bump ? [...items, { product: bumpItem, qty: 1 }] : items;
-    const subtotal = allItems.reduce((s, i) => s + i.product.price * i.qty, 0);
-    const orderTotal = subtotal + shippingFee - couponDiscount;
+      const allItems = bump ? [...items, { product: bumpItem, qty: 1 }] : items;
+      // Guard: every item must have a valid product id and price.
+      const invalidItem = allItems.find(
+        (i) => !i?.product?.id || typeof i.product.price !== "number" || i.qty < 1,
+      );
+      if (invalidItem) {
+        toast.error("One of the items in your cart is invalid. Please refresh and try again.");
+        setSubmitting(false);
+        return;
+      }
 
-    // Build the order row — works for both authed and guest checkouts.
-    // Capture marketing/session attribution from the visitor's session.
-    const attribution = getOrderAttributionPayload();
-    const baseOrder = {
-      status: "new" as const,
-      subtotal,
-      shipping_fee: shippingFee,
-      discount_amount: couponDiscount,
-      coupon_code: appliedCoupon?.code ?? null,
-      total: orderTotal,
-      payment_method: payMethod,
-      shipping_name: form.name,
-      shipping_phone: form.phone,
-      shipping_address: form.address,
-      shipping_city: form.city,
-      shipping_district: form.district,
-      ...attribution,
-    };
-    const orderInsert = isGuest
-      ? {
-          ...baseOrder,
-          user_id: null,
-          is_guest_order: true,
-          guest_name: form.name,
-          guest_phone: form.phone,
-        }
-      : {
-          ...baseOrder,
-          user_id: session!.user.id,
-        };
+      const subtotal = allItems.reduce((s, i) => s + i.product.price * i.qty, 0);
+      // Recompute discount against the actual subtotal to avoid drift vs the
+      // validate_order_totals DB trigger (tolerance is 1 unit).
+      const finalDiscount = appliedCoupon
+        ? appliedCoupon.type === "percentage"
+          ? Math.min(
+              Math.round((subtotal * Number(appliedCoupon.value)) / 100),
+              appliedCoupon.max_discount ? Number(appliedCoupon.max_discount) : Infinity,
+            )
+          : Math.min(Number(appliedCoupon.value), subtotal)
+        : 0;
+      const orderTotal = Math.max(0, subtotal + shippingFee - finalDiscount);
 
-    const { data: order, error: orderErr } = await supabase
-      .from("orders")
-      .insert(orderInsert)
-      .select("id")
-      .single();
+      const attribution = getOrderAttributionPayload();
+      const baseOrder = {
+        status: "new" as const,
+        subtotal,
+        shipping_fee: shippingFee,
+        discount_amount: finalDiscount,
+        coupon_code: appliedCoupon?.code ?? null,
+        total: orderTotal,
+        payment_method: payMethod,
+        shipping_name: trimmedName,
+        shipping_phone: normalizedPhone,
+        shipping_address: trimmedAddress,
+        shipping_city: form.city.trim() || form.district,
+        shipping_district: form.district,
+        ...attribution,
+      };
+      const orderInsert = isGuest
+        ? {
+            ...baseOrder,
+            user_id: null,
+            is_guest_order: true,
+            guest_name: trimmedName,
+            guest_phone: normalizedPhone,
+          }
+        : {
+            ...baseOrder,
+            user_id: session!.user.id,
+          };
 
-    if (orderErr || !order) {
-      console.error("Order insert failed:", orderErr, "payload:", orderInsert);
-      toast.error(orderErr?.message ? `Order failed: ${orderErr.message}` : "Could not place order. Please try again.");
-      setSubmitting(false);
-      return;
-    }
+      const { data: order, error: orderErr } = await supabase
+        .from("orders")
+        .insert(orderInsert)
+        .select("id")
+        .single();
 
-    const orderItemsPayload = allItems.map((i) => ({
-      order_id: order.id,
-      user_id: isGuest ? null : session!.user.id,
-      product_id: i.product.id,
-      name: i.product.title,
-      image: i.product.image,
-      price: i.product.price,
-      quantity: i.qty,
-      variant_id: i.variantId ?? null,
-      variant_label: i.variantLabel ?? null,
-    }));
-    const { error: itemsErr } = await supabase.from("order_items").insert(orderItemsPayload);
-    if (itemsErr) {
-      console.error("Order items insert failed:", itemsErr, "payload:", orderItemsPayload);
-      toast.error(`Items failed: ${itemsErr.message}`);
-      setSubmitting(false);
-      return;
-    }
+      if (orderErr || !order) {
+        console.error("Order insert failed:", orderErr, "payload:", orderInsert);
+        toast.error(
+          orderErr?.message
+            ? `Could not place order: ${orderErr.message}`
+            : "Could not place order. Please check your connection and try again.",
+        );
+        setSubmitting(false);
+        return;
+      }
+      createdOrderId = order.id;
 
-    if (!isGuest && appliedCoupon && couponDiscount > 0) {
-      await supabase.from("coupon_usage").insert({
-        coupon_id: appliedCoupon.id,
-        user_id: session!.user.id,
+      const orderItemsPayload = allItems.map((i) => ({
         order_id: order.id,
-        discount_amount: couponDiscount,
-      });
-    }
+        user_id: isGuest ? null : session!.user.id,
+        product_id: i.product.id,
+        name: i.product.title,
+        image: i.product.image,
+        price: i.product.price,
+        quantity: i.qty,
+        variant_id: i.variantId ?? null,
+        variant_label: i.variantLabel ?? null,
+      }));
+      const { error: itemsErr } = await supabase.from("order_items").insert(orderItemsPayload);
+      if (itemsErr) {
+        console.error("Order items insert failed:", itemsErr, "payload:", orderItemsPayload);
+        // Clean up the orphaned order row so the user can retry cleanly.
+        // Guest rows can't be deleted by the user under RLS — that's OK; the
+        // order will simply remain empty and admins can purge it.
+        if (!isGuest) {
+          await supabase.from("orders").delete().eq("id", order.id);
+        }
+        toast.error(`Could not save your items: ${itemsErr.message}. Please try again.`);
+        setSubmitting(false);
+        return;
+      }
 
-    clear();
-    toast.success("Order placed! We'll call you to confirm soon.");
-    navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
+      if (!isGuest && appliedCoupon && finalDiscount > 0) {
+        // Best-effort — failure here should not block the order.
+        const { error: couponErr } = await supabase.from("coupon_usage").insert({
+          coupon_id: appliedCoupon.id,
+          user_id: session!.user.id,
+          order_id: order.id,
+          discount_amount: finalDiscount,
+        });
+        if (couponErr) console.warn("Coupon usage log failed (non-fatal):", couponErr);
+      }
+
+      clear();
+      toast.success("Order placed! We'll call you to confirm soon.");
+      navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
+    } catch (err: any) {
+      console.error("Checkout exception:", err, "createdOrderId:", createdOrderId);
+      toast.error(
+        err?.message
+          ? `Order failed: ${err.message}`
+          : "Something went wrong. Please check your internet and try again.",
+      );
+      setSubmitting(false);
+    }
   };
 
   if (items.length === 0) {
