@@ -735,6 +735,31 @@ function LandingPage() {
 
       {/* Mobile sticky Order Now bar — updates with selected variant */}
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[var(--shadow-elevated)] backdrop-blur-xl md:hidden">
+        {/* Quick-select pills */}
+        <div className="mb-2 grid grid-cols-2 gap-1.5 rounded-full bg-muted p-1">
+          <button
+            type="button"
+            onClick={() => setVariant("single")}
+            className={`rounded-full px-2 py-1.5 text-[11px] font-bold transition-all ${
+              variant === "single"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground"
+            }`}
+          >
+            Single · ৳{SINGLE_PRICE}
+          </button>
+          <button
+            type="button"
+            onClick={() => setVariant("combo")}
+            className={`relative rounded-full px-2 py-1.5 text-[11px] font-bold transition-all ${
+              variant === "combo"
+                ? "bg-primary text-primary-foreground shadow-[var(--shadow-brand)]"
+                : "text-muted-foreground"
+            }`}
+          >
+            Combo · ৳{COMBO_PRICE}
+          </button>
+        </div>
         <div className="flex items-center gap-3">
           <div className="flex-1 min-w-0">
             <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
