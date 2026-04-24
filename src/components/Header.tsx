@@ -83,30 +83,30 @@ export default function Header() {
     <header
       className={`sticky top-0 z-40 transition-all duration-500 ${
         scrolled
-          ? "bg-background/85 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.18)] backdrop-blur-2xl"
+          ? "bg-background/75 shadow-[0_10px_40px_-18px_rgba(0,0,0,0.25)] backdrop-blur-2xl ring-1 ring-border/40"
           : "bg-background"
       }`}
     >
       {/* Announcement bar */}
       <div
-        className={`relative overflow-hidden bg-gradient-to-r from-foreground via-[oklch(0.22_0.02_20)] to-foreground text-background transition-all duration-500 ${
+        className={`relative overflow-hidden bg-gradient-to-r from-foreground via-[oklch(0.20_0.02_20)] to-foreground text-background transition-all duration-500 ${
           scrolled ? "max-h-0 opacity-0" : "max-h-10 opacity-100"
         }`}
       >
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/40 to-transparent bg-[length:200%_100%] animate-[shimmer_5s_linear_infinite]" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent bg-[length:200%_100%] animate-[shimmer_6s_linear_infinite]" />
         <div className="relative mx-auto flex h-9 max-w-7xl items-center justify-between gap-4 px-4 text-[12px]">
           <p className="hidden items-center gap-1.5 sm:flex">
-            <span>🚚</span>
+            <span className="animate-bounce-slow">🚚</span>
             <span>Free delivery on orders over <span className="font-bold text-primary-foreground">৳{freeThreshold.toLocaleString()}</span></span>
           </p>
           <p className="sm:hidden">🚚 Free delivery over ৳{freeThreshold.toLocaleString()}</p>
           <div className="hidden items-center gap-4 md:flex">
-            <span className="opacity-80">💰 Cash on Delivery</span>
+            <span className="inline-flex items-center gap-1 opacity-85">💰 <span>Cash on Delivery</span></span>
             {phone && (
               <>
                 <span className="h-3 w-px bg-background/30" />
-                <a href={`tel:${phone}`} className="inline-flex items-center gap-1.5 opacity-90 transition hover:text-primary hover:opacity-100">
-                  <Phone className="h-3 w-3" /> {phone}
+                <a href={`tel:${phone}`} className="group inline-flex items-center gap-1.5 opacity-90 transition hover:text-primary hover:opacity-100">
+                  <Phone className="h-3 w-3 transition-transform group-hover:rotate-12" /> {phone}
                 </a>
               </>
             )}
@@ -141,17 +141,17 @@ export default function Header() {
           </Link>
 
           {/* Desktop categories */}
-          <nav className="hidden flex-1 items-center justify-center gap-0.5 lg:flex">
+          <nav className="hidden flex-1 items-center justify-center gap-1 lg:flex">
             {categories.map((c) => (
               <Link
                 key={c.label}
                 to="/shop"
                 search={{ category: c.category, sort: "popular" } as any}
-                className="group relative whitespace-nowrap rounded-full px-2.5 py-2 text-[13px] font-medium text-foreground/75 transition-colors hover:text-primary xl:px-3 xl:text-sm"
+                className="group relative whitespace-nowrap rounded-full px-3 py-2 text-[13px] font-medium text-foreground/80 transition-colors hover:text-primary xl:px-3.5 xl:text-sm"
               >
                 <span className="relative z-10">{c.label}</span>
-                <span className="absolute inset-0 -z-0 scale-90 rounded-full bg-primary/8 opacity-0 transition-all duration-300 group-hover:scale-100 group-hover:opacity-100" />
-                <span className="absolute bottom-1 left-1/2 h-0.5 w-0 -translate-x-1/2 rounded-full bg-primary transition-all duration-300 group-hover:w-6" />
+                <span className="absolute inset-0 -z-0 scale-75 rounded-full bg-gradient-to-br from-primary/12 to-primary/5 opacity-0 transition-all duration-300 group-hover:scale-100 group-hover:opacity-100" />
+                <span className="absolute -bottom-0.5 left-1/2 h-[2px] w-0 -translate-x-1/2 rounded-full bg-gradient-to-r from-primary/60 via-primary to-primary/60 transition-all duration-300 group-hover:w-7" />
               </Link>
             ))}
           </nav>
@@ -217,13 +217,14 @@ export default function Header() {
             <Link
               to="/account"
               aria-label="Account"
-              className="group hidden shrink-0 items-center gap-2.5 rounded-full border border-border bg-background px-3.5 py-2 text-left transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[0_8px_24px_-10px_oklch(0.585_0.245_27.5/0.5)] md:inline-flex"
+              className="group relative hidden shrink-0 items-center gap-2.5 overflow-hidden rounded-full border border-border bg-gradient-to-br from-background to-muted/40 px-3.5 py-2 text-left transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-[0_10px_28px_-12px_oklch(0.585_0.245_27.5/0.55)] md:inline-flex"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+              <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-primary/10 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+              <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-[0_0_0_4px_oklch(0.585_0.245_27.5/0.15)]">
                 <User className="h-4 w-4" />
               </span>
-              <span className="flex flex-col leading-tight">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Account</span>
+              <span className="relative flex flex-col leading-tight">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Account</span>
                 <span className="text-xs font-bold text-foreground">Sign in</span>
               </span>
             </Link>
