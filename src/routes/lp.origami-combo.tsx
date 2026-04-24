@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
@@ -34,7 +33,11 @@ import {
   Quote,
 } from "lucide-react";
 
-const PRODUCT_SLUG = "air-plane-car-combo-2design-combo-origami-paper-1";
+const PRODUCT_SLUGS = {
+  combo: "air-plane-car-combo-2design-combo-origami-paper-1",
+  plane: "air-plane-origami-paper-kit-for-kids",
+  car: "car-origami-paper-kit-for-kids",
+} as const;
 const SHIPPING_INSIDE = 70;
 const SHIPPING_OUTSIDE = 130;
 
@@ -55,8 +58,12 @@ export const Route = createFileRoute("/lp/origami-combo")({
     ],
   }),
   loader: async () => {
-    const product = await fetchProductByIdOrSlug(PRODUCT_SLUG);
-    return { product };
+    const [combo, plane, car] = await Promise.all([
+      fetchProductByIdOrSlug(PRODUCT_SLUGS.combo),
+      fetchProductByIdOrSlug(PRODUCT_SLUGS.plane),
+      fetchProductByIdOrSlug(PRODUCT_SLUGS.car),
+    ]);
+    return { combo, plane, car };
   },
   component: LandingPage,
 });
@@ -181,7 +188,11 @@ const FAQS = [
 ];
 
 function LandingPage() {
-  const { product } = Route.useLoaderData() as { product: Product | null };
+  const { combo, plane, car } = Route.useLoaderData() as {
+    combo: Product | null;
+    plane: Product | null;
+    car: Product | null;
+  };
   const navigate = useNavigate();
 
   const [variant, setVariant] = useState<"single" | "combo">("combo");
@@ -197,18 +208,24 @@ function LandingPage() {
   const SINGLE_OLD = 795;
   const COMBO_OLD = 1390;
 
+  // Pick the active product based on variant + singleKit choice.
+  const activeProduct: Product | null =
+    variant === "combo" ? combo : singleKit === "plane" ? plane : car;
+  // For "no product found" gate — combo is the primary fallback.
+  const fallbackProduct = combo ?? plane ?? car;
+
   const unitPrice = variant === "combo" ? COMBO_PRICE : SINGLE_PRICE;
   const oldPrice = variant === "combo" ? COMBO_OLD : SINGLE_OLD;
 
   useEffect(() => {
-    if (!product) return;
+    if (!activeProduct) return;
     fbTrack("ViewContent", {
-      content_ids: [product.id],
-      content_name: product.title,
+      content_ids: [activeProduct.id],
+      content_name: activeProduct.title,
       value: unitPrice,
       currency: META_CURRENCY,
     });
-  }, [product, unitPrice]);
+  }, [activeProduct, unitPrice]);
 
   const subtotal = unitPrice * qty;
   const shippingFee = shipMethod === "inside" ? SHIPPING_INSIDE : SHIPPING_OUTSIDE;
@@ -220,7 +237,10 @@ function LandingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!product) return;
+    if (!activeProduct) {
+      toast.error("Product information missing — page reload korun.");
+      return;
+    }
 
     const trimmedName = form.name.trim();
     const trimmedAddress = form.address.trim();
@@ -300,9 +320,9 @@ function LandingPage() {
         {
           order_id: order.id,
           user_id: isGuest ? null : session!.user.id,
-          product_id: product.id,
-          name: `${product.title} — ${variantLabel}`,
-          image: product.image,
+          product_id: activeProduct.id,
+          name: `${activeProduct.title} — ${variantLabel}`,
+          image: activeProduct.image,
           price: unitPrice,
           quantity: qty,
           variant_id: null,
@@ -319,7 +339,7 @@ function LandingPage() {
       }
 
       fbTrack("Purchase", {
-        content_ids: [product.id],
+        content_ids: [activeProduct.id],
         value: orderTotal,
         currency: META_CURRENCY,
       });
@@ -333,7 +353,7 @@ function LandingPage() {
     }
   };
 
-  if (!product) {
+  if (!fallbackProduct) {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center">
         <h1 className="text-2xl font-bold text-foreground">Product paowa jay ni</h1>
@@ -831,18 +851,22 @@ function LandingPage() {
               </FormField>
 
               <FormField id="lp-district" label="জেলা *" icon={<MapPin className="h-3.5 w-3.5" />}>
-                <Select value={form.district} onValueChange={(v) => setForm({ ...form, district: v })}>
-                  <SelectTrigger id="lp-district" className="h-11 rounded-lg">
-                    <SelectValue placeholder="আপনার জেলা সিলেক্ট করুন" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BD_DISTRICTS.map((d) => (
-                      <SelectItem key={d.name} value={d.name}>
-                        {d.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <select
+                  id="lp-district"
+                  value={form.district}
+                  onChange={(e) => setForm({ ...form, district: e.target.value })}
+                  className="flex h-11 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  required
+                >
+                  <option value="" disabled>
+                    আপনার জেলা সিলেক্ট করুন
+                  </option>
+                  {BD_DISTRICTS.map((d) => (
+                    <option key={d.name} value={d.name}>
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
               </FormField>
 
               <FormField id="lp-address" label="সঠিক ঠিকানা *" icon={<MapPin className="h-3.5 w-3.5" />}>
