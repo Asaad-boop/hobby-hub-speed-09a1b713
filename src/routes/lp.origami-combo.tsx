@@ -621,7 +621,11 @@ function LandingPage() {
             <div className="flex items-center gap-3 border-b border-border bg-muted/50 p-4">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-foreground">
-                  {variant === "combo" ? "Plane + Car Combo" : "Single Kit"}
+                  {variant === "combo"
+                    ? "Plane + Car Combo"
+                    : singleKit === "plane"
+                      ? "Single — Plane Kit"
+                      : "Single — Car Kit"}
                 </p>
                 <p className="mt-0.5 text-base font-extrabold text-primary">
                   ৳ {unitPrice.toLocaleString()}
@@ -661,6 +665,34 @@ function LandingPage() {
                   <VariantOption id="v-combo" value="combo" current={variant} title="Combo — ৳১২৯০" sub={`দুটোই + ৳${savings} off`} />
                 </RadioGroup>
               </div>
+
+              {variant === "single" && (
+                <div className="rounded-xl border border-primary/30 bg-primary/5 p-3">
+                  <Label className="mb-2 block text-sm font-semibold text-foreground">
+                    🎯 কোনটা নিতে চান? (Single)
+                  </Label>
+                  <RadioGroup
+                    value={singleKit}
+                    onValueChange={(v) => setSingleKit(v as "plane" | "car")}
+                    className="grid grid-cols-2 gap-2.5"
+                  >
+                    <VariantOption
+                      id="kit-plane"
+                      value="plane"
+                      current={singleKit}
+                      title="✈️ Plane Kit"
+                      sub="১২ ডিজাইন · ৩৬ শিট"
+                    />
+                    <VariantOption
+                      id="kit-car"
+                      value="car"
+                      current={singleKit}
+                      title="🚗 Car Kit"
+                      sub="১০ ডিজাইন · ৩০ শিট"
+                    />
+                  </RadioGroup>
+                </div>
+              )}
 
               <FormField id="lp-name" label="আপনার নাম *" icon={<UserIcon className="h-3.5 w-3.5" />}>
                 <Input
