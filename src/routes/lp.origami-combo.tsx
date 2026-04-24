@@ -169,6 +169,7 @@ function LandingPage() {
   const navigate = useNavigate();
 
   const [variant, setVariant] = useState<"single" | "combo">("combo");
+  const [singleKit, setSingleKit] = useState<"plane" | "car">("plane");
   const [qty, setQty] = useState(1);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [submitting, setSubmitting] = useState(false);
