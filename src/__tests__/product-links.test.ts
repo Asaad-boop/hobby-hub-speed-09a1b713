@@ -26,7 +26,9 @@ function walk(dir: string, files: string[] = []): string[] {
   return files;
 }
 
-const FALLBACK_RE = /\b(\w+)\.slug\s*(?:\|\||\?\?)\s*\1\.id\b/;
+// Accepts: foo.slug || foo.id, foo.slug ?? foo.id, (foo as any).slug || foo.id, etc.
+// Requires both `.slug` and `.id` joined by `||` or `??`, on the same base identifier.
+const FALLBACK_RE = /(\w+)(?:\s+as\s+\w+)?\)?\.slug\s*(?:\|\||\?\?)\s*\(?\1(?:\s+as\s+\w+)?\)?\.id\b/;
 
 function extractParamsId(snippet: string): string | null {
   // Find params={{ id: <expr> }} — match balanced-ish until closing }} or , id end
