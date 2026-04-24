@@ -533,7 +533,7 @@ function LandingPage() {
               ১টি Car Kit (১০ ডিজাইন)
               <br />
               <br />
-              বাংলা ম্যানুয়াল সহ
+              ভিডিও ইনস্ট্রাকশন সহ
             </p>
             <div className="rounded-full border border-border py-2 text-xs font-semibold text-foreground">
               অর্ডার করুন →
