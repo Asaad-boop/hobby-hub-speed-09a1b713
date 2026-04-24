@@ -14,24 +14,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
-  Star,
-  Truck,
-  ShieldCheck,
-  Sparkles,
-  Heart,
-  Brain,
-  Gift,
-  CheckCircle2,
   Loader2,
   Phone,
   MapPin,
   User as UserIcon,
   Minus,
   Plus,
-  Clock,
-  Package,
-  Users,
-  Award,
+  Gift,
+  Truck,
+  RotateCcw,
+  PackageCheck,
 } from "lucide-react";
 
 const PRODUCT_SLUG = "air-plane-car-combo-2design-combo-origami-paper-1";
@@ -41,21 +33,16 @@ const SHIPPING_OUTSIDE = 130;
 export const Route = createFileRoute("/lp/origami-combo")({
   head: () => ({
     meta: [
-      { title: "Air Plane + Car Origami Combo — Bachchader Sera Upohar | HobbyShop" },
+      { title: "Plane + Car Kit Combo — Fold It. Build It. | HobbyShop" },
       {
         name: "description",
         content:
-          "Bachchader hath theke phone soriye din. Origami paper kit diye shikhuk, banaak, khelu — moner bikash, dhairjo, srijonshilota. Cash on Delivery, Bangladesh-wide.",
+          "A+ hard paper e ১২টি Plane design, hard cardboard e ১০টি 3D Car — Bangla manual soho. Combo te ৳১০০ bachao. COD all over Bangladesh.",
       },
-      { property: "og:title", content: "Air Plane + Car Origami Combo — Bachchader Sera Upohar" },
+      { property: "og:title", content: "Plane + Car Kit Combo — Fold It. Build It." },
       {
         property: "og:description",
-        content: "Origami diye shikha, mojai mojai. 200+ pcs combo kit, 30+ designs, manual included.",
-      },
-      {
-        property: "og:image",
-        content:
-          "https://cdn.shopify.com/s/files/1/0938/0331/5501/files/WhatsApp-Image-2025-06-26-at-23.53.11_c19e98a0-1536x1536.jpg?v=1764571467",
+        content: "১২ Plane design + ১০ 3D Car design — combo te ৳১০০ bachao. Bangla manual soho.",
       },
     ],
   }),
@@ -66,83 +53,40 @@ export const Route = createFileRoute("/lp/origami-combo")({
   component: LandingPage,
 });
 
-const FAKE_REVIEWS = [
-  {
-    name: "Nusrat Jahan",
-    location: "Dhaka",
-    rating: 5,
-    text:
-      "Amar 7 bochor er chele ke gift diyechilam. Eto khushi hoyeche je sara din ei origami banachhe. Phone er nesha komeche ekdom!",
-    avatar: "N",
-    verified: true,
-  },
-  {
-    name: "Tanvir Ahmed",
-    location: "Chattogram",
-    rating: 5,
-    text:
-      "Quality really impressive. Paper thick, color bright, manual ta easy to follow. Bachcha + bachcha-r baba duijon ei mile banaichi — shob theke best part eitai!",
-    avatar: "T",
-    verified: true,
-  },
-  {
-    name: "Sumaiya Akter",
-    location: "Sylhet",
-    rating: 5,
-    text:
-      "School theke creativity homework er jonno onek kaje legeche. Teacher prosongsa korechen. Paisa ta ekdom worth!",
-    avatar: "S",
-    verified: true,
-  },
-  {
-    name: "Mahmuda Rahman",
-    location: "Rajshahi",
-    rating: 4,
-    text:
-      "Combo offer ta darun. Plane ar Car duitai pacche, bachcha sara raat khela kore. Delivery o fast cilo.",
-    avatar: "M",
-    verified: true,
-  },
-  {
-    name: "Imran Hossain",
-    location: "Khulna",
-    rating: 5,
-    text:
-      "Amar mey first time origami korlo, ekhon prottek din notun kichu banachhe. Confidence beche, focus o badheche. Highly recommended.",
-    avatar: "I",
-    verified: true,
-  },
-  {
-    name: "Farhana Islam",
-    location: "Cumilla",
-    rating: 5,
-    text: "Birthday gift hisebe perfect. Packaging premium, bachchara dekhei eksho watt khushi!",
-    avatar: "F",
-    verified: true,
-  },
+const PLANE_DESIGNS = [
+  { icon: "✈️", name: "Classic Dart" },
+  { icon: "🛩️", name: "Fighter Jet" },
+  { icon: "🛫", name: "Glider" },
+  { icon: "🚀", name: "Rocket Wing" },
+  { icon: "🦅", name: "Eagle Wing" },
+  { icon: "⭐", name: "Star Plane" },
+  { icon: "🌊", name: "Wave Glider" },
+  { icon: "🔥", name: "Turbo Dart" },
+  { icon: "🏹", name: "Arrow Jet" },
+  { icon: "🦋", name: "Butterfly" },
+  { icon: "💫", name: "Stunt Flyer" },
+  { icon: "🛸", name: "UFO Glider" },
 ];
 
-const BENEFITS = [
-  {
-    icon: Brain,
-    title: "Buddhibikash & Focus",
-    desc: "Hath o chokher shomonnoy bare, mone-jog bare, dhairjo shikhe.",
-  },
-  {
-    icon: Heart,
-    title: "Phone er Nesha Kombe",
-    desc: "Screen er bodole hath-e kichu kora — bachcha-r jonno shera bikolpo.",
-  },
-  {
-    icon: Sparkles,
-    title: "Srijonshil Shokti Bridhi",
-    desc: "Nije design banano, rong baachao — kolpona shaktike unmukto kore.",
-  },
-  {
-    icon: Award,
-    title: "School-e Eka-egiye",
-    desc: "Art & craft homework, science fair, project — sob jaygay kaj-e lage.",
-  },
+const CAR_DESIGNS = [
+  { icon: "🏎️", name: "Sports Car" },
+  { icon: "🚙", name: "SUV" },
+  { icon: "🚌", name: "Bus" },
+  { icon: "🚒", name: "Fire Truck" },
+  { icon: "🏕️", name: "Jeep" },
+  { icon: "🚓", name: "Police Car" },
+  { icon: "🚕", name: "Taxi Cab" },
+  { icon: "🚛", name: "Truck" },
+  { icon: "🏍️", name: "Muscle Car" },
+  { icon: "🚑", name: "Ambulance" },
+];
+
+const INCLUDES = [
+  { color: "blue", text: "A+ Hard Paper — ১২ Plane design (প্রতিটি ৩টি)", qty: "৩৬ শিট" },
+  { color: "amber", text: "Hard Cardboard — ১০ Car design (প্রতিটি ৩টি)", qty: "৩০ শিট" },
+  { color: "blue", text: "Bangla Manual — Plane + Car uvoier nirdeshona", qty: "১টি" },
+  { color: "amber", text: "Step-by-step chobi soho design card", qty: "২২টি" },
+  { color: "blue", text: "Premium gift box packaging", qty: "১টি" },
 ];
 
 const FAQS = [
@@ -152,19 +96,15 @@ const FAQS = [
   },
   {
     q: "Combo te ki ki thakbe?",
-    a: "Air Plane design er 100+ origami paper, Car design er 100+ origami paper, Step-by-step manual book, Premium gift box packaging.",
+    a: "Plane Kit (১২ design, ৩৬ shit A+ hard paper) + Car Kit (১০ design, ৩০ shit hard cardboard) + dui kit-er Bangla manual + 22ti design card + premium gift box.",
   },
   {
     q: "Delivery koto din-e pabo?",
-    a: "Dhaka-r vetor 1-2 din, Dhaka-r baire 2-4 din. Cash on Delivery available — product hat-e niye taka diben.",
+    a: "Dhaka-r vetor 1-2 din, Dhaka-r baire 2-4 din. Cash on Delivery available — product hath-e niye taka diben.",
   },
   {
     q: "Damaged ele ki korbo?",
     a: "Delivery man er samne open kore check korben. Kono problem hole 100% replacement guarantee.",
-  },
-  {
-    q: "Onno design ki paowa jabe?",
-    a: "Ha! Amader website-e Pistol, Boat, Animal sob design er origami kit available. Order korar somoy notes-e likhe diben.",
   },
 ];
 
@@ -172,41 +112,34 @@ function LandingPage() {
   const { product } = Route.useLoaderData() as { product: Product | null };
   const navigate = useNavigate();
 
+  const [variant, setVariant] = useState<"single" | "combo">("combo");
   const [qty, setQty] = useState(1);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", district: "" });
-  const [activeImage, setActiveImage] = useState(0);
   const orderRef = useRef<HTMLDivElement | null>(null);
 
-  // Countdown — resets on each visit, gives urgency
-  const [secondsLeft, setSecondsLeft] = useState(60 * 60 * 6); // 6h
-  useEffect(() => {
-    const id = setInterval(() => setSecondsLeft((s) => (s > 0 ? s - 1 : 0)), 1000);
-    return () => clearInterval(id);
-  }, []);
+  const SINGLE_PRICE = 695;
+  const COMBO_PRICE = 1290;
+  const SINGLE_OLD = 795;
+  const COMBO_OLD = 1390;
+
+  const unitPrice = variant === "combo" ? COMBO_PRICE : SINGLE_PRICE;
+  const oldPrice = variant === "combo" ? COMBO_OLD : SINGLE_OLD;
 
   useEffect(() => {
     if (!product) return;
     fbTrack("ViewContent", {
       content_ids: [product.id],
       content_name: product.title,
-      value: product.price,
+      value: unitPrice,
       currency: META_CURRENCY,
     });
-  }, [product]);
+  }, [product, unitPrice]);
 
-  const subtotal = useMemo(() => (product ? product.price * qty : 0), [product, qty]);
+  const subtotal = unitPrice * qty;
   const shippingFee = shipMethod === "inside" ? SHIPPING_INSIDE : SHIPPING_OUTSIDE;
   const totalPay = subtotal + shippingFee;
-
-  const fmtTime = (s: number) => {
-    const h = Math.floor(s / 3600).toString().padStart(2, "0");
-    const m = Math.floor((s % 3600) / 60).toString().padStart(2, "0");
-    const sec = (s % 60).toString().padStart(2, "0");
-    return { h, m, s: sec };
-  };
-  const t = fmtTime(secondsLeft);
 
   const scrollToOrder = () => {
     orderRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -239,9 +172,10 @@ function LandingPage() {
       const { data: { session } } = await supabase.auth.getSession();
       const isGuest = !session;
 
-      const itemSubtotal = product.price * qty;
+      const itemSubtotal = unitPrice * qty;
       const orderTotal = itemSubtotal + shippingFee;
       const attribution = getOrderAttributionPayload();
+      const variantLabel = variant === "combo" ? "Plane + Car Combo" : "Single Kit";
 
       const baseOrder = {
         status: "new" as const,
@@ -257,6 +191,7 @@ function LandingPage() {
         shipping_city: form.district,
         shipping_district: form.district,
         source_website: "lp/origami-combo",
+        notes: `Variant: ${variantLabel}`,
         ...attribution,
       };
 
@@ -288,12 +223,12 @@ function LandingPage() {
           order_id: order.id,
           user_id: isGuest ? null : session!.user.id,
           product_id: product.id,
-          name: product.title,
+          name: `${product.title} — ${variantLabel}`,
           image: product.image,
-          price: product.price,
+          price: unitPrice,
           quantity: qty,
           variant_id: null,
-          variant_label: null,
+          variant_label: variantLabel,
         },
       ]);
 
@@ -323,7 +258,7 @@ function LandingPage() {
   if (!product) {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center">
-        <h1 className="text-2xl font-bold">Product paowa jay ni</h1>
+        <h1 className="text-2xl font-bold text-foreground">Product paowa jay ni</h1>
         <Link to="/shop" className="mt-6 inline-block rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground">
           Shop e firte ja
         </Link>
@@ -331,334 +266,301 @@ function LandingPage() {
     );
   }
 
-  const gallery = product.gallery.length ? product.gallery : [product.image];
-  const discountPct = product.oldPrice > product.price
-    ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
-    : 0;
-
   return (
-    <div className="bg-background">
-      {/* Sticky urgency bar */}
-      <div className="sticky top-0 z-40 bg-gradient-to-r from-primary via-primary to-primary text-primary-foreground shadow-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2 text-xs sm:text-sm">
-          <div className="flex items-center gap-2 font-medium">
-            <Clock className="h-4 w-4 animate-pulse" />
-            <span className="hidden sm:inline">Limited Offer Shesh Hote:</span>
-            <span className="sm:hidden">Offer:</span>
-            <span className="font-mono font-bold tabular-nums">
-              {t.h}:{t.m}:{t.s}
-            </span>
-          </div>
-          <button
-            onClick={scrollToOrder}
-            className="rounded-full bg-background px-3 py-1 text-xs font-bold text-primary shadow hover:scale-105 transition-transform sm:px-4 sm:text-sm"
-          >
-            Order Korun →
-          </button>
-        </div>
-      </div>
-
+    <div className="bg-background text-foreground">
       {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-amber-50 to-pink-50 dark:from-orange-950/30 dark:via-amber-950/20 dark:to-pink-950/30">
-        <div className="absolute inset-0 opacity-30 [background-image:radial-gradient(circle_at_1px_1px,_oklch(0.7_0.15_50)_1px,_transparent_0)] [background-size:24px_24px]" />
-        <div className="relative mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-2 md:py-16 lg:py-20">
-          {/* Image */}
-          <div className="order-2 md:order-1">
-            <div className="overflow-hidden rounded-3xl border-4 border-background shadow-2xl">
-              <img
-                src={gallery[activeImage]}
-                alt={product.title}
-                className="aspect-square w-full object-cover"
-              />
-            </div>
-            {gallery.length > 1 && (
-              <div className="mt-3 grid grid-cols-5 gap-2">
-                {gallery.slice(0, 5).map((g, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveImage(i)}
-                    className={`overflow-hidden rounded-xl border-2 transition ${
-                      activeImage === i ? "border-primary ring-2 ring-primary/30" : "border-border opacity-70 hover:opacity-100"
-                    }`}
-                  >
-                    <img src={g} alt="" className="aspect-square w-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Copy */}
-          <div className="order-1 flex flex-col justify-center md:order-2">
-            <div className="mb-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
-              <Sparkles className="h-3.5 w-3.5" /> Bachchader Sera Upohar
-            </div>
-            <h1 className="text-balance text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-              Phone Soriye Din,{" "}
-              <span className="bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
-                Hath-e Tule Din Magic
-              </span>
-            </h1>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Air Plane + Car origami combo kit — bachcha-r kolpona, dhairjo ar focus ek shathe gore tulun.
-              200+ paper, 30+ design, easy manual.
-            </p>
-
-            {/* Rating row */}
-            <div className="mt-4 flex items-center gap-3">
-              <div className="flex items-center gap-0.5">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                ))}
-              </div>
-              <span className="text-sm font-semibold text-foreground">4.9</span>
-              <span className="text-sm text-muted-foreground">(2,400+ khushi parents)</span>
-            </div>
-
-            {/* Price */}
-            <div className="mt-5 flex flex-wrap items-end gap-3">
-              <div className="text-4xl font-extrabold text-primary sm:text-5xl">
-                ৳{product.price.toLocaleString()}
-              </div>
-              {product.oldPrice > product.price && (
-                <>
-                  <div className="text-xl text-muted-foreground line-through">
-                    ৳{product.oldPrice.toLocaleString()}
-                  </div>
-                  <span className="rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">
-                    SAVE {discountPct}%
-                  </span>
-                </>
-              )}
-            </div>
-
-            {/* Trust pills */}
-            <div className="mt-5 flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-background/80 px-3 py-1.5 text-xs font-medium shadow-sm backdrop-blur">
-                <Truck className="h-3.5 w-3.5 text-primary" /> All BD Delivery
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-background/80 px-3 py-1.5 text-xs font-medium shadow-sm backdrop-blur">
-                <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Cash on Delivery
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-background/80 px-3 py-1.5 text-xs font-medium shadow-sm backdrop-blur">
-                <Package className="h-3.5 w-3.5 text-primary" /> 100% Replacement
-              </span>
-            </div>
-
-            <Button
-              size="lg"
-              onClick={scrollToOrder}
-              className="mt-6 h-14 rounded-full text-base font-bold shadow-xl hover:scale-[1.02] transition-transform"
-            >
-              <Gift className="mr-2 h-5 w-5" />
-              Ekhoni Order Korun — ৳{product.price.toLocaleString()}
-            </Button>
-            <p className="mt-2 text-center text-xs text-muted-foreground">
-              ⚡ Free call confirmation • COD • Easy Return
-            </p>
-          </div>
+      <section className="px-5 pt-10 pb-6 text-center">
+        <div className="mb-4 flex flex-wrap justify-center gap-2">
+          <span className="inline-block rounded-full bg-sky-100 px-3.5 py-1 text-xs font-medium text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">
+            ✈️ Plane Kit — ১২ ডিজাইন
+          </span>
+          <span className="inline-block rounded-full bg-amber-100 px-3.5 py-1 text-xs font-medium text-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
+            🚗 Car Kit — ১০ ডিজাইন
+          </span>
         </div>
-      </section>
-
-      {/* STORY SECTION — Emotional hook */}
-      <section className="bg-background py-14 md:py-20">
-        <div className="mx-auto max-w-3xl px-4 text-center">
-          <p className="mb-3 text-sm font-bold uppercase tracking-widest text-primary">Ekti Choto Golpo</p>
-          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-            "Maa, ami aaj phone dhori ni..."
-          </h2>
-          <div className="mx-auto mt-6 max-w-2xl space-y-4 text-left text-base leading-relaxed text-muted-foreground sm:text-lg">
-            <p>
-              Akash tar mayer dike takiye bollo ei kotha gula, hath-e tar ekta choto kagojer plane.
-              Mayer chokh-e jol — kintu ei bar dukkho noy, anonder.
-            </p>
-            <p>
-              <span className="font-semibold text-foreground">"Eta ami nije baniyechi! Dekho — eta uralo!"</span>
-              <br />
-              Ek shoptaher modhye Akash er jibon-e ki adbhut poriborton — phone er bodole origami,
-              YouTube er bodole srijonshilota.
-            </p>
-            <p>
-              Apnar bachcha-r jonno o ei jadu shomvob. Shudhu ekta combo kit — bakita bachcha
-              nije korbe.
-            </p>
-          </div>
+        <h1 className="mx-auto max-w-xl text-balance text-2xl font-semibold leading-snug text-foreground sm:text-3xl">
+          Fold It. Build It.
+          <br />
+          Plane ও 3D Car — একসাথে!
+        </h1>
+        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
+          A+ সাইজ হার্ড পেপারে ১২টি Plane ডিজাইন, হার্ড কার্ডবোর্ডে ১০টি 3D Car — বাংলা ম্যানুয়াল সহ।
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-2.5">
           <Button
             onClick={scrollToOrder}
-            size="lg"
-            variant="outline"
-            className="mt-8 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+            className="h-11 rounded-md bg-sky-700 px-6 text-sm font-medium text-white hover:bg-sky-800"
           >
-            Amar Bachcha-r Jonno Order Kori
+            এখনই অর্ডার করুন →
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => document.getElementById("designs")?.scrollIntoView({ behavior: "smooth" })}
+            className="h-11 rounded-md border-border px-6 text-sm font-normal"
+          >
+            বিস্তারিত দেখুন
           </Button>
         </div>
       </section>
 
-      {/* BENEFITS */}
-      <section className="bg-gradient-to-b from-amber-50/50 to-background py-14 dark:from-amber-950/10 md:py-20">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Keno Origami? <span className="text-primary">4 ti Karon</span>
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              Khelar majhe shikha — bigganik gobeshona-y proman.
+      {/* TWO KIT CARDS */}
+      <section className="grid grid-cols-2 gap-3.5 px-5 py-4">
+        {/* Plane card */}
+        <div className="overflow-hidden rounded-2xl border border-border bg-card">
+          <div className="flex min-h-[120px] items-center justify-center bg-sky-50 p-6 dark:bg-sky-950/20">
+            <svg viewBox="0 0 120 90" className="h-20 w-28">
+              <polygon points="10,60 60,20 110,60 60,50" fill="#B5D4F4" stroke="#378ADD" strokeWidth="1.5" />
+              <polygon points="60,20 110,60 60,50" fill="#85B7EB" stroke="#378ADD" strokeWidth="1.5" />
+              <polygon points="60,50 110,60 90,75" fill="#E6F1FB" stroke="#378ADD" strokeWidth="1.5" />
+              <polygon points="60,50 10,60 30,75" fill="#B5D4F4" stroke="#185FA5" strokeWidth="1.5" />
+              <line x1="60" y1="20" x2="60" y2="70" stroke="#185FA5" strokeWidth="0.8" strokeDasharray="3,2" />
+            </svg>
+          </div>
+          <div className="p-4">
+            <div className="text-sm font-medium text-foreground">✈️ Paper Plane Kit</div>
+            <div className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              A+ সাইজ হার্ড পেপার · ১২টি ডিজাইন · ৩৬টি শিট
+            </div>
+          </div>
+        </div>
+
+        {/* Car card */}
+        <div className="overflow-hidden rounded-2xl border border-border bg-card">
+          <div className="flex min-h-[120px] items-center justify-center bg-amber-50 p-6 dark:bg-amber-950/20">
+            <svg viewBox="0 0 120 90" className="h-20 w-28">
+              <rect x="20" y="35" width="80" height="30" rx="4" fill="#FAC775" stroke="#BA7517" strokeWidth="1.5" />
+              <rect x="30" y="22" width="55" height="20" rx="4" fill="#FAEEDA" stroke="#BA7517" strokeWidth="1.5" />
+              <circle cx="35" cy="67" r="9" fill="#444441" stroke="#2C2C2A" strokeWidth="1.5" />
+              <circle cx="35" cy="67" r="5" fill="#888780" />
+              <circle cx="85" cy="67" r="9" fill="#444441" stroke="#2C2C2A" strokeWidth="1.5" />
+              <circle cx="85" cy="67" r="5" fill="#888780" />
+              <rect x="35" y="26" width="18" height="12" rx="2" fill="#B5D4F4" stroke="#378ADD" strokeWidth="1" />
+              <rect x="60" y="26" width="18" height="12" rx="2" fill="#B5D4F4" stroke="#378ADD" strokeWidth="1" />
+              <rect x="20" y="50" width="12" height="8" rx="1" fill="#EF9F27" stroke="#BA7517" strokeWidth="1" />
+              <rect x="88" y="50" width="12" height="8" rx="1" fill="#EF9F27" stroke="#BA7517" strokeWidth="1" />
+            </svg>
+          </div>
+          <div className="p-4">
+            <div className="text-sm font-medium text-foreground">🚗 3D Car Kit</div>
+            <div className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              হার্ড কার্ডবোর্ড · ১০টি ডিজাইন · 3D শেপ
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SPECIFICATIONS */}
+      <section className="px-5 py-6">
+        <h2 className="mb-5 text-center text-base font-semibold text-foreground">কিটের স্পেসিফিকেশন</h2>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          {/* Plane specs */}
+          <div>
+            <span className="mb-2.5 inline-block rounded-md bg-sky-100 px-2.5 py-1 text-xs font-medium text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">
+              ✈️ Plane Kit
+            </span>
+            <div className="grid grid-cols-2 gap-2.5">
+              <SpecCard label="মোট শিট" value="৩৬টি" sub="প্রতি ডিজাইন ৩টি" />
+              <SpecCard label="ডিজাইন" value="১২টি" sub="ইউনিক ডিজাইন" />
+              <SpecCard label="পেপার" value="A+ Hard" />
+              <SpecCard label="ম্যানুয়াল" value="বাংলা" />
+            </div>
+          </div>
+          {/* Car specs */}
+          <div>
+            <span className="mb-2.5 inline-block rounded-md bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
+              🚗 Car Kit
+            </span>
+            <div className="grid grid-cols-2 gap-2.5">
+              <SpecCard label="মোট শিট" value="৩০টি" sub="প্রতি ডিজাইন ৩টি" />
+              <SpecCard label="ডিজাইন" value="১০টি" sub="ইউনিক ডিজাইন" />
+              <SpecCard label="মেটেরিয়াল" value="Cardboard" />
+              <SpecCard label="শেপ" value="3D" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* DESIGNS */}
+      <section id="designs" className="px-5 py-6">
+        <h2 className="mb-5 text-center text-base font-semibold text-foreground">কোন কোন ডিজাইন থাকছে?</h2>
+
+        <div className="mb-6">
+          <div className="mb-2.5 inline-block rounded-md bg-sky-100 px-3 py-1.5 text-xs font-medium text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">
+            ✈️ Plane — ১২টি ডিজাইন
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {PLANE_DESIGNS.map((d) => (
+              <DesignPill key={d.name} icon={d.icon} name={d.name} />
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <div className="mb-2.5 inline-block rounded-md bg-amber-100 px-3 py-1.5 text-xs font-medium text-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
+            🚗 Car — ১০টি ডিজাইন
+          </div>
+          <div className="grid grid-cols-5 gap-2">
+            {CAR_DESIGNS.map((d) => (
+              <DesignPill key={d.name} icon={d.icon} name={d.name} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* INCLUDES */}
+      <section className="px-5 py-6">
+        <h2 className="mb-4 text-center text-base font-semibold text-foreground">কিটে কী কী থাকছে?</h2>
+        <div className="rounded-2xl bg-muted/60 p-5">
+          {INCLUDES.map((item, i) => (
+            <div
+              key={i}
+              className={`flex items-center gap-2.5 py-2.5 text-sm text-foreground ${
+                i < INCLUDES.length - 1 ? "border-b border-border" : ""
+              }`}
+            >
+              <span
+                className={`h-2 w-2 flex-shrink-0 rounded-full ${
+                  item.color === "blue" ? "bg-sky-500" : "bg-amber-500"
+                }`}
+              />
+              <span className="flex-1">{item.text}</span>
+              <span className="text-xs font-medium text-muted-foreground">{item.qty}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section className="px-5 py-6">
+        <h2 className="mb-5 text-center text-base font-semibold text-foreground">প্রাইসিং</h2>
+        <div className="grid grid-cols-2 gap-3">
+          {/* Single */}
+          <button
+            type="button"
+            onClick={() => {
+              setVariant("single");
+              scrollToOrder();
+            }}
+            className={`relative rounded-2xl border bg-card p-5 text-center transition ${
+              variant === "single" ? "border-2 border-sky-600 shadow-md" : "border-border"
+            }`}
+          >
+            <div className="text-xs text-muted-foreground">Single Kit</div>
+            <div className="mt-2 text-xs text-muted-foreground line-through">৳ ৭৯৫</div>
+            <div className="mt-1 text-2xl font-semibold text-foreground">৳ ৬৯৫</div>
+            <div className="h-5" />
+            <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
+              ১টি Plane Kit (১২ ডিজাইন)
+              <br />
+              <strong>অথবা</strong>
+              <br />
+              ১টি Car Kit (১০ ডিজাইন)
+              <br />
+              <br />
+              বাংলা ম্যানুয়াল সহ
             </p>
-          </div>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {BENEFITS.map((b) => (
-              <div
-                key={b.title}
-                className="group rounded-2xl border border-border bg-card p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground">
-                  <b.icon className="h-6 w-6" />
-                </div>
-                <h3 className="text-lg font-bold">{b.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{b.desc}</p>
-              </div>
-            ))}
-          </div>
+            <div className="rounded-md border border-border py-2 text-xs font-medium text-foreground">
+              অর্ডার করুন →
+            </div>
+          </button>
+
+          {/* Combo (featured) */}
+          <button
+            type="button"
+            onClick={() => {
+              setVariant("combo");
+              scrollToOrder();
+            }}
+            className={`relative rounded-2xl border-2 bg-card p-5 text-center transition ${
+              variant === "combo" ? "border-sky-600 shadow-lg" : "border-sky-300"
+            }`}
+          >
+            <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-sky-600 px-3 py-0.5 text-[11px] font-medium text-white">
+              সাশ্রয়ী কম্বো
+            </span>
+            <div className="text-xs text-muted-foreground">Plane + Car Combo</div>
+            <div className="mt-2 text-xs text-muted-foreground line-through">৳ ১৩৯০</div>
+            <div className="mt-1 text-2xl font-semibold text-foreground">৳ ১২৯০</div>
+            <div className="mt-1.5 inline-block rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+              ৳ ১০০ বাঁচছেন!
+            </div>
+            <p className="mb-3 mt-2 text-xs leading-relaxed text-muted-foreground">
+              Plane Kit (১২ ডিজাইন, ৩৬ শিট)
+              <br />
+              +<br />
+              Car Kit (১০ ডিজাইন, ৩০ শিট)
+              <br />
+              <br />
+              দুটো ম্যানুয়াল সহ
+            </p>
+            <div className="rounded-md bg-sky-700 py-2 text-xs font-medium text-white">
+              কম্বো নিন →
+            </div>
+          </button>
+        </div>
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-center text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1">
+            <Truck className="h-3.5 w-3.5" /> ঢাকায় ফ্রি ডেলিভারি
+          </span>
+          <span>·</span>
+          <span className="inline-flex items-center gap-1">
+            <RotateCcw className="h-3.5 w-3.5" /> ৭ দিনের রিটার্ন
+          </span>
+          <span>·</span>
+          <span className="inline-flex items-center gap-1">
+            <PackageCheck className="h-3.5 w-3.5" /> গিফট প্যাকেজিং
+          </span>
         </div>
       </section>
 
-      {/* GALLERY / WHAT'S IN BOX */}
-      <section className="bg-background py-14 md:py-20">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="mb-2 text-sm font-bold uppercase tracking-widest text-primary">Box e Ki Pacchen</p>
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Premium Combo Kit</h2>
-          </div>
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {gallery.slice(0, 6).map((g, i) => (
-              <div
-                key={i}
-                className="group overflow-hidden rounded-2xl border border-border shadow-sm transition hover:shadow-xl"
-              >
-                <img
-                  src={g}
-                  alt={`${product.title} - ${i + 1}`}
-                  className="aspect-square w-full object-cover transition duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="mx-auto mt-10 max-w-2xl rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-6">
-            <h3 className="mb-4 text-center text-lg font-bold">📦 Box-e Thakche:</h3>
-            <ul className="space-y-3 text-sm sm:text-base">
-              {[
-                "100+ Air Plane design er origami paper",
-                "100+ Car design er origami paper",
-                "Step-by-step manual book (Bangla & English)",
-                "Premium gift box packaging",
-                "Free bonus: 5 ti exclusive surprise design",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
-                  <span className="text-foreground">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* SOCIAL PROOF / REVIEWS */}
-      <section className="bg-gradient-to-b from-pink-50/40 to-background py-14 dark:from-pink-950/10 md:py-20">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="mx-auto max-w-2xl text-center">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-yellow-100 px-3 py-1 text-xs font-bold text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
-              <Users className="h-3.5 w-3.5" /> 2,400+ Satisfied Parents
-            </div>
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Onyo Parents Ki Bolchen?
-            </h2>
-            <div className="mt-4 flex items-center justify-center gap-2">
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Star key={i} className="h-6 w-6 fill-yellow-400 text-yellow-400" />
-                ))}
-              </div>
-              <span className="text-lg font-bold">4.9 / 5.0</span>
-            </div>
-          </div>
-
-          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {FAKE_REVIEWS.map((r, i) => (
-              <div
-                key={i}
-                className="rounded-2xl border border-border bg-card p-6 shadow-sm transition hover:shadow-lg"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-pink-500 text-base font-bold text-white">
-                    {r.avatar}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-bold">{r.name}</p>
-                      {r.verified && (
-                        <CheckCircle2 className="h-3.5 w-3.5 fill-blue-500 text-white" />
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">{r.location}</p>
-                  </div>
-                </div>
-                <div className="mt-3 flex">
-                  {Array.from({ length: r.rating }).map((_, j) => (
-                    <Star key={j} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{r.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* FOOTER CTA */}
+      <section className="mx-5 my-6 rounded-2xl bg-sky-50 px-6 py-8 text-center dark:bg-sky-950/30">
+        <h2 className="text-base font-semibold text-sky-900 dark:text-sky-100">
+          Plane আর Car — দুটোই নিন, ৳ ১০০ বাঁচান!
+        </h2>
+        <p className="mt-1.5 text-xs text-sky-700 dark:text-sky-300">
+          স্টক সীমিত। কম্বো অফার যেকোনো সময় শেষ হতে পারে।
+        </p>
+        <Button
+          onClick={() => {
+            setVariant("combo");
+            scrollToOrder();
+          }}
+          className="mt-5 h-12 rounded-md bg-sky-700 px-8 text-sm font-medium text-white hover:bg-sky-800"
+        >
+          Combo নিন — ৳ ১২৯০ →
+        </Button>
       </section>
 
       {/* ORDER FORM */}
-      <section ref={orderRef} className="scroll-mt-20 bg-gradient-to-b from-background to-orange-50/40 py-14 dark:to-orange-950/10 md:py-20">
-        <div className="mx-auto max-w-3xl px-4">
+      <section ref={orderRef} className="scroll-mt-4 px-5 py-8">
+        <div className="mx-auto max-w-xl">
           <div className="text-center">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-primary-foreground">
-              <Gift className="h-3.5 w-3.5" /> Order Form
-            </div>
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Ekhoni Apnar Order Confirm Korun
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              Form ti puron korun, amra apnake call kore confirm korbo. Cash on Delivery.
+            <h2 className="text-xl font-semibold text-foreground">অর্ডার ফর্ম</h2>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              ফর্ম পূরণ করুন — আমরা কনফার্ম করতে কল করব। Cash on Delivery।
             </p>
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="mt-8 overflow-hidden rounded-3xl border-2 border-primary/20 bg-card shadow-2xl"
-          >
-            {/* Product summary inside form */}
-            <div className="flex items-center gap-4 border-b border-border bg-muted/40 p-4 sm:p-5">
-              <img
-                src={product.image}
-                alt={product.title}
-                className="h-20 w-20 flex-shrink-0 rounded-xl object-cover sm:h-24 sm:w-24"
-              />
+          <form onSubmit={handleSubmit} className="mt-6 overflow-hidden rounded-2xl border border-border bg-card">
+            {/* Variant + qty summary */}
+            <div className="flex items-center gap-3 border-b border-border bg-muted/40 p-4">
               <div className="flex-1 min-w-0">
-                <p className="truncate text-sm font-bold sm:text-base">{product.title}</p>
-                <p className="mt-1 text-lg font-extrabold text-primary">
-                  ৳{product.price.toLocaleString()}
-                  {product.oldPrice > product.price && (
-                    <span className="ml-2 text-sm font-medium text-muted-foreground line-through">
-                      ৳{product.oldPrice.toLocaleString()}
-                    </span>
-                  )}
+                <p className="truncate text-sm font-semibold text-foreground">
+                  {variant === "combo" ? "Plane + Car Combo" : "Single Kit"}
+                </p>
+                <p className="mt-0.5 text-base font-bold text-sky-700 dark:text-sky-400">
+                  ৳ {unitPrice.toLocaleString()}
+                  <span className="ml-2 text-xs font-normal text-muted-foreground line-through">
+                    ৳ {oldPrice.toLocaleString()}
+                  </span>
                 </p>
               </div>
               <div className="flex items-center gap-1 rounded-full border border-border bg-background p-1">
                 <button
                   type="button"
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted"
+                  className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted"
                 >
                   <Minus className="h-3.5 w-3.5" />
                 </button>
@@ -666,31 +568,66 @@ function LandingPage() {
                 <button
                   type="button"
                   onClick={() => setQty((q) => q + 1)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted"
+                  className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted"
                 >
                   <Plus className="h-3.5 w-3.5" />
                 </button>
               </div>
             </div>
 
-            {/* Fields */}
-            <div className="space-y-4 p-5 sm:p-6">
+            <div className="space-y-4 p-5">
+              {/* Variant switch */}
               <div>
-                <Label htmlFor="lp-name" className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold">
-                  <UserIcon className="h-3.5 w-3.5" /> Apnar Naam *
+                <Label className="mb-2 block text-sm font-medium">কোন কিট নিতে চান?</Label>
+                <RadioGroup
+                  value={variant}
+                  onValueChange={(v) => setVariant(v as "single" | "combo")}
+                  className="grid grid-cols-2 gap-2.5"
+                >
+                  <label
+                    htmlFor="v-single"
+                    className={`flex cursor-pointer items-center gap-2 rounded-xl border p-3 transition ${
+                      variant === "single" ? "border-2 border-sky-600 bg-sky-50 dark:bg-sky-950/20" : "border-border"
+                    }`}
+                  >
+                    <RadioGroupItem id="v-single" value="single" />
+                    <div className="flex-1 text-sm">
+                      <p className="font-semibold">Single — ৳৬৯৫</p>
+                      <p className="text-xs text-muted-foreground">Plane বা Car</p>
+                    </div>
+                  </label>
+                  <label
+                    htmlFor="v-combo"
+                    className={`flex cursor-pointer items-center gap-2 rounded-xl border p-3 transition ${
+                      variant === "combo" ? "border-2 border-sky-600 bg-sky-50 dark:bg-sky-950/20" : "border-border"
+                    }`}
+                  >
+                    <RadioGroupItem id="v-combo" value="combo" />
+                    <div className="flex-1 text-sm">
+                      <p className="font-semibold">Combo — ৳১২৯০</p>
+                      <p className="text-xs text-muted-foreground">দুটোই + ৳১০০ off</p>
+                    </div>
+                  </label>
+                </RadioGroup>
+              </div>
+
+              <div>
+                <Label htmlFor="lp-name" className="mb-1.5 flex items-center gap-1.5 text-sm font-medium">
+                  <UserIcon className="h-3.5 w-3.5" /> আপনার নাম *
                 </Label>
                 <Input
                   id="lp-name"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="Mohammed Akash"
-                  className="h-12 rounded-xl"
+                  className="h-11 rounded-lg"
                   required
                 />
               </div>
+
               <div>
-                <Label htmlFor="lp-phone" className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold">
-                  <Phone className="h-3.5 w-3.5" /> Mobile Number *
+                <Label htmlFor="lp-phone" className="mb-1.5 flex items-center gap-1.5 text-sm font-medium">
+                  <Phone className="h-3.5 w-3.5" /> মোবাইল নাম্বার *
                 </Label>
                 <Input
                   id="lp-phone"
@@ -699,17 +636,18 @@ function LandingPage() {
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   placeholder="01XXXXXXXXX"
-                  className="h-12 rounded-xl"
+                  className="h-11 rounded-lg"
                   required
                 />
               </div>
+
               <div>
-                <Label htmlFor="lp-district" className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold">
-                  <MapPin className="h-3.5 w-3.5" /> District *
+                <Label htmlFor="lp-district" className="mb-1.5 flex items-center gap-1.5 text-sm font-medium">
+                  <MapPin className="h-3.5 w-3.5" /> জেলা *
                 </Label>
                 <Select value={form.district} onValueChange={(v) => setForm({ ...form, district: v })}>
-                  <SelectTrigger id="lp-district" className="h-12 rounded-xl">
-                    <SelectValue placeholder="Apnar district select korun" />
+                  <SelectTrigger id="lp-district" className="h-11 rounded-lg">
+                    <SelectValue placeholder="আপনার জেলা সিলেক্ট করুন" />
                   </SelectTrigger>
                   <SelectContent>
                     {BD_DISTRICTS.map((d) => (
@@ -720,9 +658,10 @@ function LandingPage() {
                   </SelectContent>
                 </Select>
               </div>
+
               <div>
-                <Label htmlFor="lp-address" className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold">
-                  <MapPin className="h-3.5 w-3.5" /> Sothik Thikana *
+                <Label htmlFor="lp-address" className="mb-1.5 flex items-center gap-1.5 text-sm font-medium">
+                  <MapPin className="h-3.5 w-3.5" /> সঠিক ঠিকানা *
                 </Label>
                 <Textarea
                   id="lp-address"
@@ -730,82 +669,83 @@ function LandingPage() {
                   onChange={(e) => setForm({ ...form, address: e.target.value })}
                   placeholder="House #, Road #, Area, Thana..."
                   rows={3}
-                  className="rounded-xl"
+                  className="rounded-lg"
                   required
                 />
               </div>
 
-              {/* Shipping */}
               <div>
-                <Label className="mb-2 block text-sm font-semibold">Delivery Charge</Label>
+                <Label className="mb-2 block text-sm font-medium">ডেলিভারি চার্জ</Label>
                 <RadioGroup
                   value={shipMethod}
                   onValueChange={(v) => setShipMethod(v as "inside" | "outside")}
-                  className="grid grid-cols-2 gap-3"
+                  className="grid grid-cols-2 gap-2.5"
                 >
                   <label
                     htmlFor="ship-inside"
-                    className={`flex cursor-pointer items-center gap-2 rounded-xl border-2 p-3 transition ${
-                      shipMethod === "inside" ? "border-primary bg-primary/5" : "border-border"
+                    className={`flex cursor-pointer items-center gap-2 rounded-xl border p-3 transition ${
+                      shipMethod === "inside" ? "border-2 border-sky-600 bg-sky-50 dark:bg-sky-950/20" : "border-border"
                     }`}
                   >
                     <RadioGroupItem id="ship-inside" value="inside" />
                     <div className="flex-1 text-sm">
-                      <p className="font-bold">Dhaka-r vetor</p>
+                      <p className="font-semibold">ঢাকার ভেতরে</p>
                       <p className="text-xs text-muted-foreground">৳{SHIPPING_INSIDE}</p>
                     </div>
                   </label>
                   <label
                     htmlFor="ship-outside"
-                    className={`flex cursor-pointer items-center gap-2 rounded-xl border-2 p-3 transition ${
-                      shipMethod === "outside" ? "border-primary bg-primary/5" : "border-border"
+                    className={`flex cursor-pointer items-center gap-2 rounded-xl border p-3 transition ${
+                      shipMethod === "outside" ? "border-2 border-sky-600 bg-sky-50 dark:bg-sky-950/20" : "border-border"
                     }`}
                   >
                     <RadioGroupItem id="ship-outside" value="outside" />
                     <div className="flex-1 text-sm">
-                      <p className="font-bold">Dhaka-r baire</p>
+                      <p className="font-semibold">ঢাকার বাইরে</p>
                       <p className="text-xs text-muted-foreground">৳{SHIPPING_OUTSIDE}</p>
                     </div>
                   </label>
                 </RadioGroup>
               </div>
 
-              {/* Total summary */}
-              <div className="rounded-2xl bg-muted/50 p-4">
+              <div className="rounded-xl bg-muted/50 p-4">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal ({qty} × ৳{product.price})</span>
-                  <span className="font-semibold">৳{subtotal.toLocaleString()}</span>
+                  <span className="text-muted-foreground">Subtotal ({qty} × ৳{unitPrice})</span>
+                  <span className="font-semibold text-foreground">৳ {subtotal.toLocaleString()}</span>
                 </div>
                 <div className="mt-1.5 flex justify-between text-sm">
-                  <span className="text-muted-foreground">Delivery Charge</span>
-                  <span className="font-semibold">৳{shippingFee}</span>
+                  <span className="text-muted-foreground">ডেলিভারি চার্জ</span>
+                  <span className="font-semibold text-foreground">৳ {shippingFee}</span>
                 </div>
                 <div className="my-3 border-t border-border" />
                 <div className="flex items-end justify-between">
-                  <span className="text-base font-bold">Total Pay</span>
-                  <span className="text-2xl font-extrabold text-primary">৳{totalPay.toLocaleString()}</span>
+                  <span className="text-sm font-semibold text-foreground">মোট পেমেন্ট</span>
+                  <span className="text-xl font-bold text-sky-700 dark:text-sky-400">
+                    ৳ {totalPay.toLocaleString()}
+                  </span>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">💵 Cash on Delivery — product hat-e niye taka diben</p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  💵 Cash on Delivery — পণ্য হাতে পেয়ে টাকা দিবেন
+                </p>
               </div>
 
               <Button
                 type="submit"
                 disabled={submitting}
-                size="lg"
-                className="h-14 w-full rounded-full text-base font-extrabold shadow-xl hover:scale-[1.01] transition-transform"
+                className="h-12 w-full rounded-md bg-sky-700 text-sm font-semibold text-white hover:bg-sky-800"
               >
                 {submitting ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Order Place Hocche...
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> অর্ডার প্লেস হচ্ছে...
                   </>
                 ) : (
                   <>
-                    <Gift className="mr-2 h-5 w-5" /> Order Confirm Korun — ৳{totalPay.toLocaleString()}
+                    <Gift className="mr-2 h-4 w-4" /> অর্ডার কনফার্ম করুন — ৳ {totalPay.toLocaleString()}
                   </>
                 )}
               </Button>
               <p className="text-center text-xs text-muted-foreground">
-                🔒 Apnar tothho 100% nirapod • Confirm korar pore amra call dibo
+                🔒 আপনার তথ্য ১০০% নিরাপদ
               </p>
             </div>
           </form>
@@ -813,20 +753,17 @@ function LandingPage() {
       </section>
 
       {/* FAQ */}
-      <section className="bg-background py-14 md:py-20">
-        <div className="mx-auto max-w-3xl px-4">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Apnar Prosno?</h2>
-            <p className="mt-3 text-muted-foreground">Sob common questions er uttar ekhane.</p>
-          </div>
-          <Accordion type="single" collapsible className="mt-8 space-y-3">
+      <section className="px-5 py-8">
+        <div className="mx-auto max-w-xl">
+          <h2 className="text-center text-lg font-semibold text-foreground">আপনার প্রশ্ন?</h2>
+          <Accordion type="single" collapsible className="mt-5 space-y-2">
             {FAQS.map((f, i) => (
               <AccordionItem
                 key={i}
                 value={`item-${i}`}
-                className="rounded-2xl border border-border bg-card px-5 shadow-sm"
+                className="rounded-xl border border-border bg-card px-4"
               >
-                <AccordionTrigger className="text-left text-base font-semibold hover:no-underline">
+                <AccordionTrigger className="text-left text-sm font-medium hover:no-underline">
                   {f.q}
                 </AccordionTrigger>
                 <AccordionContent className="text-sm leading-relaxed text-muted-foreground">
@@ -835,28 +772,46 @@ function LandingPage() {
               </AccordionItem>
             ))}
           </Accordion>
-
-          <div className="mt-10 text-center">
-            <Button onClick={scrollToOrder} size="lg" className="h-14 rounded-full px-8 text-base font-bold shadow-xl">
-              <Gift className="mr-2 h-5 w-5" /> Ekhoni Order Korun
-            </Button>
-          </div>
         </div>
       </section>
 
       {/* Mobile sticky CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 p-3 shadow-2xl backdrop-blur md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 p-3 shadow-lg backdrop-blur md:hidden">
         <div className="flex items-center gap-3">
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground line-through">৳{product.oldPrice.toLocaleString()}</p>
-            <p className="text-xl font-extrabold text-primary leading-none">৳{product.price.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground line-through">৳ {oldPrice.toLocaleString()}</p>
+            <p className="text-lg font-bold leading-none text-sky-700 dark:text-sky-400">
+              ৳ {unitPrice.toLocaleString()}
+            </p>
           </div>
-          <Button onClick={scrollToOrder} className="h-12 flex-1 rounded-full text-sm font-bold">
-            <Gift className="mr-1.5 h-4 w-4" /> Order Korun
+          <Button
+            onClick={scrollToOrder}
+            className="h-11 flex-1 rounded-md bg-sky-700 text-sm font-semibold text-white hover:bg-sky-800"
+          >
+            <Gift className="mr-1.5 h-4 w-4" /> অর্ডার করুন
           </Button>
         </div>
       </div>
       <div className="h-20 md:hidden" />
+    </div>
+  );
+}
+
+function SpecCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div className="rounded-md bg-muted/60 px-3 py-3 text-center">
+      <div className="text-[11px] text-muted-foreground">{label}</div>
+      <div className="mt-0.5 text-sm font-semibold text-foreground">{value}</div>
+      {sub && <div className="mt-0.5 text-[10px] text-muted-foreground/80">{sub}</div>}
+    </div>
+  );
+}
+
+function DesignPill({ icon, name }: { icon: string; name: string }) {
+  return (
+    <div className="rounded-md border border-border bg-card px-2 py-2 text-center">
+      <div className="text-lg leading-none">{icon}</div>
+      <div className="mt-1 text-[10px] leading-tight text-muted-foreground">{name}</div>
     </div>
   );
 }
