@@ -29,18 +29,10 @@ export const triggerVercelRedeploy = createServerFn({ method: "POST" }).handler(
         };
       }
 
-      // Vercel returns JSON with job info, e.g. { "job": { "id": "...", "state": "PENDING" } }
-      let job: unknown = null;
-      try {
-        job = JSON.parse(text);
-      } catch {
-        /* ignore */
-      }
-
       return {
-        success: true,
+        success: true as const,
         triggeredAt: new Date().toISOString(),
-        job,
+        jobRaw: text.slice(0, 500),
       };
     } catch (e) {
       return {
