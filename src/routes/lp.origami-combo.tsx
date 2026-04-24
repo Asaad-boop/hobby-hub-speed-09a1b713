@@ -90,9 +90,51 @@ const CAR_DESIGNS = [
 const INCLUDES = [
   { text: "A+ Hard Paper — ১২ Plane design (প্রতিটি ৩টি)", qty: "৩৬ শিট" },
   { text: "Hard Cardboard — ১০ Car design (প্রতিটি ৩টি)", qty: "৩০ শিট" },
-  { text: "Bangla Manual — Plane + Car uvoier nirdeshona", qty: "১টি" },
-  { text: "Step-by-step chobi soho design card", qty: "২২টি" },
+  { text: "Step-by-step Video Instruction (QR code soho)", qty: "২২টি" },
+  { text: "প্রতিটি ডিজাইনের আলাদা ডিজাইন কার্ড", qty: "২২টি" },
   { text: "Premium gift box packaging", qty: "১টি" },
+];
+
+const VIDEOS = [
+  { title: "Plane — Classic Dart কীভাবে বানাবেন", duration: "2:14", thumb: "✈️" },
+  { title: "Plane — Fighter Jet step-by-step", duration: "3:08", thumb: "🛩️" },
+  { title: "Car — Sports Car 3D assembly", duration: "4:22", thumb: "🏎️" },
+  { title: "Car — Fire Truck full build", duration: "5:10", thumb: "🚒" },
+];
+
+const REVIEWS = [
+  {
+    name: "Sumaiya Akter",
+    location: "Dhanmondi, Dhaka",
+    rating: 5,
+    text: "Amar 8 bochorer chele eta peye onek khushi! Video dekhe nije nije banaite parche. Quality o khub valo, hard paper.",
+    date: "12 days ago",
+    verified: true,
+  },
+  {
+    name: "Rakib Hasan",
+    location: "Chattogram",
+    rating: 5,
+    text: "Combo nilam — Plane ar Car dutoi. Packaging gift box er moto, delivery o fast chilo. Bachchara onek enjoy korche.",
+    date: "1 month ago",
+    verified: true,
+  },
+  {
+    name: "Nusrat Jahan",
+    location: "Sylhet",
+    rating: 4,
+    text: "Video instruction tao khub kaaj e diyeche, bangla manual chara o sohoje bujha jay. Mobile e dekhe banano gelo.",
+    date: "3 weeks ago",
+    verified: true,
+  },
+  {
+    name: "Tanvir Ahmed",
+    location: "Mirpur, Dhaka",
+    rating: 5,
+    text: "Birthday gift hisebe nilam vagner jonno — onek pochondo korche. Worth the price, recommend korbo.",
+    date: "2 months ago",
+    verified: true,
+  },
 ];
 
 const FAQS = [
@@ -102,7 +144,15 @@ const FAQS = [
   },
   {
     q: "Combo te ki ki thakbe?",
-    a: "Plane Kit (১২ design, ৩৬ shit A+ hard paper) + Car Kit (১০ design, ৩০ shit hard cardboard) + dui kit-er Bangla manual + 22ti design card + premium gift box.",
+    a: "Plane Kit (১২ design, ৩৬ shit A+ hard paper) + Car Kit (১০ design, ৩০ shit hard cardboard) + step-by-step video instruction (QR code scan kore dekhben) + 22ti design card + premium gift box.",
+  },
+  {
+    q: "Manual nai? Kivabe banabo?",
+    a: "Protyek design er alada video instruction ache — QR code scan korle phone e direct video chole asbe. Bangla voice over soho, bachcha rao sohoje bujhte parbe.",
+  },
+  {
+    q: "Single nile Plane na Car — kun ta pabo?",
+    a: "Single nile order form e apni nije Plane ba Car select korte parben. Combo nile dutoi pawa jabe.",
   },
   {
     q: "Delivery koto din-e pabo?",
