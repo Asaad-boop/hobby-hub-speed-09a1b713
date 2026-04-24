@@ -170,7 +170,8 @@ function Checkout() {
       .single();
 
     if (orderErr || !order) {
-      toast.error("Could not place order. Please try again.");
+      console.error("Order insert failed:", orderErr, "payload:", orderInsert);
+      toast.error(orderErr?.message ? `Order failed: ${orderErr.message}` : "Could not place order. Please try again.");
       setSubmitting(false);
       return;
     }
@@ -186,7 +187,13 @@ function Checkout() {
       variant_id: i.variantId ?? null,
       variant_label: i.variantLabel ?? null,
     }));
-    await supabase.from("order_items").insert(orderItemsPayload);
+    const { error: itemsErr } = await supabase.from("order_items").insert(orderItemsPayload);
+    if (itemsErr) {
+      console.error("Order items insert failed:", itemsErr, "payload:", orderItemsPayload);
+      toast.error(`Items failed: ${itemsErr.message}`);
+      setSubmitting(false);
+      return;
+    }
 
     if (!isGuest && appliedCoupon && couponDiscount > 0) {
       await supabase.from("coupon_usage").insert({
