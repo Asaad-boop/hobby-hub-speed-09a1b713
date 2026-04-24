@@ -42,7 +42,11 @@ function TrackLanding() {
       sessionStorage.setItem(`order:${res.order.id}`, JSON.stringify(res.order));
       navigate({ to: "/track/$orderId", params: { orderId: res.order.id } });
     } catch (err: any) {
-      setError(err?.message || "Lookup failed. Please try again.");
+      const raw = err?.message || "";
+      const friendly = /SUPABASE_|environment variables/i.test(raw)
+        ? "Order tracking is temporarily unavailable. Please try again in a moment."
+        : raw || "Lookup failed. Please try again.";
+      setError(friendly);
     } finally {
       setLoading(false);
     }
