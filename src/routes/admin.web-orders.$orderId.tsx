@@ -122,19 +122,19 @@ type OrderWithItems = OrderRow & {
   advance_payment_amount?: number | null;
   advance_payment_method?: string | null;
   advance_payment_txn_id?: string | null;
-  session_source?: string | null;
-  utm_source?: string | null;
-  utm_medium?: string | null;
-  utm_campaign?: string | null;
-  meta_ad_account_id?: string | null;
-  meta_campaign_id?: string | null;
-  meta_ad_set_id?: string | null;
-  meta_ad_id?: string | null;
-  fb_click_id?: string | null;
-  fb_browser_pixel?: string | null;
-  device_type?: string | null;
-  ip_address?: string | null;
-  entry_url?: string | null;
+  session_source: string | null;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  meta_ad_account_id: string | null;
+  meta_campaign_id: string | null;
+  meta_ad_set_id: string | null;
+  meta_ad_id: string | null;
+  fb_click_id: string | null;
+  fb_browser_pixel: string | null;
+  device_type: string | null;
+  ip_address: string | null;
+  entry_url: string | null;
 };
 
 function copyText(value: string, label = "Copied") {
