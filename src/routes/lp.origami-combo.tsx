@@ -232,7 +232,12 @@ function LandingPage() {
       const itemSubtotal = unitPrice * qty;
       const orderTotal = itemSubtotal + shippingFee;
       const attribution = getOrderAttributionPayload();
-      const variantLabel = variant === "combo" ? "Plane + Car Combo" : "Single Kit";
+      const variantLabel =
+        variant === "combo"
+          ? "Plane + Car Combo"
+          : singleKit === "plane"
+            ? "Single Kit — Plane (12 designs)"
+            : "Single Kit — Car (10 designs)";
 
       const baseOrder = {
         status: "new" as const,
