@@ -119,10 +119,10 @@ async function fetchOrderLineItems(orderId: string): Promise<LineItem[]> {
   let costMap = new Map<string, number>();
   if (productIds.length > 0) {
     const { data: prods } = await supabase
-      .from("products")
-      .select("id, unit_cost")
-      .in("id", productIds as string[]);
-    costMap = new Map((prods ?? []).map((p) => [p.id, Number(p.unit_cost ?? 0)]));
+      .from("product_costs")
+      .select("product_id, unit_cost")
+      .in("product_id", productIds as string[]);
+    costMap = new Map((prods ?? []).map((p: any) => [p.product_id, Number(p.unit_cost ?? 0)]));
   }
   return (items ?? []).map((i: any) => ({
     id: i.id,
