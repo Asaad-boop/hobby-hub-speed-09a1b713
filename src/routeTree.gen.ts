@@ -33,6 +33,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TrackOrderIdRouteImport } from './routes/track.$orderId'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as OrderSuccessOrderIdRouteImport } from './routes/order-success.$orderId'
+import { Route as LpOrigamiComboRouteImport } from './routes/lp.origami-combo'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
@@ -178,6 +179,11 @@ const ProductIdRoute = ProductIdRouteImport.update({
 const OrderSuccessOrderIdRoute = OrderSuccessOrderIdRouteImport.update({
   id: '/order-success/$orderId',
   path: '/order-success/$orderId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpOrigamiComboRoute = LpOrigamiComboRouteImport.update({
+  id: '/lp/origami-combo',
+  path: '/lp/origami-combo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategorySlugRoute = CategorySlugRouteImport.update({
@@ -351,6 +357,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/staff': typeof AdminStaffRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/lp/origami-combo': typeof LpOrigamiComboRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -402,6 +409,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/staff': typeof AdminStaffRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/lp/origami-combo': typeof LpOrigamiComboRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -455,6 +463,7 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/staff': typeof AdminStaffRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/lp/origami-combo': typeof LpOrigamiComboRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -509,6 +518,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/staff'
     | '/category/$slug'
+    | '/lp/origami-combo'
     | '/order-success/$orderId'
     | '/product/$id'
     | '/track/$orderId'
@@ -560,6 +570,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/staff'
     | '/category/$slug'
+    | '/lp/origami-combo'
     | '/order-success/$orderId'
     | '/product/$id'
     | '/track/$orderId'
@@ -612,6 +623,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/staff'
     | '/category/$slug'
+    | '/lp/origami-combo'
     | '/order-success/$orderId'
     | '/product/$id'
     | '/track/$orderId'
@@ -648,6 +660,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   WishlistRoute: typeof WishlistRoute
   CategorySlugRoute: typeof CategorySlugRoute
+  LpOrigamiComboRoute: typeof LpOrigamiComboRoute
   OrderSuccessOrderIdRoute: typeof OrderSuccessOrderIdRoute
   ProductIdRoute: typeof ProductIdRoute
   TrackOrderIdRoute: typeof TrackOrderIdRoute
@@ -822,6 +835,13 @@ declare module '@tanstack/react-router' {
       path: '/order-success/$orderId'
       fullPath: '/order-success/$orderId'
       preLoaderRoute: typeof OrderSuccessOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lp/origami-combo': {
+      id: '/lp/origami-combo'
+      path: '/lp/origami-combo'
+      fullPath: '/lp/origami-combo'
+      preLoaderRoute: typeof LpOrigamiComboRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/category/$slug': {
@@ -1110,6 +1130,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   WishlistRoute: WishlistRoute,
   CategorySlugRoute: CategorySlugRoute,
+  LpOrigamiComboRoute: LpOrigamiComboRoute,
   OrderSuccessOrderIdRoute: OrderSuccessOrderIdRoute,
   ProductIdRoute: ProductIdRoute,
   TrackOrderIdRoute: TrackOrderIdRoute,
