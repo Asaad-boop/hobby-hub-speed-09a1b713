@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProductByIdOrSlug, type Product } from "@/lib/products";
+import reviewPhoto1 from "@/assets/review-customer-1.jpg";
+import reviewPhoto2 from "@/assets/review-customer-2.jpg";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { getOrderAttributionPayload } from "@/lib/session-tracking";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
@@ -102,7 +104,26 @@ const VIDEOS = [
   { title: "Car — Fire Truck full build", duration: "5:10", thumb: "🚒" },
 ];
 
-const REVIEWS = [
+type Review = {
+  name: string;
+  location: string;
+  rating: number;
+  text: string;
+  date: string;
+  verified: boolean;
+  photos?: string[];
+};
+
+const REVIEWS: Review[] = [
+  {
+    name: "Mahmuda Khatun",
+    location: "Uttara, Dhaka",
+    rating: 5,
+    text: "ছোটদের জন্য একদম perfect। আমার ছেলে নিজের হাতে বানিয়ে এত খুশি হয়েছে — দেখুন কত সুন্দর হয়েছে গাড়িগুলো! Quality অসাধারণ, color print একদম ঝকঝকে।",
+    date: "5 days ago",
+    verified: true,
+    photos: [reviewPhoto1, reviewPhoto2],
+  },
   {
     name: "Sumaiya Akter",
     location: "Dhanmondi, Dhaka",
@@ -568,6 +589,29 @@ function LandingPage() {
                 ))}
               </div>
               <p className="mb-3 text-sm leading-relaxed text-foreground">"{r.text}"</p>
+              {r.photos && r.photos.length > 0 && (
+                <div className={`mb-3 grid gap-2 ${r.photos.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+                  {r.photos.map((src, idx) => (
+                    <a
+                      key={idx}
+                      href={src}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative block overflow-hidden rounded-xl border border-border bg-muted"
+                    >
+                      <img
+                        src={src}
+                        alt={`${r.name}'s build photo ${idx + 1}`}
+                        loading="lazy"
+                        className="aspect-square w-full object-cover transition group-hover:scale-105"
+                      />
+                      <span className="absolute bottom-1.5 right-1.5 rounded-full bg-background/90 px-1.5 py-0.5 text-[9px] font-bold text-foreground backdrop-blur">
+                        📷 Customer
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              )}
               <div className="flex items-center gap-2.5 border-t border-border pt-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                   {r.name.charAt(0)}
