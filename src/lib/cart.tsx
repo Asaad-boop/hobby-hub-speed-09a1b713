@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, ReactNode, useMemo } from "react";
 import type { Product } from "./products";
+import { fbTrack, META_CURRENCY } from "./meta-pixel";
 
 export type CartItem = {
   product: Product;
