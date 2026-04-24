@@ -119,42 +119,43 @@ const REVIEWS: Review[] = [
     name: "Mahmuda Khatun",
     location: "Uttara, Dhaka",
     rating: 5,
-    text: "ছোটদের জন্য একদম perfect। আমার ছেলে নিজের হাতে বানিয়ে এত খুশি হয়েছে — দেখুন কত সুন্দর হয়েছে গাড়িগুলো! Quality অসাধারণ, color print একদম ঝকঝকে।",
+    text: "ছোটদের জন্য একদম perfect। আমার ছেলে নিজের হাতে বানিয়ে এত খুশি হয়েছে",
     date: "5 days ago",
     verified: true,
     photos: [reviewPhoto1, reviewPhoto2],
   },
+];
+
+const WHY_THIS_PRODUCT = [
   {
-    name: "Sumaiya Akter",
-    location: "Dhanmondi, Dhaka",
-    rating: 5,
-    text: "Amar 8 bochorer chele eta peye onek khushi! Video dekhe nije nije banaite parche. Quality o khub valo, hard paper.",
-    date: "12 days ago",
-    verified: true,
+    icon: "📵",
+    title: "Screen-time কমায়",
+    desc: "Mobile ও tablet থেকে দূরে রেখে hands-on creative activity দেয়।",
   },
   {
-    name: "Rakib Hasan",
-    location: "Chattogram",
-    rating: 5,
-    text: "Combo nilam — Plane ar Car dutoi. Packaging gift box er moto, delivery o fast chilo. Bachchara onek enjoy korche.",
-    date: "1 month ago",
-    verified: true,
+    icon: "🧠",
+    title: "Brain development",
+    desc: "Focus, patience আর problem-solving skill বাড়ায় খেলতে খেলতে।",
   },
   {
-    name: "Nusrat Jahan",
-    location: "Sylhet",
-    rating: 4,
-    text: "Video instruction tao khub kaaj e diyeche, bangla manual chara o sohoje bujha jay. Mobile e dekhe banano gelo.",
-    date: "3 weeks ago",
-    verified: true,
+    icon: "✋",
+    title: "Fine motor skills",
+    desc: "Folding ও assembly হাতের আঙুলের সূক্ষ্ম নড়াচড়া শেখায়।",
   },
   {
-    name: "Tanvir Ahmed",
-    location: "Mirpur, Dhaka",
-    rating: 5,
-    text: "Birthday gift hisebe nilam vagner jonno — onek pochondo korche. Worth the price, recommend korbo.",
-    date: "2 months ago",
-    verified: true,
+    icon: "🎨",
+    title: "Creativity boost",
+    desc: "Color, shape ও design নিয়ে imagination develop হয়।",
+  },
+  {
+    icon: "🎁",
+    title: "Perfect gift",
+    desc: "Birthday, Eid বা যেকোনো occasion-এ বাচ্চাদের জন্য থoughtful gift।",
+  },
+  {
+    icon: "👨‍👩‍👧",
+    title: "Family bonding",
+    desc: "বাবা-মা ও বাচ্চা একসাথে বানিয়ে quality time কাটাতে পারে।",
   },
 ];
 
@@ -558,6 +559,23 @@ function LandingPage() {
         </p>
       </section>
 
+      {/* WHY THIS PRODUCT */}
+      <section className="bg-muted/30 px-5 py-10">
+        <SectionHeading kicker="Why this product" title="কেন এই Origami Kit নিবেন?" />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {WHY_THIS_PRODUCT.map((item) => (
+            <div
+              key={item.title}
+              className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]"
+            >
+              <div className="mb-2 text-3xl">{item.icon}</div>
+              <h3 className="mb-1 text-sm font-bold text-foreground">{item.title}</h3>
+              <p className="text-xs leading-relaxed text-muted-foreground">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* CUSTOMER REVIEWS */}
       <section className="px-5 py-10">
         <SectionHeading kicker="Trusted by parents" title="কাস্টমার রিভিউ" />
@@ -568,10 +586,11 @@ function LandingPage() {
             ))}
           </div>
           <p className="text-sm font-semibold text-foreground">
-            ৪.৮ <span className="text-muted-foreground">/ ৫ ({REVIEWS.length * 87}+ reviews)</span>
+            ৫.০ <span className="text-muted-foreground">/ ৫ — Verified customer</span>
           </p>
         </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="mx-auto grid max-w-2xl grid-cols-1 gap-3">
+
           {REVIEWS.map((r) => (
             <div
               key={r.name}
