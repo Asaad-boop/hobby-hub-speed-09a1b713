@@ -223,7 +223,7 @@ function WebOrdersPage() {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "orders" },
-        (payload) => {
+        (payload: any) => {
           const newOrder = payload.new as Order;
           if (newOrder.status === "new") {
             queryClient.invalidateQueries({ queryKey: ["web-orders"] });
@@ -356,7 +356,7 @@ function WebOrdersPage() {
                 queryKey: ["web-orders-courier-stats"],
               });
             })
-            .catch((e) => console.warn("courier fetch failed", p, e));
+            .catch((e: unknown) => console.warn("courier fetch failed", p, e));
         }
       }
       return map;
@@ -1290,7 +1290,7 @@ function WebOrdersPage() {
                       advance_payment_amount: Number(advance.amount),
                       advance_payment_method: advance.method,
                       advance_payment_txn_id: advance.txn,
-                    },
+                    } as any,
                   });
                 setAdvanceFor(null);
               }}
