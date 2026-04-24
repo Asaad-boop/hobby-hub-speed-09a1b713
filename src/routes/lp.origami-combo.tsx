@@ -713,8 +713,8 @@ function LandingPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {BD_DISTRICTS.map((d) => (
-                      <SelectItem key={d} value={d}>
-                        {d}
+                      <SelectItem key={d.name} value={d.name}>
+                        {d.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
