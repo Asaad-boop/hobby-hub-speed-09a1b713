@@ -27,18 +27,16 @@ export const Route = createFileRoute("/admin/settings")({
 function AdminSettingsPage() {
   const { data, isLoading } = useSiteSettings();
   const queryClient = useQueryClient();
-  const redeployOnVercel = useServerFn(triggerVercelRedeploy);
-  const checkDeployStatus = useServerFn(getDeploymentStatus);
+  const checkCommit = useServerFn(getLatestGithubCommit);
   const [form, setForm] = useState<SiteSettings>(DEFAULT_SETTINGS);
   const [saving, setSaving] = useState(false);
-  const [deploying, setDeploying] = useState(false);
   const [checking, setChecking] = useState(false);
-  const [status, setStatus] = useState<DeployStatus | null>(null);
+  const [status, setStatus] = useState<CommitStatus | null>(null);
 
   const onCheckStatus = async () => {
     setChecking(true);
     try {
-      const res = await checkDeployStatus();
+      const res = await checkCommit();
       setStatus(res);
       if (!res.success) toast.error(res.error);
     } catch (e) {
@@ -52,26 +50,6 @@ function AdminSettingsPage() {
     void onCheckStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const onRedeploy = async () => {
-    setDeploying(true);
-    try {
-      const res = await redeployOnVercel();
-      if (res.success) {
-        toast.success(
-          `Redeploy triggered (${"sha" in res ? res.sha : res.method}) — 1-2 min lagbe live hote.`,
-        );
-        // refresh status after a beat
-        setTimeout(() => void onCheckStatus(), 3000);
-      } else {
-        toast.error(res.error ?? "Redeploy failed");
-      }
-    } catch (e) {
-      toast.error((e as Error).message);
-    } finally {
-      setDeploying(false);
-    }
-  };
 
   useEffect(() => {
     if (data) setForm(data);
