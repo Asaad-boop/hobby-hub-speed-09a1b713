@@ -1,5 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
+const ledgerSupabase = supabase as any;
+
 export type AccountType = "asset" | "liability" | "equity" | "revenue" | "expense";
 
 export type ChartAccount = {
@@ -34,7 +36,7 @@ export type LedgerLine = {
 };
 
 export async function listChartOfAccounts(): Promise<ChartAccount[]> {
-  const { data, error } = await supabase
+  const { data, error } = await ledgerSupabase
     .from("chart_of_accounts")
     .select("*")
     .order("code", { ascending: true });
@@ -47,7 +49,7 @@ export async function listLedgerEntries(opts: {
   to?: string;
   limit?: number;
 } = {}) {
-  let q = supabase
+  let q = ledgerSupabase
     .from("general_ledger")
     .select("*")
     .order("entry_date", { ascending: false })
@@ -60,11 +62,8 @@ export async function listLedgerEntries(opts: {
   return (data ?? []) as LedgerEntry[];
 }
 
-/**
- * Returns aggregated debit/credit totals per account across the date range.
- */
 export async function getAccountActivity(from: string, to: string) {
-  const { data, error } = await supabase
+  const { data, error } = await ledgerSupabase
     .from("ledger_lines")
     .select(
       "debit, credit, account_id, chart_of_accounts!inner(code, name, type), general_ledger!inner(entry_date)",
@@ -80,8 +79,13 @@ export async function getAccountActivity(from: string, to: string) {
   for (const row of (data ?? []) as any[]) {
     const acct = row.chart_of_accounts;
     const key = acct.code;
-    const cur =
-      map.get(key) ?? { code: acct.code, name: acct.name, type: acct.type, debit: 0, credit: 0 };
+    const cur = map.get(key) ?? {
+      code: acct.code,
+      name: acct.name,
+      type: acct.type,
+      debit: 0,
+      credit: 0,
+    };
     cur.debit += Number(row.debit) || 0;
     cur.credit += Number(row.credit) || 0;
     map.set(key, cur);
@@ -89,11 +93,6 @@ export async function getAccountActivity(from: string, to: string) {
   return Array.from(map.values()).sort((a, b) => a.code.localeCompare(b.code));
 }
 
-/**
- * Profit & Loss summary for the given date range.
- * Revenue accounts: balance = credit - debit
- * Expense accounts: balance = debit - credit
- */
 export type PnLRow = { code: string; name: string; amount: number };
 export type PnLReport = {
   from: string;
@@ -126,7 +125,6 @@ export async function getProfitLoss(from: string, to: string): Promise<PnLReport
       const amt = a.debit - a.credit;
       expenses.push({ code: a.code, name: a.name, amount: amt });
       totalExpenses += amt;
-      // 5xxx codes are cost-of-sales (COGS bucket)
       if (a.code.startsWith("5")) cogs += amt;
     }
   }

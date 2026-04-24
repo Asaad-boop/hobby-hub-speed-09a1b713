@@ -46,16 +46,17 @@ async function fetchOrdersPnL(filters: {
   profitFilter?: string;
   search?: string;
 }): Promise<Row[]> {
-  let q = supabase
+  const pnlSupabase = supabase as any;
+  let q = pnlSupabase
     .from("order_financials")
     .select(
-      "id, order_id, revenue, product_cost, delivery_charge, cod_charge, return_charge, packaging_cost, ads_cost_attributed, other_costs, total_costs, net_profit, profit_margin_pct, finalization_status, created_at, is_backfilled, orders:order_id(shipping_name, status)"
+      "id, order_id, revenue, product_cost, delivery_charge, cod_charge, return_charge, packaging_cost, ads_cost_attributed, other_costs, total_costs, net_profit, profit_margin_pct, finalization_status, created_at, is_backfilled, orders:order_id(shipping_name, status)",
     )
     .order("created_at", { ascending: false })
     .limit(500);
 
   if (filters.status && filters.status !== "all") {
-    q = q.eq("finalization_status", filters.status as never);
+    q = q.eq("finalization_status", filters.status);
   }
 
   const { data, error } = await q;

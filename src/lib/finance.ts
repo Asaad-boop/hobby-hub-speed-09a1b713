@@ -1,13 +1,37 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
-export type CashAccount = Database["public"]["Tables"]["cash_accounts"]["Row"];
-export type CashAccountType = Database["public"]["Enums"]["cash_account_type"];
+export type CashAccountType =
+  | "cash"
+  | "bkash"
+  | "nagad"
+  | "rocket"
+  | "bank"
+  | "pathao_pending"
+  | "meta_ads_wallet"
+  | "other";
+
+export type CashAccount = {
+  id: string;
+  name: string;
+  type: CashAccountType;
+  current_balance: number;
+  is_active: boolean;
+  display_order: number;
+  account_number: string | null;
+  provider: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Transaction = Database["public"]["Tables"]["transactions"]["Row"];
 export type TxnType = Database["public"]["Enums"]["transaction_type"];
 export type TxnCategory = Database["public"]["Enums"]["transaction_category"];
 export type TxnDirection = Database["public"]["Enums"]["transaction_direction"];
 export type TxnRefType = Database["public"]["Enums"]["transaction_reference_type"];
+
+const financeSupabase = supabase as any;
 
 /** Format BDT with Bangladeshi (Indian-style) lakh comma grouping. */
 export function formatBDT(amount: number | string | null | undefined, opts: { sign?: boolean } = {}): string {
@@ -15,7 +39,6 @@ export function formatBDT(amount: number | string | null | undefined, opts: { si
   const abs = Math.abs(n);
   const fixed = abs.toFixed(2);
   const [intPart, decPart] = fixed.split(".");
-  // Indian/Bangla grouping: last 3 then groups of 2
   let formatted: string;
   if (intPart.length <= 3) {
     formatted = intPart;
@@ -31,14 +54,22 @@ export function formatBDT(amount: number | string | null | undefined, opts: { si
 
 export function accountTypeLabel(t: CashAccountType): string {
   switch (t) {
-    case "cash": return "Cash";
-    case "bkash": return "bKash";
-    case "nagad": return "Nagad";
-    case "rocket": return "Rocket";
-    case "bank": return "Bank";
-    case "pathao_pending": return "Pathao Pending";
-    case "meta_ads_wallet": return "Meta Ads";
-    default: return "Other";
+    case "cash":
+      return "Cash";
+    case "bkash":
+      return "bKash";
+    case "nagad":
+      return "Nagad";
+    case "rocket":
+      return "Rocket";
+    case "bank":
+      return "Bank";
+    case "pathao_pending":
+      return "Pathao Pending";
+    case "meta_ads_wallet":
+      return "Meta Ads";
+    default:
+      return "Other";
   }
 }
 
@@ -77,20 +108,15 @@ export const TRANSACTION_TYPES: { value: TxnType; label: string }[] = [
 ];
 
 export async function fetchAccounts(): Promise<CashAccount[]> {
-  const { data, error } = await supabase
-    .from("cash_accounts")
-    .select("*")
-    .order("display_order");
+  const { data, error } = await financeSupabase.from("cash_accounts").select("*").order("display_order");
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as CashAccount[];
 }
 
 export async function fetchTotalCashBalance(): Promise<number> {
-  const { data, error } = await supabase
-    .from("cash_accounts")
-    .select("current_balance, is_active");
+  const { data, error } = await financeSupabase.from("cash_accounts").select("current_balance, is_active");
   if (error) throw error;
-  return (data ?? []).filter((a) => a.is_active).reduce((s, a) => s + Number(a.current_balance ?? 0), 0);
+  return (data ?? []).filter((a: any) => a.is_active).reduce((s: number, a: any) => s + Number(a.current_balance ?? 0), 0);
 }
 
 export type TxnFilters = {
@@ -98,8 +124,8 @@ export type TxnFilters = {
   type?: TxnType;
   category?: TxnCategory;
   direction?: TxnDirection;
-  from?: string; // YYYY-MM-DD
-  to?: string;   // YYYY-MM-DD
+  from?: string;
+  to?: string;
   search?: string;
   limit?: number;
 };
@@ -135,9 +161,10 @@ export type ManualTxnInput = {
 };
 
 export async function createTransaction(input: ManualTxnInput): Promise<Transaction> {
-  const { data: userRes } = await supabase.auth.getUser();
-  const uid = userRes.user?.id;
-  if (!uid) throw new Error("Not authenticated");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
   const { data, error } = await supabase
     .from("transactions")
     .insert({
@@ -150,7 +177,7 @@ export async function createTransaction(input: ManualTxnInput): Promise<Transact
       transaction_date: input.transaction_date ?? new Date().toISOString(),
       reference_type: input.reference_type ?? "manual",
       reference_id: input.reference_id ?? null,
-      created_by: uid,
+      created_by: user.id,
     })
     .select("*")
     .single();
@@ -158,7 +185,6 @@ export async function createTransaction(input: ManualTxnInput): Promise<Transact
   return data;
 }
 
-/** Transfer money between two accounts — creates a paired out/in entry. */
 export async function transferBetween(args: {
   from_account_id: string;
   to_account_id: string;
@@ -186,18 +212,14 @@ export async function transferBetween(args: {
   });
 }
 
-/** Reversal — creates an opposite entry and links both. */
 export async function reverseTransaction(txnId: string): Promise<void> {
-  const { data: orig, error } = await supabase
-    .from("transactions")
-    .select("*")
-    .eq("id", txnId)
-    .single();
+  const { data: orig, error } = await supabase.from("transactions").select("*").eq("id", txnId).single();
   if (error) throw error;
   if (orig.reversed_at) throw new Error("Already reversed");
-  const { data: userRes } = await supabase.auth.getUser();
-  const uid = userRes.user?.id;
-  if (!uid) throw new Error("Not authenticated");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
   const oppositeDirection: TxnDirection = orig.direction === "in" ? "out" : "in";
   const { data: rev, error: insErr } = await supabase
     .from("transactions")
@@ -210,7 +232,7 @@ export async function reverseTransaction(txnId: string): Promise<void> {
       description: `Reversal of ${orig.id.slice(0, 8)} — ${orig.description ?? ""}`.trim(),
       reference_type: "manual",
       reference_id: orig.id,
-      created_by: uid,
+      created_by: user.id,
     })
     .select("id")
     .single();
@@ -239,22 +261,22 @@ export async function fetchDashboardKpis(): Promise<DashboardKpis> {
   const monthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
 
   const [accounts, todayFin, monthFin, monthOrders] = await Promise.all([
-    supabase.from("cash_accounts").select("current_balance, type, is_active"),
-    supabase.from("order_financials").select("revenue, net_profit, created_at").gte("created_at", todayStr),
-    supabase.from("order_financials").select("revenue, net_profit, finalization_status").gte("created_at", monthStart),
+    financeSupabase.from("cash_accounts").select("current_balance, type, is_active"),
+    financeSupabase.from("order_financials").select("revenue, net_profit, created_at").gte("created_at", todayStr),
+    financeSupabase.from("order_financials").select("revenue, net_profit, finalization_status").gte("created_at", monthStart),
     supabase.from("orders").select("id, status").gte("created_at", monthStart).limit(1000),
   ]);
 
-  const totalCash = (accounts.data ?? []).filter((a) => a.is_active).reduce((s, a) => s + Number(a.current_balance ?? 0), 0);
-  const pendingCod = (accounts.data ?? []).filter((a) => a.type === "pathao_pending").reduce((s, a) => s + Number(a.current_balance ?? 0), 0);
+  const totalCash = (accounts.data ?? []).filter((a: any) => a.is_active).reduce((s: number, a: any) => s + Number(a.current_balance ?? 0), 0);
+  const pendingCod = (accounts.data ?? []).filter((a: any) => a.type === "pathao_pending").reduce((s: number, a: any) => s + Number(a.current_balance ?? 0), 0);
 
-  const todayRevenue = (todayFin.data ?? []).reduce((s, r) => s + Number(r.revenue ?? 0), 0);
-  const todayProfit = (todayFin.data ?? []).reduce((s, r) => s + Number(r.net_profit ?? 0), 0);
-  const monthRevenue = (monthFin.data ?? []).reduce((s, r) => s + Number(r.revenue ?? 0), 0);
-  const monthProfit = (monthFin.data ?? []).reduce((s, r) => s + Number(r.net_profit ?? 0), 0);
+  const todayRevenue = (todayFin.data ?? []).reduce((s: number, r: any) => s + Number(r.revenue ?? 0), 0);
+  const todayProfit = (todayFin.data ?? []).reduce((s: number, r: any) => s + Number(r.net_profit ?? 0), 0);
+  const monthRevenue = (monthFin.data ?? []).reduce((s: number, r: any) => s + Number(r.revenue ?? 0), 0);
+  const monthProfit = (monthFin.data ?? []).reduce((s: number, r: any) => s + Number(r.net_profit ?? 0), 0);
 
   const totalOrders = (monthOrders.data ?? []).length;
-  const returned = (monthOrders.data ?? []).filter((o) => o.status === "cancelled").length; // approx until shipments wired
+  const returned = (monthOrders.data ?? []).filter((o) => o.status === "cancelled").length;
   const returnRatePct = totalOrders > 0 ? (returned / totalOrders) * 100 : 0;
 
   return {
@@ -269,7 +291,6 @@ export async function fetchDashboardKpis(): Promise<DashboardKpis> {
   };
 }
 
-/** Daily series of revenue and expenses (from transactions ledger) for last N days. */
 export async function fetchRevenueExpenseSeries(days = 30): Promise<{ date: string; revenue: number; expense: number }[]> {
   const end = new Date();
   const start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - (days - 1));

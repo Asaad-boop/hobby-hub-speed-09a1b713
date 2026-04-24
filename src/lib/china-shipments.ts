@@ -66,8 +66,10 @@ export const STATUS_TONE: Record<ChinaShipmentStatus, string> = {
   cancelled: "bg-destructive/10 text-destructive",
 };
 
+const chinaSupabase = supabase as any;
+
 export async function listChinaShipments(): Promise<ChinaShipment[]> {
-  const { data, error } = await supabase
+  const { data, error } = await chinaSupabase
     .from("china_shipments")
     .select("*")
     .order("created_at", { ascending: false });
@@ -76,15 +78,14 @@ export async function listChinaShipments(): Promise<ChinaShipment[]> {
 }
 
 export async function getChinaShipment(id: string) {
-  const [{ data: header, error: e1 }, { data: items, error: e2 }] =
-    await Promise.all([
-      supabase.from("china_shipments").select("*").eq("id", id).single(),
-      supabase
-        .from("china_shipment_items")
-        .select("*")
-        .eq("shipment_id", id)
-        .order("created_at", { ascending: true }),
-    ]);
+  const [{ data: header, error: e1 }, { data: items, error: e2 }] = await Promise.all([
+    chinaSupabase.from("china_shipments").select("*").eq("id", id).single(),
+    chinaSupabase
+      .from("china_shipment_items")
+      .select("*")
+      .eq("shipment_id", id)
+      .order("created_at", { ascending: true }),
+  ]);
   if (e1) throw e1;
   if (e2) throw e2;
   return {
@@ -111,7 +112,7 @@ export type CreateShipmentInput = {
 };
 
 export async function createChinaShipment(input: CreateShipmentInput) {
-  const { data, error } = await supabase
+  const { data, error } = await chinaSupabase
     .from("china_shipments")
     .insert(input)
     .select("*")
@@ -124,7 +125,7 @@ export async function updateChinaShipment(
   id: string,
   patch: Partial<CreateShipmentInput> & { status?: ChinaShipmentStatus },
 ) {
-  const { data, error } = await supabase
+  const { data, error } = await chinaSupabase
     .from("china_shipments")
     .update(patch)
     .eq("id", id)
@@ -135,7 +136,7 @@ export async function updateChinaShipment(
 }
 
 export async function deleteChinaShipment(id: string) {
-  const { error } = await supabase.from("china_shipments").delete().eq("id", id);
+  const { error } = await chinaSupabase.from("china_shipments").delete().eq("id", id);
   if (error) throw error;
 }
 
@@ -150,7 +151,7 @@ export type CreateShipmentItemInput = {
 };
 
 export async function addShipmentItem(input: CreateShipmentItemInput) {
-  const { data, error } = await supabase
+  const { data, error } = await chinaSupabase
     .from("china_shipment_items")
     .insert(input)
     .select("*")
@@ -160,10 +161,7 @@ export async function addShipmentItem(input: CreateShipmentItemInput) {
 }
 
 export async function deleteShipmentItem(id: string) {
-  const { error } = await supabase
-    .from("china_shipment_items")
-    .delete()
-    .eq("id", id);
+  const { error } = await chinaSupabase.from("china_shipment_items").delete().eq("id", id);
   if (error) throw error;
 }
 
