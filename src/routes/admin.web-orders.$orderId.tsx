@@ -27,7 +27,8 @@ import {
   Smartphone,
   Facebook,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as supabaseTyped } from "@/integrations/supabase/client";
+const supabase = supabaseTyped as any;
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
