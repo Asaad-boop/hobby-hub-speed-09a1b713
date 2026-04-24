@@ -116,7 +116,12 @@ const STATUS_TONES: Record<OrderStatus, string> = {
   incomplete: "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/30",
 };
 
-type OrderWithItems = OrderRow & { order_items: OrderItemRow[] };
+type OrderWithItems = OrderRow & {
+  order_items: OrderItemRow[];
+  advance_payment_amount?: number | null;
+  advance_payment_method?: string | null;
+  advance_payment_txn_id?: string | null;
+};
 
 function copyText(value: string, label = "Copied") {
   navigator.clipboard
