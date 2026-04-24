@@ -5,6 +5,9 @@
  *
  * Stored in sessionStorage so it persists for the visit but doesn't
  * leak across browser sessions.
+ *
+ * Note: order attribution payload currently disabled — orders table
+ * does not have tracking columns yet.
  */
 
 const STORAGE_KEY = "hs_attribution_v1";
