@@ -91,7 +91,7 @@ const CAR_DESIGNS = [
 
 const INCLUDES = [
   { text: "A+ Hard Paper — ১২ Plane design (প্রতিটি ৩টি)", qty: "৩৬ শিট" },
-  { text: "Hard Cardboard — ১০ Car design (প্রতিটি ৩টি)", qty: "৩০ শিট" },
+  { text: "Hard Cardboard — ১০ Car design (১টি করে)", qty: "১০ শিট" },
   { text: "Step-by-step Video Instruction (QR code soho)", qty: "২২টি" },
   { text: "প্রতিটি ডিজাইনের আলাদা ডিজাইন কার্ড", qty: "২২টি" },
   { text: "Premium gift box packaging", qty: "১টি" },
@@ -166,7 +166,7 @@ const FAQS = [
   },
   {
     q: "Combo te ki ki thakbe?",
-    a: "Plane Kit (১২ design, ৩৬ shit A+ hard paper) + Car Kit (১০ design, ৩০ shit hard cardboard) + step-by-step video instruction (QR code scan kore dekhben) + 22ti design card + premium gift box.",
+    a: "Plane Kit (১২ design, ৩৬ shit A+ hard paper) + Car Kit (১০ design, ১০ shit hard cardboard) + step-by-step video instruction (QR code scan kore dekhben) + 22ti design card + premium gift box.",
   },
   {
     q: "Manual nai? Kivabe banabo?",
@@ -191,7 +191,7 @@ function LandingPage() {
   const navigate = useNavigate();
 
   const [variant, setVariant] = useState<"single" | "combo">("combo");
-  const [singleKit, setSingleKit] = useState<"plane" | "car">("plane");
+  const [singleKit, setSingleKit] = useState<"plane" | "car">("car");
   const [qty, setQty] = useState(1);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [submitting, setSubmitting] = useState(false);
@@ -475,7 +475,7 @@ function LandingPage() {
           <div>
             <KitTag>🚗 Car Kit</KitTag>
             <div className="grid grid-cols-2 gap-2.5">
-              <SpecCard label="মোট শিট" value="৩০টি" sub="প্রতি ডিজাইন ৩টি" />
+              <SpecCard label="মোট শিট" value="১০টি" sub="প্রতি ডিজাইন ১টি" />
               <SpecCard label="ডিজাইন" value="১০টি" sub="ইউনিক" />
               <SpecCard label="মেটেরিয়াল" value="Cardboard" />
               <SpecCard label="শেপ" value="3D" />
@@ -714,7 +714,7 @@ function LandingPage() {
             <p className="mb-3 mt-2 text-xs leading-relaxed text-white/70">
               Plane Kit (১২ ডিজাইন, ৩৬ শিট)
               <br />+<br />
-              Car Kit (১০ ডিজাইন, ৩০ শিট)
+              Car Kit (১০ ডিজাইন, ১০ শিট)
               <br />
               <br />
               ভিডিও ইনস্ট্রাকশন সহ
@@ -838,7 +838,8 @@ function LandingPage() {
                       value="car"
                       current={singleKit}
                       title="🚗 Car Kit"
-                      sub="১০ ডিজাইন · ৩০ শিট"
+                      sub="১০ ডিজাইন · ১০ শিট"
+                      badge="Best Seller"
                     />
                   </RadioGroup>
                 </div>
