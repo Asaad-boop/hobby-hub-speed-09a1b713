@@ -733,10 +733,15 @@ function TrackOrderSection() {
       sessionStorage.setItem(`order:${res.order.id}`, JSON.stringify(res.order));
       navigate({ to: "/track/$orderId", params: { orderId: res.order.id } });
     } catch (e: any) {
-      const msg =
-        e?.message && !/SUPABASE_|environment variables/i.test(e.message)
-          ? e.message
-          : "Order tracking is temporarily unavailable. Please try again.";
+      const raw = e?.message || "";
+      if (/Unauthorized|No authorization|No token/i.test(raw)) {
+        toast.info("Please sign in to track your order");
+        navigate({ to: "/auth" });
+        return;
+      }
+      const msg = !/SUPABASE_|environment variables/i.test(raw)
+        ? raw || "Lookup failed"
+        : "Order tracking is temporarily unavailable. Please try again.";
       setErr(msg);
     } finally {
       setLoading(false);

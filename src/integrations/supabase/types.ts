@@ -742,6 +742,35 @@ export type Database = {
           },
         ]
       }
+      product_costs: {
+        Row: {
+          avg_cost: number
+          product_id: string
+          unit_cost: number
+          updated_at: string
+        }
+        Insert: {
+          avg_cost?: number
+          product_id: string
+          unit_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          avg_cost?: number
+          product_id?: string
+          unit_cost?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_costs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_option_types: {
         Row: {
           created_at: string
@@ -888,7 +917,6 @@ export type Database = {
       }
       products: {
         Row: {
-          avg_cost: number
           benefits: Json
           category_id: string | null
           created_at: string
@@ -908,11 +936,9 @@ export type Database = {
           specs: Json
           stock: number
           title: string
-          unit_cost: number
           updated_at: string
         }
         Insert: {
-          avg_cost?: number
           benefits?: Json
           category_id?: string | null
           created_at?: string
@@ -932,11 +958,9 @@ export type Database = {
           specs?: Json
           stock?: number
           title: string
-          unit_cost?: number
           updated_at?: string
         }
         Update: {
-          avg_cost?: number
           benefits?: Json
           category_id?: string | null
           created_at?: string
@@ -956,7 +980,6 @@ export type Database = {
           specs?: Json
           stock?: number
           title?: string
-          unit_cost?: number
           updated_at?: string
         }
         Relationships: [
