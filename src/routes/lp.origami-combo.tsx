@@ -29,7 +29,7 @@ import {
   Sparkles,
   ShieldCheck,
   CheckCircle2,
-  PlayCircle,
+  
   Star,
   Quote,
 } from "lucide-react";
@@ -97,12 +97,6 @@ const INCLUDES = [
   { text: "Premium gift box packaging", qty: "১টি" },
 ];
 
-const VIDEOS = [
-  { title: "Plane — Classic Dart কীভাবে বানাবেন", duration: "2:14", thumb: "✈️" },
-  { title: "Plane — Fighter Jet step-by-step", duration: "3:08", thumb: "🛩️" },
-  { title: "Car — Sports Car 3D assembly", duration: "4:22", thumb: "🏎️" },
-  { title: "Car — Fire Truck full build", duration: "5:10", thumb: "🚒" },
-];
 
 type Review = {
   name: string;
