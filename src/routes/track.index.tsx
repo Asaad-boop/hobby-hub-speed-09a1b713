@@ -65,7 +65,7 @@ function TrackLanding() {
         </div>
         <h1 className="text-3xl font-extrabold md:text-4xl">Track Your Order</h1>
         <p className="mt-2 text-sm text-muted-foreground md:text-base">
-          No account needed — enter your Order ID, phone number, or email.
+          Sign in to track your order — enter your Order ID, phone number, or email.
         </p>
       </div>
 
