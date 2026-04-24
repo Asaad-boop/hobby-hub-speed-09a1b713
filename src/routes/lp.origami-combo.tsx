@@ -447,7 +447,7 @@ function LandingPage() {
               <SpecCard label="মোট শিট" value="৩৬টি" sub="প্রতি ডিজাইন ৩টি" />
               <SpecCard label="ডিজাইন" value="১২টি" sub="ইউনিক" />
               <SpecCard label="পেপার" value="A+ Hard" />
-              <SpecCard label="ম্যানুয়াল" value="বাংলা" />
+              <SpecCard label="ইনস্ট্রাকশন" value="Video" sub="QR scan" />
             </div>
           </div>
           <div>
