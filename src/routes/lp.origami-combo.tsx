@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProductByIdOrSlug, type Product } from "@/lib/products";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
@@ -24,6 +24,9 @@ import {
   Truck,
   RotateCcw,
   PackageCheck,
+  Sparkles,
+  ShieldCheck,
+  CheckCircle2,
 } from "lucide-react";
 
 const PRODUCT_SLUG = "air-plane-car-combo-2design-combo-origami-paper-1";
@@ -82,11 +85,11 @@ const CAR_DESIGNS = [
 ];
 
 const INCLUDES = [
-  { color: "blue", text: "A+ Hard Paper — ১২ Plane design (প্রতিটি ৩টি)", qty: "৩৬ শিট" },
-  { color: "amber", text: "Hard Cardboard — ১০ Car design (প্রতিটি ৩টি)", qty: "৩০ শিট" },
-  { color: "blue", text: "Bangla Manual — Plane + Car uvoier nirdeshona", qty: "১টি" },
-  { color: "amber", text: "Step-by-step chobi soho design card", qty: "২২টি" },
-  { color: "blue", text: "Premium gift box packaging", qty: "১টি" },
+  { text: "A+ Hard Paper — ১২ Plane design (প্রতিটি ৩টি)", qty: "৩৬ শিট" },
+  { text: "Hard Cardboard — ১০ Car design (প্রতিটি ৩টি)", qty: "৩০ শিট" },
+  { text: "Bangla Manual — Plane + Car uvoier nirdeshona", qty: "১টি" },
+  { text: "Step-by-step chobi soho design card", qty: "২২টি" },
+  { text: "Premium gift box packaging", qty: "১টি" },
 ];
 
 const FAQS = [
@@ -266,82 +269,108 @@ function LandingPage() {
     );
   }
 
+  const savings = COMBO_OLD - COMBO_PRICE;
+
   return (
     <div className="bg-background text-foreground">
-      {/* HERO */}
-      <section className="px-5 pt-10 pb-6 text-center">
-        <div className="mb-4 flex flex-wrap justify-center gap-2">
-          <span className="inline-block rounded-full bg-sky-100 px-3.5 py-1 text-xs font-medium text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">
-            ✈️ Plane Kit — ১২ ডিজাইন
+      {/* HERO — bold brand gradient */}
+      <section
+        className="relative overflow-hidden px-5 pt-12 pb-10 text-center"
+        style={{ background: "var(--gradient-dark)" }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0 opacity-30"
+          style={{
+            background:
+              "radial-gradient(60% 50% at 50% 0%, oklch(0.585 0.245 27.5 / 0.55), transparent 70%)",
+          }}
+        />
+        <div className="relative">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary-foreground shadow-[var(--shadow-brand)]">
+            <Sparkles className="h-3 w-3" /> Limited Combo Offer
           </span>
-          <span className="inline-block rounded-full bg-amber-100 px-3.5 py-1 text-xs font-medium text-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
-            🚗 Car Kit — ১০ ডিজাইন
-          </span>
-        </div>
-        <h1 className="mx-auto max-w-xl text-balance text-2xl font-semibold leading-snug text-foreground sm:text-3xl">
-          Fold It. Build It.
-          <br />
-          Plane ও 3D Car — একসাথে!
-        </h1>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-          A+ সাইজ হার্ড পেপারে ১২টি Plane ডিজাইন, হার্ড কার্ডবোর্ডে ১০টি 3D Car — বাংলা ম্যানুয়াল সহ।
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2.5">
-          <Button
-            onClick={scrollToOrder}
-            className="h-11 rounded-md bg-sky-700 px-6 text-sm font-medium text-white hover:bg-sky-800"
-          >
-            এখনই অর্ডার করুন →
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => document.getElementById("designs")?.scrollIntoView({ behavior: "smooth" })}
-            className="h-11 rounded-md border-border px-6 text-sm font-normal"
-          >
-            বিস্তারিত দেখুন
-          </Button>
+          <h1 className="mx-auto mt-5 max-w-xl text-balance text-3xl font-extrabold leading-tight text-white sm:text-4xl">
+            Fold It. Build It.
+            <br />
+            <span className="bg-gradient-to-r from-primary to-[oklch(0.72_0.20_30)] bg-clip-text text-transparent">
+              Plane + 3D Car Combo
+            </span>
+          </h1>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/70">
+            A+ সাইজ হার্ড পেপারে ১২টি Plane ডিজাইন, হার্ড কার্ডবোর্ডে ১০টি 3D Car — বাংলা ম্যানুয়াল সহ।
+          </p>
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+            <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/85 backdrop-blur">
+              ✈️ ১২ Plane
+            </span>
+            <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/85 backdrop-blur">
+              🚗 ১০ Car
+            </span>
+            <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/85 backdrop-blur">
+              📖 Bangla Manual
+            </span>
+          </div>
+
+          <div className="mt-7 flex flex-wrap justify-center gap-2.5">
+            <Button
+              onClick={scrollToOrder}
+              className="h-12 rounded-full bg-primary px-7 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-brand)] hover:bg-primary/90"
+            >
+              এখনই অর্ডার করুন →
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => document.getElementById("designs")?.scrollIntoView({ behavior: "smooth" })}
+              className="h-12 rounded-full border-white/20 bg-white/5 px-6 text-sm font-medium text-white backdrop-blur hover:bg-white/10 hover:text-white"
+            >
+              বিস্তারিত দেখুন
+            </Button>
+          </div>
+
+          <div className="mt-6 flex items-center justify-center gap-1.5 text-xs text-white/60">
+            <ShieldCheck className="h-3.5 w-3.5" /> Cash on Delivery · 100% Replacement Guarantee
+          </div>
         </div>
       </section>
 
       {/* TWO KIT CARDS */}
-      <section className="grid grid-cols-2 gap-3.5 px-5 py-4">
-        {/* Plane card */}
-        <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          <div className="flex min-h-[120px] items-center justify-center bg-sky-50 p-6 dark:bg-sky-950/20">
+      <section className="-mt-6 grid grid-cols-2 gap-3.5 px-5">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+          <div className="flex min-h-[120px] items-center justify-center bg-muted p-6">
             <svg viewBox="0 0 120 90" className="h-20 w-28">
-              <polygon points="10,60 60,20 110,60 60,50" fill="#B5D4F4" stroke="#378ADD" strokeWidth="1.5" />
-              <polygon points="60,20 110,60 60,50" fill="#85B7EB" stroke="#378ADD" strokeWidth="1.5" />
-              <polygon points="60,50 110,60 90,75" fill="#E6F1FB" stroke="#378ADD" strokeWidth="1.5" />
-              <polygon points="60,50 10,60 30,75" fill="#B5D4F4" stroke="#185FA5" strokeWidth="1.5" />
-              <line x1="60" y1="20" x2="60" y2="70" stroke="#185FA5" strokeWidth="0.8" strokeDasharray="3,2" />
+              <polygon points="10,60 60,20 110,60 60,50" fill="oklch(0.92 0 0)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
+              <polygon points="60,20 110,60 60,50" fill="oklch(0.82 0 0)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
+              <polygon points="60,50 110,60 90,75" fill="oklch(0.97 0 0)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
+              <polygon points="60,50 10,60 30,75" fill="oklch(0.92 0 0)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
+              <line x1="60" y1="20" x2="60" y2="70" stroke="oklch(0.18 0 0)" strokeWidth="0.8" strokeDasharray="3,2" />
             </svg>
           </div>
           <div className="p-4">
-            <div className="text-sm font-medium text-foreground">✈️ Paper Plane Kit</div>
+            <div className="text-sm font-semibold text-foreground">✈️ Paper Plane Kit</div>
             <div className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              A+ সাইজ হার্ড পেপার · ১২টি ডিজাইন · ৩৬টি শিট
+              A+ হার্ড পেপার · ১২টি ডিজাইন · ৩৬ শিট
             </div>
           </div>
         </div>
 
-        {/* Car card */}
-        <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          <div className="flex min-h-[120px] items-center justify-center bg-amber-50 p-6 dark:bg-amber-950/20">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+          <div className="flex min-h-[120px] items-center justify-center bg-muted p-6">
             <svg viewBox="0 0 120 90" className="h-20 w-28">
-              <rect x="20" y="35" width="80" height="30" rx="4" fill="#FAC775" stroke="#BA7517" strokeWidth="1.5" />
-              <rect x="30" y="22" width="55" height="20" rx="4" fill="#FAEEDA" stroke="#BA7517" strokeWidth="1.5" />
-              <circle cx="35" cy="67" r="9" fill="#444441" stroke="#2C2C2A" strokeWidth="1.5" />
-              <circle cx="35" cy="67" r="5" fill="#888780" />
-              <circle cx="85" cy="67" r="9" fill="#444441" stroke="#2C2C2A" strokeWidth="1.5" />
-              <circle cx="85" cy="67" r="5" fill="#888780" />
-              <rect x="35" y="26" width="18" height="12" rx="2" fill="#B5D4F4" stroke="#378ADD" strokeWidth="1" />
-              <rect x="60" y="26" width="18" height="12" rx="2" fill="#B5D4F4" stroke="#378ADD" strokeWidth="1" />
-              <rect x="20" y="50" width="12" height="8" rx="1" fill="#EF9F27" stroke="#BA7517" strokeWidth="1" />
-              <rect x="88" y="50" width="12" height="8" rx="1" fill="#EF9F27" stroke="#BA7517" strokeWidth="1" />
+              <rect x="20" y="35" width="80" height="30" rx="4" fill="oklch(0.585 0.245 27.5)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
+              <rect x="30" y="22" width="55" height="20" rx="4" fill="oklch(0.95 0.05 27)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
+              <circle cx="35" cy="67" r="9" fill="oklch(0.18 0 0)" stroke="oklch(0.10 0 0)" strokeWidth="1.5" />
+              <circle cx="35" cy="67" r="5" fill="oklch(0.55 0 0)" />
+              <circle cx="85" cy="67" r="9" fill="oklch(0.18 0 0)" stroke="oklch(0.10 0 0)" strokeWidth="1.5" />
+              <circle cx="85" cy="67" r="5" fill="oklch(0.55 0 0)" />
+              <rect x="35" y="26" width="18" height="12" rx="2" fill="oklch(0.85 0 0)" stroke="oklch(0.18 0 0)" strokeWidth="1" />
+              <rect x="60" y="26" width="18" height="12" rx="2" fill="oklch(0.85 0 0)" stroke="oklch(0.18 0 0)" strokeWidth="1" />
+              <rect x="20" y="50" width="12" height="8" rx="1" fill="oklch(0.96 0.07 90)" stroke="oklch(0.18 0 0)" strokeWidth="1" />
+              <rect x="88" y="50" width="12" height="8" rx="1" fill="oklch(0.96 0.07 90)" stroke="oklch(0.18 0 0)" strokeWidth="1" />
             </svg>
           </div>
           <div className="p-4">
-            <div className="text-sm font-medium text-foreground">🚗 3D Car Kit</div>
+            <div className="text-sm font-semibold text-foreground">🚗 3D Car Kit</div>
             <div className="mt-1 text-xs leading-relaxed text-muted-foreground">
               হার্ড কার্ডবোর্ড · ১০টি ডিজাইন · 3D শেপ
             </div>
@@ -350,29 +379,23 @@ function LandingPage() {
       </section>
 
       {/* SPECIFICATIONS */}
-      <section className="px-5 py-6">
-        <h2 className="mb-5 text-center text-base font-semibold text-foreground">কিটের স্পেসিফিকেশন</h2>
+      <section className="px-5 py-10">
+        <SectionHeading kicker="Specifications" title="কিটের স্পেসিফিকেশন" />
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          {/* Plane specs */}
           <div>
-            <span className="mb-2.5 inline-block rounded-md bg-sky-100 px-2.5 py-1 text-xs font-medium text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">
-              ✈️ Plane Kit
-            </span>
+            <KitTag>✈️ Plane Kit</KitTag>
             <div className="grid grid-cols-2 gap-2.5">
               <SpecCard label="মোট শিট" value="৩৬টি" sub="প্রতি ডিজাইন ৩টি" />
-              <SpecCard label="ডিজাইন" value="১২টি" sub="ইউনিক ডিজাইন" />
+              <SpecCard label="ডিজাইন" value="১২টি" sub="ইউনিক" />
               <SpecCard label="পেপার" value="A+ Hard" />
               <SpecCard label="ম্যানুয়াল" value="বাংলা" />
             </div>
           </div>
-          {/* Car specs */}
           <div>
-            <span className="mb-2.5 inline-block rounded-md bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
-              🚗 Car Kit
-            </span>
+            <KitTag>🚗 Car Kit</KitTag>
             <div className="grid grid-cols-2 gap-2.5">
               <SpecCard label="মোট শিট" value="৩০টি" sub="প্রতি ডিজাইন ৩টি" />
-              <SpecCard label="ডিজাইন" value="১০টি" sub="ইউনিক ডিজাইন" />
+              <SpecCard label="ডিজাইন" value="১০টি" sub="ইউনিক" />
               <SpecCard label="মেটেরিয়াল" value="Cardboard" />
               <SpecCard label="শেপ" value="3D" />
             </div>
@@ -381,13 +404,11 @@ function LandingPage() {
       </section>
 
       {/* DESIGNS */}
-      <section id="designs" className="px-5 py-6">
-        <h2 className="mb-5 text-center text-base font-semibold text-foreground">কোন কোন ডিজাইন থাকছে?</h2>
+      <section id="designs" className="bg-muted/40 px-5 py-10">
+        <SectionHeading kicker="Designs" title="কোন কোন ডিজাইন থাকছে?" />
 
         <div className="mb-6">
-          <div className="mb-2.5 inline-block rounded-md bg-sky-100 px-3 py-1.5 text-xs font-medium text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">
-            ✈️ Plane — ১২টি ডিজাইন
-          </div>
+          <KitTag>✈️ Plane — ১২টি ডিজাইন</KitTag>
           <div className="grid grid-cols-4 gap-2">
             {PLANE_DESIGNS.map((d) => (
               <DesignPill key={d.name} icon={d.icon} name={d.name} />
@@ -396,9 +417,7 @@ function LandingPage() {
         </div>
 
         <div>
-          <div className="mb-2.5 inline-block rounded-md bg-amber-100 px-3 py-1.5 text-xs font-medium text-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
-            🚗 Car — ১০টি ডিজাইন
-          </div>
+          <KitTag>🚗 Car — ১০টি ডিজাইন</KitTag>
           <div className="grid grid-cols-5 gap-2">
             {CAR_DESIGNS.map((d) => (
               <DesignPill key={d.name} icon={d.icon} name={d.name} />
@@ -408,31 +427,27 @@ function LandingPage() {
       </section>
 
       {/* INCLUDES */}
-      <section className="px-5 py-6">
-        <h2 className="mb-4 text-center text-base font-semibold text-foreground">কিটে কী কী থাকছে?</h2>
-        <div className="rounded-2xl bg-muted/60 p-5">
+      <section className="px-5 py-10">
+        <SectionHeading kicker="What's inside" title="কিটে কী কী থাকছে?" />
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
           {INCLUDES.map((item, i) => (
             <div
               key={i}
-              className={`flex items-center gap-2.5 py-2.5 text-sm text-foreground ${
+              className={`flex items-center gap-3 py-3 text-sm text-foreground ${
                 i < INCLUDES.length - 1 ? "border-b border-border" : ""
               }`}
             >
-              <span
-                className={`h-2 w-2 flex-shrink-0 rounded-full ${
-                  item.color === "blue" ? "bg-sky-500" : "bg-amber-500"
-                }`}
-              />
+              <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-primary" />
               <span className="flex-1">{item.text}</span>
-              <span className="text-xs font-medium text-muted-foreground">{item.qty}</span>
+              <span className="text-xs font-semibold text-muted-foreground">{item.qty}</span>
             </div>
           ))}
         </div>
       </section>
 
       {/* PRICING */}
-      <section className="px-5 py-6">
-        <h2 className="mb-5 text-center text-base font-semibold text-foreground">প্রাইসিং</h2>
+      <section className="px-5 py-10">
+        <SectionHeading kicker="Pricing" title="আপনার জন্য সেরা অফার" />
         <div className="grid grid-cols-2 gap-3">
           {/* Single */}
           <button
@@ -442,83 +457,86 @@ function LandingPage() {
               scrollToOrder();
             }}
             className={`relative rounded-2xl border bg-card p-5 text-center transition ${
-              variant === "single" ? "border-2 border-sky-600 shadow-md" : "border-border"
+              variant === "single"
+                ? "border-2 border-primary shadow-[var(--shadow-brand)]"
+                : "border-border hover:border-foreground/20"
             }`}
           >
-            <div className="text-xs text-muted-foreground">Single Kit</div>
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Single Kit</div>
             <div className="mt-2 text-xs text-muted-foreground line-through">৳ ৭৯৫</div>
-            <div className="mt-1 text-2xl font-semibold text-foreground">৳ ৬৯৫</div>
-            <div className="h-5" />
+            <div className="mt-1 text-3xl font-extrabold text-foreground">৳ ৬৯৫</div>
+            <div className="h-3" />
             <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
               ১টি Plane Kit (১২ ডিজাইন)
               <br />
-              <strong>অথবা</strong>
+              <strong className="text-foreground">অথবা</strong>
               <br />
               ১টি Car Kit (১০ ডিজাইন)
               <br />
               <br />
               বাংলা ম্যানুয়াল সহ
             </p>
-            <div className="rounded-md border border-border py-2 text-xs font-medium text-foreground">
+            <div className="rounded-full border border-border py-2 text-xs font-semibold text-foreground">
               অর্ডার করুন →
             </div>
           </button>
 
-          {/* Combo (featured) */}
+          {/* Combo */}
           <button
             type="button"
             onClick={() => {
               setVariant("combo");
               scrollToOrder();
             }}
-            className={`relative rounded-2xl border-2 bg-card p-5 text-center transition ${
-              variant === "combo" ? "border-sky-600 shadow-lg" : "border-sky-300"
+            className={`relative rounded-2xl p-5 text-center text-white transition ${
+              variant === "combo" ? "shadow-[var(--shadow-brand)]" : "shadow-[var(--shadow-card)]"
             }`}
+            style={{ background: "var(--gradient-dark)" }}
           >
-            <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-sky-600 px-3 py-0.5 text-[11px] font-medium text-white">
-              সাশ্রয়ী কম্বো
+            <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary px-3 py-0.5 text-[11px] font-bold uppercase tracking-wider text-primary-foreground">
+              Best Value
             </span>
-            <div className="text-xs text-muted-foreground">Plane + Car Combo</div>
-            <div className="mt-2 text-xs text-muted-foreground line-through">৳ ১৩৯০</div>
-            <div className="mt-1 text-2xl font-semibold text-foreground">৳ ১২৯০</div>
-            <div className="mt-1.5 inline-block rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
-              ৳ ১০০ বাঁচছেন!
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-white/60">Plane + Car Combo</div>
+            <div className="mt-2 text-xs text-white/50 line-through">৳ ১৩৯০</div>
+            <div className="mt-1 text-3xl font-extrabold text-white">৳ ১২৯০</div>
+            <div className="mt-1.5 inline-block rounded-full bg-primary/20 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+              ৳ {savings} বাঁচছেন!
             </div>
-            <p className="mb-3 mt-2 text-xs leading-relaxed text-muted-foreground">
+            <p className="mb-3 mt-2 text-xs leading-relaxed text-white/70">
               Plane Kit (১২ ডিজাইন, ৩৬ শিট)
-              <br />
-              +<br />
+              <br />+<br />
               Car Kit (১০ ডিজাইন, ৩০ শিট)
               <br />
               <br />
               দুটো ম্যানুয়াল সহ
             </p>
-            <div className="rounded-md bg-sky-700 py-2 text-xs font-medium text-white">
+            <div className="rounded-full bg-primary py-2 text-xs font-bold text-primary-foreground">
               কম্বো নিন →
             </div>
           </button>
         </div>
-        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-center text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <Truck className="h-3.5 w-3.5" /> ঢাকায় ফ্রি ডেলিভারি
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-center text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5">
+            <Truck className="h-3.5 w-3.5" /> দ্রুত ডেলিভারি
           </span>
           <span>·</span>
-          <span className="inline-flex items-center gap-1">
+          <span className="inline-flex items-center gap-1.5">
             <RotateCcw className="h-3.5 w-3.5" /> ৭ দিনের রিটার্ন
           </span>
           <span>·</span>
-          <span className="inline-flex items-center gap-1">
+          <span className="inline-flex items-center gap-1.5">
             <PackageCheck className="h-3.5 w-3.5" /> গিফট প্যাকেজিং
           </span>
         </div>
       </section>
 
-      {/* FOOTER CTA */}
-      <section className="mx-5 my-6 rounded-2xl bg-sky-50 px-6 py-8 text-center dark:bg-sky-950/30">
-        <h2 className="text-base font-semibold text-sky-900 dark:text-sky-100">
-          Plane আর Car — দুটোই নিন, ৳ ১০০ বাঁচান!
-        </h2>
-        <p className="mt-1.5 text-xs text-sky-700 dark:text-sky-300">
+      {/* MID CTA */}
+      <section
+        className="mx-5 my-6 overflow-hidden rounded-2xl px-6 py-10 text-center text-white shadow-[var(--shadow-brand)]"
+        style={{ background: "var(--gradient-brand)" }}
+      >
+        <h2 className="text-lg font-bold">Plane আর Car — দুটোই নিন, ৳ {savings} বাঁচান!</h2>
+        <p className="mt-2 text-xs text-white/85">
           স্টক সীমিত। কম্বো অফার যেকোনো সময় শেষ হতে পারে।
         </p>
         <Button
@@ -526,30 +544,27 @@ function LandingPage() {
             setVariant("combo");
             scrollToOrder();
           }}
-          className="mt-5 h-12 rounded-md bg-sky-700 px-8 text-sm font-medium text-white hover:bg-sky-800"
+          className="mt-5 h-12 rounded-full bg-white px-8 text-sm font-bold text-primary hover:bg-white/90"
         >
           Combo নিন — ৳ ১২৯০ →
         </Button>
       </section>
 
       {/* ORDER FORM */}
-      <section ref={orderRef} className="scroll-mt-4 px-5 py-8">
+      <section ref={orderRef} className="scroll-mt-4 px-5 py-10">
         <div className="mx-auto max-w-xl">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-foreground">অর্ডার ফর্ম</h2>
-            <p className="mt-1.5 text-sm text-muted-foreground">
-              ফর্ম পূরণ করুন — আমরা কনফার্ম করতে কল করব। Cash on Delivery।
-            </p>
-          </div>
+          <SectionHeading kicker="Order now" title="অর্ডার ফর্ম" />
+          <p className="-mt-4 mb-6 text-center text-sm text-muted-foreground">
+            ফর্ম পূরণ করুন — আমরা কনফার্ম করতে কল করব। Cash on Delivery।
+          </p>
 
-          <form onSubmit={handleSubmit} className="mt-6 overflow-hidden rounded-2xl border border-border bg-card">
-            {/* Variant + qty summary */}
-            <div className="flex items-center gap-3 border-b border-border bg-muted/40 p-4">
-              <div className="flex-1 min-w-0">
+          <form onSubmit={handleSubmit} className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+            <div className="flex items-center gap-3 border-b border-border bg-muted/50 p-4">
+              <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-foreground">
                   {variant === "combo" ? "Plane + Car Combo" : "Single Kit"}
                 </p>
-                <p className="mt-0.5 text-base font-bold text-sky-700 dark:text-sky-400">
+                <p className="mt-0.5 text-base font-extrabold text-primary">
                   ৳ {unitPrice.toLocaleString()}
                   <span className="ml-2 text-xs font-normal text-muted-foreground line-through">
                     ৳ {oldPrice.toLocaleString()}
@@ -576,45 +591,19 @@ function LandingPage() {
             </div>
 
             <div className="space-y-4 p-5">
-              {/* Variant switch */}
               <div>
-                <Label className="mb-2 block text-sm font-medium">কোন কিট নিতে চান?</Label>
+                <Label className="mb-2 block text-sm font-semibold">কোন কিট নিতে চান?</Label>
                 <RadioGroup
                   value={variant}
                   onValueChange={(v) => setVariant(v as "single" | "combo")}
                   className="grid grid-cols-2 gap-2.5"
                 >
-                  <label
-                    htmlFor="v-single"
-                    className={`flex cursor-pointer items-center gap-2 rounded-xl border p-3 transition ${
-                      variant === "single" ? "border-2 border-sky-600 bg-sky-50 dark:bg-sky-950/20" : "border-border"
-                    }`}
-                  >
-                    <RadioGroupItem id="v-single" value="single" />
-                    <div className="flex-1 text-sm">
-                      <p className="font-semibold">Single — ৳৬৯৫</p>
-                      <p className="text-xs text-muted-foreground">Plane বা Car</p>
-                    </div>
-                  </label>
-                  <label
-                    htmlFor="v-combo"
-                    className={`flex cursor-pointer items-center gap-2 rounded-xl border p-3 transition ${
-                      variant === "combo" ? "border-2 border-sky-600 bg-sky-50 dark:bg-sky-950/20" : "border-border"
-                    }`}
-                  >
-                    <RadioGroupItem id="v-combo" value="combo" />
-                    <div className="flex-1 text-sm">
-                      <p className="font-semibold">Combo — ৳১২৯০</p>
-                      <p className="text-xs text-muted-foreground">দুটোই + ৳১০০ off</p>
-                    </div>
-                  </label>
+                  <VariantOption id="v-single" value="single" current={variant} title="Single — ৳৬৯৫" sub="Plane বা Car" />
+                  <VariantOption id="v-combo" value="combo" current={variant} title="Combo — ৳১২৯০" sub={`দুটোই + ৳${savings} off`} />
                 </RadioGroup>
               </div>
 
-              <div>
-                <Label htmlFor="lp-name" className="mb-1.5 flex items-center gap-1.5 text-sm font-medium">
-                  <UserIcon className="h-3.5 w-3.5" /> আপনার নাম *
-                </Label>
+              <FormField id="lp-name" label="আপনার নাম *" icon={<UserIcon className="h-3.5 w-3.5" />}>
                 <Input
                   id="lp-name"
                   value={form.name}
@@ -623,12 +612,9 @@ function LandingPage() {
                   className="h-11 rounded-lg"
                   required
                 />
-              </div>
+              </FormField>
 
-              <div>
-                <Label htmlFor="lp-phone" className="mb-1.5 flex items-center gap-1.5 text-sm font-medium">
-                  <Phone className="h-3.5 w-3.5" /> মোবাইল নাম্বার *
-                </Label>
+              <FormField id="lp-phone" label="মোবাইল নাম্বার *" icon={<Phone className="h-3.5 w-3.5" />}>
                 <Input
                   id="lp-phone"
                   type="tel"
@@ -639,12 +625,9 @@ function LandingPage() {
                   className="h-11 rounded-lg"
                   required
                 />
-              </div>
+              </FormField>
 
-              <div>
-                <Label htmlFor="lp-district" className="mb-1.5 flex items-center gap-1.5 text-sm font-medium">
-                  <MapPin className="h-3.5 w-3.5" /> জেলা *
-                </Label>
+              <FormField id="lp-district" label="জেলা *" icon={<MapPin className="h-3.5 w-3.5" />}>
                 <Select value={form.district} onValueChange={(v) => setForm({ ...form, district: v })}>
                   <SelectTrigger id="lp-district" className="h-11 rounded-lg">
                     <SelectValue placeholder="আপনার জেলা সিলেক্ট করুন" />
@@ -657,12 +640,9 @@ function LandingPage() {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </FormField>
 
-              <div>
-                <Label htmlFor="lp-address" className="mb-1.5 flex items-center gap-1.5 text-sm font-medium">
-                  <MapPin className="h-3.5 w-3.5" /> সঠিক ঠিকানা *
-                </Label>
+              <FormField id="lp-address" label="সঠিক ঠিকানা *" icon={<MapPin className="h-3.5 w-3.5" />}>
                 <Textarea
                   id="lp-address"
                   value={form.address}
@@ -672,43 +652,21 @@ function LandingPage() {
                   className="rounded-lg"
                   required
                 />
-              </div>
+              </FormField>
 
               <div>
-                <Label className="mb-2 block text-sm font-medium">ডেলিভারি চার্জ</Label>
+                <Label className="mb-2 block text-sm font-semibold">ডেলিভারি চার্জ</Label>
                 <RadioGroup
                   value={shipMethod}
                   onValueChange={(v) => setShipMethod(v as "inside" | "outside")}
                   className="grid grid-cols-2 gap-2.5"
                 >
-                  <label
-                    htmlFor="ship-inside"
-                    className={`flex cursor-pointer items-center gap-2 rounded-xl border p-3 transition ${
-                      shipMethod === "inside" ? "border-2 border-sky-600 bg-sky-50 dark:bg-sky-950/20" : "border-border"
-                    }`}
-                  >
-                    <RadioGroupItem id="ship-inside" value="inside" />
-                    <div className="flex-1 text-sm">
-                      <p className="font-semibold">ঢাকার ভেতরে</p>
-                      <p className="text-xs text-muted-foreground">৳{SHIPPING_INSIDE}</p>
-                    </div>
-                  </label>
-                  <label
-                    htmlFor="ship-outside"
-                    className={`flex cursor-pointer items-center gap-2 rounded-xl border p-3 transition ${
-                      shipMethod === "outside" ? "border-2 border-sky-600 bg-sky-50 dark:bg-sky-950/20" : "border-border"
-                    }`}
-                  >
-                    <RadioGroupItem id="ship-outside" value="outside" />
-                    <div className="flex-1 text-sm">
-                      <p className="font-semibold">ঢাকার বাইরে</p>
-                      <p className="text-xs text-muted-foreground">৳{SHIPPING_OUTSIDE}</p>
-                    </div>
-                  </label>
+                  <VariantOption id="ship-inside" value="inside" current={shipMethod} title="ঢাকার ভেতরে" sub={`৳${SHIPPING_INSIDE}`} />
+                  <VariantOption id="ship-outside" value="outside" current={shipMethod} title="ঢাকার বাইরে" sub={`৳${SHIPPING_OUTSIDE}`} />
                 </RadioGroup>
               </div>
 
-              <div className="rounded-xl bg-muted/50 p-4">
+              <div className="rounded-xl border border-border bg-muted/40 p-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal ({qty} × ৳{unitPrice})</span>
                   <span className="font-semibold text-foreground">৳ {subtotal.toLocaleString()}</span>
@@ -720,7 +678,7 @@ function LandingPage() {
                 <div className="my-3 border-t border-border" />
                 <div className="flex items-end justify-between">
                   <span className="text-sm font-semibold text-foreground">মোট পেমেন্ট</span>
-                  <span className="text-xl font-bold text-sky-700 dark:text-sky-400">
+                  <span className="text-2xl font-extrabold text-primary">
                     ৳ {totalPay.toLocaleString()}
                   </span>
                 </div>
@@ -732,7 +690,7 @@ function LandingPage() {
               <Button
                 type="submit"
                 disabled={submitting}
-                className="h-12 w-full rounded-md bg-sky-700 text-sm font-semibold text-white hover:bg-sky-800"
+                className="h-12 w-full rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-[var(--shadow-brand)] hover:bg-primary/90"
               >
                 {submitting ? (
                   <>
@@ -753,17 +711,17 @@ function LandingPage() {
       </section>
 
       {/* FAQ */}
-      <section className="px-5 py-8">
+      <section className="bg-muted/40 px-5 py-10">
         <div className="mx-auto max-w-xl">
-          <h2 className="text-center text-lg font-semibold text-foreground">আপনার প্রশ্ন?</h2>
-          <Accordion type="single" collapsible className="mt-5 space-y-2">
+          <SectionHeading kicker="FAQ" title="আপনার প্রশ্ন?" />
+          <Accordion type="single" collapsible className="space-y-2">
             {FAQS.map((f, i) => (
               <AccordionItem
                 key={i}
                 value={`item-${i}`}
                 className="rounded-xl border border-border bg-card px-4"
               >
-                <AccordionTrigger className="text-left text-sm font-medium hover:no-underline">
+                <AccordionTrigger className="text-left text-sm font-semibold hover:no-underline">
                   {f.q}
                 </AccordionTrigger>
                 <AccordionContent className="text-sm leading-relaxed text-muted-foreground">
@@ -776,17 +734,17 @@ function LandingPage() {
       </section>
 
       {/* Mobile sticky CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 p-3 shadow-lg backdrop-blur md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 p-3 shadow-[var(--shadow-elevated)] backdrop-blur md:hidden">
         <div className="flex items-center gap-3">
           <div className="flex-1">
             <p className="text-xs text-muted-foreground line-through">৳ {oldPrice.toLocaleString()}</p>
-            <p className="text-lg font-bold leading-none text-sky-700 dark:text-sky-400">
+            <p className="text-lg font-extrabold leading-none text-primary">
               ৳ {unitPrice.toLocaleString()}
             </p>
           </div>
           <Button
             onClick={scrollToOrder}
-            className="h-11 flex-1 rounded-md bg-sky-700 text-sm font-semibold text-white hover:bg-sky-800"
+            className="h-11 flex-1 rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-[var(--shadow-brand)] hover:bg-primary/90"
           >
             <Gift className="mr-1.5 h-4 w-4" /> অর্ডার করুন
           </Button>
@@ -797,11 +755,28 @@ function LandingPage() {
   );
 }
 
+function SectionHeading({ kicker, title }: { kicker: string; title: string }) {
+  return (
+    <div className="mb-6 text-center">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">{kicker}</span>
+      <h2 className="mt-1 text-xl font-bold text-foreground">{title}</h2>
+    </div>
+  );
+}
+
+function KitTag({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="mb-3 inline-block rounded-full bg-secondary px-3 py-1 text-[11px] font-semibold text-secondary-foreground">
+      {children}
+    </span>
+  );
+}
+
 function SpecCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-md bg-muted/60 px-3 py-3 text-center">
+    <div className="rounded-xl border border-border bg-card px-3 py-3 text-center">
       <div className="text-[11px] text-muted-foreground">{label}</div>
-      <div className="mt-0.5 text-sm font-semibold text-foreground">{value}</div>
+      <div className="mt-0.5 text-sm font-bold text-foreground">{value}</div>
       {sub && <div className="mt-0.5 text-[10px] text-muted-foreground/80">{sub}</div>}
     </div>
   );
@@ -809,9 +784,60 @@ function SpecCard({ label, value, sub }: { label: string; value: string; sub?: s
 
 function DesignPill({ icon, name }: { icon: string; name: string }) {
   return (
-    <div className="rounded-md border border-border bg-card px-2 py-2 text-center">
-      <div className="text-lg leading-none">{icon}</div>
+    <div className="rounded-xl border border-border bg-card px-2 py-2.5 text-center transition hover:border-primary/40 hover:shadow-[var(--shadow-card)]">
+      <div className="text-xl leading-none">{icon}</div>
       <div className="mt-1 text-[10px] leading-tight text-muted-foreground">{name}</div>
+    </div>
+  );
+}
+
+function VariantOption({
+  id,
+  value,
+  current,
+  title,
+  sub,
+}: {
+  id: string;
+  value: string;
+  current: string;
+  title: string;
+  sub: string;
+}) {
+  const active = current === value;
+  return (
+    <label
+      htmlFor={id}
+      className={`flex cursor-pointer items-center gap-2 rounded-xl border p-3 transition ${
+        active ? "border-2 border-primary bg-primary/5" : "border-border hover:border-foreground/20"
+      }`}
+    >
+      <RadioGroupItem id={id} value={value} />
+      <div className="flex-1 text-sm">
+        <p className="font-semibold text-foreground">{title}</p>
+        <p className="text-xs text-muted-foreground">{sub}</p>
+      </div>
+    </label>
+  );
+}
+
+function FormField({
+  id,
+  label,
+  icon,
+  children,
+}: {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <Label htmlFor={id} className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold">
+        {icon} {label}
+      </Label>
+      {children}
     </div>
   );
 }
