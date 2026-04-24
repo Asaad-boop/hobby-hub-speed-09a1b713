@@ -567,7 +567,7 @@ function LandingPage() {
               Car Kit (১০ ডিজাইন, ৩০ শিট)
               <br />
               <br />
-              দুটো ম্যানুয়াল সহ
+              ভিডিও ইনস্ট্রাকশন সহ
             </p>
             <div className="rounded-full bg-primary py-2 text-xs font-bold text-primary-foreground">
               কম্বো নিন →
