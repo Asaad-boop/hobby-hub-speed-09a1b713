@@ -321,7 +321,7 @@ function AccountPage() {
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {wishlistProducts.slice(0, 6).map((p) => (
-                <Link key={p.id} to="/product/$id" params={{ id: p.id }} className="group rounded-xl border border-border bg-card p-3 transition hover:shadow-md">
+                <Link key={p.id} to="/product/$id" params={{ id: (p as any).slug || p.id }} className="group rounded-xl border border-border bg-card p-3 transition hover:shadow-md">
                   <img src={p.image} alt={p.title} className="mb-2 aspect-square w-full rounded-lg object-cover" />
                   <p className="line-clamp-1 text-sm font-semibold">{p.title}</p>
                   <p className="text-sm font-bold text-primary">৳{p.price}</p>

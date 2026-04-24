@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type Product = {
   id: string;
+  slug: string;
   title: string;
   price: number;
   oldPrice: number;
@@ -57,6 +58,7 @@ const toProduct = (r: ProductRow): Product => {
   const image = r.image && r.image.trim() ? r.image : FALLBACK_IMAGE;
   return {
     id: r.id, // canonical: use UUID
+    slug: r.slug,
     title: r.title,
     price: Number(r.price) || 0,
     oldPrice: r.old_price != null ? Number(r.old_price) : Number(r.price) || 0,
