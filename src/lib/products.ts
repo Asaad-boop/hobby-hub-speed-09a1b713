@@ -129,11 +129,12 @@ export async function fetchAllProducts(): Promise<Product[]> {
 }
 
 export async function fetchProductByIdOrSlug(idOrSlug: string): Promise<Product | null> {
+  const filter = UUID_RE.test(idOrSlug) ? `id.eq.${idOrSlug},slug.eq.${idOrSlug}` : `slug.eq.${idOrSlug}`;
   const { data, error } = await supabase
     .from("products")
     .select(SELECT_COLS)
     .eq("is_active", true)
-    .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`)
+    .or(filter)
     .maybeSingle();
   if (error) throw error;
   return data ? toProduct(data as unknown as ProductRow) : null;
