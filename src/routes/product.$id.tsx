@@ -6,6 +6,7 @@ import { fetchProductByIdOrSlug, fetchAllProducts } from "@/lib/products";
 import { fetchProductReviews, submitReview, fetchEligibleOrderId } from "@/lib/reviews";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
+import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
 import ProductCard from "@/components/ProductCard";
 import ReviewModal, { type NewReview } from "@/components/ReviewModal";
 import ReviewsList from "@/components/ReviewsList";
