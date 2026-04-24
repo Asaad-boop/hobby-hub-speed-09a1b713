@@ -48,10 +48,13 @@ describe("product links use slug with id fallback", () => {
     const src = readFileSync(file, "utf8");
     if (!src.includes("/product/$id")) continue;
 
-    // Find each occurrence of /product/$id and inspect surrounding ~400 chars
+    // Find each occurrence of /product/$id used as a link/navigate target,
+    // skipping the route definition itself (createFileRoute("/product/$id")).
     const re = /["'`]\/product\/\$id["'`]/g;
     let match: RegExpExecArray | null;
     while ((match = re.exec(src))) {
+      const before = src.slice(Math.max(0, match.index - 40), match.index);
+      if (/createFileRoute\s*\(\s*$/.test(before)) continue;
       const start = Math.max(0, match.index - 50);
       const end = Math.min(src.length, match.index + 400);
       const window = src.slice(start, end);
