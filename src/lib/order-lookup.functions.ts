@@ -1,34 +1,58 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { getRequestHeader } from "@tanstack/react-start/server";
+import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { Database } from "@/integrations/supabase/types";
 
 const normalizePhone = (p: string) => p.replace(/\D/g, "").slice(-10);
 
 /**
  * Order lookup — REQUIRES AUTHENTICATION.
- * Customers must sign in (account created with phone/email) to track orders.
- * Staff (admin/customer_service/operations) can look up any order; regular
- * users can only look up orders that belong to them.
+ * Returns ok:false with a friendly error instead of throwing, so the
+ * client never sees a raw Response/blank screen.
  */
 export const lookupOrder = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((input: { query: string }) => {
     const query = String(input.query || "").trim();
     if (!query) throw new Error("Please enter Order ID, phone or email");
     if (query.length > 254) throw new Error("Input too long");
     return { query };
   })
-  .handler(async ({ data, context }) => {
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  .handler(async ({ data }) => {
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
+    if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       return {
         ok: false as const,
-        error:
-          "Order tracking is temporarily unavailable. Please try again in a moment.",
+        code: "unavailable" as const,
+        error: "Order tracking is temporarily unavailable. Please try again in a moment.",
       };
     }
 
-    const userId = context.userId;
-    const claims = context.claims as { role?: string } | undefined;
+    // Inline auth check — return friendly error instead of throwing
+    const authHeader = getRequestHeader("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return {
+        ok: false as const,
+        code: "unauthorized" as const,
+        error: "Please sign in to track your order.",
+      };
+    }
+    const token = authHeader.replace("Bearer ", "");
+    const authedClient = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+      auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+    });
+    const { data: claimsData, error: claimsErr } = await authedClient.auth.getClaims(token);
+    if (claimsErr || !claimsData?.claims?.sub) {
+      return {
+        ok: false as const,
+        code: "unauthorized" as const,
+        error: "Please sign in to track your order.",
+      };
+    }
+    const userId = claimsData.claims.sub;
+    const claims = claimsData.claims as { role?: string };
 
     // Check if caller is staff
     const { data: rolesRow } = await supabaseAdmin

@@ -726,6 +726,11 @@ function TrackOrderSection() {
     try {
       const res = await lookupOrder({ data: { query: q.trim() } });
       if (!res.ok) {
+        if ((res as any).code === "unauthorized") {
+          toast.info(res.error);
+          navigate({ to: "/auth" });
+          return;
+        }
         setErr(res.error);
         toast.error(res.error);
         return;
@@ -733,22 +738,7 @@ function TrackOrderSection() {
       sessionStorage.setItem(`order:${res.order.id}`, JSON.stringify(res.order));
       navigate({ to: "/track/$orderId", params: { orderId: res.order.id } });
     } catch (e: any) {
-      let status = 0;
-      let raw = "";
-      if (e instanceof Response) {
-        status = e.status;
-        try { raw = await e.text(); } catch { /* ignore */ }
-      } else {
-        raw = e?.message || String(e || "");
-      }
-      if (status === 401 || /Unauthorized|No authorization|No token|Invalid token/i.test(raw)) {
-        toast.info("Please sign in to track your order");
-        navigate({ to: "/auth" });
-        return;
-      }
-      const msg = status === 500 || /SUPABASE_|environment variables/i.test(raw)
-        ? "Order tracking is temporarily unavailable. Please try again."
-        : raw || "Lookup failed";
+      const msg = e?.message || "Lookup failed";
       setErr(msg);
       toast.error(msg);
     } finally {
