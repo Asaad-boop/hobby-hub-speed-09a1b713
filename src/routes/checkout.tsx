@@ -51,6 +51,23 @@ function Checkout() {
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", city: "", district: "" });
 
+  // Meta Pixel: InitiateCheckout (fires once on mount when cart has items)
+  useEffect(() => {
+    if (items.length === 0) return;
+    fbTrack("InitiateCheckout", {
+      content_ids: items.map((i) => i.product.id),
+      contents: items.map((i) => ({
+        id: i.product.id,
+        quantity: i.qty,
+        item_price: i.product.price,
+      })),
+      num_items: items.reduce((s, i) => s + i.qty, 0),
+      value: total,
+      currency: META_CURRENCY,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Prefill from default address if logged in
   useEffect(() => {
     (async () => {
