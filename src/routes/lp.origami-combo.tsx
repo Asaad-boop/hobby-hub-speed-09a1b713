@@ -367,7 +367,7 @@ function LandingPage() {
               🚗 ১০ Car
             </span>
             <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/85 backdrop-blur">
-              📖 Bangla Manual
+              🎬 Video Instruction
             </span>
           </div>
 
