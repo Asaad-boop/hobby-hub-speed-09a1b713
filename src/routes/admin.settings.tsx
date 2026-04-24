@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save, Rocket } from "lucide-react";
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/admin/settings")({
 function AdminSettingsPage() {
   const { data, isLoading } = useSiteSettings();
   const queryClient = useQueryClient();
+  const redeployOnVercel = useServerFn(triggerVercelRedeploy);
   const [form, setForm] = useState<SiteSettings>(DEFAULT_SETTINGS);
   const [saving, setSaving] = useState(false);
   const [deploying, setDeploying] = useState(false);
@@ -32,7 +34,7 @@ function AdminSettingsPage() {
   const onRedeploy = async () => {
     setDeploying(true);
     try {
-      const res = await triggerVercelRedeploy();
+      const res = await redeployOnVercel();
       if (res.success) {
         setLastDeploy(res.triggeredAt ?? new Date().toISOString());
         toast.success("Vercel redeploy triggered — 1-2 minute lagbe live hote.");

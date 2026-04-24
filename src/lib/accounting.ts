@@ -33,7 +33,9 @@ export async function fetchRevenueByDay(from: string, to: string): Promise<Reven
     .lte("created_at", `${to}T23:59:59`)
     .in("status", [...REVENUE_STATUSES])
     .limit(1000);
+
   if (error) throw error;
+
   const map = new Map<string, { revenue: number; orders: number }>();
   for (const o of data ?? []) {
     const day = (o.created_at as string).slice(0, 10);
@@ -42,6 +44,7 @@ export async function fetchRevenueByDay(from: string, to: string): Promise<Reven
     cur.orders += 1;
     map.set(day, cur);
   }
+
   return [...map.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, v]) => ({ date, ...v }));
@@ -49,17 +52,21 @@ export async function fetchRevenueByDay(from: string, to: string): Promise<Reven
 
 export async function fetchExpensesByDay(from: string, to: string): Promise<ExpenseRow[]> {
   const { data, error } = await supabase
-    .from("expenses")
-    .select("expense_date, amount")
-    .gte("expense_date", from)
-    .lte("expense_date", to)
+    .from("transactions")
+    .select("transaction_date, amount, direction")
+    .eq("direction", "out")
+    .gte("transaction_date", from)
+    .lte("transaction_date", `${to}T23:59:59`)
     .limit(1000);
+
   if (error) throw error;
+
   const map = new Map<string, number>();
   for (const e of data ?? []) {
-    const day = e.expense_date as string;
+    const day = (e.transaction_date as string).slice(0, 10);
     map.set(day, (map.get(day) ?? 0) + Number(e.amount ?? 0));
   }
+
   return [...map.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, amount]) => ({ date, amount }));
@@ -67,17 +74,21 @@ export async function fetchExpensesByDay(from: string, to: string): Promise<Expe
 
 export async function fetchExpensesByCategory(from: string, to: string): Promise<CategoryTotal[]> {
   const { data, error } = await supabase
-    .from("expenses")
-    .select("amount, category:expense_categories(name)")
-    .gte("expense_date", from)
-    .lte("expense_date", to)
+    .from("transactions")
+    .select("amount, category, direction")
+    .eq("direction", "out")
+    .gte("transaction_date", from)
+    .lte("transaction_date", `${to}T23:59:59`)
     .limit(1000);
+
   if (error) throw error;
+
   const map = new Map<string, number>();
-  for (const e of (data ?? []) as Array<{ amount: number; category: { name: string } | null }>) {
-    const name = e.category?.name ?? "Uncategorized";
+  for (const e of data ?? []) {
+    const name = e.category ?? "other";
     map.set(name, (map.get(name) ?? 0) + Number(e.amount ?? 0));
   }
+
   return [...map.entries()]
     .sort((a, b) => b[1] - a[1])
     .map(([category, amount]) => ({ category, amount }));
@@ -101,16 +112,19 @@ export async function fetchMonthlyPnL(months = 12): Promise<MonthlyPnL[]> {
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     monthly.set(key, { month: key, revenue: 0, expenses: 0, profit: 0 });
   }
+
   for (const r of rev) {
     const key = r.date.slice(0, 7);
     const cur = monthly.get(key);
     if (cur) cur.revenue += r.revenue;
   }
+
   for (const e of exp) {
     const key = e.date.slice(0, 7);
     const cur = monthly.get(key);
     if (cur) cur.expenses += e.amount;
   }
+
   for (const m of monthly.values()) m.profit = m.revenue - m.expenses;
   return [...monthly.values()];
 }
