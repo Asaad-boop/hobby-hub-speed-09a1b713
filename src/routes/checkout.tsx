@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { validateCoupon, type Coupon } from "@/lib/coupons";
 import { getOrderAttributionPayload } from "@/lib/session-tracking";
+import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
 import { toast } from "sonner";
 import {
   Truck,
