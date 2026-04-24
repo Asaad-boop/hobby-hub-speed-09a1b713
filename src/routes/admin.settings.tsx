@@ -237,27 +237,36 @@ function AdminSettingsPage() {
       {/* Deployment */}
       <Section
         title="Deployment"
-        description="Vercel e latest commit redeploy koro — revert er por live site update korte ei button use koro."
+        description="GitHub main commit ar Vercel production deployment compare koro, ar latest code force redeploy koro."
       >
-        <div className="flex flex-wrap items-center gap-3">
+        <DeployStatusPanel
+          status={status}
+          checking={checking}
+          onRefresh={onCheckStatus}
+        />
+        <div className="flex flex-wrap items-center gap-3 pt-2">
           <Button onClick={onRedeploy} disabled={deploying} variant="default">
             {deploying ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <Rocket className="h-4 w-4" />
             )}
-            Redeploy on Vercel
+            Force redeploy to Production
           </Button>
-          {lastDeploy && (
-            <span className="text-xs text-muted-foreground">
-              Last triggered: {new Date(lastDeploy).toLocaleString()}
-            </span>
-          )}
+          <Button
+            onClick={onCheckStatus}
+            disabled={checking}
+            variant="outline"
+            size="sm"
+          >
+            {checking ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            Re-check status
+          </Button>
         </div>
-        <p className="text-xs text-muted-foreground">
-          Setup: Vercel → Project Settings → Git → Deploy Hooks. Hook URL ti{" "}
-          <code className="rounded bg-muted px-1">VERCEL_DEPLOY_HOOK_URL</code> secret e save koro.
-        </p>
       </Section>
 
       <div className="flex justify-end">
