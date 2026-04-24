@@ -733,24 +733,31 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Mobile sticky CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 p-3 shadow-[var(--shadow-elevated)] backdrop-blur md:hidden">
+      {/* Mobile sticky Order Now bar — updates with selected variant */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[var(--shadow-elevated)] backdrop-blur-xl md:hidden">
         <div className="flex items-center gap-3">
-          <div className="flex-1">
-            <p className="text-xs text-muted-foreground line-through">৳ {oldPrice.toLocaleString()}</p>
-            <p className="text-lg font-extrabold leading-none text-primary">
-              ৳ {unitPrice.toLocaleString()}
+          <div className="flex-1 min-w-0">
+            <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {variant === "combo" ? "Plane + Car Combo" : "Single Kit"}
             </p>
+            <div className="flex items-baseline gap-1.5">
+              <p className="text-lg font-extrabold leading-none text-primary">
+                ৳{unitPrice.toLocaleString()}
+              </p>
+              <p className="text-xs text-muted-foreground line-through">
+                ৳{oldPrice.toLocaleString()}
+              </p>
+            </div>
           </div>
           <Button
             onClick={scrollToOrder}
-            className="h-11 flex-1 rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-[var(--shadow-brand)] hover:bg-primary/90"
+            className="h-12 flex-1 rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-[var(--shadow-brand)] hover:bg-primary/90"
           >
             <Gift className="mr-1.5 h-4 w-4" /> অর্ডার করুন
           </Button>
         </div>
       </div>
-      <div className="h-20 md:hidden" />
+      <div className="h-24 md:hidden" />
     </div>
   );
 }
