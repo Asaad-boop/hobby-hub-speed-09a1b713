@@ -526,39 +526,6 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* VIDEO INSTRUCTIONS */}
-      <section className="bg-muted/40 px-5 py-10">
-        <SectionHeading kicker="How to build" title="ভিডিও ইনস্ট্রাকশন" />
-        <p className="-mt-4 mb-6 text-center text-sm text-muted-foreground">
-          প্রতিটি ডিজাইনের জন্য আলাদা step-by-step ভিডিও — QR scan করলেই মোবাইলে দেখা যাবে।
-        </p>
-        <div className="grid grid-cols-2 gap-3">
-          {VIDEOS.map((v) => (
-            <div
-              key={v.title}
-              className="group overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]"
-            >
-              <div
-                className="relative flex aspect-video items-center justify-center text-5xl"
-                style={{ background: "var(--gradient-dark)" }}
-              >
-                <span className="opacity-90">{v.thumb}</span>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <PlayCircle className="h-12 w-12 text-white drop-shadow-lg" strokeWidth={1.5} />
-                </div>
-                <span className="absolute bottom-1.5 right-1.5 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                  {v.duration}
-                </span>
-              </div>
-              <p className="p-3 text-xs font-semibold leading-snug text-foreground">{v.title}</p>
-            </div>
-          ))}
-        </div>
-        <p className="mt-5 text-center text-xs text-muted-foreground">
-          📦 প্রোডাক্ট বক্সের ভিতরে QR কোড পাবেন — স্ক্যান করলেই সব ভিডিও।
-        </p>
-      </section>
-
       {/* WHY THIS PRODUCT */}
       <section className="bg-muted/30 px-5 py-10">
         <SectionHeading kicker="Why this product" title="কেন এই Origami Kit নিবেন?" />
