@@ -43,6 +43,11 @@ function TrackLanding() {
       navigate({ to: "/track/$orderId", params: { orderId: res.order.id } });
     } catch (err: any) {
       const raw = err?.message || "";
+      if (/Unauthorized|No authorization|No token/i.test(raw)) {
+        toast.info("Please sign in to track your order");
+        navigate({ to: "/auth" });
+        return;
+      }
       const friendly = /SUPABASE_|environment variables/i.test(raw)
         ? "Order tracking is temporarily unavailable. Please try again in a moment."
         : raw || "Lookup failed. Please try again.";
