@@ -1411,8 +1411,12 @@ function AuroraLampLanding() {
       </section>
 
       {/* Mobile sticky bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[var(--shadow-elevated)] backdrop-blur-xl md:hidden">
-        <div className="flex items-center gap-3">
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] shadow-[var(--shadow-elevated)] backdrop-blur-xl md:hidden">
+        <div className="flex items-center justify-center gap-1.5 bg-gradient-to-r from-rose-500/15 to-purple-500/15 px-3 py-1.5 text-[11px] font-semibold text-rose-600 dark:text-rose-300">
+          <Flame className="h-3 w-3 animate-pulse" />
+          Sale ends in <span className="tabular-nums">{hh}:{mm}:{ss}</span>
+        </div>
+        <div className="flex items-center gap-3 p-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               Aurora Galaxy Lamp
@@ -1434,6 +1438,7 @@ function AuroraLampLanding() {
           </Button>
         </div>
       </div>
+
       <div className="h-24 md:hidden" />
 
       {/* ============ SOCIAL PROOF TOAST ============ */}
