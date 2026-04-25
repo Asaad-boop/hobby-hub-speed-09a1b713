@@ -636,34 +636,6 @@ function AuroraLampLanding() {
               </a>
             </div>
 
-            {/* Live viewers + stock urgency */}
-            <div className="mt-6 grid gap-3 rounded-2xl border border-white/15 bg-white/5 p-3.5 backdrop-blur sm:grid-cols-2">
-              <div className="flex items-center gap-2.5 text-sm text-white/85">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
-                </span>
-                <Eye className="h-4 w-4 text-white/70" />
-                <span>
-                  <strong className="text-white tabular-nums">{viewers}</strong> jon ekhon ei page-e
-                </span>
-              </div>
-              <div>
-                <div className="flex items-center justify-between text-[11px] text-white/75">
-                  <span className="inline-flex items-center gap-1">
-                    <Flame className="h-3 w-3 text-orange-300" /> Stock: only {stockLeft} left
-                  </span>
-                  <span className="font-bold text-orange-200">{stockLeft}/100</span>
-                </div>
-                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/15">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-orange-400 to-pink-500"
-                    style={{ width: `${stockLeft}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
             {/* Trust strip */}
             <div className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-white/70 md:justify-start">
               <span className="inline-flex items-center gap-1.5">
