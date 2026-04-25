@@ -43,7 +43,7 @@ import beforeRoom from "@/assets/aurora-before-room.jpg";
 import afterRoom from "@/assets/aurora-after-room.jpg";
 import rippleProjection from "@/assets/aurora-ripple-projection.jpg";
 import nebulaProjection from "@/assets/aurora-nebula-projection.jpg";
-import lensSystem from "@/assets/aurora-lens-system.png";
+import lensSystem from "@/assets/aurora-lens-system.webp";
 import bedsideLamp from "@/assets/aurora-bedside-lamp.webp";
 import deskLamp from "@/assets/aurora-desk-lamp.jpg";
 

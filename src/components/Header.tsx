@@ -6,7 +6,7 @@ import { useWishlist } from "@/lib/wishlist";
 import { useAdminAuth } from "@/lib/admin";
 import { useSiteSettings } from "@/lib/site-settings";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import defaultLogo from "@/assets/logo.png";
+import defaultLogo from "@/assets/logo.webp";
 
 type Category = { label: string; category: string };
 
