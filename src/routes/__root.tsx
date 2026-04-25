@@ -115,11 +115,33 @@ function RootComponent() {
   // first effect run to avoid a duplicate event.
   const firstPathRef = useRef(true);
   useEffect(() => {
+    // Tag the Clarity session with the current route + a coarse page-type
+    // bucket. Lets us filter recordings/heatmaps by funnel stage in the
+    // Clarity dashboard ("show only checkout sessions", "only LP visitors").
+    const pageType = pathname.startsWith("/admin")
+      ? "admin"
+      : pathname.startsWith("/checkout")
+        ? "checkout"
+        : pathname.startsWith("/order-success")
+          ? "order-success"
+          : pathname.startsWith("/product/")
+            ? "product"
+            : pathname.startsWith("/lp/")
+              ? "landing-page"
+              : pathname.startsWith("/category/")
+                ? "category"
+                : pathname === "/"
+                  ? "home"
+                  : "other";
+    clarityTag("page_type", pageType);
+    clarityTag("route", pathname);
+
     if (firstPathRef.current) {
       firstPathRef.current = false;
       return;
     }
     fbTrack("PageView");
+    clarityEvent("spa_navigation");
   }, [pathname]);
 
   return (
