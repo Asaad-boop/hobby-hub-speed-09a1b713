@@ -32,12 +32,12 @@ import {
   Sparkles,
   ShieldCheck,
   Star,
-  Moon,
-  Music,
   Lightbulb,
   Heart,
   Wand2,
   Zap,
+  Palette,
+  Radio,
 } from "lucide-react";
 
 import beforeRoom from "@/assets/aurora-before-room.jpg";
