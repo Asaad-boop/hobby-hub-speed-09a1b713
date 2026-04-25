@@ -38,6 +38,13 @@ import {
   Zap,
   Palette,
   Radio,
+  Clock,
+  Eye,
+  CheckCircle2,
+  Flame,
+  X,
+  Award,
+  ThumbsUp,
 } from "lucide-react";
 
 import beforeRoom from "@/assets/aurora-before-room.jpg";
@@ -209,6 +216,71 @@ function AuroraLampLanding() {
   const [sliderPos, setSliderPos] = useState(50);
   const [lensPreview, setLensPreview] = useState<"ripple" | "nebula">("ripple");
 
+  // Urgency countdown — 24h flash sale (persists across reloads via localStorage)
+  const [secondsLeft, setSecondsLeft] = useState(24 * 60 * 60);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const KEY = "aurora_lp_deal_end";
+    let end = parseInt(localStorage.getItem(KEY) || "0", 10);
+    if (!end || end < Date.now()) {
+      end = Date.now() + 24 * 60 * 60 * 1000;
+      localStorage.setItem(KEY, String(end));
+    }
+    const tick = () => setSecondsLeft(Math.max(0, Math.floor((end - Date.now()) / 1000)));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+  const hh = String(Math.floor(secondsLeft / 3600)).padStart(2, "0");
+  const mm = String(Math.floor((secondsLeft % 3600) / 60)).padStart(2, "0");
+  const ss = String(secondsLeft % 60).padStart(2, "0");
+
+  // Live visitor count (simulated, deterministic-ish)
+  const [viewers, setViewers] = useState(38);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setViewers((v) => Math.max(22, Math.min(74, v + Math.floor(Math.random() * 7) - 3)));
+    }, 5000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Stock remaining (out of 100)
+  const stockLeft = 23;
+
+  // Social-proof toasts — recent buyers
+  const [proofIdx, setProofIdx] = useState(0);
+  const [proofVisible, setProofVisible] = useState(false);
+  useEffect(() => {
+    const buyers = [
+      { name: "Sadia R.", city: "Mirpur", min: 2 },
+      { name: "Tanvir A.", city: "Uttara", min: 5 },
+      { name: "Mehedi H.", city: "Chattogram", min: 8 },
+      { name: "Lamia K.", city: "Sylhet", min: 12 },
+      { name: "Rakib M.", city: "Khulna", min: 18 },
+    ];
+    let i = 0;
+    const cycle = () => {
+      setProofIdx(i % buyers.length);
+      setProofVisible(true);
+      setTimeout(() => setProofVisible(false), 4500);
+      i++;
+    };
+    const first = setTimeout(cycle, 3000);
+    const id = setInterval(cycle, 11000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(id);
+    };
+  }, []);
+  const buyers = [
+    { name: "Sadia R.", city: "Mirpur", min: 2 },
+    { name: "Tanvir A.", city: "Uttara", min: 5 },
+    { name: "Mehedi H.", city: "Chattogram", min: 8 },
+    { name: "Lamia K.", city: "Sylhet", min: 12 },
+    { name: "Rakib M.", city: "Khulna", min: 18 },
+  ];
+  const currentBuyer = buyers[proofIdx];
+
   const packMeta = {
     single: { qty: 1, price: SINGLE_PRICE, old: SINGLE_OLD, label: "1 pc" },
     double: { qty: 2, price: COMBO_PRICE, old: COMBO_OLD, label: "2 pcs · 10% OFF" },
@@ -375,6 +447,31 @@ function AuroraLampLanding() {
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
+      {/* ============ TOP URGENCY BAR ============ */}
+      <div
+        className="relative overflow-hidden text-white"
+        style={{
+          background:
+            "linear-gradient(90deg, oklch(0.45 0.22 320), oklch(0.45 0.22 290), oklch(0.45 0.22 260))",
+        }}
+      >
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 py-2 text-[12px] font-semibold sm:text-sm">
+          <span className="inline-flex items-center gap-1.5">
+            <Flame className="h-3.5 w-3.5 animate-pulse text-yellow-300" />
+            Flash Sale 32% OFF
+          </span>
+          <span className="hidden opacity-60 sm:inline">·</span>
+          <span className="inline-flex items-center gap-1.5 tabular-nums">
+            <Clock className="h-3.5 w-3.5" />
+            Ends in {hh}:{mm}:{ss}
+          </span>
+          <span className="hidden opacity-60 sm:inline">·</span>
+          <span className="inline-flex items-center gap-1.5">
+            <Truck className="h-3.5 w-3.5" /> COD all over BD
+          </span>
+        </div>
+      </div>
+
       {/* HERO — cosmic, full-bleed */}
       <section className="relative overflow-hidden">
         {/* Cosmic gradient backdrop */}
@@ -447,6 +544,34 @@ function AuroraLampLanding() {
               >
                 Demo দেখুন ↓
               </a>
+            </div>
+
+            {/* Live viewers + stock urgency */}
+            <div className="mt-6 grid gap-3 rounded-2xl border border-white/15 bg-white/5 p-3.5 backdrop-blur sm:grid-cols-2">
+              <div className="flex items-center gap-2.5 text-sm text-white/85">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                </span>
+                <Eye className="h-4 w-4 text-white/70" />
+                <span>
+                  <strong className="text-white tabular-nums">{viewers}</strong> jon ekhon ei page-e
+                </span>
+              </div>
+              <div>
+                <div className="flex items-center justify-between text-[11px] text-white/75">
+                  <span className="inline-flex items-center gap-1">
+                    <Flame className="h-3 w-3 text-orange-300" /> Stock: only {stockLeft} left
+                  </span>
+                  <span className="font-bold text-orange-200">{stockLeft}/100</span>
+                </div>
+                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/15">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-orange-400 to-pink-500"
+                    style={{ width: `${stockLeft}%` }}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Trust strip */}
@@ -921,7 +1046,79 @@ function AuroraLampLanding() {
         </div>
       </section>
 
-      {/* ============ MID CTA ============ */}
+      {/* ============ COMPARISON TABLE ============ */}
+      <section className="px-5 py-14">
+        <div className="mx-auto max-w-3xl">
+          <SectionHeading kicker="Why Us" title="HobbyShop vs onno seller" />
+          <div className="overflow-hidden rounded-2xl border border-border shadow-[var(--shadow-card)]">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-muted/60 text-foreground">
+                  <th className="p-3 text-left font-semibold">Feature</th>
+                  <th className="p-3 text-center font-bold text-primary">HobbyShop ✓</th>
+                  <th className="p-3 text-center font-medium text-muted-foreground">Others</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border bg-card">
+                {[
+                  ["3-in-1 use (Lamp + Aurora + Galaxy)", true, false],
+                  ["Remote + 2 interchangeable lens", true, false],
+                  ["Premium gift box packaging", true, false],
+                  ["7-day replacement guarantee", true, false],
+                  ["Cash on Delivery all over BD", true, true],
+                  ["Verified original product", true, false],
+                  ["Same-day shipping", true, false],
+                ].map(([feat, us, them], i) => (
+                  <tr key={i}>
+                    <td className="p-3 text-foreground">{feat as string}</td>
+                    <td className="p-3 text-center">
+                      {us ? (
+                        <CheckCircle2 className="mx-auto h-5 w-5 text-emerald-500" />
+                      ) : (
+                        <X className="mx-auto h-5 w-5 text-muted-foreground/50" />
+                      )}
+                    </td>
+                    <td className="p-3 text-center">
+                      {them ? (
+                        <CheckCircle2 className="mx-auto h-5 w-5 text-muted-foreground/60" />
+                      ) : (
+                        <X className="mx-auto h-5 w-5 text-rose-400" />
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ GUARANTEES STRIP ============ */}
+      <section className="px-5 pb-4">
+        <div className="mx-auto grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { icon: <ShieldCheck className="h-5 w-5" />, t: "100% Authentic", s: "Verified original product" },
+            { icon: <RotateCcw className="h-5 w-5" />, t: "7-Day Replacement", s: "Damage হলে free swap" },
+            { icon: <Truck className="h-5 w-5" />, t: "Fast Delivery", s: "Dhaka 1-2 din · BD 2-4 din" },
+            { icon: <Award className="h-5 w-5" />, t: "Cash on Delivery", s: "Hath-e niye taka diben" },
+          ].map((g, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                {g.icon}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-foreground">{g.t}</p>
+                <p className="text-xs text-muted-foreground">{g.s}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ============ MID CTA WITH COUNTDOWN ============ */}
       <section
         className="mx-5 my-8 overflow-hidden rounded-3xl px-6 py-12 text-center text-white shadow-[var(--shadow-brand)]"
         style={{
@@ -931,10 +1128,25 @@ function AuroraLampLanding() {
       >
         <Heart className="mx-auto h-7 w-7 text-white/90" />
         <h2 className="mt-3 text-xl font-extrabold leading-tight md:text-2xl">
-          Stock limited! Aaj order korle{" "}
-          <span className="underline decoration-pink-300 underline-offset-4">aaj-i ship</span>
+          Flash sale shesh hote{" "}
+          <span className="underline decoration-pink-300 underline-offset-4">baki ache:</span>
         </h2>
-        <p className="mt-2 text-xs text-white/80 md:text-sm">
+        <div className="mt-4 flex justify-center gap-2 sm:gap-3">
+          {[
+            { v: hh, l: "ghonta" },
+            { v: mm, l: "minute" },
+            { v: ss, l: "second" },
+          ].map((t, i) => (
+            <div
+              key={i}
+              className="min-w-[68px] rounded-2xl bg-white/15 px-3 py-2.5 backdrop-blur sm:min-w-[80px]"
+            >
+              <div className="text-2xl font-extrabold tabular-nums sm:text-3xl">{t.v}</div>
+              <div className="mt-0.5 text-[10px] uppercase tracking-widest text-white/70">{t.l}</div>
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 text-xs text-white/80 md:text-sm">
           Daily 200+ orders · last 24 hours-e 47 jon kinechen
         </p>
         <Button
@@ -944,6 +1156,7 @@ function AuroraLampLanding() {
           🌌 Aamar Galaxy Lamp Chai →
         </Button>
       </section>
+
 
       {/* ============ ORDER FORM ============ */}
       <section ref={orderRef} className="scroll-mt-4 px-5 py-12">
@@ -1198,8 +1411,12 @@ function AuroraLampLanding() {
       </section>
 
       {/* Mobile sticky bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[var(--shadow-elevated)] backdrop-blur-xl md:hidden">
-        <div className="flex items-center gap-3">
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] shadow-[var(--shadow-elevated)] backdrop-blur-xl md:hidden">
+        <div className="flex items-center justify-center gap-1.5 bg-gradient-to-r from-rose-500/15 to-purple-500/15 px-3 py-1.5 text-[11px] font-semibold text-rose-600 dark:text-rose-300">
+          <Flame className="h-3 w-3 animate-pulse" />
+          Sale ends in <span className="tabular-nums">{hh}:{mm}:{ss}</span>
+        </div>
+        <div className="flex items-center gap-3 p-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               Aurora Galaxy Lamp
@@ -1221,7 +1438,40 @@ function AuroraLampLanding() {
           </Button>
         </div>
       </div>
+
       <div className="h-24 md:hidden" />
+
+      {/* ============ SOCIAL PROOF TOAST ============ */}
+      <div
+        className={`pointer-events-none fixed bottom-24 left-3 z-50 max-w-[280px] transition-all duration-500 md:bottom-6 md:left-6 ${
+          proofVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+        }`}
+        aria-live="polite"
+      >
+        <div className="flex items-start gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-[var(--shadow-elevated)] backdrop-blur-xl">
+          <div
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+            style={{
+              background:
+                "linear-gradient(135deg, oklch(0.55 0.22 320), oklch(0.55 0.22 260))",
+            }}
+          >
+            {currentBuyer.name.charAt(0)}
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-foreground">
+              {currentBuyer.name} · {currentBuyer.city}
+            </p>
+            <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">
+              Aurora Galaxy Lamp order korechen
+            </p>
+            <p className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+              <ThumbsUp className="h-2.5 w-2.5" /> {currentBuyer.min} min ago
+            </p>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }
