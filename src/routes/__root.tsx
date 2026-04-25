@@ -7,6 +7,7 @@ import "@/lib/i18n";
 import { captureSessionOnFirstVisit } from "@/lib/session-tracking";
 import { usePresenceHeartbeat } from "@/hooks/use-presence";
 import { META_PIXEL_ID, fbTrack } from "@/lib/meta-pixel";
+import { clarityTag, clarityEvent } from "@/lib/clarity";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
@@ -59,8 +60,12 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         children: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${META_PIXEL_ID}');fbq('track','PageView');`,
       },
       {
-        // Microsoft Clarity — session recordings & heatmaps.
-        children: `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "wh5255b06h");`,
+        // Microsoft Clarity — session recordings & heatmaps. Loaded with a
+        // small idle delay so it never competes with critical above-the-fold
+        // resources (LCP, hero image, fonts). Clarity itself is async, but
+        // deferring the loader call past first paint keeps INP/LCP clean
+        // while still capturing the full session from the start.
+        children: `window.addEventListener("load",function(){setTimeout(function(){(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","wh5255b06h");},800);});`,
       },
     ],
   }),
