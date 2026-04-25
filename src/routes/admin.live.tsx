@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
   ShoppingBag,
@@ -152,8 +152,11 @@ function LiveDashboardPage() {
     refetchInterval: REFRESH_MS,
   });
 
+  const queryClient = useQueryClient();
+  const activeVisitorsKey = ["admin", "live", "active-visitors"] as const;
+
   const { data: activeVisitors = 0 } = useQuery({
-    queryKey: ["admin", "live", "active-visitors"],
+    queryKey: activeVisitorsKey,
     queryFn: async () => {
       const cutoff = new Date(Date.now() - 60_000).toISOString();
       const { count, error } = await supabase
@@ -163,8 +166,27 @@ function LiveDashboardPage() {
       if (error) return 0;
       return count ?? 0;
     },
-    refetchInterval: 10_000,
+    refetchInterval: 5_000,
+    refetchOnWindowFocus: true,
   });
+
+  // Realtime: invalidate the count the moment any session row changes.
+  useEffect(() => {
+    const channel = supabase
+      .channel("active_sessions_live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "active_sessions" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: activeVisitorsKey });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryClient]);
 
 
   const recentOrders = todayOrders.slice(0, 8);
