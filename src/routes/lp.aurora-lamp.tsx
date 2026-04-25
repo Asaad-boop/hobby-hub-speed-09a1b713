@@ -38,6 +38,13 @@ import {
   Zap,
   Palette,
   Radio,
+  Clock,
+  Eye,
+  CheckCircle2,
+  Flame,
+  X,
+  Award,
+  ThumbsUp,
 } from "lucide-react";
 
 import beforeRoom from "@/assets/aurora-before-room.jpg";
