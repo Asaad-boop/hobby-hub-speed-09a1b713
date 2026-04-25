@@ -1573,14 +1573,14 @@ function AuroraLampLanding() {
 
       {/* ============ SOCIAL PROOF TOAST ============ */}
       <div
-        className={`pointer-events-none fixed bottom-24 left-3 z-50 max-w-[280px] transition-all duration-500 md:bottom-6 md:left-6 ${
+        className={`pointer-events-none fixed bottom-24 left-2 z-50 transition-all duration-500 md:bottom-6 md:left-6 ${
           proofVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
         }`}
         aria-live="polite"
       >
-        <div className="flex items-start gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-[var(--shadow-elevated)] backdrop-blur-xl">
+        <div className="flex items-center gap-2 rounded-full border border-border bg-card/95 py-1 pl-1 pr-2.5 shadow-[var(--shadow-elevated)] backdrop-blur-xl">
           <div
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
             style={{
               background:
                 "linear-gradient(135deg, oklch(0.55 0.22 320), oklch(0.55 0.22 260))",
@@ -1588,17 +1588,10 @@ function AuroraLampLanding() {
           >
             {currentBuyer.name.charAt(0)}
           </div>
-          <div className="min-w-0">
-            <p className="text-xs font-bold text-foreground">
-              {currentBuyer.name} · {currentBuyer.city}
-            </p>
-            <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">
-              Aurora Galaxy Lamp order korechen
-            </p>
-            <p className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-              <ThumbsUp className="h-2.5 w-2.5" /> {currentBuyer.min} min ago
-            </p>
-          </div>
+          <p className="text-[10px] leading-tight text-foreground">
+            <span className="font-bold">{currentBuyer.name}</span>
+            <span className="text-muted-foreground"> ordered · {currentBuyer.min}m ago</span>
+          </p>
         </div>
       </div>
 
