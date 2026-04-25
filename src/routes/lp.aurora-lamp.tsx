@@ -1435,6 +1435,38 @@ function AuroraLampLanding() {
         </div>
       </div>
       <div className="h-24 md:hidden" />
+
+      {/* ============ SOCIAL PROOF TOAST ============ */}
+      <div
+        className={`pointer-events-none fixed bottom-24 left-3 z-50 max-w-[280px] transition-all duration-500 md:bottom-6 md:left-6 ${
+          proofVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+        }`}
+        aria-live="polite"
+      >
+        <div className="flex items-start gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-[var(--shadow-elevated)] backdrop-blur-xl">
+          <div
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+            style={{
+              background:
+                "linear-gradient(135deg, oklch(0.55 0.22 320), oklch(0.55 0.22 260))",
+            }}
+          >
+            {currentBuyer.name.charAt(0)}
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-foreground">
+              {currentBuyer.name} · {currentBuyer.city}
+            </p>
+            <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">
+              Aurora Galaxy Lamp order korechen
+            </p>
+            <p className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+              <ThumbsUp className="h-2.5 w-2.5" /> {currentBuyer.min} min ago
+            </p>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }
