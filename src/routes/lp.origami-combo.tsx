@@ -2,11 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProductByIdOrSlug, type Product } from "@/lib/products";
-import reviewPhoto1 from "@/assets/review-customer-1.jpg";
-import reviewPhoto2 from "@/assets/review-customer-2.jpg";
+import reviewPhoto1 from "@/assets/review-customer-1.webp";
+import reviewPhoto2 from "@/assets/review-customer-2.webp";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { getOrderAttributionPayload } from "@/lib/session-tracking";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
+import { clarityTag } from "@/lib/clarity";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -225,7 +226,9 @@ function LandingPage() {
       value: unitPrice,
       currency: META_CURRENCY,
     });
-  }, [activeProduct, unitPrice]);
+    clarityTag("lp_campaign", "origami-combo");
+    clarityTag("lp_variant_selected", variant);
+  }, [activeProduct, unitPrice, variant]);
 
   const subtotal = unitPrice * qty;
   const shippingFee = shipMethod === "inside" ? SHIPPING_INSIDE : SHIPPING_OUTSIDE;

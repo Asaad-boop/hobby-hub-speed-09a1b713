@@ -5,6 +5,7 @@ import { fetchProductByIdOrSlug, type Product } from "@/lib/products";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { getOrderAttributionPayload } from "@/lib/session-tracking";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
+import { clarityTag } from "@/lib/clarity";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,7 +44,7 @@ import beforeRoom from "@/assets/aurora-before-room.jpg";
 import afterRoom from "@/assets/aurora-after-room.jpg";
 import rippleProjection from "@/assets/aurora-ripple-projection.jpg";
 import nebulaProjection from "@/assets/aurora-nebula-projection.jpg";
-import lensSystem from "@/assets/aurora-lens-system.png";
+import lensSystem from "@/assets/aurora-lens-system.webp";
 import bedsideLamp from "@/assets/aurora-bedside-lamp.webp";
 import deskLamp from "@/assets/aurora-desk-lamp.jpg";
 
@@ -234,7 +235,9 @@ function AuroraLampLanding() {
       value: activePack.price,
       currency: META_CURRENCY,
     });
-  }, [product, activePack.price]);
+    clarityTag("lp_campaign", "aurora-lamp");
+    clarityTag("lp_pack_selected", pack);
+  }, [product, activePack.price, pack]);
 
   const subtotal = activePack.price * qty;
   const shippingFee = shipMethod === "inside" ? SHIPPING_INSIDE : SHIPPING_OUTSIDE;

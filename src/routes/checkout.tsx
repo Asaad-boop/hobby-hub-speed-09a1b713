@@ -7,6 +7,7 @@ import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { validateCoupon, type Coupon } from "@/lib/coupons";
 import { getOrderAttributionPayload } from "@/lib/session-tracking";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
+import { clarityEvent, clarityTag, clarityUpgrade } from "@/lib/clarity";
 import { toast } from "sonner";
 import {
   Truck,
@@ -65,6 +66,11 @@ function Checkout() {
       value: total,
       currency: META_CURRENCY,
     });
+    // Clarity: high-intent — upgrade and tag the session for funnel filtering.
+    clarityEvent("initiate_checkout");
+    clarityTag("reached_checkout", "true");
+    clarityTag("checkout_value_bdt", String(Math.round(total)));
+    clarityUpgrade("initiate_checkout");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
