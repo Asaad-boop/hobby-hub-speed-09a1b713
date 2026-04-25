@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, ReactNode, useMemo } from "react";
 import type { Product } from "./products";
 import { fbTrack, META_CURRENCY } from "./meta-pixel";
+import { clarityEvent, clarityTag, clarityUpgrade } from "./clarity";
 
 export type CartItem = {
   product: Product;
@@ -65,6 +66,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       value: p.price * qty,
       currency: META_CURRENCY,
     });
+    // Clarity: mark as a high-intent session and timeline-tag the action.
+    clarityEvent("add_to_cart");
+    clarityTag("has_cart", "true");
+    clarityTag("last_added_product", p.title);
+    clarityUpgrade("add_to_cart");
   }, []);
 
   const remove = useCallback((lineKey: string) => {
