@@ -300,9 +300,9 @@ function LiveDashboardPage() {
         />
         <KpiCard
           icon={<Users className="h-4 w-4" />}
-          label="Active right now"
-          value={recentPulse.toString()}
-          subtitle="Orders in last 5 minutes"
+          label="Active visitors"
+          value={activeVisitors.toString()}
+          subtitle={`${recentPulse} orders in last 5 min`}
         />
       </div>
 
