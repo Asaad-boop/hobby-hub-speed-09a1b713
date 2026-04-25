@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      active_sessions: {
+        Row: {
+          country: string | null
+          first_seen_at: string
+          last_seen_at: string
+          path: string | null
+          referrer: string | null
+          session_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          country?: string | null
+          first_seen_at?: string
+          last_seen_at?: string
+          path?: string | null
+          referrer?: string | null
+          session_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          country?: string | null
+          first_seen_at?: string
+          last_seen_at?: string
+          path?: string | null
+          referrer?: string | null
+          session_id?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       activity_log: {
         Row: {
           action: string

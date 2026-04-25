@@ -152,6 +152,21 @@ function LiveDashboardPage() {
     refetchInterval: REFRESH_MS,
   });
 
+  const { data: activeVisitors = 0 } = useQuery({
+    queryKey: ["admin", "live", "active-visitors"],
+    queryFn: async () => {
+      const cutoff = new Date(Date.now() - 60_000).toISOString();
+      const { count, error } = await supabase
+        .from("active_sessions")
+        .select("session_id", { count: "exact", head: true })
+        .gte("last_seen_at", cutoff);
+      if (error) return 0;
+      return count ?? 0;
+    },
+    refetchInterval: 10_000,
+  });
+
+
   const recentOrders = todayOrders.slice(0, 8);
 
   const validToday = todayOrders.filter(
@@ -256,7 +271,7 @@ function LiveDashboardPage() {
           </Badge>
           <Badge className="gap-1.5 bg-green-500/15 text-green-600 hover:bg-green-500/20">
             <CircleDot className="h-3 w-3 animate-pulse" />
-            {recentPulse} active in last 5 min
+            {activeVisitors} live {activeVisitors === 1 ? "visitor" : "visitors"}
           </Badge>
         </div>
       </div>
@@ -285,9 +300,9 @@ function LiveDashboardPage() {
         />
         <KpiCard
           icon={<Users className="h-4 w-4" />}
-          label="Active right now"
-          value={recentPulse.toString()}
-          subtitle="Orders in last 5 minutes"
+          label="Active visitors"
+          value={activeVisitors.toString()}
+          subtitle={`${recentPulse} orders in last 5 min`}
         />
       </div>
 
