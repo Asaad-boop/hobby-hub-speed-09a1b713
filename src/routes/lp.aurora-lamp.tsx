@@ -447,6 +447,31 @@ function AuroraLampLanding() {
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
+      {/* ============ TOP URGENCY BAR ============ */}
+      <div
+        className="relative overflow-hidden text-white"
+        style={{
+          background:
+            "linear-gradient(90deg, oklch(0.45 0.22 320), oklch(0.45 0.22 290), oklch(0.45 0.22 260))",
+        }}
+      >
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 py-2 text-[12px] font-semibold sm:text-sm">
+          <span className="inline-flex items-center gap-1.5">
+            <Flame className="h-3.5 w-3.5 animate-pulse text-yellow-300" />
+            Flash Sale 32% OFF
+          </span>
+          <span className="hidden opacity-60 sm:inline">·</span>
+          <span className="inline-flex items-center gap-1.5 tabular-nums">
+            <Clock className="h-3.5 w-3.5" />
+            Ends in {hh}:{mm}:{ss}
+          </span>
+          <span className="hidden opacity-60 sm:inline">·</span>
+          <span className="inline-flex items-center gap-1.5">
+            <Truck className="h-3.5 w-3.5" /> COD all over BD
+          </span>
+        </div>
+      </div>
+
       {/* HERO — cosmic, full-bleed */}
       <section className="relative overflow-hidden">
         {/* Cosmic gradient backdrop */}
