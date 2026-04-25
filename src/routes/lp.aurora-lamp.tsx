@@ -32,12 +32,12 @@ import {
   Sparkles,
   ShieldCheck,
   Star,
-  Moon,
-  Music,
   Lightbulb,
   Heart,
   Wand2,
   Zap,
+  Palette,
+  Radio,
 } from "lucide-react";
 
 import beforeRoom from "@/assets/aurora-before-room.jpg";
@@ -66,13 +66,13 @@ export const Route = createFileRoute("/lp/aurora-lamp")({
       {
         name: "description",
         content:
-          "Aurora Galaxy Ripple Lamp — 4 way use, water ripple + galaxy projection, 16 colours, remote + Bluetooth speaker. Bedroom ke turant magical kore din. COD all over BD.",
+          "Aurora Galaxy Ripple Lamp — 3-in-1 use, water ripple + galaxy nebula projection, 16 RGB colours, remote control. Bedroom ke turant magical kore din. COD all over BD.",
       },
       { property: "og:title", content: "Aurora Galaxy Ripple Lamp — Room ke Galaxy Banao 🌌" },
       {
         property: "og:description",
         content:
-          "Water ripple + galaxy nebula projection · 16 RGB colours · Remote + Bluetooth speaker. ৳1290 only — COD all over BD.",
+          "Water ripple + galaxy nebula projection · 16 RGB colours · Remote control. ৳1290 only — COD all over BD.",
       },
       {
         property: "og:image",
@@ -100,24 +100,24 @@ const FEATURES = [
     desc: "Mood অনুযায়ী রঙ change — single colour, breathing বা auto cycle",
   },
   {
-    icon: <Music className="h-5 w-5" />,
-    title: "Bluetooth speaker built-in",
-    desc: "Phone connect করে নিজের playlist চালান — ripple গান-এর সাথে নাচে",
+    icon: <Palette className="h-5 w-5" />,
+    title: "Multi-mode lighting",
+    desc: "Single colour, breathing, auto-cycle — moment er sathe match",
   },
   {
     icon: <Wand2 className="h-5 w-5" />,
-    title: "4-in-1 use",
-    desc: "Night lamp · Galaxy projector · Aurora ripple · Bluetooth speaker",
+    title: "3-in-1 use",
+    desc: "Night lamp · Galaxy projector · Aurora ripple — ek device-e shob",
   },
   {
-    icon: <Moon className="h-5 w-5" />,
-    title: "Sleep timer + remote",
-    desc: "Remote দিয়ে control · Auto-off timer — ঘুমিয়ে গেলে নিজে নিজেই বন্ধ",
+    icon: <Radio className="h-5 w-5" />,
+    title: "Remote control included",
+    desc: "Distance theke colour, mode, brightness — sob set kora jay",
   },
   {
     icon: <Zap className="h-5 w-5" />,
     title: "USB powered, low heat",
-    desc: "Plug-and-play · ঘণ্টার পর ঘণ্টা চালালেও গরম হয় না",
+    desc: "Plug-and-play · ghonta-r por ghonta chalalei o gorom hoy na",
   },
 ];
 
@@ -133,9 +133,9 @@ const USE_CASES = [
 const SPECS = [
   { label: "Power", value: "USB / 5V", sub: "Cable included" },
   { label: "Colours", value: "16 RGB", sub: "Auto-cycle mode" },
-  { label: "Modes", value: "4-in-1", sub: "Lamp · Aurora · Galaxy · Speaker" },
+  { label: "Modes", value: "3-in-1", sub: "Lamp · Aurora · Galaxy" },
   { label: "Control", value: "Remote", sub: "+ Touch button" },
-  { label: "Speaker", value: "Bluetooth 5.0", sub: "Built-in" },
+  { label: "Projection", value: "360°", sub: "Wall + ceiling" },
   { label: "Material", value: "Premium ABS", sub: "Low-heat LED" },
 ];
 
@@ -173,8 +173,8 @@ const REVIEWS: Review[] = [
 
 const FAQS = [
   {
-    q: "Lamp ta ki actually 4 way use hoy?",
-    a: "Ji — (1) Soft night lamp, (2) Aurora ripple wall projector, (3) Galaxy nebula projection, (4) Bluetooth speaker phone connect kore gaan chalanor jonno. Sob mode remote diye control korben.",
+    q: "Lamp ta ki actually multi-mode use hoy?",
+    a: "Ji — (1) Soft night lamp, (2) Aurora ripple wall projector, (3) Galaxy nebula projection. Sob mode remote diye ba touch button diye control korben.",
   },
   {
     q: "Charge dite hoy naki USB plug-in?",
@@ -182,11 +182,7 @@ const FAQS = [
   },
   {
     q: "Remote control included?",
-    a: "Han, full remote box-er sathe free. Distance theke colour, mode, brightness, timer sob set kora jay.",
-  },
-  {
-    q: "Bluetooth speaker-er sound quality kemon?",
-    a: "Crystal-clear stereo sound. Phone Bluetooth-e connect korben — music chalale ripple effect beat-er sathe pulse kore. Movie/podcast-eo bhalo chole.",
+    a: "Han, full remote box-er sathe free. Distance theke colour, mode, brightness sob set kora jay.",
   },
   {
     q: "Delivery koto din-e pabo?",
@@ -420,9 +416,9 @@ function AuroraLampLanding() {
               baniye din ✨
             </h1>
             <p className="mt-4 text-base leading-relaxed text-white/75 md:text-lg">
-              Aurora Ripple + Galaxy nebula projection · 16 RGB rang · Bluetooth speaker built-in ·
-              Remote control. <strong className="text-white">4-in-1 magical lamp</strong> — ekta
-              switch-e mood ekdom palte jabe.
+              Aurora Ripple + Galaxy nebula projection · 16 RGB rang · Remote control included.{" "}
+              <strong className="text-white">3-in-1 magical lamp</strong> — ekta switch-e mood ekdom
+              palte jabe.
             </p>
 
             {/* Price */}
@@ -482,7 +478,7 @@ function AuroraLampLanding() {
               />
               {/* Floating badge */}
               <div className="absolute left-4 top-4 rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur">
-                🌌 4-in-1 Magic
+                🌌 3-in-1 Magic
               </div>
               <div className="absolute bottom-4 right-4 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-slate-900 shadow-lg">
                 ৳{SINGLE_PRICE.toLocaleString()}
@@ -520,9 +516,9 @@ function AuroraLampLanding() {
         </div>
 
         <div className="mx-auto mt-10 grid max-w-3xl grid-cols-3 gap-3 text-center">
-          <MiniStat label="Modes" value="4" sub="in 1 device" />
+          <MiniStat label="Modes" value="3" sub="in 1 device" />
           <MiniStat label="Colours" value="16" sub="RGB" />
-          <MiniStat label="Speaker" value="✓" sub="Bluetooth" />
+          <MiniStat label="Remote" value="✓" sub="Included" />
         </div>
       </section>
 
