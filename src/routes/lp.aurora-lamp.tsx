@@ -173,8 +173,8 @@ const REVIEWS: Review[] = [
 
 const FAQS = [
   {
-    q: "Lamp ta ki actually 4 way use hoy?",
-    a: "Ji — (1) Soft night lamp, (2) Aurora ripple wall projector, (3) Galaxy nebula projection, (4) Bluetooth speaker phone connect kore gaan chalanor jonno. Sob mode remote diye control korben.",
+    q: "Lamp ta ki actually multi-mode use hoy?",
+    a: "Ji — (1) Soft night lamp, (2) Aurora ripple wall projector, (3) Galaxy nebula projection. Sob mode remote diye ba touch button diye control korben.",
   },
   {
     q: "Charge dite hoy naki USB plug-in?",
@@ -182,11 +182,7 @@ const FAQS = [
   },
   {
     q: "Remote control included?",
-    a: "Han, full remote box-er sathe free. Distance theke colour, mode, brightness, timer sob set kora jay.",
-  },
-  {
-    q: "Bluetooth speaker-er sound quality kemon?",
-    a: "Crystal-clear stereo sound. Phone Bluetooth-e connect korben — music chalale ripple effect beat-er sathe pulse kore. Movie/podcast-eo bhalo chole.",
+    a: "Han, full remote box-er sathe free. Distance theke colour, mode, brightness sob set kora jay.",
   },
   {
     q: "Delivery koto din-e pabo?",
