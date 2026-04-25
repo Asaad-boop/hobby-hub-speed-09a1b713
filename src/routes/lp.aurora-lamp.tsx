@@ -210,6 +210,7 @@ function AuroraLampLanding() {
 
   // Slider position for before/after (0-100)
   const [sliderPos, setSliderPos] = useState(50);
+  const [lensPreview, setLensPreview] = useState<"ripple" | "nebula">("ripple");
 
   const packMeta = {
     single: { qty: 1, price: SINGLE_PRICE, old: SINGLE_OLD, label: "1 pc" },
