@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import appCss from "../styles.css?url";
 import "@/lib/i18n";
 import { captureSessionOnFirstVisit } from "@/lib/session-tracking";
+import { usePresenceHeartbeat } from "@/hooks/use-presence";
 import { META_PIXEL_ID, fbTrack } from "@/lib/meta-pixel";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -96,6 +97,9 @@ function RootComponent() {
   useEffect(() => {
     captureSessionOnFirstVisit();
   }, []);
+
+  // Heartbeat for live visitors dashboard.
+  usePresenceHeartbeat();
 
   // Fire Meta Pixel PageView on SPA route changes. The first PageView is
   // already sent by the base snippet during initial HTML load, so skip the
