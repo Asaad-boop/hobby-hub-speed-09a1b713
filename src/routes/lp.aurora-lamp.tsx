@@ -216,6 +216,71 @@ function AuroraLampLanding() {
   const [sliderPos, setSliderPos] = useState(50);
   const [lensPreview, setLensPreview] = useState<"ripple" | "nebula">("ripple");
 
+  // Urgency countdown — 24h flash sale (persists across reloads via localStorage)
+  const [secondsLeft, setSecondsLeft] = useState(24 * 60 * 60);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const KEY = "aurora_lp_deal_end";
+    let end = parseInt(localStorage.getItem(KEY) || "0", 10);
+    if (!end || end < Date.now()) {
+      end = Date.now() + 24 * 60 * 60 * 1000;
+      localStorage.setItem(KEY, String(end));
+    }
+    const tick = () => setSecondsLeft(Math.max(0, Math.floor((end - Date.now()) / 1000)));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+  const hh = String(Math.floor(secondsLeft / 3600)).padStart(2, "0");
+  const mm = String(Math.floor((secondsLeft % 3600) / 60)).padStart(2, "0");
+  const ss = String(secondsLeft % 60).padStart(2, "0");
+
+  // Live visitor count (simulated, deterministic-ish)
+  const [viewers, setViewers] = useState(38);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setViewers((v) => Math.max(22, Math.min(74, v + Math.floor(Math.random() * 7) - 3)));
+    }, 5000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Stock remaining (out of 100)
+  const stockLeft = 23;
+
+  // Social-proof toasts — recent buyers
+  const [proofIdx, setProofIdx] = useState(0);
+  const [proofVisible, setProofVisible] = useState(false);
+  useEffect(() => {
+    const buyers = [
+      { name: "Sadia R.", city: "Mirpur", min: 2 },
+      { name: "Tanvir A.", city: "Uttara", min: 5 },
+      { name: "Mehedi H.", city: "Chattogram", min: 8 },
+      { name: "Lamia K.", city: "Sylhet", min: 12 },
+      { name: "Rakib M.", city: "Khulna", min: 18 },
+    ];
+    let i = 0;
+    const cycle = () => {
+      setProofIdx(i % buyers.length);
+      setProofVisible(true);
+      setTimeout(() => setProofVisible(false), 4500);
+      i++;
+    };
+    const first = setTimeout(cycle, 3000);
+    const id = setInterval(cycle, 11000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(id);
+    };
+  }, []);
+  const buyers = [
+    { name: "Sadia R.", city: "Mirpur", min: 2 },
+    { name: "Tanvir A.", city: "Uttara", min: 5 },
+    { name: "Mehedi H.", city: "Chattogram", min: 8 },
+    { name: "Lamia K.", city: "Sylhet", min: 12 },
+    { name: "Rakib M.", city: "Khulna", min: 18 },
+  ];
+  const currentBuyer = buyers[proofIdx];
+
   const packMeta = {
     single: { qty: 1, price: SINGLE_PRICE, old: SINGLE_OLD, label: "1 pc" },
     double: { qty: 2, price: COMBO_PRICE, old: COMBO_OLD, label: "2 pcs · 10% OFF" },
