@@ -100,24 +100,24 @@ const FEATURES = [
     desc: "Mood অনুযায়ী রঙ change — single colour, breathing বা auto cycle",
   },
   {
-    icon: <Music className="h-5 w-5" />,
-    title: "Bluetooth speaker built-in",
-    desc: "Phone connect করে নিজের playlist চালান — ripple গান-এর সাথে নাচে",
+    icon: <Palette className="h-5 w-5" />,
+    title: "Multi-mode lighting",
+    desc: "Single colour, breathing, auto-cycle — moment er sathe match",
   },
   {
     icon: <Wand2 className="h-5 w-5" />,
-    title: "4-in-1 use",
-    desc: "Night lamp · Galaxy projector · Aurora ripple · Bluetooth speaker",
+    title: "3-in-1 use",
+    desc: "Night lamp · Galaxy projector · Aurora ripple — ek device-e shob",
   },
   {
-    icon: <Moon className="h-5 w-5" />,
-    title: "Sleep timer + remote",
-    desc: "Remote দিয়ে control · Auto-off timer — ঘুমিয়ে গেলে নিজে নিজেই বন্ধ",
+    icon: <Radio className="h-5 w-5" />,
+    title: "Remote control included",
+    desc: "Distance theke colour, mode, brightness — sob set kora jay",
   },
   {
     icon: <Zap className="h-5 w-5" />,
     title: "USB powered, low heat",
-    desc: "Plug-and-play · ঘণ্টার পর ঘণ্টা চালালেও গরম হয় না",
+    desc: "Plug-and-play · ghonta-r por ghonta chalalei o gorom hoy na",
   },
 ];
 
