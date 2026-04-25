@@ -478,7 +478,7 @@ function AuroraLampLanding() {
               />
               {/* Floating badge */}
               <div className="absolute left-4 top-4 rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur">
-                🌌 4-in-1 Magic
+                🌌 3-in-1 Magic
               </div>
               <div className="absolute bottom-4 right-4 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-slate-900 shadow-lg">
                 ৳{SINGLE_PRICE.toLocaleString()}
