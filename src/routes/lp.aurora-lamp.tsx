@@ -606,6 +606,62 @@ function AuroraLampLanding() {
             </p>
           </div>
 
+          {/* Tappable lens preview */}
+          <div className="mt-8 overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur">
+            <div className="relative aspect-[16/10] w-full overflow-hidden sm:aspect-[16/7]">
+              <img
+                src={rippleProjection}
+                alt="Aurora water ripple projection preview"
+                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
+                  lensPreview === "ripple" ? "opacity-100" : "opacity-0"
+                }`}
+              />
+              <img
+                src={nebulaProjection}
+                alt="Galaxy nebula projection preview"
+                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
+                  lensPreview === "nebula" ? "opacity-100" : "opacity-0"
+                }`}
+              />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 sm:p-5">
+                <p className="text-xs font-bold uppercase tracking-widest text-white/70">
+                  {lensPreview === "ripple" ? "Aurora Lens · Way 1" : "Spiral Lens · Way 2"}
+                </p>
+                <h3 className="text-lg font-extrabold text-white sm:text-xl">
+                  {lensPreview === "ripple"
+                    ? "🌊 Water Ripple Projection"
+                    : "🌌 Galaxy Nebula Projection"}
+                </h3>
+              </div>
+            </div>
+            <div className="flex gap-2 p-3 sm:p-4">
+              <button
+                type="button"
+                onClick={() => setLensPreview("ripple")}
+                aria-pressed={lensPreview === "ripple"}
+                className={`flex-1 rounded-2xl px-4 py-3 text-sm font-bold transition active:scale-[0.98] ${
+                  lensPreview === "ripple"
+                    ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30"
+                    : "bg-white/10 text-white/80 hover:bg-white/15"
+                }`}
+              >
+                🌊 Water Ripple
+              </button>
+              <button
+                type="button"
+                onClick={() => setLensPreview("nebula")}
+                aria-pressed={lensPreview === "nebula"}
+                className={`flex-1 rounded-2xl px-4 py-3 text-sm font-bold transition active:scale-[0.98] ${
+                  lensPreview === "nebula"
+                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30"
+                    : "bg-white/10 text-white/80 hover:bg-white/15"
+                }`}
+              >
+                🌌 Galaxy Nebula
+              </button>
+            </div>
+          </div>
+
           <div className="mt-10 grid gap-5 md:grid-cols-2">
             {/* Way 1: Water Ripple Projection */}
             <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur transition hover:border-white/20">
