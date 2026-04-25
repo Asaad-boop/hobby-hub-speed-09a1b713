@@ -446,13 +446,38 @@ function AuroraLampLanding() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24 md:pb-0">
+    <div
+      className="relative min-h-screen pb-24 md:pb-0"
+      style={{
+        background:
+          "linear-gradient(180deg, oklch(0.10 0.06 285) 0%, oklch(0.13 0.08 295) 18%, oklch(0.11 0.07 270) 38%, oklch(0.14 0.09 320) 58%, oklch(0.10 0.06 250) 78%, oklch(0.08 0.04 280) 100%)",
+        color: "white",
+      }}
+    >
+      {/* Global ambient aurora layers — paint entire page */}
+      <div className="pointer-events-none fixed inset-0 -z-50" aria-hidden>
+        <div
+          className="aurora-drift absolute -inset-x-20 top-[10%] h-[60%] blur-[120px] opacity-60"
+          style={{
+            background:
+              "radial-gradient(ellipse 50% 40% at 20% 30%, oklch(0.60 0.30 320 / 0.55), transparent 65%), radial-gradient(ellipse 45% 35% at 80% 70%, oklch(0.62 0.26 200 / 0.50), transparent 65%)",
+          }}
+        />
+        <div
+          className="aurora-drift-slow absolute -inset-x-20 top-[40%] h-[70%] blur-[140px] opacity-55"
+          style={{
+            background:
+              "radial-gradient(ellipse 55% 40% at 70% 30%, oklch(0.65 0.28 350 / 0.50), transparent 65%), radial-gradient(ellipse 50% 40% at 25% 80%, oklch(0.55 0.25 270 / 0.55), transparent 65%)",
+          }}
+        />
+      </div>
+
       {/* ============ TOP URGENCY BAR ============ */}
       <div
-        className="relative overflow-hidden text-white"
+        className="relative overflow-hidden text-white shadow-lg shadow-fuchsia-900/30"
         style={{
           background:
-            "linear-gradient(90deg, oklch(0.45 0.22 320), oklch(0.45 0.22 290), oklch(0.45 0.22 260))",
+            "linear-gradient(90deg, oklch(0.50 0.28 350), oklch(0.45 0.30 320), oklch(0.42 0.28 285), oklch(0.45 0.26 250))",
         }}
       >
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 py-2 text-[12px] font-semibold sm:text-sm">
