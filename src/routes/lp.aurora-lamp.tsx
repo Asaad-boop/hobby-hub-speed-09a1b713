@@ -133,9 +133,9 @@ const USE_CASES = [
 const SPECS = [
   { label: "Power", value: "USB / 5V", sub: "Cable included" },
   { label: "Colours", value: "16 RGB", sub: "Auto-cycle mode" },
-  { label: "Modes", value: "4-in-1", sub: "Lamp · Aurora · Galaxy · Speaker" },
+  { label: "Modes", value: "3-in-1", sub: "Lamp · Aurora · Galaxy" },
   { label: "Control", value: "Remote", sub: "+ Touch button" },
-  { label: "Speaker", value: "Bluetooth 5.0", sub: "Built-in" },
+  { label: "Projection", value: "360°", sub: "Wall + ceiling" },
   { label: "Material", value: "Premium ABS", sub: "Low-heat LED" },
 ];
 
