@@ -516,9 +516,9 @@ function AuroraLampLanding() {
         </div>
 
         <div className="mx-auto mt-10 grid max-w-3xl grid-cols-3 gap-3 text-center">
-          <MiniStat label="Modes" value="4" sub="in 1 device" />
+          <MiniStat label="Modes" value="3" sub="in 1 device" />
           <MiniStat label="Colours" value="16" sub="RGB" />
-          <MiniStat label="Speaker" value="✓" sub="Bluetooth" />
+          <MiniStat label="Remote" value="✓" sub="Included" />
         </div>
       </section>
 
