@@ -41,6 +41,11 @@ import {
 
 import beforeRoom from "@/assets/aurora-before-room.jpg";
 import afterRoom from "@/assets/aurora-after-room.jpg";
+import rippleProjection from "@/assets/aurora-ripple-projection.jpg";
+import nebulaProjection from "@/assets/aurora-nebula-projection.jpg";
+import lensSystem from "@/assets/aurora-lens-system.png";
+import bedsideLamp from "@/assets/aurora-bedside-lamp.webp";
+import deskLamp from "@/assets/aurora-desk-lamp.jpg";
 
 const PRODUCT_SLUG = "aurora-galaxy-ripple-lamp-4-way-use-light";
 const SHIPPING_INSIDE = 70;
@@ -575,6 +580,172 @@ function AuroraLampLanding() {
           </div>
         </section>
       )}
+
+      {/* ============ 1 LAMP · 4 WAYS ============ */}
+      <section className="relative overflow-hidden px-5 py-16">
+        <div
+          className="absolute inset-0 -z-10"
+          style={{
+            background:
+              "radial-gradient(circle at 20% 20%, oklch(0.25 0.18 290 / 0.15), transparent 60%), radial-gradient(circle at 80% 80%, oklch(0.30 0.18 200 / 0.15), transparent 60%), oklch(0.12 0.04 280)",
+          }}
+          aria-hidden
+        />
+        <div className="mx-auto max-w-6xl text-white">
+          <div className="text-center">
+            <span className="inline-block rounded-full bg-white/10 px-4 py-1 text-xs font-bold uppercase tracking-widest text-white/80 backdrop-blur">
+              1 Lamp · 4 Ways
+            </span>
+            <h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">
+              Ekta lamp e <span style={{ color: "oklch(0.85 0.18 320)" }}>4 rokom</span> use 🌌
+            </h2>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-white/70">
+              Cap khulle full-room projector · Cap lagale soft mood lamp. 2-ta interchangeable lens diye
+              4 ta unique experience.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-5 md:grid-cols-2">
+            {/* Way 1: Water Ripple Projection */}
+            <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur transition hover:border-white/20">
+              <div className="aspect-[4/3] overflow-hidden">
+                <img
+                  src={rippleProjection}
+                  alt="Aurora water ripple projection on ceiling"
+                  className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                  loading="lazy"
+                />
+              </div>
+              <div className="p-5">
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-purple-500/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-purple-200">
+                    Way 1
+                  </span>
+                  <span className="text-xs text-white/60">Aurora Lens</span>
+                </div>
+                <h3 className="mt-2 text-lg font-bold">🌊 Water Ripple Projection</h3>
+                <p className="mt-1 text-sm text-white/70">
+                  Full ceiling-e wavy water ripple effect — calm, soothing, hypnotic. Perfect for
+                  sleep & meditation.
+                </p>
+              </div>
+            </div>
+
+            {/* Way 2: Galaxy Nebula */}
+            <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur transition hover:border-white/20">
+              <div className="aspect-[4/3] overflow-hidden">
+                <img
+                  src={nebulaProjection}
+                  alt="Galaxy nebula projection on bedroom ceiling"
+                  className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                  loading="lazy"
+                />
+              </div>
+              <div className="p-5">
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-blue-500/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-200">
+                    Way 2
+                  </span>
+                  <span className="text-xs text-white/60">Spiral Lens</span>
+                </div>
+                <h3 className="mt-2 text-lg font-bold">🌌 Galaxy Nebula Projection</h3>
+                <p className="mt-1 text-sm text-white/70">
+                  Pure room cosmic galaxy nebula te bhore jay — TikTok / Reels & date night-er
+                  jonno perfect.
+                </p>
+              </div>
+            </div>
+
+            {/* Way 3: Bedside Lamp (cap on) */}
+            <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur transition hover:border-white/20">
+              <div className="aspect-[4/3] overflow-hidden">
+                <img
+                  src={bedsideLamp}
+                  alt="Aurora lamp used as soft bedside lamp"
+                  className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                  loading="lazy"
+                />
+              </div>
+              <div className="p-5">
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-pink-500/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-pink-200">
+                    Way 3
+                  </span>
+                  <span className="text-xs text-white/60">Cap On</span>
+                </div>
+                <h3 className="mt-2 text-lg font-bold">🛌 Bedside Mood Lamp</h3>
+                <p className="mt-1 text-sm text-white/70">
+                  Cap lagale soft glowing globe lamp — bedside table-e perfect ambient light, eye
+                  friendly.
+                </p>
+              </div>
+            </div>
+
+            {/* Way 4: Desk Lamp */}
+            <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur transition hover:border-white/20">
+              <div className="aspect-[4/3] overflow-hidden">
+                <img
+                  src={deskLamp}
+                  alt="Aurora lamp used as decorative desk lamp"
+                  className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                  loading="lazy"
+                />
+              </div>
+              <div className="p-5">
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-cyan-500/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-200">
+                    Way 4
+                  </span>
+                  <span className="text-xs text-white/60">Decor Mode</span>
+                </div>
+                <h3 className="mt-2 text-lg font-bold">💡 Decor / Desk Lamp</h3>
+                <p className="mt-1 text-sm text-white/70">
+                  Reading table, study desk ba shelf-e — 16 RGB color cycle decorative lamp hisebe
+                  use korun.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Lens swap explainer */}
+          <div className="mt-8 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-6 backdrop-blur md:p-8">
+            <div className="grid items-center gap-6 md:grid-cols-2">
+              <div>
+                <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest">
+                  Interchangeable Lens System
+                </span>
+                <h3 className="mt-3 text-2xl font-extrabold">
+                  Cap khulun · Lens badlan · Notun mood
+                </h3>
+                <p className="mt-2 text-sm text-white/70">
+                  Box-e <strong className="text-white">2-ta precision lens</strong> pacchen — Aurora
+                  (wavy ripple) ar Spiral (cosmic nebula). 5 second-e swap kore notun effect upobhog
+                  korun. Cap lagiye dile abar soft bedside lamp.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm">
+                  <li className="flex items-center gap-2">
+                    <span className="text-purple-300">✦</span> Aurora Lens — water ripple wave
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-blue-300">✦</span> Spiral Lens — galaxy nebula
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-pink-300">✦</span> Cap on — soft mood / desk lamp
+                  </li>
+                </ul>
+              </div>
+              <div className="overflow-hidden rounded-2xl">
+                <img
+                  src={lensSystem}
+                  alt="Interchangeable Aurora and Spiral lens system"
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ============ USE CASES ============ */}
       <section className="relative overflow-hidden px-5 py-14">
