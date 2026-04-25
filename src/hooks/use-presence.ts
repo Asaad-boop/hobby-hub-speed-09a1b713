@@ -46,7 +46,7 @@ export function usePresenceHeartbeat() {
     };
 
     ping();
-    const interval = setInterval(ping, 20_000);
+    const interval = setInterval(ping, 10_000);
     const onVisible = () => {
       if (document.visibilityState === "visible") ping();
     };
