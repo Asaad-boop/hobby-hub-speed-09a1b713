@@ -66,13 +66,13 @@ export const Route = createFileRoute("/lp/aurora-lamp")({
       {
         name: "description",
         content:
-          "Aurora Galaxy Ripple Lamp — 4 way use, water ripple + galaxy projection, 16 colours, remote + Bluetooth speaker. Bedroom ke turant magical kore din. COD all over BD.",
+          "Aurora Galaxy Ripple Lamp — 3-in-1 use, water ripple + galaxy nebula projection, 16 RGB colours, remote control. Bedroom ke turant magical kore din. COD all over BD.",
       },
       { property: "og:title", content: "Aurora Galaxy Ripple Lamp — Room ke Galaxy Banao 🌌" },
       {
         property: "og:description",
         content:
-          "Water ripple + galaxy nebula projection · 16 RGB colours · Remote + Bluetooth speaker. ৳1290 only — COD all over BD.",
+          "Water ripple + galaxy nebula projection · 16 RGB colours · Remote control. ৳1290 only — COD all over BD.",
       },
       {
         property: "og:image",
