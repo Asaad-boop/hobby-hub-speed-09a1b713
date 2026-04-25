@@ -34,6 +34,7 @@ import { Route as TrackOrderIdRouteImport } from './routes/track.$orderId'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as OrderSuccessOrderIdRouteImport } from './routes/order-success.$orderId'
 import { Route as LpOrigamiComboRouteImport } from './routes/lp.origami-combo'
+import { Route as LpAuroraLampRouteImport } from './routes/lp.aurora-lamp'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
@@ -185,6 +186,11 @@ const OrderSuccessOrderIdRoute = OrderSuccessOrderIdRouteImport.update({
 const LpOrigamiComboRoute = LpOrigamiComboRouteImport.update({
   id: '/lp/origami-combo',
   path: '/lp/origami-combo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpAuroraLampRoute = LpAuroraLampRouteImport.update({
+  id: '/lp/aurora-lamp',
+  path: '/lp/aurora-lamp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategorySlugRoute = CategorySlugRouteImport.update({
@@ -364,6 +370,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/staff': typeof AdminStaffRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/lp/aurora-lamp': typeof LpAuroraLampRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
@@ -417,6 +424,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/staff': typeof AdminStaffRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/lp/aurora-lamp': typeof LpAuroraLampRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
@@ -472,6 +480,7 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/staff': typeof AdminStaffRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/lp/aurora-lamp': typeof LpAuroraLampRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
@@ -528,6 +537,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/staff'
     | '/category/$slug'
+    | '/lp/aurora-lamp'
     | '/lp/origami-combo'
     | '/order-success/$orderId'
     | '/product/$id'
@@ -581,6 +591,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/staff'
     | '/category/$slug'
+    | '/lp/aurora-lamp'
     | '/lp/origami-combo'
     | '/order-success/$orderId'
     | '/product/$id'
@@ -635,6 +646,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/staff'
     | '/category/$slug'
+    | '/lp/aurora-lamp'
     | '/lp/origami-combo'
     | '/order-success/$orderId'
     | '/product/$id'
@@ -672,6 +684,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   WishlistRoute: typeof WishlistRoute
   CategorySlugRoute: typeof CategorySlugRoute
+  LpAuroraLampRoute: typeof LpAuroraLampRoute
   LpOrigamiComboRoute: typeof LpOrigamiComboRoute
   OrderSuccessOrderIdRoute: typeof OrderSuccessOrderIdRoute
   ProductIdRoute: typeof ProductIdRoute
@@ -854,6 +867,13 @@ declare module '@tanstack/react-router' {
       path: '/lp/origami-combo'
       fullPath: '/lp/origami-combo'
       preLoaderRoute: typeof LpOrigamiComboRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lp/aurora-lamp': {
+      id: '/lp/aurora-lamp'
+      path: '/lp/aurora-lamp'
+      fullPath: '/lp/aurora-lamp'
+      preLoaderRoute: typeof LpAuroraLampRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/category/$slug': {
@@ -1151,6 +1171,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   WishlistRoute: WishlistRoute,
   CategorySlugRoute: CategorySlugRoute,
+  LpAuroraLampRoute: LpAuroraLampRoute,
   LpOrigamiComboRoute: LpOrigamiComboRoute,
   OrderSuccessOrderIdRoute: OrderSuccessOrderIdRoute,
   ProductIdRoute: ProductIdRoute,
