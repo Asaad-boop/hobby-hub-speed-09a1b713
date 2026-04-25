@@ -197,3 +197,41 @@
   50% { opacity: 0.35; transform: scale(1.15); }
 }
 .group:hover .cat-glow { animation: cat-glow-pulse 1.8s ease-in-out infinite; }
+
+/* ===== Aurora LP — cosmic visuals ===== */
+@keyframes aurora-drift {
+  0%, 100% { transform: translate3d(0,0,0) scale(1); opacity: 0.55; }
+  50%      { transform: translate3d(-3%, 2%, 0) scale(1.08); opacity: 0.85; }
+}
+.aurora-drift { animation: aurora-drift 14s ease-in-out infinite; }
+
+@keyframes aurora-drift-slow {
+  0%, 100% { transform: translate3d(0,0,0) scale(1); opacity: 0.45; }
+  50%      { transform: translate3d(4%, -3%, 0) scale(1.12); opacity: 0.75; }
+}
+.aurora-drift-slow { animation: aurora-drift-slow 22s ease-in-out infinite; }
+
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 1; }
+}
+.star-twinkle { animation: star-twinkle 4s ease-in-out infinite; }
+
+@keyframes shooting-star {
+  0%   { transform: translate(0,0) rotate(-20deg); opacity: 0; }
+  10%  { opacity: 1; }
+  100% { transform: translate(420px, 140px) rotate(-20deg); opacity: 0; }
+}
+.shooting-star { animation: shooting-star 6s linear infinite; }
+
+@keyframes hero-orb-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-12px) rotate(2deg); }
+}
+.hero-orb-float { animation: hero-orb-float 6s ease-in-out infinite; }
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 0.95; transform: scale(1.06); }
+}
+.glow-pulse { animation: glow-pulse 4s ease-in-out infinite; }

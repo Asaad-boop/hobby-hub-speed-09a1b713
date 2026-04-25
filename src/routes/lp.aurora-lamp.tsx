@@ -474,22 +474,87 @@ function AuroraLampLanding() {
 
       {/* HERO — cosmic, full-bleed */}
       <section className="relative overflow-hidden">
-        {/* Cosmic gradient backdrop */}
+        {/* Deep cosmic base */}
+        <div
+          className="absolute inset-0 -z-30"
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 60% at 50% 0%, oklch(0.22 0.10 290) 0%, oklch(0.10 0.05 280) 55%, oklch(0.06 0.03 280) 100%)",
+          }}
+          aria-hidden
+        />
+        {/* Aurora ribbon 1 — magenta/violet */}
+        <div
+          className="aurora-drift absolute -inset-x-10 -top-20 h-[70%] -z-20 blur-3xl"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 40% at 25% 30%, oklch(0.55 0.28 320 / 0.55), transparent 60%)",
+          }}
+          aria-hidden
+        />
+        {/* Aurora ribbon 2 — cyan/teal */}
+        <div
+          className="aurora-drift-slow absolute -inset-x-10 top-[20%] h-[70%] -z-20 blur-3xl"
+          style={{
+            background:
+              "radial-gradient(ellipse 55% 40% at 75% 60%, oklch(0.60 0.22 200 / 0.50), transparent 60%)",
+          }}
+          aria-hidden
+        />
+        {/* Aurora ribbon 3 — pink accent */}
+        <div
+          className="aurora-drift absolute -inset-x-10 top-[40%] h-[60%] -z-20 blur-3xl"
+          style={{
+            background:
+              "radial-gradient(ellipse 45% 35% at 50% 80%, oklch(0.65 0.26 350 / 0.40), transparent 65%)",
+            animationDelay: "-7s",
+          }}
+          aria-hidden
+        />
+        {/* Dense star field — small */}
+        <div
+          className="absolute inset-0 -z-10 opacity-70 mix-blend-screen"
+          style={{
+            backgroundImage:
+              "radial-gradient(1px 1px at 12% 18%, white, transparent), radial-gradient(1px 1px at 28% 42%, white, transparent), radial-gradient(1px 1px at 47% 12%, white, transparent), radial-gradient(1px 1px at 62% 35%, white, transparent), radial-gradient(1px 1px at 78% 58%, white, transparent), radial-gradient(1px 1px at 88% 22%, white, transparent), radial-gradient(1px 1px at 8% 72%, white, transparent), radial-gradient(1px 1px at 35% 88%, white, transparent), radial-gradient(1px 1px at 92% 78%, white, transparent), radial-gradient(2px 2px at 55% 65%, white, transparent), radial-gradient(2px 2px at 18% 55%, white, transparent), radial-gradient(2px 2px at 72% 8%, white, transparent)",
+            backgroundSize: "320px 320px",
+          }}
+          aria-hidden
+        />
+        {/* Twinkling brighter stars */}
+        <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
+          <span className="star-twinkle absolute left-[15%] top-[22%] h-1 w-1 rounded-full bg-white shadow-[0_0_8px_2px_rgba(255,255,255,0.8)]" />
+          <span
+            className="star-twinkle absolute left-[68%] top-[14%] h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_10px_3px_rgba(186,164,255,0.9)]"
+            style={{ animationDelay: "-1.5s" }}
+          />
+          <span
+            className="star-twinkle absolute left-[42%] top-[68%] h-1 w-1 rounded-full bg-white shadow-[0_0_8px_2px_rgba(140,220,255,0.8)]"
+            style={{ animationDelay: "-2.8s" }}
+          />
+          <span
+            className="star-twinkle absolute left-[85%] top-[44%] h-1 w-1 rounded-full bg-white shadow-[0_0_8px_2px_rgba(255,255,255,0.8)]"
+            style={{ animationDelay: "-3.6s" }}
+          />
+          <span
+            className="star-twinkle absolute left-[30%] top-[82%] h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_10px_3px_rgba(255,180,230,0.9)]"
+            style={{ animationDelay: "-1s" }}
+          />
+        </div>
+        {/* Shooting star */}
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+          <span className="shooting-star absolute left-[5%] top-[12%] h-px w-24 bg-gradient-to-r from-white via-white/80 to-transparent shadow-[0_0_6px_1px_rgba(255,255,255,0.7)]" />
+          <span
+            className="shooting-star absolute left-[55%] top-[8%] h-px w-20 bg-gradient-to-r from-white via-white/80 to-transparent shadow-[0_0_6px_1px_rgba(255,255,255,0.7)]"
+            style={{ animationDelay: "-3.5s" }}
+          />
+        </div>
+        {/* Vignette + bottom fade for blend */}
         <div
           className="absolute inset-0 -z-10"
           style={{
             background:
-              "radial-gradient(ellipse at 30% 20%, oklch(0.45 0.22 290 / 0.45), transparent 55%), radial-gradient(ellipse at 75% 70%, oklch(0.55 0.20 200 / 0.40), transparent 55%), linear-gradient(180deg, oklch(0.18 0.05 280) 0%, oklch(0.10 0.04 280) 100%)",
-          }}
-          aria-hidden
-        />
-        {/* Star dust */}
-        <div
-          className="absolute inset-0 -z-10 opacity-40 mix-blend-screen"
-          style={{
-            backgroundImage:
-              "radial-gradient(1px 1px at 20% 30%, white, transparent), radial-gradient(1px 1px at 80% 60%, white, transparent), radial-gradient(2px 2px at 40% 80%, white, transparent), radial-gradient(1px 1px at 65% 20%, white, transparent), radial-gradient(1px 1px at 10% 70%, white, transparent)",
-            backgroundSize: "200px 200px",
+              "linear-gradient(180deg, transparent 60%, oklch(0.06 0.03 280 / 0.7) 100%)",
           }}
           aria-hidden
         />
@@ -592,8 +657,20 @@ function AuroraLampLanding() {
 
           {/* Hero image */}
           <div className="relative">
-            <div className="absolute inset-0 -z-10 rounded-[2rem] bg-gradient-to-br from-fuchsia-500/30 via-violet-500/20 to-cyan-400/30 blur-3xl" />
-            <div className="relative aspect-square overflow-hidden rounded-[2rem] border border-white/10 bg-black/20 shadow-[0_20px_60px_-15px_rgba(120,80,255,0.6)] backdrop-blur">
+            {/* Outer glow halo */}
+            <div className="glow-pulse absolute inset-0 -z-10 rounded-[2.2rem] bg-gradient-to-br from-fuchsia-500/40 via-violet-500/30 to-cyan-400/40 blur-3xl" />
+            {/* Conic rotating ring */}
+            <div
+              className="absolute -inset-2 -z-10 rounded-[2.4rem] opacity-70 blur-md"
+              style={{
+                background:
+                  "conic-gradient(from 0deg, oklch(0.7 0.25 320), oklch(0.7 0.20 200), oklch(0.7 0.25 350), oklch(0.7 0.25 290), oklch(0.7 0.25 320))",
+                animation: "spin 14s linear infinite",
+              }}
+              aria-hidden
+            />
+            <div className="hero-orb-float relative aspect-square overflow-hidden rounded-[2rem] border border-white/15 bg-black/30 shadow-[0_30px_80px_-15px_rgba(120,80,255,0.7),inset_0_0_60px_rgba(120,80,255,0.15)] backdrop-blur">
+              {/* Image with subtle zoom */}
               <img
                 src={heroImage}
                 alt={product.title}
@@ -601,20 +678,70 @@ function AuroraLampLanding() {
                 width={1024}
                 height={1024}
               />
-              {/* Floating badge */}
-              <div className="absolute left-4 top-4 rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur">
-                🌌 3-in-1 Magic
+              {/* Inner gradient sheen */}
+              <div
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background:
+                    "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.18), transparent 50%), linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.4) 100%)",
+                }}
+                aria-hidden
+              />
+              {/* Top-left badge */}
+              <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/55 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
+                <Sparkles className="h-3 w-3 text-fuchsia-300" /> 3-in-1 Magic
               </div>
-              <div className="absolute bottom-4 right-4 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-slate-900 shadow-lg">
+              {/* Top-right rating */}
+              <div className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/55 px-2.5 py-1.5 text-[11px] font-bold text-white backdrop-blur-md">
+                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" /> 4.9 · 280+
+              </div>
+              {/* Bottom price chip */}
+              <div className="absolute bottom-4 right-4 rounded-full bg-white px-3.5 py-1.5 text-xs font-extrabold text-slate-900 shadow-[0_8px_24px_-4px_rgba(0,0,0,0.5)]">
                 ৳{SINGLE_PRICE.toLocaleString()}
+                <span className="ml-1.5 text-[10px] font-semibold text-slate-500 line-through">
+                  ৳{SINGLE_OLD.toLocaleString()}
+                </span>
+              </div>
+              {/* Bottom-left mini chip */}
+              <div className="absolute bottom-4 left-4 inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/55 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur-md">
+                <Truck className="h-3 w-3" /> COD
               </div>
             </div>
+            {/* Floating decorative dots */}
+            <div
+              className="hero-orb-float absolute -right-3 top-12 h-8 w-8 rounded-full border border-white/30 bg-white/10 backdrop-blur"
+              style={{ animationDelay: "-2s" }}
+              aria-hidden
+            />
+            <div
+              className="hero-orb-float absolute -left-2 bottom-16 h-5 w-5 rounded-full bg-fuchsia-400/60 blur-[2px]"
+              style={{ animationDelay: "-4s" }}
+              aria-hidden
+            />
           </div>
+
         </div>
       </section>
 
       {/* ============ BEFORE / AFTER SLIDER ============ */}
-      <section className="relative overflow-hidden bg-slate-950 px-5 py-14">
+      <section className="relative overflow-hidden px-5 py-14">
+        <div
+          className="absolute inset-0 -z-10"
+          style={{
+            background:
+              "radial-gradient(ellipse at 20% 30%, oklch(0.30 0.18 290 / 0.5), transparent 55%), radial-gradient(ellipse at 80% 70%, oklch(0.35 0.18 200 / 0.5), transparent 55%), oklch(0.08 0.04 280)",
+          }}
+          aria-hidden
+        />
+        <div
+          className="absolute inset-0 -z-10 opacity-50 mix-blend-screen"
+          style={{
+            backgroundImage:
+              "radial-gradient(1px 1px at 25% 35%, white, transparent), radial-gradient(1px 1px at 75% 25%, white, transparent), radial-gradient(1px 1px at 50% 70%, white, transparent), radial-gradient(2px 2px at 15% 85%, white, transparent), radial-gradient(1px 1px at 85% 60%, white, transparent)",
+            backgroundSize: "280px 280px",
+          }}
+          aria-hidden
+        />
         <div className="mx-auto max-w-4xl text-center">
           <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-fuchsia-300">
             Before · After
@@ -680,7 +807,13 @@ function AuroraLampLanding() {
 
       {/* ============ GALLERY ============ */}
       {galleryImages.length > 1 && (
-        <section className="relative px-5 py-14" style={{ background: "oklch(0.97 0.01 280)" }}>
+        <section
+          className="relative px-5 py-14"
+          style={{
+            background:
+              "linear-gradient(180deg, oklch(0.98 0.015 290) 0%, oklch(0.96 0.025 320) 100%)",
+          }}
+        >
           <div className="mx-auto max-w-5xl">
             <SectionHeading kicker="Gallery" title="Real product shots — ekdom genuine" />
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
