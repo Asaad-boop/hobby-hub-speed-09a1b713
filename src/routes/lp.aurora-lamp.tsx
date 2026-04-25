@@ -1046,7 +1046,79 @@ function AuroraLampLanding() {
         </div>
       </section>
 
-      {/* ============ MID CTA ============ */}
+      {/* ============ COMPARISON TABLE ============ */}
+      <section className="px-5 py-14">
+        <div className="mx-auto max-w-3xl">
+          <SectionHeading kicker="Why Us" title="HobbyShop vs onno seller" />
+          <div className="overflow-hidden rounded-2xl border border-border shadow-[var(--shadow-card)]">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-muted/60 text-foreground">
+                  <th className="p-3 text-left font-semibold">Feature</th>
+                  <th className="p-3 text-center font-bold text-primary">HobbyShop ✓</th>
+                  <th className="p-3 text-center font-medium text-muted-foreground">Others</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border bg-card">
+                {[
+                  ["3-in-1 use (Lamp + Aurora + Galaxy)", true, false],
+                  ["Remote + 2 interchangeable lens", true, false],
+                  ["Premium gift box packaging", true, false],
+                  ["7-day replacement guarantee", true, false],
+                  ["Cash on Delivery all over BD", true, true],
+                  ["Verified original product", true, false],
+                  ["Same-day shipping", true, false],
+                ].map(([feat, us, them], i) => (
+                  <tr key={i}>
+                    <td className="p-3 text-foreground">{feat as string}</td>
+                    <td className="p-3 text-center">
+                      {us ? (
+                        <CheckCircle2 className="mx-auto h-5 w-5 text-emerald-500" />
+                      ) : (
+                        <X className="mx-auto h-5 w-5 text-muted-foreground/50" />
+                      )}
+                    </td>
+                    <td className="p-3 text-center">
+                      {them ? (
+                        <CheckCircle2 className="mx-auto h-5 w-5 text-muted-foreground/60" />
+                      ) : (
+                        <X className="mx-auto h-5 w-5 text-rose-400" />
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ GUARANTEES STRIP ============ */}
+      <section className="px-5 pb-4">
+        <div className="mx-auto grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { icon: <ShieldCheck className="h-5 w-5" />, t: "100% Authentic", s: "Verified original product" },
+            { icon: <RotateCcw className="h-5 w-5" />, t: "7-Day Replacement", s: "Damage হলে free swap" },
+            { icon: <Truck className="h-5 w-5" />, t: "Fast Delivery", s: "Dhaka 1-2 din · BD 2-4 din" },
+            { icon: <Award className="h-5 w-5" />, t: "Cash on Delivery", s: "Hath-e niye taka diben" },
+          ].map((g, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                {g.icon}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-foreground">{g.t}</p>
+                <p className="text-xs text-muted-foreground">{g.s}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ============ MID CTA WITH COUNTDOWN ============ */}
       <section
         className="mx-5 my-8 overflow-hidden rounded-3xl px-6 py-12 text-center text-white shadow-[var(--shadow-brand)]"
         style={{
@@ -1056,10 +1128,25 @@ function AuroraLampLanding() {
       >
         <Heart className="mx-auto h-7 w-7 text-white/90" />
         <h2 className="mt-3 text-xl font-extrabold leading-tight md:text-2xl">
-          Stock limited! Aaj order korle{" "}
-          <span className="underline decoration-pink-300 underline-offset-4">aaj-i ship</span>
+          Flash sale shesh hote{" "}
+          <span className="underline decoration-pink-300 underline-offset-4">baki ache:</span>
         </h2>
-        <p className="mt-2 text-xs text-white/80 md:text-sm">
+        <div className="mt-4 flex justify-center gap-2 sm:gap-3">
+          {[
+            { v: hh, l: "ghonta" },
+            { v: mm, l: "minute" },
+            { v: ss, l: "second" },
+          ].map((t, i) => (
+            <div
+              key={i}
+              className="min-w-[68px] rounded-2xl bg-white/15 px-3 py-2.5 backdrop-blur sm:min-w-[80px]"
+            >
+              <div className="text-2xl font-extrabold tabular-nums sm:text-3xl">{t.v}</div>
+              <div className="mt-0.5 text-[10px] uppercase tracking-widest text-white/70">{t.l}</div>
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 text-xs text-white/80 md:text-sm">
           Daily 200+ orders · last 24 hours-e 47 jon kinechen
         </p>
         <Button
@@ -1069,6 +1156,7 @@ function AuroraLampLanding() {
           🌌 Aamar Galaxy Lamp Chai →
         </Button>
       </section>
+
 
       {/* ============ ORDER FORM ============ */}
       <section ref={orderRef} className="scroll-mt-4 px-5 py-12">
