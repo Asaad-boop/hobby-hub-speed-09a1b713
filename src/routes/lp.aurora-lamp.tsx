@@ -657,8 +657,20 @@ function AuroraLampLanding() {
 
           {/* Hero image */}
           <div className="relative">
-            <div className="absolute inset-0 -z-10 rounded-[2rem] bg-gradient-to-br from-fuchsia-500/30 via-violet-500/20 to-cyan-400/30 blur-3xl" />
-            <div className="relative aspect-square overflow-hidden rounded-[2rem] border border-white/10 bg-black/20 shadow-[0_20px_60px_-15px_rgba(120,80,255,0.6)] backdrop-blur">
+            {/* Outer glow halo */}
+            <div className="glow-pulse absolute inset-0 -z-10 rounded-[2.2rem] bg-gradient-to-br from-fuchsia-500/40 via-violet-500/30 to-cyan-400/40 blur-3xl" />
+            {/* Conic rotating ring */}
+            <div
+              className="absolute -inset-2 -z-10 rounded-[2.4rem] opacity-70 blur-md"
+              style={{
+                background:
+                  "conic-gradient(from 0deg, oklch(0.7 0.25 320), oklch(0.7 0.20 200), oklch(0.7 0.25 350), oklch(0.7 0.25 290), oklch(0.7 0.25 320))",
+                animation: "spin 14s linear infinite",
+              }}
+              aria-hidden
+            />
+            <div className="hero-orb-float relative aspect-square overflow-hidden rounded-[2rem] border border-white/15 bg-black/30 shadow-[0_30px_80px_-15px_rgba(120,80,255,0.7),inset_0_0_60px_rgba(120,80,255,0.15)] backdrop-blur">
+              {/* Image with subtle zoom */}
               <img
                 src={heroImage}
                 alt={product.title}
@@ -666,15 +678,48 @@ function AuroraLampLanding() {
                 width={1024}
                 height={1024}
               />
-              {/* Floating badge */}
-              <div className="absolute left-4 top-4 rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur">
-                🌌 3-in-1 Magic
+              {/* Inner gradient sheen */}
+              <div
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background:
+                    "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.18), transparent 50%), linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.4) 100%)",
+                }}
+                aria-hidden
+              />
+              {/* Top-left badge */}
+              <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/55 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
+                <Sparkles className="h-3 w-3 text-fuchsia-300" /> 3-in-1 Magic
               </div>
-              <div className="absolute bottom-4 right-4 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-slate-900 shadow-lg">
+              {/* Top-right rating */}
+              <div className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/55 px-2.5 py-1.5 text-[11px] font-bold text-white backdrop-blur-md">
+                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" /> 4.9 · 280+
+              </div>
+              {/* Bottom price chip */}
+              <div className="absolute bottom-4 right-4 rounded-full bg-white px-3.5 py-1.5 text-xs font-extrabold text-slate-900 shadow-[0_8px_24px_-4px_rgba(0,0,0,0.5)]">
                 ৳{SINGLE_PRICE.toLocaleString()}
+                <span className="ml-1.5 text-[10px] font-semibold text-slate-500 line-through">
+                  ৳{SINGLE_OLD.toLocaleString()}
+                </span>
+              </div>
+              {/* Bottom-left mini chip */}
+              <div className="absolute bottom-4 left-4 inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/55 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur-md">
+                <Truck className="h-3 w-3" /> COD
               </div>
             </div>
+            {/* Floating decorative dots */}
+            <div
+              className="hero-orb-float absolute -right-3 top-12 h-8 w-8 rounded-full border border-white/30 bg-white/10 backdrop-blur"
+              style={{ animationDelay: "-2s" }}
+              aria-hidden
+            />
+            <div
+              className="hero-orb-float absolute -left-2 bottom-16 h-5 w-5 rounded-full bg-fuchsia-400/60 blur-[2px]"
+              style={{ animationDelay: "-4s" }}
+              aria-hidden
+            />
           </div>
+
         </div>
       </section>
 
