@@ -807,7 +807,13 @@ function AuroraLampLanding() {
 
       {/* ============ GALLERY ============ */}
       {galleryImages.length > 1 && (
-        <section className="relative px-5 py-14" style={{ background: "oklch(0.97 0.01 280)" }}>
+        <section
+          className="relative px-5 py-14"
+          style={{
+            background:
+              "linear-gradient(180deg, oklch(0.98 0.015 290) 0%, oklch(0.96 0.025 320) 100%)",
+          }}
+        >
           <div className="mx-auto max-w-5xl">
             <SectionHeading kicker="Gallery" title="Real product shots — ekdom genuine" />
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
