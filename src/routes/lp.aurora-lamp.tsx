@@ -349,11 +349,7 @@ function AuroraLampLanding() {
         return;
       }
 
-      fbTrack("Purchase", {
-        content_ids: [product.id],
-        value: orderTotal,
-        currency: META_CURRENCY,
-      });
+      // Purchase event fires on /order-success page (single source of truth, deduped per order)
 
       toast.success("Order place hoyeche! Confirm korar jonno call korbo.");
       navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
