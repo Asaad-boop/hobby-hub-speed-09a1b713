@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Check, Package, Truck, Copy, Home, ShoppingBag, MapPin, Loader2, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
+import { clarityEvent, clarityTag, clarityUpgrade } from "@/lib/clarity";
 
 export const Route = createFileRoute("/order-success/$orderId")({
   head: ({ params }) => ({
@@ -68,6 +69,12 @@ function OrderSuccessPage() {
           });
           sessionStorage.setItem(key, "1");
         }
+        // Clarity: mark this session as a converter — top priority retention.
+        clarityEvent("purchase");
+        clarityTag("converted", "true");
+        clarityTag("order_value_bdt", String(Math.round(o.total)));
+        clarityTag("order_id", o.id);
+        clarityUpgrade("purchase");
       }
     })();
   }, [orderId]);
