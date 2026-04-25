@@ -11,6 +11,7 @@ import {
   MessageSquare,
   Tag,
   PhoneCall,
+  Activity,
 } from "lucide-react";
 import {
   Sidebar,
