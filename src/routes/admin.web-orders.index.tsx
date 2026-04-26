@@ -20,6 +20,7 @@ import {
   Plus,
   Filter as FilterIcon,
   ChevronDown,
+  Trash2,
 } from "lucide-react";
 import { supabase as supabaseTyped } from "@/integrations/supabase/client";
 const supabase = supabaseTyped as any;
@@ -44,6 +45,16 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -607,7 +618,27 @@ function WebOrdersPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // Bulk action: add tag
+  // Delete order(s) — admin only
+  const deleteOrder = useMutation({
+    mutationFn: async (ids: string[]) => {
+      // Delete order_items first (in case cascade is missing), then orders
+      const { error: itemsErr } = await supabase
+        .from("order_items")
+        .delete()
+        .in("order_id", ids);
+      if (itemsErr) throw itemsErr;
+      const { error } = await supabase.from("orders").delete().in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: (_d, ids) => {
+      toast.success(`${ids.length} order${ids.length > 1 ? "s" : ""} deleted`);
+      setSelected(new Set());
+      setDeleteFor(null);
+      setBulkDeleteOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["web-orders"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
   const bulkAddTag = useMutation({
     mutationFn: async ({ ids, tag }: { ids: string[]; tag: string }) => {
       for (const id of ids) {
@@ -640,6 +671,8 @@ function WebOrdersPage() {
   const [advance, setAdvance] = useState({ amount: "", method: "bkash", txn: "" });
   const [bulkTagOpen, setBulkTagOpen] = useState(false);
   const [bulkTagValue, setBulkTagValue] = useState("");
+  const [deleteFor, setDeleteFor] = useState<string | null>(null);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
   if (authLoading) {
     return (
@@ -771,6 +804,17 @@ function WebOrdersPage() {
             >
               <MessageCircle className="mr-2 h-4 w-4" /> Bulk Send SMS
             </DropdownMenuItem>
+            {hasRole(["admin"]) && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setBulkDeleteOpen(true)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete selected
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setSelected(new Set())}>
               Clear selection
@@ -1050,14 +1094,27 @@ function WebOrdersPage() {
 
                       {/* Actions */}
                       <TableCell className="text-right">
-                        <Button asChild size="sm" variant="default">
-                          <Link
-                            to="/admin/web-orders/$orderId"
-                            params={{ orderId: o.id }}
-                          >
-                            Open <ExternalLink className="ml-1 h-3 w-3" />
-                          </Link>
-                        </Button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button asChild size="sm" variant="default">
+                            <Link
+                              to="/admin/web-orders/$orderId"
+                              params={{ orderId: o.id }}
+                            >
+                              Open <ExternalLink className="ml-1 h-3 w-3" />
+                            </Link>
+                          </Button>
+                          {hasRole(["admin"]) && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              onClick={() => setDeleteFor(o.id)}
+                              aria-label="Delete order"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -1332,6 +1389,68 @@ function WebOrdersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Single delete confirmation */}
+      <AlertDialog open={!!deleteFor} onOpenChange={(v) => !v && setDeleteFor(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Order delete korben?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ei action permanent. Order ebong er items database theke shoshhrod
+              delete hoye jabe — undo kora jabe na.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteOrder.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteOrder.isPending}
+              onClick={() => deleteFor && deleteOrder.mutate([deleteFor])}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteOrder.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting…
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk delete confirmation */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{selected.size} order delete korben?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Selected order gulo ebong tader items permanently delete hobe.
+              Ei action revert kora jabe na.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteOrder.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteOrder.isPending || selected.size === 0}
+              onClick={() => deleteOrder.mutate(Array.from(selected))}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteOrder.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting…
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete {selected.size}
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
