@@ -671,6 +671,8 @@ function WebOrdersPage() {
   const [advance, setAdvance] = useState({ amount: "", method: "bkash", txn: "" });
   const [bulkTagOpen, setBulkTagOpen] = useState(false);
   const [bulkTagValue, setBulkTagValue] = useState("");
+  const [deleteFor, setDeleteFor] = useState<string | null>(null);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
   if (authLoading) {
     return (
