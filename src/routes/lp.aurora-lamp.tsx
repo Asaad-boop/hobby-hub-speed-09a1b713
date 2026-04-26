@@ -1420,7 +1420,7 @@ function AuroraLampLanding() {
           </div>
           <Button
             onClick={scrollToOrder}
-            className="h-12 flex-1 rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-[var(--shadow-brand)] hover:bg-primary/90"
+            className="cta-bump h-12 flex-1 rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-[var(--shadow-brand)] hover:bg-primary/90"
           >
             <Gift className="mr-1.5 h-4 w-4" /> অর্ডার করুন
           </Button>
