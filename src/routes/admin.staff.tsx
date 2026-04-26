@@ -240,10 +240,11 @@ function CreateUserDialog({ onDone }: { onDone: () => void }) {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<AppRole>("customer_service");
+  const createStaffUserFn = useServerFn(createStaffUser);
 
   const mut = useMutation({
     mutationFn: () =>
-      createStaffUser({
+      createStaffUserFn({
         data: { email, password, display_name: displayName, role },
       }),
     onSuccess: () => {
