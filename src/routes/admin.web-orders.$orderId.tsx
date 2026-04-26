@@ -169,6 +169,21 @@ function WebOrderDetailPage() {
   const qc = useQueryClient();
   const { loading: authLoading, hasRole } = useAdminAuth();
   const allowed = hasRole(["admin", "customer_service", "operations"]);
+  const isAdmin = hasRole(["admin"]);
+
+  const deleteOrderMut = useMutation({
+    mutationFn: async () => {
+      await supabase.from("order_items").delete().eq("order_id", orderId);
+      const { error } = await supabase.from("orders").delete().eq("id", orderId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Order deleted");
+      qc.invalidateQueries({ queryKey: ["web-orders"] });
+      navigate({ to: "/admin/web-orders" });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   // ============ Fetch order + items (split — no FK relationship) ============
   const { data: order, isLoading: orderLoading, error: orderError } = useQuery({
@@ -585,6 +600,34 @@ function WebOrderDetailPage() {
             <Send className="mr-1 h-3.5 w-3.5" />
             Send Message
           </Button>
+          {isAdmin && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                  <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete order
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Order delete korben?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Ei action permanent. Order ebong er items database theke shomporno
+                    delete hoye jabe — undo kora jabe na.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={deleteOrderMut.isPending}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    disabled={deleteOrderMut.isPending}
+                    onClick={() => deleteOrderMut.mutate()}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleteOrderMut.isPending ? "Deleting…" : "Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
       </div>
 
