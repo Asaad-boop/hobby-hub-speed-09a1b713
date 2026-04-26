@@ -1285,13 +1285,13 @@ function AuroraLampLanding() {
                 </div>
               </div>
 
-              <FormField id="lp-name" label="আপনার নাম *" icon={<UserIcon className="h-3.5 w-3.5" />}>
+              <FormField id="lp-name" label="আপনার পুরো নাম *" icon={<UserIcon className="h-3.5 w-3.5" />}>
                 <Input
                   id="lp-name"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Mohammed Akash"
-                  className="h-11 rounded-lg"
+                  placeholder="আপনার পুরো নাম লিখুন"
+                  className="h-12 rounded-xl border-2 border-border/60 bg-background px-4 text-[15px] font-medium shadow-sm transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   required
                 />
               </FormField>
@@ -1307,8 +1307,8 @@ function AuroraLampLanding() {
                   inputMode="tel"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  placeholder="01XXXXXXXXX"
-                  className="h-11 rounded-lg"
+                  placeholder="আপনার মোবাইল নাম্বার লিখুন"
+                  className="h-12 rounded-xl border-2 border-border/60 bg-background px-4 text-[15px] font-medium shadow-sm transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   required
                 />
               </FormField>
@@ -1318,7 +1318,7 @@ function AuroraLampLanding() {
                   id="lp-district"
                   value={form.district}
                   onChange={(e) => setForm({ ...form, district: e.target.value })}
-                  className="flex h-11 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="flex h-12 w-full rounded-xl border-2 border-border/60 bg-background px-4 text-[15px] font-medium text-foreground shadow-sm transition-all focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                   required
                 >
                   <option value="" disabled>
@@ -1341,9 +1341,9 @@ function AuroraLampLanding() {
                   id="lp-address"
                   value={form.address}
                   onChange={(e) => setForm({ ...form, address: e.target.value })}
-                  placeholder="House #, Road #, Area, Thana..."
+                  placeholder="বাসা/হোল্ডিং নং, রোড নং, এরিয়া, থানা লিখুন"
                   rows={3}
-                  className="rounded-lg"
+                  className="rounded-xl border-2 border-border/60 bg-background px-4 py-3 text-[15px] font-medium shadow-sm transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   required
                 />
               </FormField>
