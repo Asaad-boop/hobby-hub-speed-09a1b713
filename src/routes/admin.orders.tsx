@@ -355,6 +355,27 @@ function AdminOrdersPage() {
         onClose={() => setOpenOrderId(null)}
         onStatusChange={(id, status) => updateStatus.mutate({ id, status })}
       />
+
+      <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this order?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Permanently database theke order ebong oar items remove hoye jabe. Eta undo kora jabe na.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteOrder.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteOrder.isPending}
+              onClick={() => deleteId && deleteOrder.mutate(deleteId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteOrder.isPending ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
