@@ -55,6 +55,7 @@ import {
   assignRoleByEmail,
   removeRole,
   resetStaffPassword,
+  verifyUserRoles,
 } from "@/lib/staff.functions";
 import type { Database } from "@/integrations/supabase/types";
 
