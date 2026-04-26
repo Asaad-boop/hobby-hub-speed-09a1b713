@@ -99,6 +99,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isAdmin = pathname.startsWith("/admin");
+  const isLanding = pathname.startsWith("/lp/");
 
   // Capture marketing attribution on the first page of the visit.
   useEffect(() => {
@@ -148,6 +149,11 @@ function RootComponent() {
         <CartProvider>
           {isAdmin ? (
             <Outlet />
+          ) : isLanding ? (
+            <div className="min-h-screen">
+              <Outlet />
+              <CartDrawer />
+            </div>
           ) : (
             <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
               <Header />
