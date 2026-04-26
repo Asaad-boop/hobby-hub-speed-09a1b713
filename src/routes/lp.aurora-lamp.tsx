@@ -224,9 +224,6 @@ function AuroraLampLanding() {
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", district: "" });
   const orderRef = useRef<HTMLDivElement | null>(null);
-
-  // Slider position for before/after (0-100)
-  const [sliderPos, setSliderPos] = useState(50);
   const [lensPreview, setLensPreview] = useState<"ripple" | "nebula">("ripple");
 
   // Urgency countdown — 24h flash sale (persists across reloads via localStorage)
