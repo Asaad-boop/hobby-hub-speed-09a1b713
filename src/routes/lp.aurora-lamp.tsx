@@ -73,7 +73,7 @@ export const Route = createFileRoute("/lp/aurora-lamp")({
       {
         name: "description",
         content:
-          "Aurora Galaxy Ripple Lamp — 3-in-1 use, water ripple + galaxy nebula projection, 16 RGB colours, remote control. Bedroom ke turant magical kore din. COD all over BD.",
+          "Aurora Galaxy Ripple Lamp — 4-in-1 use, water ripple + galaxy nebula projection, 16 RGB colours, remote control. Bedroom ke turant magical kore din. COD all over BD.",
       },
       { property: "og:title", content: "Aurora Galaxy Ripple Lamp — Room ke Galaxy Banao 🌌" },
       {
@@ -154,7 +154,7 @@ const OBJECTIONS = [
 const SPECS = [
   { label: "Power", value: "USB / 5V", sub: "Cable included" },
   { label: "Colours", value: "16 RGB", sub: "Auto-cycle mode" },
-  { label: "Modes", value: "3-in-1", sub: "Lamp · Aurora · Galaxy" },
+  { label: "Modes", value: "4-in-1", sub: "Lamp · Aurora · Galaxy" },
   { label: "Control", value: "Remote", sub: "+ Touch button" },
   { label: "Projection", value: "360°", sub: "Wall + ceiling" },
   { label: "Material", value: "Premium ABS", sub: "Low-heat LED" },
@@ -700,7 +700,7 @@ function AuroraLampLanding() {
               />
               {/* Top-left badge */}
               <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/55 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
-                <Sparkles className="h-3 w-3 text-fuchsia-300" /> 3-in-1 Magic
+                <Sparkles className="h-3 w-3 text-fuchsia-300" /> 4-in-1 Magic
               </div>
               {/* Top-right rating */}
               <div className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/55 px-2.5 py-1.5 text-[11px] font-bold text-white backdrop-blur-md">
@@ -1205,7 +1205,7 @@ function AuroraLampLanding() {
               </thead>
               <tbody className="divide-y divide-border bg-card">
                 {[
-                  ["3-in-1 use (Lamp + Aurora + Galaxy)", true, false],
+                  ["4-in-1 use (Lamp + Aurora + Galaxy)", true, false],
                   ["Remote + 2 interchangeable lens", true, false],
                   ["Premium gift box packaging", true, false],
                   ["7-day replacement guarantee", true, false],
