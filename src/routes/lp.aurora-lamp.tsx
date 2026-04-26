@@ -1676,10 +1676,12 @@ function MiniStat({ label, value, sub }: { label: string; value: string; sub?: s
 function SectionHeading({ kicker, title }: { kicker: string; title: string }) {
   return (
     <div className="mb-6 text-center">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-fuchsia-300/90 drop-shadow-[0_0_12px_rgba(217,70,239,0.6)]">
         {kicker}
       </span>
-      <h2 className="mt-1 text-xl font-bold text-foreground md:text-2xl">{title}</h2>
+      <h2 className="mt-2 text-2xl font-extrabold text-white drop-shadow-[0_2px_12px_rgba(168,85,247,0.45)] md:text-3xl">
+        {title}
+      </h2>
     </div>
   );
 }
