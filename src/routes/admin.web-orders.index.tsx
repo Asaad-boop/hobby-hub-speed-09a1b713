@@ -804,6 +804,17 @@ function WebOrdersPage() {
             >
               <MessageCircle className="mr-2 h-4 w-4" /> Bulk Send SMS
             </DropdownMenuItem>
+            {hasRole(["admin"]) && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setBulkDeleteOpen(true)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete selected
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setSelected(new Set())}>
               Clear selection
