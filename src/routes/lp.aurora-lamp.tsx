@@ -637,7 +637,7 @@ function AuroraLampLanding() {
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
               <Button
                 onClick={scrollToOrder}
-                className="h-14 rounded-full bg-white px-8 text-base font-extrabold text-slate-900 shadow-2xl hover:bg-white/90"
+                className="cta-bump h-14 rounded-full bg-white px-8 text-base font-extrabold text-slate-900 shadow-2xl hover:bg-white/90"
               >
                 <Gift className="mr-2 h-5 w-5" /> এখনই অর্ডার করুন
               </Button>
