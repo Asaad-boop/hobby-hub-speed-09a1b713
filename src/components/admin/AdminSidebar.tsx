@@ -11,8 +11,9 @@ import {
   MessageSquare,
   Tag,
   PhoneCall,
-  Activity,
   Users,
+  Boxes,
+  UserCircle,
 } from "lucide-react";
 import {
   Sidebar,
@@ -45,13 +46,13 @@ const groups: { label: string; items: NavItem[] }[] = [
     label: "Overview",
     items: [
       { title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true, roles: ["admin"] },
-      { title: "Live", url: "/admin/live", icon: Activity, roles: ["admin"] },
     ],
   },
   {
     label: "Sales",
     items: [
       { title: "Orders", url: "/admin/web-orders", icon: PhoneCall, roles: ["admin", "customer_service"] },
+      { title: "Customers", url: "/admin/customers", icon: UserCircle, roles: ["admin"] },
       { title: "Reviews", url: "/admin/reviews", icon: MessageSquare, roles: ["admin"] },
       { title: "Coupons", url: "/admin/coupons", icon: Tag, roles: ["admin"] },
     ],
@@ -61,6 +62,7 @@ const groups: { label: string; items: NavItem[] }[] = [
     items: [
       { title: "Products", url: "/admin/products", icon: Package, roles: ["admin"] },
       { title: "Categories", url: "/admin/categories", icon: Tags, roles: ["admin"] },
+      { title: "Inventory", url: "/admin/inventory", icon: Boxes, roles: ["admin"] },
     ],
   },
   {
