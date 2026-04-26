@@ -363,9 +363,10 @@ function CreateUserDialog({ onDone }: { onDone: () => void }) {
 function ExistingUserAssign({ onDone }: { onDone: () => void }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<AppRole>("customer_service");
+  const assignRoleByEmailFn = useServerFn(assignRoleByEmail);
 
   const mut = useMutation({
-    mutationFn: () => assignRoleByEmail({ data: { email, role } }),
+    mutationFn: () => assignRoleByEmailFn({ data: { email, role } }),
     onSuccess: () => {
       toast.success(`Role "${role}" assigned to ${email}`);
       setEmail("");
