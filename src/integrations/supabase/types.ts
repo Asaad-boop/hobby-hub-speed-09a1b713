@@ -772,35 +772,6 @@ export type Database = {
           },
         ]
       }
-      product_costs: {
-        Row: {
-          avg_cost: number
-          product_id: string
-          unit_cost: number
-          updated_at: string
-        }
-        Insert: {
-          avg_cost?: number
-          product_id: string
-          unit_cost?: number
-          updated_at?: string
-        }
-        Update: {
-          avg_cost?: number
-          product_id?: string
-          unit_cost?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_costs_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: true
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       product_option_types: {
         Row: {
           created_at: string
@@ -1067,72 +1038,6 @@ export type Database = {
         }
         Relationships: []
       }
-      returns_exchanges: {
-        Row: {
-          created_at: string
-          damage_logged_qty: number
-          exchange_issued_qty: number
-          financial_impact: number
-          id: string
-          items: Json
-          notes: string | null
-          order_id: string
-          processed_at: string
-          processed_by: string
-          reason: string | null
-          shipment_id: string | null
-          stock_restored_qty: number
-          type: Database["public"]["Enums"]["return_type"]
-        }
-        Insert: {
-          created_at?: string
-          damage_logged_qty?: number
-          exchange_issued_qty?: number
-          financial_impact?: number
-          id?: string
-          items?: Json
-          notes?: string | null
-          order_id: string
-          processed_at?: string
-          processed_by: string
-          reason?: string | null
-          shipment_id?: string | null
-          stock_restored_qty?: number
-          type: Database["public"]["Enums"]["return_type"]
-        }
-        Update: {
-          created_at?: string
-          damage_logged_qty?: number
-          exchange_issued_qty?: number
-          financial_impact?: number
-          id?: string
-          items?: Json
-          notes?: string | null
-          order_id?: string
-          processed_at?: string
-          processed_by?: string
-          reason?: string | null
-          shipment_id?: string | null
-          stock_restored_qty?: number
-          type?: Database["public"]["Enums"]["return_type"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "returns_exchanges_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "returns_exchanges_shipment_id_fkey"
-            columns: ["shipment_id"]
-            isOneToOne: false
-            referencedRelation: "courier_shipments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       reviews: {
         Row: {
           admin_note: string | null
@@ -1214,102 +1119,6 @@ export type Database = {
         }
         Relationships: []
       }
-      sms_logs: {
-        Row: {
-          delivered_at: string | null
-          error_message: string | null
-          id: string
-          message_sent: string
-          order_id: string | null
-          provider_message_id: string | null
-          provider_response: Json | null
-          recipient_phone: string
-          sent_at: string | null
-          sent_by: string | null
-          status: Database["public"]["Enums"]["sms_status"] | null
-          template_id: string | null
-        }
-        Insert: {
-          delivered_at?: string | null
-          error_message?: string | null
-          id?: string
-          message_sent: string
-          order_id?: string | null
-          provider_message_id?: string | null
-          provider_response?: Json | null
-          recipient_phone: string
-          sent_at?: string | null
-          sent_by?: string | null
-          status?: Database["public"]["Enums"]["sms_status"] | null
-          template_id?: string | null
-        }
-        Update: {
-          delivered_at?: string | null
-          error_message?: string | null
-          id?: string
-          message_sent?: string
-          order_id?: string | null
-          provider_message_id?: string | null
-          provider_response?: Json | null
-          recipient_phone?: string
-          sent_at?: string | null
-          sent_by?: string | null
-          status?: Database["public"]["Enums"]["sms_status"] | null
-          template_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sms_logs_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "sms_logs_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "sms_templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      sms_templates: {
-        Row: {
-          created_at: string | null
-          id: string
-          is_active: boolean | null
-          message_bn: string
-          message_en: string | null
-          name: string
-          type: Database["public"]["Enums"]["sms_template_type"]
-          updated_at: string | null
-          variables: Json | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          message_bn: string
-          message_en?: string | null
-          name: string
-          type: Database["public"]["Enums"]["sms_template_type"]
-          updated_at?: string | null
-          variables?: Json | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          message_bn?: string
-          message_en?: string | null
-          name?: string
-          type?: Database["public"]["Enums"]["sms_template_type"]
-          updated_at?: string | null
-          variables?: Json | null
-        }
-        Relationships: []
-      }
       stock_movements: {
         Row: {
           created_at: string
@@ -1350,65 +1159,6 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      transactions: {
-        Row: {
-          account_id: string
-          amount: number
-          category: Database["public"]["Enums"]["transaction_category"]
-          created_at: string
-          created_by: string
-          description: string | null
-          direction: Database["public"]["Enums"]["transaction_direction"]
-          id: string
-          reference_id: string | null
-          reference_type: Database["public"]["Enums"]["transaction_reference_type"]
-          reversed_at: string | null
-          reversed_by: string | null
-          transaction_date: string
-          type: Database["public"]["Enums"]["transaction_type"]
-        }
-        Insert: {
-          account_id: string
-          amount: number
-          category?: Database["public"]["Enums"]["transaction_category"]
-          created_at?: string
-          created_by: string
-          description?: string | null
-          direction: Database["public"]["Enums"]["transaction_direction"]
-          id?: string
-          reference_id?: string | null
-          reference_type?: Database["public"]["Enums"]["transaction_reference_type"]
-          reversed_at?: string | null
-          reversed_by?: string | null
-          transaction_date?: string
-          type: Database["public"]["Enums"]["transaction_type"]
-        }
-        Update: {
-          account_id?: string
-          amount?: number
-          category?: Database["public"]["Enums"]["transaction_category"]
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          direction?: Database["public"]["Enums"]["transaction_direction"]
-          id?: string
-          reference_id?: string | null
-          reference_type?: Database["public"]["Enums"]["transaction_reference_type"]
-          reversed_at?: string | null
-          reversed_by?: string | null
-          transaction_date?: string
-          type?: Database["public"]["Enums"]["transaction_type"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "transactions_reversed_by_fkey"
-            columns: ["reversed_by"]
-            isOneToOne: false
-            referencedRelation: "transactions"
             referencedColumns: ["id"]
           },
         ]
@@ -1536,12 +1286,6 @@ export type Database = {
         | "on_hold"
         | "advance_payment_pending"
         | "incomplete"
-      return_type:
-        | "full_return"
-        | "partial_return"
-        | "exchange_return"
-        | "exchange_out"
-        | "damage_return"
       shipment_status:
         | "booked"
         | "pickup_pending"
@@ -1553,54 +1297,6 @@ export type Database = {
         | "damaged"
         | "lost"
         | "cancelled"
-      sms_status: "pending" | "sent" | "failed" | "delivered" | "undelivered"
-      sms_template_type:
-        | "reminder"
-        | "advance"
-        | "confirmation"
-        | "shipped"
-        | "delivered"
-        | "cancelled"
-        | "custom"
-      transaction_category:
-        | "product_sale"
-        | "product_purchase"
-        | "meta_ads"
-        | "google_ads"
-        | "tiktok_ads"
-        | "courier_delivery_charge"
-        | "courier_cod_charge"
-        | "courier_return_charge"
-        | "packaging"
-        | "salary"
-        | "rent"
-        | "utilities"
-        | "return_loss"
-        | "damage_loss"
-        | "owner_drawing"
-        | "owner_investment"
-        | "bank_charge"
-        | "other"
-      transaction_direction: "in" | "out"
-      transaction_reference_type:
-        | "order"
-        | "shipment"
-        | "ad_campaign"
-        | "purchase_order"
-        | "return"
-        | "manual"
-        | "settlement"
-      transaction_type:
-        | "income"
-        | "expense"
-        | "transfer_in"
-        | "transfer_out"
-        | "cod_collection"
-        | "cod_settlement"
-        | "ads_spend"
-        | "refund"
-        | "adjustment"
-        | "reversal"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1777,13 +1473,6 @@ export const Constants = {
         "advance_payment_pending",
         "incomplete",
       ],
-      return_type: [
-        "full_return",
-        "partial_return",
-        "exchange_return",
-        "exchange_out",
-        "damage_return",
-      ],
       shipment_status: [
         "booked",
         "pickup_pending",
@@ -1795,58 +1484,6 @@ export const Constants = {
         "damaged",
         "lost",
         "cancelled",
-      ],
-      sms_status: ["pending", "sent", "failed", "delivered", "undelivered"],
-      sms_template_type: [
-        "reminder",
-        "advance",
-        "confirmation",
-        "shipped",
-        "delivered",
-        "cancelled",
-        "custom",
-      ],
-      transaction_category: [
-        "product_sale",
-        "product_purchase",
-        "meta_ads",
-        "google_ads",
-        "tiktok_ads",
-        "courier_delivery_charge",
-        "courier_cod_charge",
-        "courier_return_charge",
-        "packaging",
-        "salary",
-        "rent",
-        "utilities",
-        "return_loss",
-        "damage_loss",
-        "owner_drawing",
-        "owner_investment",
-        "bank_charge",
-        "other",
-      ],
-      transaction_direction: ["in", "out"],
-      transaction_reference_type: [
-        "order",
-        "shipment",
-        "ad_campaign",
-        "purchase_order",
-        "return",
-        "manual",
-        "settlement",
-      ],
-      transaction_type: [
-        "income",
-        "expense",
-        "transfer_in",
-        "transfer_out",
-        "cod_collection",
-        "cod_settlement",
-        "ads_spend",
-        "refund",
-        "adjustment",
-        "reversal",
       ],
     },
   },
