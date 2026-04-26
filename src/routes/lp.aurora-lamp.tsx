@@ -737,56 +737,6 @@ function AuroraLampLanding() {
         </div>
       </section>
 
-      {/* ============ BEFORE / AFTER SLIDER ============ */}
-      <section className="relative overflow-hidden px-5 py-10">
-        <div
-          className="absolute inset-0 -z-10"
-          style={{
-            background:
-              "radial-gradient(ellipse at 20% 30%, oklch(0.30 0.18 290 / 0.5), transparent 55%), radial-gradient(ellipse at 80% 70%, oklch(0.35 0.18 200 / 0.5), transparent 55%), oklch(0.08 0.04 280)",
-          }}
-          aria-hidden
-        />
-        <div
-          className="absolute inset-0 -z-10 opacity-50 mix-blend-screen"
-          style={{
-            backgroundImage:
-              "radial-gradient(1px 1px at 25% 35%, white, transparent), radial-gradient(1px 1px at 75% 25%, white, transparent), radial-gradient(1px 1px at 50% 70%, white, transparent), radial-gradient(2px 2px at 15% 85%, white, transparent), radial-gradient(1px 1px at 85% 60%, white, transparent)",
-            backgroundSize: "280px 280px",
-          }}
-          aria-hidden
-        />
-        <div className="mx-auto max-w-4xl text-center">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-fuchsia-300">
-            Before · After
-          </span>
-          <h2 className="mt-2 text-2xl font-bold text-white md:text-3xl">
-            Same room. <span className="text-fuchsia-300">Different planet.</span>
-          </h2>
-          <p className="mx-auto mt-3 max-w-lg text-sm text-white/65 md:text-base">
-            👉 Lights off → Magic on. Slider ta tene dekhun — room instantly aesthetic hoye jabe 🌌
-          </p>
-        </div>
-
-        <div className="mx-auto mt-8 max-w-4xl">
-          <BeforeAfterSlider
-            beforeSrc={beforeRoom}
-            afterSrc={afterRoom}
-            position={sliderPos}
-            onChange={setSliderPos}
-          />
-          <p className="mt-3 text-center text-[11px] text-white/50">
-            👆 Slider ta tene dekhun · Lights off → Magic on
-          </p>
-        </div>
-
-        <div className="mx-auto mt-10 grid max-w-3xl grid-cols-3 gap-3 text-center">
-          <MiniStat label="Modes" value="3" sub="in 1 device" />
-          <MiniStat label="Colours" value="16" sub="RGB" />
-          <MiniStat label="Remote" value="✓" sub="Included" />
-        </div>
-      </section>
-
       {/* ============ KEY FEATURES ============ */}
       <section id="features" className="relative px-5 py-10">
         <div className="mx-auto max-w-5xl">
