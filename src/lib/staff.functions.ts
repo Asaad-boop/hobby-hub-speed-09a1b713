@@ -224,6 +224,64 @@ export const removeRole = createServerFn({ method: "POST" })
     return { success: true as const };
   });
 
+/** Verify a user's roles by email — used by the permission test panel. */
+export const verifyUserRoles = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { email: string }) => {
+    const email = String(input?.email ?? "").trim().toLowerCase();
+    if (!email || !email.includes("@")) throw new Error("Valid email required");
+    return { email };
+  })
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context.userId);
+
+    // Find user by email
+    let userId: string | null = null;
+    let page = 1;
+    const perPage = 200;
+    while (page <= 20) {
+      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({
+        page,
+        perPage,
+      });
+      if (error) throw new Error(error.message);
+      const found = list.users.find(
+        (u) => (u.email ?? "").toLowerCase() === data.email,
+      );
+      if (found) {
+        userId = found.id;
+        break;
+      }
+      if (list.users.length < perPage) break;
+      page += 1;
+    }
+    if (!userId) {
+      return { found: false as const };
+    }
+
+    const { data: rows, error: rolesErr } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+    if (rolesErr) throw new Error(rolesErr.message);
+
+    const roles = (rows ?? []).map((r) => r.role as AppRole);
+    const adminAllowedRoles: AppRole[] = [
+      "admin",
+      "customer_service",
+      "operations",
+    ];
+    const canAccessAdmin = roles.some((r) => adminAllowedRoles.includes(r));
+
+    return {
+      found: true as const,
+      user_id: userId,
+      email: data.email,
+      roles,
+      canAccessAdmin,
+    };
+  });
+
 /** Reset a staff user's password. */
 export const resetStaffPassword = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
