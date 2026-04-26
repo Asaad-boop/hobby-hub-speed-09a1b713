@@ -235,3 +235,12 @@
   50%      { opacity: 0.95; transform: scale(1.06); }
 }
 .glow-pulse { animation: glow-pulse 4s ease-in-out infinite; }
+
+@keyframes cta-bump {
+  0%, 70%, 100% { transform: scale(1); }
+  78%           { transform: scale(1.06); }
+  85%           { transform: scale(0.97); }
+  92%           { transform: scale(1.03); }
+}
+.cta-bump { animation: cta-bump 2.4s ease-in-out infinite; transform-origin: center; }
+.cta-bump:hover { animation-play-state: paused; }
