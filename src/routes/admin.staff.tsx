@@ -455,10 +455,11 @@ function ResetPasswordDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState("");
+  const resetStaffPasswordFn = useServerFn(resetStaffPassword);
 
   const mut = useMutation({
     mutationFn: () =>
-      resetStaffPassword({ data: { user_id: userId, password } }),
+      resetStaffPasswordFn({ data: { user_id: userId, password } }),
     onSuccess: () => {
       toast.success("Password updated");
       setOpen(false);
