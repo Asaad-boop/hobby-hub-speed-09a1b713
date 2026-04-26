@@ -601,10 +601,10 @@ function AuroraLampLanding() {
         <div className="mx-auto grid max-w-6xl gap-8 px-5 pt-10 pb-12 md:grid-cols-2 md:gap-12 md:py-20">
           <div className="text-center md:text-left">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85 backdrop-blur">
-              <Sparkles className="h-3.5 w-3.5" /> Best Seller · Trending
+              <Flame className="h-3.5 w-3.5 text-orange-400" /> Best Seller · Trending 🔥
             </span>
             <h1 className="mt-4 text-4xl font-extrabold leading-[1.05] tracking-tight text-white md:text-5xl lg:text-6xl">
-              Aapnar Bedroom-ke{" "}
+              Aurora Ripple{" "}
               <span
                 className="bg-clip-text text-transparent"
                 style={{
@@ -614,7 +614,10 @@ function AuroraLampLanding() {
               >
                 Galaxy
               </span>{" "}
-              baniye din ✨
+              Lamp
+              <span className="mt-1 block text-lg font-semibold text-white/70 md:text-xl">
+                (4-in-1 Edition)
+              </span>
             </h1>
             <p className="mt-4 text-base leading-relaxed text-white/75 md:text-lg">
               Aurora Ripple + Galaxy Nebula Projection · 16 RGB Colors · Remote Included.{" "}
