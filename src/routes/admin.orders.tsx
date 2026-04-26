@@ -1,7 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Search, Eye, Package, Truck, CheckCircle2, XCircle, Clock, RefreshCw, Sparkles, PackageCheck, MapPin, AlertTriangle, RotateCcw, Repeat, FileText, ClipboardList } from "lucide-react";
+import { Loader2, Search, Eye, Package, Truck, CheckCircle2, XCircle, Clock, RefreshCw, Sparkles, PackageCheck, MapPin, AlertTriangle, RotateCcw, Repeat, FileText, ClipboardList, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { generateInvoicePDF } from "@/lib/pdf/invoice";
 import { generatePackingListPDF } from "@/lib/pdf/packing-list";
 import { generatePickingListPDF } from "@/lib/pdf/picking-list";
