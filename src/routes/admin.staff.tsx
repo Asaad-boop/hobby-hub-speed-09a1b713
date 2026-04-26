@@ -232,7 +232,286 @@ function StaffPage() {
           ))}
         </div>
       </div>
+      {/* Permission Test Panel */}
+      <PermissionTestPanel onAfterChange={() => refetch()} />
     </div>
+  );
+}
+
+/* ---------- Permission Test Panel ---------- */
+
+type TestStep = {
+  label: string;
+  status: "idle" | "running" | "success" | "error";
+  message?: string;
+};
+
+function PermissionTestPanel({ onAfterChange }: { onAfterChange: () => void }) {
+  const [mode, setMode] = useState<"create" | "existing">("create");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [role, setRole] = useState<AppRole>("customer_service");
+  const [steps, setSteps] = useState<TestStep[]>([]);
+  const [running, setRunning] = useState(false);
+
+  const createStaffUserFn = useServerFn(createStaffUser);
+  const assignRoleFn = useServerFn(assignRoleByEmail);
+  const verifyUserRolesFn = useServerFn(verifyUserRoles);
+
+  const updateStep = (idx: number, patch: Partial<TestStep>) => {
+    setSteps((prev) => prev.map((s, i) => (i === idx ? { ...s, ...patch } : s)));
+  };
+
+  const runTest = async () => {
+    if (!email.trim() || !email.includes("@")) {
+      toast.error("Valid email required");
+      return;
+    }
+    if (mode === "create" && password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+
+    setRunning(true);
+    const initial: TestStep[] =
+      mode === "create"
+        ? [
+            { label: "Create staff user", status: "running" },
+            { label: `Verify role "${role}" assigned`, status: "idle" },
+            { label: "Verify admin panel access", status: "idle" },
+          ]
+        : [
+            { label: `Assign role "${role}" to existing user`, status: "running" },
+            { label: `Verify role "${role}" assigned`, status: "idle" },
+            { label: "Verify admin panel access", status: "idle" },
+          ];
+    setSteps(initial);
+
+    try {
+      // Step 1: Create or assign
+      if (mode === "create") {
+        const res = await createStaffUserFn({
+          data: {
+            email: email.trim(),
+            password,
+            display_name: displayName.trim() || undefined,
+            role,
+          },
+        });
+        updateStep(0, {
+          status: "success",
+          message: `User created (id: ${res.user_id.slice(0, 8)}…)`,
+        });
+      } else {
+        const res = await assignRoleFn({
+          data: { email: email.trim(), role },
+        });
+        updateStep(0, {
+          status: "success",
+          message: `Role assigned (user id: ${res.user_id.slice(0, 8)}…)`,
+        });
+      }
+
+      // Step 2: Verify role exists in DB
+      updateStep(1, { status: "running" });
+      const verify = await verifyUserRolesFn({
+        data: { email: email.trim() },
+      });
+      if (!verify.found) {
+        updateStep(1, { status: "error", message: "User not found in auth" });
+        throw new Error("User not found after step 1");
+      }
+      if (!verify.roles.includes(role)) {
+        updateStep(1, {
+          status: "error",
+          message: `DB roles: [${verify.roles.join(", ") || "none"}] — "${role}" missing`,
+        });
+        throw new Error(`Role "${role}" not found in user_roles table`);
+      }
+      updateStep(1, {
+        status: "success",
+        message: `DB roles: [${verify.roles.join(", ")}]`,
+      });
+
+      // Step 3: Admin access check
+      updateStep(2, { status: "running" });
+      if (verify.canAccessAdmin) {
+        updateStep(2, {
+          status: "success",
+          message: `Can access /admin (role grants entry)`,
+        });
+        toast.success("Permission test passed ✓");
+      } else {
+        updateStep(2, {
+          status: "error",
+          message: `Role "${role}" does NOT grant /admin access`,
+        });
+        toast.error(`Role "${role}" cannot access admin panel`);
+      }
+
+      onAfterChange();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      // Mark first running step as failed
+      setSteps((prev) =>
+        prev.map((s) =>
+          s.status === "running" ? { ...s, status: "error", message: msg } : s,
+        ),
+      );
+      toast.error(msg);
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5">
+      <div className="mb-4 flex items-start gap-2">
+        <FlaskConical className="mt-0.5 h-5 w-5 text-primary" />
+        <div>
+          <h2 className="text-base font-semibold">Permission Test</h2>
+          <p className="text-xs text-muted-foreground">
+            Create or assign a role, then automatically verify the role lands in
+            the DB and grants /admin access.
+          </p>
+        </div>
+      </div>
+
+      <div className="mb-3 flex gap-2">
+        <Button
+          size="sm"
+          variant={mode === "create" ? "default" : "outline"}
+          onClick={() => setMode("create")}
+          disabled={running}
+        >
+          New user
+        </Button>
+        <Button
+          size="sm"
+          variant={mode === "existing" ? "default" : "outline"}
+          onClick={() => setMode("existing")}
+          disabled={running}
+        >
+          Existing user
+        </Button>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <Label htmlFor="ptest-email">Email</Label>
+          <Input
+            id="ptest-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="staff@example.com"
+            disabled={running}
+          />
+        </div>
+        <div>
+          <Label htmlFor="ptest-role">Role</Label>
+          <Select
+            value={role}
+            onValueChange={(v) => setRole(v as AppRole)}
+            disabled={running}
+          >
+            <SelectTrigger id="ptest-role">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {STAFF_ROLES.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {r}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {mode === "create" && (
+          <>
+            <div>
+              <Label htmlFor="ptest-name">Display name (optional)</Label>
+              <Input
+                id="ptest-name"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Test Staff"
+                disabled={running}
+              />
+            </div>
+            <div>
+              <Label htmlFor="ptest-pw">Password (min 8)</Label>
+              <Input
+                id="ptest-pw"
+                type="text"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="min 8 chars"
+                disabled={running}
+              />
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="mt-4 flex items-center gap-2">
+        <Button onClick={runTest} disabled={running}>
+          {running ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <FlaskConical className="mr-2 h-4 w-4" />
+          )}
+          Run permission test
+        </Button>
+        {steps.length > 0 && !running && (
+          <Button variant="ghost" size="sm" onClick={() => setSteps([])}>
+            Clear
+          </Button>
+        )}
+      </div>
+
+      {steps.length > 0 && (
+        <ol className="mt-4 space-y-2">
+          {steps.map((s, i) => (
+            <li
+              key={i}
+              className="flex items-start gap-2 rounded-lg border border-border bg-background p-3 text-sm"
+            >
+              <StepIcon status={s.status} />
+              <div className="min-w-0 flex-1">
+                <div className="font-medium">
+                  {i + 1}. {s.label}
+                </div>
+                {s.message && (
+                  <div
+                    className={`mt-0.5 text-xs ${
+                      s.status === "error"
+                        ? "text-destructive"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {s.message}
+                  </div>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
+}
+
+function StepIcon({ status }: { status: TestStep["status"] }) {
+  if (status === "success")
+    return <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />;
+  if (status === "error")
+    return <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />;
+  if (status === "running")
+    return <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-primary" />;
+  return (
+    <div className="mt-0.5 h-4 w-4 shrink-0 rounded-full border-2 border-muted-foreground/30" />
   );
 }
 
