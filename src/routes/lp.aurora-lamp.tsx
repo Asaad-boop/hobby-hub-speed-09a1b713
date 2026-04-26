@@ -738,7 +738,7 @@ function AuroraLampLanding() {
       </section>
 
       {/* ============ BEFORE / AFTER SLIDER ============ */}
-      <section className="relative overflow-hidden px-5 py-14">
+      <section className="relative overflow-hidden px-5 py-10">
         <div
           className="absolute inset-0 -z-10"
           style={{
@@ -788,7 +788,7 @@ function AuroraLampLanding() {
       </section>
 
       {/* ============ KEY FEATURES ============ */}
-      <section id="features" className="relative px-5 py-14">
+      <section id="features" className="relative px-5 py-10">
         <div className="mx-auto max-w-5xl">
           <SectionHeading kicker="Features" title="Keno ei lamp ta sobaike pagol korche" />
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -818,8 +818,10 @@ function AuroraLampLanding() {
         </div>
       </section>
 
+      <MidCTA onClick={scrollToOrder} />
+
       {/* ============ 1 LAMP · 4 WAYS ============ */}
-      <section className="relative overflow-hidden px-5 py-16">
+      <section className="relative overflow-hidden px-5 py-10">
         <div
           className="absolute inset-0 -z-10"
           style={{
@@ -1041,7 +1043,7 @@ function AuroraLampLanding() {
       </section>
 
       {/* ============ USE CASES ============ */}
-      <section className="relative overflow-hidden px-5 py-14">
+      <section className="relative overflow-hidden px-5 py-10">
         <div
           className="absolute inset-0 -z-10"
           style={{
@@ -1067,8 +1069,10 @@ function AuroraLampLanding() {
         </div>
       </section>
 
+      <MidCTA onClick={scrollToOrder} label="Aamar Lamp Chai — ৳1,290" />
+
       {/* ============ VALUE STACK ============ */}
-      <section className="relative overflow-hidden px-5 py-14">
+      <section className="relative overflow-hidden px-5 py-10">
         <div
           className="absolute inset-0 -z-10"
           style={{
@@ -1124,7 +1128,7 @@ function AuroraLampLanding() {
       </section>
 
       {/* ============ OBJECTION KILLER ============ */}
-      <section className="relative px-5 py-14">
+      <section className="relative px-5 py-10">
         <div className="mx-auto max-w-3xl">
           <div className="text-center">
             <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-cyan-300">
@@ -1155,7 +1159,7 @@ function AuroraLampLanding() {
       </section>
 
       {/* ============ SPECS ============ */}
-      <section className="px-5 py-14">
+      <section className="px-5 py-10">
         <div className="mx-auto max-w-3xl">
           <SectionHeading kicker="Specifications" title="Box-e ki ki pacchen" />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -1426,7 +1430,7 @@ function AuroraLampLanding() {
       </section>
 
       {/* ============ FAQ ============ */}
-      <section className="px-5 py-14">
+      <section className="px-5 py-10">
         <div className="mx-auto max-w-xl">
           <SectionHeading kicker="FAQ" title="আপনার প্রশ্ন?" />
           <Accordion type="single" collapsible className="space-y-2">
@@ -1620,6 +1624,19 @@ function SectionHeading({ kicker, title }: { kicker: string; title: string }) {
       <h2 className="mt-2 text-2xl font-extrabold text-white drop-shadow-[0_2px_12px_rgba(168,85,247,0.45)] md:text-3xl">
         {title}
       </h2>
+    </div>
+  );
+}
+
+function MidCTA({ onClick, label }: { onClick: () => void; label?: string }) {
+  return (
+    <div className="px-5 py-6 text-center">
+      <Button
+        onClick={onClick}
+        className="h-12 rounded-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-500 px-8 text-sm font-extrabold text-white shadow-[0_8px_30px_rgba(168,85,247,0.45)] hover:opacity-95"
+      >
+        🌌 {label ?? "Order Now — ৳1,290"} →
+      </Button>
     </div>
   );
 }
