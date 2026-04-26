@@ -1097,6 +1097,93 @@ function AuroraLampLanding() {
         </div>
       </section>
 
+      {/* ============ VALUE STACK ============ */}
+      <section className="relative overflow-hidden px-5 py-14">
+        <div
+          className="absolute inset-0 -z-10"
+          style={{
+            background:
+              "radial-gradient(ellipse at 50% 0%, oklch(0.30 0.18 320 / 0.45), transparent 60%), oklch(0.10 0.05 280)",
+          }}
+          aria-hidden
+        />
+        <div className="mx-auto max-w-5xl text-center">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-fuchsia-300">
+            Value Stack
+          </span>
+          <h2 className="mt-2 text-2xl font-extrabold text-white md:text-4xl">
+            1 Lamp ={" "}
+            <span
+              className="bg-clip-text text-transparent"
+              style={{
+                backgroundImage:
+                  "linear-gradient(120deg, #ff84d9, #b993ff, #5ee5d0)",
+              }}
+            >
+              4 Experience
+            </span>{" "}
+            🔥
+          </h2>
+          <p className="mx-auto mt-3 max-w-md text-sm text-white/65">
+            Ekta product = 4 ta use → paisa full recover
+          </p>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {VALUE_STACK.map((v, i) => (
+              <div
+                key={i}
+                className="group relative overflow-hidden rounded-2xl border border-white/15 bg-white/5 p-5 text-left backdrop-blur transition hover:-translate-y-1 hover:border-fuchsia-400/50"
+              >
+                <div
+                  className="absolute -right-4 -top-4 flex h-16 w-16 items-center justify-center rounded-full text-2xl font-extrabold text-white/10 transition group-hover:text-white/25"
+                  aria-hidden
+                >
+                  {v.num}
+                </div>
+                <div className="relative">
+                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-fuchsia-500/30 to-cyan-400/30 text-sm font-bold text-white">
+                    {v.num}
+                  </div>
+                  <h3 className="mt-3 text-base font-bold text-white">{v.title}</h3>
+                  <p className="mt-1 text-xs leading-relaxed text-white/65">{v.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============ OBJECTION KILLER ============ */}
+      <section className="relative px-5 py-14">
+        <div className="mx-auto max-w-3xl">
+          <div className="text-center">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-cyan-300">
+              ⚔️ No More Doubts
+            </span>
+            <h2 className="mt-2 text-2xl font-extrabold text-white md:text-3xl">
+              Apnar shob question-er answer
+            </h2>
+          </div>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2">
+            {OBJECTIONS.map((o, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-white/15 bg-white/5 p-5 backdrop-blur"
+              >
+                <p className="flex items-start gap-2 text-sm font-semibold text-white">
+                  <span className="text-rose-400">❓</span>
+                  <span>{o.q}</span>
+                </p>
+                <p className="mt-2 flex items-start gap-2 text-sm text-emerald-300">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{o.a}</span>
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ============ SPECS ============ */}
       <section className="px-5 py-14">
         <div className="mx-auto max-w-3xl">
