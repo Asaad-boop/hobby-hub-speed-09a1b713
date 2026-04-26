@@ -98,43 +98,57 @@ export const Route = createFileRoute("/lp/aurora-lamp")({
 const FEATURES = [
   {
     icon: <Sparkles className="h-5 w-5" />,
-    title: "Galaxy + Aurora projection",
-    desc: "Northern-lights ripple effect — পুরো ঘরে nebula art ভেসে উঠবে",
-  },
-  {
-    icon: <Lightbulb className="h-5 w-5" />,
-    title: "16 RGB রঙ",
-    desc: "Mood অনুযায়ী রঙ change — single colour, breathing বা auto cycle",
-  },
-  {
-    icon: <Palette className="h-5 w-5" />,
-    title: "Multi-mode lighting",
-    desc: "Single colour, breathing, auto-cycle — moment er sathe match",
+    title: "🌌 Full Room Galaxy Experience",
+    desc: "Ceiling + wall puro nebula diye fill — real cosmic feel",
   },
   {
     icon: <Wand2 className="h-5 w-5" />,
-    title: "3-in-1 use",
-    desc: "Night lamp · Galaxy projector · Aurora ripple — ek device-e shob",
+    title: "🌊 Aurora Water Ripple Effect",
+    desc: "Relaxing wave light — ghumer age mind calm kore",
+  },
+  {
+    icon: <Palette className="h-5 w-5" />,
+    title: "🎨 16 RGB Mood Colors",
+    desc: "Romantic, chill, party — mood onujayi instantly change",
   },
   {
     icon: <Radio className="h-5 w-5" />,
-    title: "Remote control included",
-    desc: "Distance theke colour, mode, brightness — sob set kora jay",
+    title: "🎛 Remote Control",
+    desc: "Distance theke colour, mode, brightness — control everything",
   },
   {
     icon: <Zap className="h-5 w-5" />,
-    title: "USB powered, low heat",
-    desc: "Plug-and-play · ghonta-r por ghonta chalalei o gorom hoy na",
+    title: "🔥 Low Heat, Long Use",
+    desc: "Raat-vor chalaleo problem nai — USB plug & play",
+  },
+  {
+    icon: <Lightbulb className="h-5 w-5" />,
+    title: "✨ 4-in-1 Magical Lamp",
+    desc: "Galaxy · Aurora · Night Lamp · Decor — ek device-e shob",
   },
 ];
 
 const USE_CASES = [
-  { emoji: "🛌", title: "Bedroom mood light", desc: "ঘুমানোর আগে relaxing ambient nebula" },
-  { emoji: "🎂", title: "Birthday vibe", desc: "Cake-cutting, party decor — instant wow factor" },
-  { emoji: "📸", title: "TikTok / Reels background", desc: "Aesthetic content এর জন্য perfect prop" },
-  { emoji: "💑", title: "Date night-এ", desc: "Romantic dinner, anniversary set-up" },
-  { emoji: "🧘", title: "Yoga / meditation", desc: "Calming colour-flow — focus বাড়ায়" },
-  { emoji: "🎁", title: "Gift হিসাবে", desc: "Friend, partner, sibling — সবাই পাগল হবে" },
+  { emoji: "🛌", title: "Bedroom vibe upgrade", desc: "Boring room → aesthetic galaxy room" },
+  { emoji: "📸", title: "TikTok / Reels background", desc: "Aesthetic content er jonno perfect" },
+  { emoji: "💑", title: "Date night setup", desc: "Romantic dinner, anniversary mood" },
+  { emoji: "🎁", title: "Gift dile sure impress", desc: "Friend, partner, sibling — sobai khushi" },
+  { emoji: "🧘", title: "Meditation / Relax mode", desc: "Calming colour-flow — focus barhay" },
+  { emoji: "🎂", title: "Birthday / party vibe", desc: "Instant wow factor — decor ready" },
+];
+
+const VALUE_STACK = [
+  { num: "1", title: "Galaxy Projector", desc: "Ceiling-e nebula projection" },
+  { num: "2", title: "Aurora Ripple Light", desc: "Water wave wall effect" },
+  { num: "3", title: "Bedside Night Lamp", desc: "Soft warm glow" },
+  { num: "4", title: "Decor / Desk Light", desc: "Aesthetic room piece" },
+];
+
+const OBJECTIONS = [
+  { q: "Gorom hoy?", a: "Na, low-heat LED — raat-vor safe" },
+  { q: "Use kora tough?", a: "Na, plug & play — 1 second-e on" },
+  { q: "Remote ase?", a: "Yes, full remote box-er sathe free" },
+  { q: "Damage hole?", a: "Free replacement — 7 days guarantee" },
 ];
 
 const SPECS = [
