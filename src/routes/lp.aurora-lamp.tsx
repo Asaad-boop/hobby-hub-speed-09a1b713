@@ -617,9 +617,9 @@ function AuroraLampLanding() {
               baniye din ✨
             </h1>
             <p className="mt-4 text-base leading-relaxed text-white/75 md:text-lg">
-              Aurora Ripple + Galaxy nebula projection · 16 RGB rang · Remote control included.{" "}
-              <strong className="text-white">3-in-1 magical lamp</strong> — ekta switch-e mood ekdom
-              palte jabe.
+              Aurora Ripple + Galaxy Nebula Projection · 16 RGB Colors · Remote Included.{" "}
+              <strong className="text-white">4-in-1 Magical Lamp</strong> — ekta switch-e pura vibe
+              change.
             </p>
 
             {/* Price */}
