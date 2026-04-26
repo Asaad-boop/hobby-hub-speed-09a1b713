@@ -99,6 +99,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isAdmin = pathname.startsWith("/admin");
+  const isLanding = pathname.startsWith("/lp/");
 
   // Capture marketing attribution on the first page of the visit.
   useEffect(() => {
