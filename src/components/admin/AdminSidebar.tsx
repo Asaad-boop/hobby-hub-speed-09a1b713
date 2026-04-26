@@ -12,6 +12,7 @@ import {
   Tag,
   PhoneCall,
   Activity,
+  Users,
 } from "lucide-react";
 import {
   Sidebar,
@@ -67,6 +68,12 @@ const groups: { label: string; items: NavItem[] }[] = [
     items: [
       { title: "Homepage", url: "/admin/homepage", icon: Home, roles: ["admin"] },
       { title: "Site Settings", url: "/admin/settings", icon: Settings, exact: true, roles: ["admin"] },
+    ],
+  },
+  {
+    label: "System",
+    items: [
+      { title: "Staff & Roles", url: "/admin/staff", icon: Users, roles: ["admin"] },
     ],
   },
 ];
