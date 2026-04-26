@@ -185,15 +185,16 @@ function AdminOrdersPage() {
 
   const deleteOrder = useMutation({
     mutationFn: async (id: string) => {
-      await supabase.from("order_items").delete().eq("order_id", id);
-      const { error } = await supabase.from("orders").delete().eq("id", id);
+      const { error } = await supabase.rpc("hard_delete_order" as never, { _order_id: id } as never);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Order deleted");
       setDeleteId(null);
       queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
-      queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "web-orders", "pendingCount"] });
+      queryClient.invalidateQueries({ queryKey: ["web-orders"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
