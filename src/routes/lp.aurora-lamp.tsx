@@ -1218,44 +1218,6 @@ function AuroraLampLanding() {
         </div>
       </section>
 
-      {/* ============ MID CTA WITH COUNTDOWN ============ */}
-      <section
-        className="mx-5 my-8 overflow-hidden rounded-3xl px-6 py-12 text-center text-white shadow-[var(--shadow-brand)]"
-        style={{
-          background:
-            "linear-gradient(135deg, oklch(0.40 0.22 290), oklch(0.50 0.20 320), oklch(0.55 0.18 200))",
-        }}
-      >
-        <Heart className="mx-auto h-7 w-7 text-white/90" />
-        <h2 className="mt-3 text-xl font-extrabold leading-tight md:text-2xl">
-          Flash sale shesh hote{" "}
-          <span className="underline decoration-pink-300 underline-offset-4">baki ache:</span>
-        </h2>
-        <div className="mt-4 flex justify-center gap-2 sm:gap-3">
-          {[
-            { v: hh, l: "ghonta" },
-            { v: mm, l: "minute" },
-            { v: ss, l: "second" },
-          ].map((t, i) => (
-            <div
-              key={i}
-              className="min-w-[68px] rounded-2xl bg-white/15 px-3 py-2.5 backdrop-blur sm:min-w-[80px]"
-            >
-              <div className="text-2xl font-extrabold tabular-nums sm:text-3xl">{t.v}</div>
-              <div className="mt-0.5 text-[10px] uppercase tracking-widest text-white/70">{t.l}</div>
-            </div>
-          ))}
-        </div>
-        <p className="mt-4 text-xs text-white/80 md:text-sm">
-          Daily 200+ orders · last 24 hours-e 47 jon kinechen
-        </p>
-        <Button
-          onClick={scrollToOrder}
-          className="mt-5 h-12 rounded-full bg-white px-8 text-sm font-extrabold text-slate-900 hover:bg-white/90"
-        >
-          🌌 Aamar Galaxy Lamp Chai →
-        </Button>
-      </section>
 
 
       {/* ============ ORDER FORM ============ */}
