@@ -47,7 +47,6 @@ import {
   ThumbsUp,
 } from "lucide-react";
 
-import beforeRoom from "@/assets/aurora-before-room.jpg";
 import afterRoom from "@/assets/aurora-after-room.jpg";
 import rippleProjection from "@/assets/aurora-ripple-projection.jpg";
 import nebulaProjection from "@/assets/aurora-nebula-projection.jpg";
