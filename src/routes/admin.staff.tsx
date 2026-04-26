@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -88,19 +89,22 @@ const ROLE_DESCRIPTIONS: Record<AppRole, string> = {
 function StaffPage() {
   const { isAdmin, loading } = useAdminAuth();
   const queryClient = useQueryClient();
+  const listStaffFn = useServerFn(listStaff);
+  const removeRoleFn = useServerFn(removeRole);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["staff", "list"],
-    queryFn: () => listStaff(),
+    queryFn: () => listStaffFn(),
     enabled: isAdmin,
   });
   const staff = data?.staff ?? [];
 
   const removeMut = useMutation({
-    mutationFn: (role_id: string) => removeRole({ data: { role_id } }),
+    mutationFn: (role_id: string) => removeRoleFn({ data: { role_id } }),
     onSuccess: () => {
       toast.success("Role removed");
       queryClient.invalidateQueries({ queryKey: ["staff", "list"] });
+      queryClient.invalidateQueries({ queryKey: ["admin_auth"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -236,10 +240,11 @@ function CreateUserDialog({ onDone }: { onDone: () => void }) {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<AppRole>("customer_service");
+  const createStaffUserFn = useServerFn(createStaffUser);
 
   const mut = useMutation({
     mutationFn: () =>
-      createStaffUser({
+      createStaffUserFn({
         data: { email, password, display_name: displayName, role },
       }),
     onSuccess: () => {
@@ -358,9 +363,10 @@ function CreateUserDialog({ onDone }: { onDone: () => void }) {
 function ExistingUserAssign({ onDone }: { onDone: () => void }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<AppRole>("customer_service");
+  const assignRoleByEmailFn = useServerFn(assignRoleByEmail);
 
   const mut = useMutation({
-    mutationFn: () => assignRoleByEmail({ data: { email, role } }),
+    mutationFn: () => assignRoleByEmailFn({ data: { email, role } }),
     onSuccess: () => {
       toast.success(`Role "${role}" assigned to ${email}`);
       setEmail("");
@@ -449,10 +455,11 @@ function ResetPasswordDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState("");
+  const resetStaffPasswordFn = useServerFn(resetStaffPassword);
 
   const mut = useMutation({
     mutationFn: () =>
-      resetStaffPassword({ data: { user_id: userId, password } }),
+      resetStaffPasswordFn({ data: { user_id: userId, password } }),
     onSuccess: () => {
       toast.success("Password updated");
       setOpen(false);
