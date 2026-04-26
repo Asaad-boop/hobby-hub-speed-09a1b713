@@ -764,8 +764,7 @@ function AuroraLampLanding() {
             Same room. <span className="text-fuchsia-300">Different planet.</span>
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-sm text-white/65 md:text-base">
-            Slider ta drag korun — dekhun apnar boring bedroom kibhabe ekta galaxy theme room hoye
-            jay 🌌
+            👉 Lights off → Magic on. Slider ta tene dekhun — room instantly aesthetic hoye jabe 🌌
           </p>
         </div>
 
