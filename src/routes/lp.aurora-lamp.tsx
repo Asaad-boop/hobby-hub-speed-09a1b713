@@ -1193,30 +1193,6 @@ function AuroraLampLanding() {
         </div>
       </section>
 
-      {/* ============ GUARANTEES STRIP ============ */}
-      <section className="px-5 pb-4">
-        <div className="mx-auto grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { icon: <ShieldCheck className="h-5 w-5" />, t: "100% Authentic", s: "Verified original product" },
-            { icon: <RotateCcw className="h-5 w-5" />, t: "7-Day Replacement", s: "Damage হলে free swap" },
-            { icon: <Truck className="h-5 w-5" />, t: "Fast Delivery", s: "Dhaka 1-2 din · BD 2-4 din" },
-            { icon: <Award className="h-5 w-5" />, t: "Cash on Delivery", s: "Hath-e niye taka diben" },
-          ].map((g, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                {g.icon}
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-bold text-foreground">{g.t}</p>
-                <p className="text-xs text-muted-foreground">{g.s}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
 
 
