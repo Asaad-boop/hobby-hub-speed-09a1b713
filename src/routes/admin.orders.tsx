@@ -183,6 +183,21 @@ function AdminOrdersPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const deleteOrder = useMutation({
+    mutationFn: async (id: string) => {
+      await supabase.from("order_items").delete().eq("order_id", id);
+      const { error } = await supabase.from("orders").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Order deleted");
+      setDeleteId(null);
+      queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
