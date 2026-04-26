@@ -1291,7 +1291,7 @@ function AuroraLampLanding() {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="আপনার পুরো নাম লিখুন"
-                  className="h-12 rounded-xl border-2 border-border/60 bg-background px-4 text-[15px] font-medium shadow-sm transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
+                  className="h-12 rounded-xl border-2 border-border/60 bg-background px-4 text-[15px] font-medium text-foreground placeholder:text-muted-foreground shadow-sm transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   required
                 />
               </FormField>
