@@ -1343,7 +1343,7 @@ function AuroraLampLanding() {
                   onChange={(e) => setForm({ ...form, address: e.target.value })}
                   placeholder="বাসা/হোল্ডিং নং, রোড নং, এরিয়া, থানা লিখুন"
                   rows={3}
-                  className="rounded-xl border-2 border-border/60 bg-background px-4 py-3 text-[15px] font-medium shadow-sm transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
+                  className="rounded-xl border-2 border-border/60 bg-background px-4 py-3 text-[15px] font-medium text-foreground placeholder:text-muted-foreground shadow-sm transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   required
                 />
               </FormField>
