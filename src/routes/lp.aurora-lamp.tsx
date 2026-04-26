@@ -73,7 +73,7 @@ export const Route = createFileRoute("/lp/aurora-lamp")({
       {
         name: "description",
         content:
-          "Aurora Galaxy Ripple Lamp — 3-in-1 use, water ripple + galaxy nebula projection, 16 RGB colours, remote control. Bedroom ke turant magical kore din. COD all over BD.",
+          "Aurora Galaxy Ripple Lamp — 4-in-1 use, water ripple + galaxy nebula projection, 16 RGB colours, remote control. Bedroom ke turant magical kore din. COD all over BD.",
       },
       { property: "og:title", content: "Aurora Galaxy Ripple Lamp — Room ke Galaxy Banao 🌌" },
       {
@@ -98,49 +98,63 @@ export const Route = createFileRoute("/lp/aurora-lamp")({
 const FEATURES = [
   {
     icon: <Sparkles className="h-5 w-5" />,
-    title: "Galaxy + Aurora projection",
-    desc: "Northern-lights ripple effect — পুরো ঘরে nebula art ভেসে উঠবে",
-  },
-  {
-    icon: <Lightbulb className="h-5 w-5" />,
-    title: "16 RGB রঙ",
-    desc: "Mood অনুযায়ী রঙ change — single colour, breathing বা auto cycle",
-  },
-  {
-    icon: <Palette className="h-5 w-5" />,
-    title: "Multi-mode lighting",
-    desc: "Single colour, breathing, auto-cycle — moment er sathe match",
+    title: "🌌 Full Room Galaxy Experience",
+    desc: "Ceiling + wall puro nebula diye fill — real cosmic feel",
   },
   {
     icon: <Wand2 className="h-5 w-5" />,
-    title: "3-in-1 use",
-    desc: "Night lamp · Galaxy projector · Aurora ripple — ek device-e shob",
+    title: "🌊 Aurora Water Ripple Effect",
+    desc: "Relaxing wave light — ghumer age mind calm kore",
+  },
+  {
+    icon: <Palette className="h-5 w-5" />,
+    title: "🎨 16 RGB Mood Colors",
+    desc: "Romantic, chill, party — mood onujayi instantly change",
   },
   {
     icon: <Radio className="h-5 w-5" />,
-    title: "Remote control included",
-    desc: "Distance theke colour, mode, brightness — sob set kora jay",
+    title: "🎛 Remote Control",
+    desc: "Distance theke colour, mode, brightness — control everything",
   },
   {
     icon: <Zap className="h-5 w-5" />,
-    title: "USB powered, low heat",
-    desc: "Plug-and-play · ghonta-r por ghonta chalalei o gorom hoy na",
+    title: "🔥 Low Heat, Long Use",
+    desc: "Raat-vor chalaleo problem nai — USB plug & play",
+  },
+  {
+    icon: <Lightbulb className="h-5 w-5" />,
+    title: "✨ 4-in-1 Magical Lamp",
+    desc: "Galaxy · Aurora · Night Lamp · Decor — ek device-e shob",
   },
 ];
 
 const USE_CASES = [
-  { emoji: "🛌", title: "Bedroom mood light", desc: "ঘুমানোর আগে relaxing ambient nebula" },
-  { emoji: "🎂", title: "Birthday vibe", desc: "Cake-cutting, party decor — instant wow factor" },
-  { emoji: "📸", title: "TikTok / Reels background", desc: "Aesthetic content এর জন্য perfect prop" },
-  { emoji: "💑", title: "Date night-এ", desc: "Romantic dinner, anniversary set-up" },
-  { emoji: "🧘", title: "Yoga / meditation", desc: "Calming colour-flow — focus বাড়ায়" },
-  { emoji: "🎁", title: "Gift হিসাবে", desc: "Friend, partner, sibling — সবাই পাগল হবে" },
+  { emoji: "🛌", title: "Bedroom vibe upgrade", desc: "Boring room → aesthetic galaxy room" },
+  { emoji: "📸", title: "TikTok / Reels background", desc: "Aesthetic content er jonno perfect" },
+  { emoji: "💑", title: "Date night setup", desc: "Romantic dinner, anniversary mood" },
+  { emoji: "🎁", title: "Gift dile sure impress", desc: "Friend, partner, sibling — sobai khushi" },
+  { emoji: "🧘", title: "Meditation / Relax mode", desc: "Calming colour-flow — focus barhay" },
+  { emoji: "🎂", title: "Birthday / party vibe", desc: "Instant wow factor — decor ready" },
+];
+
+const VALUE_STACK = [
+  { num: "1", title: "Galaxy Projector", desc: "Ceiling-e nebula projection" },
+  { num: "2", title: "Aurora Ripple Light", desc: "Water wave wall effect" },
+  { num: "3", title: "Bedside Night Lamp", desc: "Soft warm glow" },
+  { num: "4", title: "Decor / Desk Light", desc: "Aesthetic room piece" },
+];
+
+const OBJECTIONS = [
+  { q: "Gorom hoy?", a: "Na, low-heat LED — raat-vor safe" },
+  { q: "Use kora tough?", a: "Na, plug & play — 1 second-e on" },
+  { q: "Remote ase?", a: "Yes, full remote box-er sathe free" },
+  { q: "Damage hole?", a: "Free replacement — 7 days guarantee" },
 ];
 
 const SPECS = [
   { label: "Power", value: "USB / 5V", sub: "Cable included" },
   { label: "Colours", value: "16 RGB", sub: "Auto-cycle mode" },
-  { label: "Modes", value: "3-in-1", sub: "Lamp · Aurora · Galaxy" },
+  { label: "Modes", value: "4-in-1", sub: "Galaxy · Aurora · Lamp · Decor" },
   { label: "Control", value: "Remote", sub: "+ Touch button" },
   { label: "Projection", value: "360°", sub: "Wall + ceiling" },
   { label: "Material", value: "Premium ABS", sub: "Low-heat LED" },
@@ -587,10 +601,10 @@ function AuroraLampLanding() {
         <div className="mx-auto grid max-w-6xl gap-8 px-5 pt-10 pb-12 md:grid-cols-2 md:gap-12 md:py-20">
           <div className="text-center md:text-left">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85 backdrop-blur">
-              <Sparkles className="h-3.5 w-3.5" /> Best Seller · Trending
+              <Flame className="h-3.5 w-3.5 text-orange-400" /> Best Seller · Trending 🔥
             </span>
             <h1 className="mt-4 text-4xl font-extrabold leading-[1.05] tracking-tight text-white md:text-5xl lg:text-6xl">
-              Aapnar Bedroom-ke{" "}
+              Aurora Ripple{" "}
               <span
                 className="bg-clip-text text-transparent"
                 style={{
@@ -600,12 +614,15 @@ function AuroraLampLanding() {
               >
                 Galaxy
               </span>{" "}
-              baniye din ✨
+              Lamp
+              <span className="mt-1 block text-lg font-semibold text-white/70 md:text-xl">
+                (4-in-1 Edition)
+              </span>
             </h1>
             <p className="mt-4 text-base leading-relaxed text-white/75 md:text-lg">
-              Aurora Ripple + Galaxy nebula projection · 16 RGB rang · Remote control included.{" "}
-              <strong className="text-white">3-in-1 magical lamp</strong> — ekta switch-e mood ekdom
-              palte jabe.
+              Aurora Ripple + Galaxy Nebula Projection · 16 RGB Colors · Remote Included.{" "}
+              <strong className="text-white">4-in-1 Magical Lamp</strong> — ekta switch-e pura vibe
+              change.
             </p>
 
             {/* Price */}
@@ -686,7 +703,7 @@ function AuroraLampLanding() {
               />
               {/* Top-left badge */}
               <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/55 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
-                <Sparkles className="h-3 w-3 text-fuchsia-300" /> 3-in-1 Magic
+                <Sparkles className="h-3 w-3 text-fuchsia-300" /> 4-in-1 Magic
               </div>
               {/* Top-right rating */}
               <div className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/55 px-2.5 py-1.5 text-[11px] font-bold text-white backdrop-blur-md">
@@ -747,8 +764,7 @@ function AuroraLampLanding() {
             Same room. <span className="text-fuchsia-300">Different planet.</span>
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-sm text-white/65 md:text-base">
-            Slider ta drag korun — dekhun apnar boring bedroom kibhabe ekta galaxy theme room hoye
-            jay 🌌
+            👉 Lights off → Magic on. Slider ta tene dekhun — room instantly aesthetic hoye jabe 🌌
           </p>
         </div>
 
@@ -1081,6 +1097,93 @@ function AuroraLampLanding() {
         </div>
       </section>
 
+      {/* ============ VALUE STACK ============ */}
+      <section className="relative overflow-hidden px-5 py-14">
+        <div
+          className="absolute inset-0 -z-10"
+          style={{
+            background:
+              "radial-gradient(ellipse at 50% 0%, oklch(0.30 0.18 320 / 0.45), transparent 60%), oklch(0.10 0.05 280)",
+          }}
+          aria-hidden
+        />
+        <div className="mx-auto max-w-5xl text-center">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-fuchsia-300">
+            Value Stack
+          </span>
+          <h2 className="mt-2 text-2xl font-extrabold text-white md:text-4xl">
+            1 Lamp ={" "}
+            <span
+              className="bg-clip-text text-transparent"
+              style={{
+                backgroundImage:
+                  "linear-gradient(120deg, #ff84d9, #b993ff, #5ee5d0)",
+              }}
+            >
+              4 Experience
+            </span>{" "}
+            🔥
+          </h2>
+          <p className="mx-auto mt-3 max-w-md text-sm text-white/65">
+            Ekta product = 4 ta use → paisa full recover
+          </p>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {VALUE_STACK.map((v, i) => (
+              <div
+                key={i}
+                className="group relative overflow-hidden rounded-2xl border border-white/15 bg-white/5 p-5 text-left backdrop-blur transition hover:-translate-y-1 hover:border-fuchsia-400/50"
+              >
+                <div
+                  className="absolute -right-4 -top-4 flex h-16 w-16 items-center justify-center rounded-full text-2xl font-extrabold text-white/10 transition group-hover:text-white/25"
+                  aria-hidden
+                >
+                  {v.num}
+                </div>
+                <div className="relative">
+                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-fuchsia-500/30 to-cyan-400/30 text-sm font-bold text-white">
+                    {v.num}
+                  </div>
+                  <h3 className="mt-3 text-base font-bold text-white">{v.title}</h3>
+                  <p className="mt-1 text-xs leading-relaxed text-white/65">{v.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============ OBJECTION KILLER ============ */}
+      <section className="relative px-5 py-14">
+        <div className="mx-auto max-w-3xl">
+          <div className="text-center">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-cyan-300">
+              ⚔️ No More Doubts
+            </span>
+            <h2 className="mt-2 text-2xl font-extrabold text-white md:text-3xl">
+              Apnar shob question-er answer
+            </h2>
+          </div>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2">
+            {OBJECTIONS.map((o, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-white/15 bg-white/5 p-5 backdrop-blur"
+              >
+                <p className="flex items-start gap-2 text-sm font-semibold text-white">
+                  <span className="text-rose-400">❓</span>
+                  <span>{o.q}</span>
+                </p>
+                <p className="mt-2 flex items-start gap-2 text-sm text-emerald-300">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{o.a}</span>
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ============ SPECS ============ */}
       <section className="px-5 py-14">
         <div className="mx-auto max-w-3xl">
@@ -1191,7 +1294,7 @@ function AuroraLampLanding() {
               </thead>
               <tbody className="divide-y divide-border bg-card">
                 {[
-                  ["3-in-1 use (Lamp + Aurora + Galaxy)", true, false],
+                  ["4-in-1 use (Lamp + Aurora + Galaxy)", true, false],
                   ["Remote + 2 interchangeable lens", true, false],
                   ["Premium gift box packaging", true, false],
                   ["7-day replacement guarantee", true, false],
