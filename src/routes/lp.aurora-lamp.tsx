@@ -738,7 +738,7 @@ function AuroraLampLanding() {
       </section>
 
       {/* ============ BEFORE / AFTER SLIDER ============ */}
-      <section className="relative overflow-hidden px-5 py-14">
+      <section className="relative overflow-hidden px-5 py-10">
         <div
           className="absolute inset-0 -z-10"
           style={{
