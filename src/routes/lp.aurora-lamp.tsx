@@ -637,7 +637,7 @@ function AuroraLampLanding() {
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
               <Button
                 onClick={scrollToOrder}
-                className="h-14 rounded-full bg-white px-8 text-base font-extrabold text-slate-900 shadow-2xl hover:bg-white/90"
+                className="cta-bump h-14 rounded-full bg-white px-8 text-base font-extrabold text-slate-900 shadow-2xl hover:bg-white/90"
               >
                 <Gift className="mr-2 h-5 w-5" /> এখনই অর্ডার করুন
               </Button>
@@ -1420,7 +1420,7 @@ function AuroraLampLanding() {
           </div>
           <Button
             onClick={scrollToOrder}
-            className="h-12 flex-1 rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-[var(--shadow-brand)] hover:bg-primary/90"
+            className="cta-bump h-12 flex-1 rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-[var(--shadow-brand)] hover:bg-primary/90"
           >
             <Gift className="mr-1.5 h-4 w-4" /> অর্ডার করুন
           </Button>
@@ -1487,7 +1487,7 @@ function MidCTA({ onClick, label }: { onClick: () => void; label?: string }) {
     <div className="px-5 py-6 text-center">
       <Button
         onClick={onClick}
-        className="h-12 rounded-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-500 px-8 text-sm font-extrabold text-white shadow-[0_8px_30px_rgba(168,85,247,0.45)] hover:opacity-95"
+        className="cta-bump h-12 rounded-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-500 px-8 text-sm font-extrabold text-white shadow-[0_8px_30px_rgba(168,85,247,0.45)] hover:opacity-95"
       >
         🌌 {label ?? "Order Now — ৳1,290"} →
       </Button>
