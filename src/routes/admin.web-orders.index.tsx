@@ -1094,14 +1094,27 @@ function WebOrdersPage() {
 
                       {/* Actions */}
                       <TableCell className="text-right">
-                        <Button asChild size="sm" variant="default">
-                          <Link
-                            to="/admin/web-orders/$orderId"
-                            params={{ orderId: o.id }}
-                          >
-                            Open <ExternalLink className="ml-1 h-3 w-3" />
-                          </Link>
-                        </Button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button asChild size="sm" variant="default">
+                            <Link
+                              to="/admin/web-orders/$orderId"
+                              params={{ orderId: o.id }}
+                            >
+                              Open <ExternalLink className="ml-1 h-3 w-3" />
+                            </Link>
+                          </Button>
+                          {hasRole(["admin"]) && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              onClick={() => setDeleteFor(o.id)}
+                              aria-label="Delete order"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
