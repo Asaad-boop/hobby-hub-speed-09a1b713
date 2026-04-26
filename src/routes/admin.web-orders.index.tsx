@@ -618,7 +618,27 @@ function WebOrdersPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // Bulk action: add tag
+  // Delete order(s) — admin only
+  const deleteOrder = useMutation({
+    mutationFn: async (ids: string[]) => {
+      // Delete order_items first (in case cascade is missing), then orders
+      const { error: itemsErr } = await supabase
+        .from("order_items")
+        .delete()
+        .in("order_id", ids);
+      if (itemsErr) throw itemsErr;
+      const { error } = await supabase.from("orders").delete().in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: (_d, ids) => {
+      toast.success(`${ids.length} order${ids.length > 1 ? "s" : ""} deleted`);
+      setSelected(new Set());
+      setDeleteFor(null);
+      setBulkDeleteOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["web-orders"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
   const bulkAddTag = useMutation({
     mutationFn: async ({ ids, tag }: { ids: string[]; tag: string }) => {
       for (const id of ids) {
