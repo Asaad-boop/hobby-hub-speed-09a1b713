@@ -89,19 +89,22 @@ const ROLE_DESCRIPTIONS: Record<AppRole, string> = {
 function StaffPage() {
   const { isAdmin, loading } = useAdminAuth();
   const queryClient = useQueryClient();
+  const listStaffFn = useServerFn(listStaff);
+  const removeRoleFn = useServerFn(removeRole);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["staff", "list"],
-    queryFn: () => listStaff(),
+    queryFn: () => listStaffFn(),
     enabled: isAdmin,
   });
   const staff = data?.staff ?? [];
 
   const removeMut = useMutation({
-    mutationFn: (role_id: string) => removeRole({ data: { role_id } }),
+    mutationFn: (role_id: string) => removeRoleFn({ data: { role_id } }),
     onSuccess: () => {
       toast.success("Role removed");
       queryClient.invalidateQueries({ queryKey: ["staff", "list"] });
+      queryClient.invalidateQueries({ queryKey: ["admin_auth"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
