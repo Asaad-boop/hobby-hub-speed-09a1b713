@@ -1624,6 +1624,19 @@ function SectionHeading({ kicker, title }: { kicker: string; title: string }) {
   );
 }
 
+function MidCTA({ onClick, label }: { onClick: () => void; label?: string }) {
+  return (
+    <div className="px-5 py-6 text-center">
+      <Button
+        onClick={onClick}
+        className="h-12 rounded-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-500 px-8 text-sm font-extrabold text-white shadow-[0_8px_30px_rgba(168,85,247,0.45)] hover:opacity-95"
+      >
+        🌌 {label ?? "Order Now — ৳1,290"} →
+      </Button>
+    </div>
+  );
+}
+
 function SpecCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="rounded-xl border border-border bg-card px-3 py-3 text-center">
