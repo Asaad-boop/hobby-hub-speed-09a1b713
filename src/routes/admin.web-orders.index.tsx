@@ -1389,6 +1389,68 @@ function WebOrdersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Single delete confirmation */}
+      <AlertDialog open={!!deleteFor} onOpenChange={(v) => !v && setDeleteFor(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Order delete korben?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ei action permanent. Order ebong er items database theke shoshhrod
+              delete hoye jabe — undo kora jabe na.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteOrder.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteOrder.isPending}
+              onClick={() => deleteFor && deleteOrder.mutate([deleteFor])}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteOrder.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting…
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk delete confirmation */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{selected.size} order delete korben?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Selected order gulo ebong tader items permanently delete hobe.
+              Ei action revert kora jabe na.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteOrder.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteOrder.isPending || selected.size === 0}
+              onClick={() => deleteOrder.mutate(Array.from(selected))}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteOrder.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting…
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete {selected.size}
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
