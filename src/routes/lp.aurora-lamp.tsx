@@ -47,7 +47,6 @@ import {
   ThumbsUp,
 } from "lucide-react";
 
-import beforeRoom from "@/assets/aurora-before-room.jpg";
 import afterRoom from "@/assets/aurora-after-room.jpg";
 import rippleProjection from "@/assets/aurora-ripple-projection.jpg";
 import nebulaProjection from "@/assets/aurora-nebula-projection.jpg";
@@ -225,9 +224,6 @@ function AuroraLampLanding() {
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", district: "" });
   const orderRef = useRef<HTMLDivElement | null>(null);
-
-  // Slider position for before/after (0-100)
-  const [sliderPos, setSliderPos] = useState(50);
   const [lensPreview, setLensPreview] = useState<"ripple" | "nebula">("ripple");
 
   // Urgency countdown — 24h flash sale (persists across reloads via localStorage)
@@ -1462,98 +1458,6 @@ function AuroraLampLanding() {
 }
 
 /* ===================== Sub-components ===================== */
-
-function BeforeAfterSlider({
-  beforeSrc,
-  afterSrc,
-  position,
-  onChange,
-}: {
-  beforeSrc: string;
-  afterSrc: string;
-  position: number;
-  onChange: (n: number) => void;
-}) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const draggingRef = useRef(false);
-
-  const setFromClientX = (clientX: number) => {
-    const el = containerRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const pct = ((clientX - rect.left) / rect.width) * 100;
-    onChange(Math.max(0, Math.min(100, pct)));
-  };
-
-  return (
-    <div
-      ref={containerRef}
-      className="relative aspect-[4/3] w-full select-none overflow-hidden rounded-2xl border border-white/10 shadow-[0_25px_60px_-20px_rgba(120,80,255,0.5)] sm:aspect-[16/10]"
-      onMouseDown={(e) => {
-        draggingRef.current = true;
-        setFromClientX(e.clientX);
-      }}
-      onMouseMove={(e) => draggingRef.current && setFromClientX(e.clientX)}
-      onMouseUp={() => (draggingRef.current = false)}
-      onMouseLeave={() => (draggingRef.current = false)}
-      onTouchStart={(e) => {
-        draggingRef.current = true;
-        setFromClientX(e.touches[0].clientX);
-      }}
-      onTouchMove={(e) => draggingRef.current && setFromClientX(e.touches[0].clientX)}
-      onTouchEnd={() => (draggingRef.current = false)}
-    >
-      {/* AFTER (full layer) */}
-      <img
-        src={afterSrc}
-        alt="With Aurora lamp on"
-        loading="lazy"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-      {/* BEFORE (clipped) */}
-      <div
-        className="absolute inset-0 overflow-hidden"
-        style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
-      >
-        <img
-          src={beforeSrc}
-          alt="Without lamp"
-          loading="lazy"
-          className="h-full w-full object-cover"
-        />
-      </div>
-
-      {/* Labels */}
-      <span className="absolute left-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur">
-        Before
-      </span>
-      <span className="absolute right-3 top-3 rounded-full bg-fuchsia-500/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur">
-        After ✨
-      </span>
-
-      {/* Divider line + handle */}
-      <div
-        className="pointer-events-none absolute inset-y-0 w-0.5 bg-white/90 shadow-[0_0_10px_rgba(255,255,255,0.7)]"
-        style={{ left: `${position}%`, transform: "translateX(-50%)" }}
-      >
-        <div className="pointer-events-auto absolute top-1/2 left-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-fuchsia-500 text-white shadow-xl">
-          <span className="text-xs font-bold">⇆</span>
-        </div>
-      </div>
-
-      {/* Native range for accessibility / mobile fallback */}
-      <input
-        type="range"
-        min={0}
-        max={100}
-        value={position}
-        onChange={(e) => onChange(Number(e.target.value))}
-        aria-label="Before / after slider"
-        className="absolute inset-0 h-full w-full cursor-ew-resize opacity-0"
-      />
-    </div>
-  );
-}
 
 function MiniStat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
