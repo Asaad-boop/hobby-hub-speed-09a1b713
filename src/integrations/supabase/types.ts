@@ -1224,6 +1224,7 @@ export type Database = {
         }[]
       }
       get_customer_stats: { Args: { p_user_id: string }; Returns: Json }
+      hard_delete_order: { Args: { _order_id: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

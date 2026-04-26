@@ -621,14 +621,10 @@ function WebOrdersPage() {
   // Delete order(s) — admin only
   const deleteOrder = useMutation({
     mutationFn: async (ids: string[]) => {
-      // Delete order_items first (in case cascade is missing), then orders
-      const { error: itemsErr } = await supabase
-        .from("order_items")
-        .delete()
-        .in("order_id", ids);
-      if (itemsErr) throw itemsErr;
-      const { error } = await supabase.from("orders").delete().in("id", ids);
-      if (error) throw error;
+      for (const id of ids) {
+        const { error } = await supabase.rpc("hard_delete_order", { _order_id: id });
+        if (error) throw error;
+      }
     },
     onSuccess: (_d, ids) => {
       toast.success(`${ids.length} order${ids.length > 1 ? "s" : ""} deleted`);
@@ -636,6 +632,9 @@ function WebOrdersPage() {
       setDeleteFor(null);
       setBulkDeleteOpen(false);
       queryClient.invalidateQueries({ queryKey: ["web-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "web-orders", "pendingCount"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
