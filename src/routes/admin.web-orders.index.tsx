@@ -20,6 +20,7 @@ import {
   Plus,
   Filter as FilterIcon,
   ChevronDown,
+  Trash2,
 } from "lucide-react";
 import { supabase as supabaseTyped } from "@/integrations/supabase/client";
 const supabase = supabaseTyped as any;
@@ -44,6 +45,16 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
