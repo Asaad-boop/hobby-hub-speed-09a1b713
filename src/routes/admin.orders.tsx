@@ -116,6 +116,7 @@ function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
   const [search, setSearch] = useState("");
   const [openOrderId, setOpenOrderId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data: orders = [], isLoading, refetch, isFetching } = useQuery({
     queryKey: ["admin", "orders"],
