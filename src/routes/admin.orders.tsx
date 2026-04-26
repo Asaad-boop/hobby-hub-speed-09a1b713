@@ -332,6 +332,15 @@ function AdminOrdersPage() {
                       >
                         <ClipboardList className="h-4 w-4" />
                       </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        title="Delete order"
+                        className="text-destructive hover:bg-destructive/10"
+                        onClick={() => setDeleteId(o.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
