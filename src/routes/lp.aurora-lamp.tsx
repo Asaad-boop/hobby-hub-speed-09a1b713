@@ -790,7 +790,7 @@ function AuroraLampLanding() {
       {/* ============ KEY FEATURES ============ */}
       <section id="features" className="relative px-5 py-10">
         <div className="mx-auto max-w-5xl">
-          <SectionHeading kicker="Features" title="Keno ei lamp ta sobaike pagol korche" />
+          <SectionHeading kicker="Features" title="Keno ei Aurora Lamp ta eto special" />
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f, i) => (
               <div
