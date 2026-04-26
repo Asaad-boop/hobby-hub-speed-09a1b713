@@ -12,6 +12,7 @@ import {
   Tag,
   PhoneCall,
   Activity,
+  Users,
 } from "lucide-react";
 import {
   Sidebar,
