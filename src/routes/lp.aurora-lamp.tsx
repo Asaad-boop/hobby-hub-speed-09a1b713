@@ -1426,7 +1426,7 @@ function AuroraLampLanding() {
       </section>
 
       {/* ============ FAQ ============ */}
-      <section className="bg-muted/40 px-5 py-14">
+      <section className="px-5 py-14">
         <div className="mx-auto max-w-xl">
           <SectionHeading kicker="FAQ" title="আপনার প্রশ্ন?" />
           <Accordion type="single" collapsible className="space-y-2">
@@ -1434,12 +1434,12 @@ function AuroraLampLanding() {
               <AccordionItem
                 key={i}
                 value={`item-${i}`}
-                className="rounded-xl border border-border bg-card px-4"
+                className="rounded-xl border border-white/15 bg-white/10 px-4 backdrop-blur-md"
               >
-                <AccordionTrigger className="text-left text-sm font-semibold hover:no-underline">
+                <AccordionTrigger className="text-left text-sm font-semibold text-white hover:no-underline [&>svg]:text-white">
                   {f.q}
                 </AccordionTrigger>
-                <AccordionContent className="text-sm leading-relaxed text-muted-foreground">
+                <AccordionContent className="text-sm leading-relaxed text-white/80">
                   {f.a}
                 </AccordionContent>
               </AccordionItem>
