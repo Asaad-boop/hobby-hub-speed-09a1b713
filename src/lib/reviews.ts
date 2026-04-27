@@ -3,13 +3,15 @@ import { supabase } from "@/integrations/supabase/client";
 export type ReviewRow = {
   id: string;
   product_id: string;
-  user_id: string;
+  user_id: string | null;
   order_id: string | null;
   rating: number;
   title: string | null;
   comment: string | null;
   is_approved: boolean;
   admin_note: string | null;
+  guest_name: string | null;
+  guest_phone: string | null;
   created_at: string;
   updated_at: string;
 };
