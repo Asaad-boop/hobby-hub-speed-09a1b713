@@ -288,6 +288,34 @@ export default function ReviewsList({ reviews, loading, fallbackRating = 0, fall
         )}
       </div>
     )}
+
+    {videoLightbox && (
+      <div
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
+        onClick={() => setVideoLightbox(null)}
+        role="dialog"
+        aria-modal="true"
+      >
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setVideoLightbox(null); }}
+          className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20"
+          aria-label="Close"
+        >
+          <X className="h-5 w-5" />
+        </button>
+        <video
+          src={videoLightbox}
+          controls
+          autoPlay
+          playsInline
+          onClick={(e) => e.stopPropagation()}
+          className="max-h-[88vh] max-w-[92vw] rounded-xl bg-black shadow-2xl"
+        >
+          <track kind="captions" />
+        </video>
+      </div>
+    )}
     </>
   );
 }
