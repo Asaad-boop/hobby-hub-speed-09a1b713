@@ -100,6 +100,8 @@ function StaffPage() {
     queryKey: ["staff", "list"],
     queryFn: () => listStaffFn(),
     enabled: isAdmin,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
   const staff = data?.staff ?? [];
 
