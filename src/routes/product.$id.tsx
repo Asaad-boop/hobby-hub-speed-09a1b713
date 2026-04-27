@@ -204,16 +204,12 @@ function ProductPage() {
     : null;
 
   const handleReviewSubmit = async (r: NewReview) => {
-    if (!eligibleOrderId) {
-      toast.error("You must have a delivered order of this product to leave a review.");
-      throw new Error("Not eligible");
-    }
     try {
       await submitReview({
         product_id: product.id,
-        order_id: eligibleOrderId,
         rating: r.rating,
-        title: r.name ? `${r.name}${r.location ? ` · ${r.location}` : ""}` : undefined,
+        guest_name: r.name,
+        guest_phone: r.phone,
         comment: r.text,
       });
       toast.success("Review submitted! Visible after admin approval.");
