@@ -56,6 +56,7 @@ const toProduct = (r: ProductRow): Product => {
     ? (r.benefits as unknown[]).filter((b): b is string => typeof b === "string")
     : [];
   const image = r.image && r.image.trim() ? r.image : FALLBACK_IMAGE;
+  const mergedGallery = gallery.includes(image) ? gallery : [image, ...gallery];
   return {
     id: r.id, // canonical: use UUID
     slug: r.slug,
@@ -63,7 +64,7 @@ const toProduct = (r: ProductRow): Product => {
     price: Number(r.price) || 0,
     oldPrice: r.old_price != null ? Number(r.old_price) : Number(r.price) || 0,
     image,
-    gallery: gallery.length ? gallery : [image],
+    gallery: mergedGallery.length ? mergedGallery : [image],
     rating: Number(r.rating) || 0,
     reviews: r.reviews ?? 0,
     stock: r.stock ?? 0,
