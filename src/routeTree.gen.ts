@@ -39,6 +39,7 @@ import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
+import { Route as AdminOrdersWorkspaceRouteImport } from './routes/admin.orders-workspace'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminHomepageRouteImport } from './routes/admin.homepage'
@@ -199,6 +200,11 @@ const AdminProductsRoute = AdminProductsRouteImport.update({
   path: '/products',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminOrdersWorkspaceRoute = AdminOrdersWorkspaceRouteImport.update({
+  id: '/orders-workspace',
+  path: '/orders-workspace',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminOrdersRoute = AdminOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -271,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/orders-workspace': typeof AdminOrdersWorkspaceRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRouteWithChildren
@@ -311,6 +318,7 @@ export interface FileRoutesByTo {
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/orders-workspace': typeof AdminOrdersWorkspaceRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRouteWithChildren
@@ -353,6 +361,7 @@ export interface FileRoutesById {
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/orders-workspace': typeof AdminOrdersWorkspaceRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRouteWithChildren
@@ -396,6 +405,7 @@ export interface FileRouteTypes {
     | '/admin/homepage'
     | '/admin/inventory'
     | '/admin/orders'
+    | '/admin/orders-workspace'
     | '/admin/products'
     | '/admin/reviews'
     | '/admin/settings'
@@ -436,6 +446,7 @@ export interface FileRouteTypes {
     | '/admin/homepage'
     | '/admin/inventory'
     | '/admin/orders'
+    | '/admin/orders-workspace'
     | '/admin/products'
     | '/admin/reviews'
     | '/admin/settings'
@@ -477,6 +488,7 @@ export interface FileRouteTypes {
     | '/admin/homepage'
     | '/admin/inventory'
     | '/admin/orders'
+    | '/admin/orders-workspace'
     | '/admin/products'
     | '/admin/reviews'
     | '/admin/settings'
@@ -734,6 +746,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminProductsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/orders-workspace': {
+      id: '/admin/orders-workspace'
+      path: '/orders-workspace'
+      fullPath: '/admin/orders-workspace'
+      preLoaderRoute: typeof AdminOrdersWorkspaceRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/orders': {
       id: '/admin/orders'
       path: '/orders'
@@ -819,6 +838,7 @@ interface AdminRouteChildren {
   AdminHomepageRoute: typeof AdminHomepageRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminOrdersWorkspaceRoute: typeof AdminOrdersWorkspaceRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminSettingsRoute: typeof AdminSettingsRouteWithChildren
@@ -835,6 +855,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminHomepageRoute: AdminHomepageRoute,
   AdminInventoryRoute: AdminInventoryRoute,
   AdminOrdersRoute: AdminOrdersRoute,
+  AdminOrdersWorkspaceRoute: AdminOrdersWorkspaceRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminSettingsRoute: AdminSettingsRouteWithChildren,

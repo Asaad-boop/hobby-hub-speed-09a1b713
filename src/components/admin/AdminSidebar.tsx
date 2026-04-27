@@ -14,6 +14,7 @@ import {
   Users,
   Boxes,
   UserCircle,
+  Zap,
 } from "lucide-react";
 import {
   Sidebar,
@@ -51,6 +52,7 @@ const groups: { label: string; items: NavItem[] }[] = [
   {
     label: "Sales",
     items: [
+      { title: "Workspace", url: "/admin/orders-workspace", icon: Zap, roles: ["admin", "customer_service", "operations"] },
       { title: "Orders", url: "/admin/web-orders", icon: PhoneCall, roles: ["admin", "customer_service"] },
       { title: "Customers", url: "/admin/customers", icon: UserCircle, roles: ["admin"] },
       { title: "Reviews", url: "/admin/reviews", icon: MessageSquare, roles: ["admin"] },
