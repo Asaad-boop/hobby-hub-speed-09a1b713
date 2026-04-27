@@ -204,10 +204,6 @@ function ProductPage() {
     : null;
 
   const handleReviewSubmit = async (r: NewReview) => {
-    if (!eligibleOrderId) {
-      toast.error("You must have a delivered order of this product to leave a review.");
-      throw new Error("Not eligible");
-    }
     try {
       let imageUrls: string[] = [];
       if (r.photoFiles && r.photoFiles.length > 0) {
@@ -215,11 +211,12 @@ function ProductPage() {
       }
       await submitReview({
         product_id: product.id,
-        order_id: eligibleOrderId,
+        order_id: eligibleOrderId ?? null,
         rating: r.rating,
-        title: r.name ? `${r.name}${r.location ? ` · ${r.location}` : ""}` : undefined,
         comment: r.text,
         images: imageUrls,
+        guest_name: r.name,
+        guest_phone: r.location, // ReviewModal field re-used as phone
       });
       toast.success("Review submitted! Visible after admin approval.");
       setUserReviews((prev) => [r, ...prev]);
@@ -689,17 +686,15 @@ function ProductPage() {
             <p className="mt-1 text-sm text-muted-foreground">
               {eligibleOrderId
                 ? "You're a verified buyer — share your experience!"
-                : "Verified buyers can leave a review after their order is delivered."}
+                : "Share your experience with this product."}
             </p>
           </div>
-          {eligibleOrderId && (
-            <button
-              onClick={() => setReviewOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full border-2 border-foreground px-4 py-2 text-xs font-bold transition hover:bg-foreground hover:text-background"
-            >
-              <MessageSquare className="h-4 w-4" /> Write a review
-            </button>
-          )}
+          <button
+            onClick={() => setReviewOpen(true)}
+            className="inline-flex items-center gap-2 rounded-full border-2 border-foreground px-4 py-2 text-xs font-bold transition hover:bg-foreground hover:text-background"
+          >
+            <MessageSquare className="h-4 w-4" /> Write a review
+          </button>
         </div>
 
         <ReviewsList
