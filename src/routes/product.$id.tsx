@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { fetchProductByIdOrSlug, fetchAllProducts } from "@/lib/products";
-import { fetchProductReviews, submitReview, fetchEligibleOrderId } from "@/lib/reviews";
+import { fetchProductReviews, submitReview, fetchEligibleOrderId, uploadReviewImages } from "@/lib/reviews";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
