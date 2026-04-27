@@ -109,20 +109,42 @@ export async function uploadReviewImages(files: File[]): Promise<string[]> {
 
 export async function submitReview(input: {
   product_id: string;
-  order_id: string;
+  order_id?: string | null;
   rating: number;
   title?: string;
   comment?: string;
   images?: string[];
+  guest_name?: string;
+  guest_phone?: string;
 }) {
   const { data: sess } = await supabase.auth.getSession();
   const user = sess.session?.user;
-  if (!user) throw new Error("Login required to submit a review");
+
+  // Guest submission path
+  if (!user) {
+    if (!input.guest_name || !input.guest_phone) {
+      throw new Error("Name and phone are required");
+    }
+    const { error } = await supabase.from("reviews").insert({
+      product_id: input.product_id,
+      user_id: null,
+      order_id: null,
+      rating: input.rating,
+      title: input.title?.trim() || null,
+      comment: input.comment?.trim() || null,
+      images: input.images ?? [],
+      guest_name: input.guest_name.trim(),
+      guest_phone: input.guest_phone.trim(),
+      is_approved: false,
+    });
+    if (error) throw error;
+    return;
+  }
 
   const { error } = await supabase.from("reviews").insert({
     product_id: input.product_id,
     user_id: user.id,
-    order_id: input.order_id,
+    order_id: input.order_id ?? null,
     rating: input.rating,
     title: input.title?.trim() || null,
     comment: input.comment?.trim() || null,
