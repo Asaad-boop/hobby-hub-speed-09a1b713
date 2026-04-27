@@ -118,8 +118,26 @@ function StatusBadge({ status }: { status: OrderStatus }) {
   );
 }
 
+type PipelineTab =
+  | "all"
+  | "pending"
+  | "packing"
+  | "shipping"
+  | "delivered"
+  | "returns";
+
+const PIPELINE_TABS: { key: PipelineTab; label: string; statuses: OrderStatus[] }[] = [
+  { key: "all", label: "All", statuses: STATUS_OPTIONS },
+  { key: "pending", label: "Pending", statuses: ["confirmed", "ready_to_pack"] },
+  { key: "packing", label: "Packing", statuses: ["packaging", "packed", "courier_entry", "ready_to_ship"] },
+  { key: "shipping", label: "Shipping", statuses: ["shipped", "in_transit"] },
+  { key: "delivered", label: "Delivered", statuses: ["delivered", "partial_delivered"] },
+  { key: "returns", label: "Returns", statuses: ["returned", "exchanged", "damaged", "paid_return", "unpaid_return", "partial_return", "pending_return"] },
+];
+
 function AdminOrdersPage() {
   const queryClient = useQueryClient();
+  const [tab, setTab] = useState<PipelineTab>("pending");
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
   const [search, setSearch] = useState("");
   const [openOrderId, setOpenOrderId] = useState<string | null>(null);
