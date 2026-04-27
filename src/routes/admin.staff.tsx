@@ -524,22 +524,28 @@ function CreateUserDialog({ onDone }: { onDone: () => void }) {
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<AppRole>("customer_service");
   const createStaffUserFn = useServerFn(createStaffUser);
+  const queryClient = useQueryClient();
 
   const mut = useMutation({
     mutationFn: () =>
       createStaffUserFn({
         data: { email, password, display_name: displayName, role },
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success(`User created and assigned "${role}"`);
       setOpen(false);
       setEmail("");
       setPassword("");
       setDisplayName("");
       setRole("customer_service");
+      await queryClient.invalidateQueries({ queryKey: ["staff", "list"] });
+      await queryClient.refetchQueries({ queryKey: ["staff", "list"] });
       onDone();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      console.error("[createStaffUser] failed:", e);
+      toast.error(e.message || "Failed to create user");
+    },
   });
 
   return (
