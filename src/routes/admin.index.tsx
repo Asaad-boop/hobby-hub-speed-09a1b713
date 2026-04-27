@@ -13,6 +13,8 @@ import {
   Truck,
   XCircle,
   PackageCheck,
+  Activity,
+  Eye,
 } from "lucide-react";
 import {
   Area,
@@ -61,6 +63,94 @@ function StatusBadge({ status }: { status: string }) {
       <Icon className="h-3 w-3" />
       {meta.label}
     </span>
+  );
+}
+
+function LiveVisitorsCard() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin", "live-visitors"],
+    queryFn: async () => {
+      const cutoff = new Date(Date.now() - 60_000).toISOString();
+      const { data, error } = await supabase
+        .from("active_sessions")
+        .select("session_id, path, last_seen_at, country")
+        .gte("last_seen_at", cutoff)
+        .order("last_seen_at", { ascending: false })
+        .limit(50);
+      if (error) return { count: 0, sessions: [] as Array<{ session_id: string; path: string | null; last_seen_at: string; country: string | null }> };
+      return { count: data.length, sessions: data };
+    },
+    refetchInterval: 10_000,
+    staleTime: 5_000,
+  });
+
+  const pathCounts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const s of data?.sessions ?? []) {
+      const p = s.path || "/";
+      map.set(p, (map.get(p) ?? 0) + 1);
+    }
+    return Array.from(map.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6);
+  }, [data?.sessions]);
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+          </span>
+          <h2 className="text-base font-semibold">Live visitors</h2>
+        </div>
+        <Badge variant="outline" className="gap-1 text-[10px]">
+          <Activity className="h-3 w-3" /> Real-time
+        </Badge>
+      </div>
+
+      <div className="mb-4 flex items-baseline gap-2">
+        <p className="text-4xl font-bold tabular-nums">
+          {isLoading ? <span className="inline-block h-9 w-16 animate-pulse rounded bg-muted" /> : data?.count ?? 0}
+        </p>
+        <span className="text-xs text-muted-foreground">active now (last 60s)</span>
+      </div>
+
+      <div>
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Top pages
+        </p>
+        {isLoading ? (
+          <div className="space-y-1.5">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-7 animate-pulse rounded bg-muted" />
+            ))}
+          </div>
+        ) : pathCounts.length ? (
+          <ul className="space-y-1.5">
+            {pathCounts.map(([path, count]) => (
+              <li
+                key={path}
+                className="flex items-center justify-between gap-2 rounded-md border border-border/60 bg-background px-2.5 py-1.5"
+              >
+                <span className="flex min-w-0 items-center gap-1.5 text-xs">
+                  <Eye className="h-3 w-3 shrink-0 text-muted-foreground" />
+                  <span className="truncate font-mono">{path}</span>
+                </span>
+                <span className="shrink-0 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
+                  {count}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+            No visitors right now.
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -221,8 +311,8 @@ function AdminDashboard() {
         ))}
       </div>
 
-      {/* Sales chart + Pending orders */}
-      <div className="grid gap-4 lg:grid-cols-3">
+      {/* Sales chart + Live visitors + Pending orders */}
+      <div className="grid gap-4 lg:grid-cols-4">
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
             <div>
@@ -276,6 +366,8 @@ function AdminDashboard() {
             </ResponsiveContainer>
           </div>
         </div>
+
+        <LiveVisitorsCard />
 
         {/* Low stock */}
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
