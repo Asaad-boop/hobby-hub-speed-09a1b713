@@ -67,7 +67,10 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
             r.readAsDataURL(f);
           }),
       ),
-    ).then((urls) => setPhotos((p) => [...p, ...urls].slice(0, MAX_PHOTOS)));
+    ).then((urls) => {
+      setPhotos((p) => [...p, ...urls].slice(0, MAX_PHOTOS));
+      setPhotoFiles((p) => [...p, ...valid].slice(0, MAX_PHOTOS));
+    });
   };
 
   const [submitting, setSubmitting] = useState(false);
