@@ -177,6 +177,8 @@ function shortId(id: string) {
   return id.slice(0, 8).toUpperCase();
 }
 
+const webOrdersListSearch = { tab: "processing" as const, q: "" };
+
 function WebOrderDetailPage() {
   const { orderId } = Route.useParams();
   const navigate = useNavigate();
@@ -196,7 +198,7 @@ function WebOrderDetailPage() {
       qc.invalidateQueries({ queryKey: ["admin", "orders"] });
       qc.invalidateQueries({ queryKey: ["admin", "dashboard"] });
       qc.invalidateQueries({ queryKey: ["admin", "web-orders", "pendingCount"] });
-      navigate({ to: "/admin/web-orders" });
+      navigate({ to: "/admin/web-orders", search: webOrdersListSearch });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -618,7 +620,7 @@ function WebOrderDetailPage() {
       <div className="p-8 text-center">
         <p className="text-muted-foreground">Order not found.</p>
         <Button asChild variant="outline" className="mt-4">
-          <Link to="/admin/web-orders">Back to Web Orders</Link>
+          <Link to="/admin/web-orders" search={webOrdersListSearch}>Back to Web Orders</Link>
         </Button>
       </div>
     );
@@ -641,7 +643,7 @@ function WebOrderDetailPage() {
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link to="/admin/web-orders">Web Orders</Link>
+                <Link to="/admin/web-orders" search={webOrdersListSearch}>Web Orders</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -652,7 +654,7 @@ function WebOrderDetailPage() {
         </Breadcrumb>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" asChild>
-            <Link to="/admin/web-orders">
+            <Link to="/admin/web-orders" search={webOrdersListSearch}>
               <ArrowLeft className="mr-1 h-3.5 w-3.5" />
               New Order
             </Link>
@@ -699,7 +701,7 @@ function WebOrderDetailPage() {
       <div className="flex flex-col gap-3 rounded-2xl border bg-card p-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" asChild>
-            <Link to="/admin/web-orders">
+            <Link to="/admin/web-orders" search={webOrdersListSearch}>
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
@@ -1157,7 +1159,7 @@ function WebOrderDetailPage() {
                 </SelectContent>
               </Select>
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigate({ to: "/admin/web-orders" })}>
+                <Button variant="outline" size="sm" onClick={() => navigate({ to: "/admin/web-orders", search: webOrdersListSearch })}>
                   Back to List
                 </Button>
                 <Button size="sm" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
