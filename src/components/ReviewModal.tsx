@@ -27,6 +27,7 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
   const [location, setLocation] = useState("");
   const [text, setText] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
