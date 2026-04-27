@@ -1,8 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { zodValidator, fallback } from "@tanstack/zod-adapter";
-import { z } from "zod";
 import {
   Search,
   Phone,
@@ -76,23 +74,24 @@ const WEB_STATUS_OPTIONS: WebStatus[] = [
   "cancelled",
 ];
 
-const searchSchema = z.object({
-  tab: fallback(
-    z.enum([
-      "processing",
-      "incomplete",
-      "good_but_no_response",
-      "no_response",
-      "advance_payment",
-      "on_hold",
-      "complete",
-      "cancelled",
-      "all",
-    ]),
-    "processing",
-  ).default("processing"),
-  q: fallback(z.string(), "").default(""),
-});
+type WebOrdersSearch = {
+  tab: WebStatus | "all";
+  q: string;
+};
+
+function validateWebOrdersSearch(search: Record<string, unknown>): WebOrdersSearch {
+  const rawTab = search.tab;
+  const tab =
+    typeof rawTab === "string" &&
+    (rawTab === "all" || (WEB_STATUS_OPTIONS as readonly string[]).includes(rawTab))
+      ? (rawTab as WebStatus | "all")
+      : "processing";
+
+  return {
+    tab,
+    q: typeof search.q === "string" ? search.q : "",
+  };
+}
 
 export const Route = createFileRoute("/admin/web-orders/")({
   head: () => ({
@@ -101,7 +100,7 @@ export const Route = createFileRoute("/admin/web-orders/")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  validateSearch: zodValidator(searchSchema),
+  validateSearch: validateWebOrdersSearch,
   component: WebOrdersInboxPage,
 });
 
