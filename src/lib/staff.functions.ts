@@ -15,11 +15,17 @@ const STAFF_ROLES: AppRole[] = [
 ];
 
 async function assertAdmin(userId: string) {
-  const { data } = await supabaseAdmin
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error(
+      "Server is missing SUPABASE_SERVICE_ROLE_KEY. Open Lovable Cloud settings and reconnect/sync the Supabase integration so the service role key is provisioned to this project.",
+    );
+  }
+  const { data, error } = await supabaseAdmin
     .from("user_roles")
     .select("role")
     .eq("user_id", userId)
     .eq("role", "admin");
+  if (error) throw new Error(`Admin check failed: ${error.message}`);
   if (!data || data.length === 0) throw new Error("Forbidden: admin only");
 }
 
