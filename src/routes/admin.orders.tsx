@@ -142,6 +142,9 @@ function AdminOrdersPage() {
   const [search, setSearch] = useState("");
   const [openOrderId, setOpenOrderId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [courierOrderId, setCourierOrderId] = useState<string | null>(null);
+  const [courierName, setCourierName] = useState("pathao");
+  const [trackingNumber, setTrackingNumber] = useState("");
 
   const { data: orders = [], isLoading, refetch, isFetching } = useQuery({
     queryKey: ["admin", "orders"],
