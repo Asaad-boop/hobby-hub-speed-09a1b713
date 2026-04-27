@@ -12,6 +12,7 @@ export type ReviewRow = {
   admin_note: string | null;
   guest_name: string | null;
   guest_phone: string | null;
+  images: string[];
   created_at: string;
   updated_at: string;
 };
