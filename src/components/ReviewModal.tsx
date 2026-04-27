@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { X, Star, Camera, Trash2, Check } from "lucide-react";
+import { X, Star, Camera, Trash2, Check, Video, Play } from "lucide-react";
 
 export type NewReview = {
   name: string;
@@ -8,6 +8,8 @@ export type NewReview = {
   text: string;
   photos: string[];
   photoFiles: File[];
+  videos: string[];
+  videoFiles: File[];
 };
 
 type Props = {
@@ -18,6 +20,8 @@ type Props = {
 };
 
 const MAX_PHOTOS = 4;
+const MAX_VIDEOS = 2;
+const MAX_VIDEO_MB = 30;
 const MAX_TEXT = 500;
 
 export default function ReviewModal({ open, onClose, productTitle, onSubmit }: Props) {
@@ -28,9 +32,12 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
   const [text, setText] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [videos, setVideos] = useState<string[]>([]);
+  const [videoFiles, setVideoFiles] = useState<File[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -44,7 +51,7 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
   }, [open, onClose]);
 
   const reset = () => {
-    setRating(0); setHover(0); setName(""); setLocation(""); setText(""); setPhotos([]); setPhotoFiles([]); setSubmitted(false); setError("");
+    setRating(0); setHover(0); setName(""); setLocation(""); setText(""); setPhotos([]); setPhotoFiles([]); setVideos([]); setVideoFiles([]); setSubmitted(false); setError("");
   };
 
   const handleClose = () => { reset(); onClose(); };
