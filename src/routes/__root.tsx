@@ -16,6 +16,11 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import NotFound from "@/components/NotFound";
 import { CartProvider } from "@/lib/cart";
 import { WishlistProvider } from "@/lib/wishlist";
+import { installServerFnAuth } from "@/lib/server-fn-auth";
+
+if (typeof window !== "undefined") {
+  installServerFnAuth();
+}
 
 interface RouterContext {
   queryClient: QueryClient;
