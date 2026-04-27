@@ -7,6 +7,7 @@ export type NewReview = {
   rating: number;
   text: string;
   photos: string[];
+  photoFiles: File[];
 };
 
 type Props = {
