@@ -142,6 +142,9 @@ function AdminOrdersPage() {
   const [search, setSearch] = useState("");
   const [openOrderId, setOpenOrderId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [courierOrderId, setCourierOrderId] = useState<string | null>(null);
+  const [courierName, setCourierName] = useState("pathao");
+  const [trackingNumber, setTrackingNumber] = useState("");
 
   const { data: orders = [], isLoading, refetch, isFetching } = useQuery({
     queryKey: ["admin", "orders"],
@@ -227,6 +230,28 @@ function AdminOrdersPage() {
       queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "web-orders", "pendingCount"] });
       queryClient.invalidateQueries({ queryKey: ["web-orders"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const assignCourier = useMutation({
+    mutationFn: async ({ id, courier, tracking }: { id: string; courier: string; tracking: string }) => {
+      const { error } = await supabase
+        .from("orders")
+        .update({
+          status: "courier_entry" as OrderStatus,
+          courier_name: courier,
+          tracking_number: tracking || null,
+          courier_assigned_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Courier assigned");
+      setCourierOrderId(null);
+      setTrackingNumber("");
+      queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -354,6 +379,42 @@ function AdminOrdersPage() {
                           <PackageCheck className="h-4 w-4" /> Ready
                         </Button>
                       )}
+                      {o.status === "ready_to_pack" && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          title="Mark Packed"
+                          onClick={() => updateStatus.mutate({ id: o.id, status: "packed" })}
+                        >
+                          <Package className="h-4 w-4" /> Packed
+                        </Button>
+                      )}
+                      {o.status === "packed" && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          title="Courier Entry"
+                          onClick={() => {
+                            setCourierOrderId(o.id);
+                            setCourierName(o.courier_name ?? "pathao");
+                            setTrackingNumber(o.tracking_number ?? "");
+                          }}
+                        >
+                          <Truck className="h-4 w-4" /> Courier
+                        </Button>
+                      )}
+                      {o.status === "courier_entry" && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          title="Ready to Ship"
+                          onClick={() =>
+                            updateStatus.mutate({ id: o.id, status: "ready_to_ship" })
+                          }
+                        >
+                          <Truck className="h-4 w-4" /> Ship
+                        </Button>
+                      )}
                       <Button size="sm" variant="outline" onClick={() => setOpenOrderId(o.id)}>
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -421,6 +482,61 @@ function AdminOrdersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={!!courierOrderId} onOpenChange={(o) => !o && setCourierOrderId(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Assign Courier</DialogTitle>
+            <DialogDescription>
+              Pick courier and (optional) tracking number. Order chole jabe Courier Entry stage e.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">Courier</label>
+              <Select value={courierName} onValueChange={setCourierName}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pathao">Pathao</SelectItem>
+                  <SelectItem value="steadfast">Steadfast</SelectItem>
+                  <SelectItem value="redx">Redx</SelectItem>
+                  <SelectItem value="sundarban">Sundarban</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                Tracking number (optional)
+              </label>
+              <Input
+                value={trackingNumber}
+                onChange={(e) => setTrackingNumber(e.target.value)}
+                placeholder="e.g. PTH123456"
+              />
+            </div>
+          </div>
+          <Separator />
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setCourierOrderId(null)}>
+              Cancel
+            </Button>
+            <Button
+              disabled={assignCourier.isPending}
+              onClick={() =>
+                courierOrderId &&
+                assignCourier.mutate({
+                  id: courierOrderId,
+                  courier: courierName,
+                  tracking: trackingNumber.trim(),
+                })
+              }
+            >
+              {assignCourier.isPending ? "Saving…" : "Assign & Move"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
