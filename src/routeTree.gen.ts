@@ -28,27 +28,12 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrackIndexRouteImport } from './routes/track.index'
-import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TrackOrderIdRouteImport } from './routes/track.$orderId'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as OrderSuccessOrderIdRouteImport } from './routes/order-success.$orderId'
 import { Route as LpOrigamiComboRouteImport } from './routes/lp.origami-combo'
 import { Route as LpAuroraLampRouteImport } from './routes/lp.aurora-lamp'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
-import { Route as AdminStaffRouteImport } from './routes/admin.staff'
-import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
-import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
-import { Route as AdminProductsRouteImport } from './routes/admin.products'
-import { Route as AdminOrdersWorkspaceRouteImport } from './routes/admin.orders-workspace'
-import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
-import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
-import { Route as AdminHomepageRouteImport } from './routes/admin.homepage'
-import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
-import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
-import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
-import { Route as AdminWebOrdersIndexRouteImport } from './routes/admin.web-orders.index'
-import { Route as AdminWebOrdersOrderIdRouteImport } from './routes/admin.web-orders.$orderId'
-import { Route as AdminSettingsIntegrationsRouteImport } from './routes/admin.settings.integrations'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -145,11 +130,6 @@ const TrackIndexRoute = TrackIndexRouteImport.update({
   path: '/track/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRoute,
-} as any)
 const TrackOrderIdRoute = TrackOrderIdRouteImport.update({
   id: '/track/$orderId',
   path: '/track/$orderId',
@@ -180,83 +160,12 @@ const CategorySlugRoute = CategorySlugRouteImport.update({
   path: '/category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminStaffRoute = AdminStaffRouteImport.update({
-  id: '/staff',
-  path: '/staff',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSettingsRoute = AdminSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminReviewsRoute = AdminReviewsRouteImport.update({
-  id: '/reviews',
-  path: '/reviews',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminProductsRoute = AdminProductsRouteImport.update({
-  id: '/products',
-  path: '/products',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminOrdersWorkspaceRoute = AdminOrdersWorkspaceRouteImport.update({
-  id: '/orders-workspace',
-  path: '/orders-workspace',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminOrdersRoute = AdminOrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminInventoryRoute = AdminInventoryRouteImport.update({
-  id: '/inventory',
-  path: '/inventory',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminHomepageRoute = AdminHomepageRouteImport.update({
-  id: '/homepage',
-  path: '/homepage',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminCustomersRoute = AdminCustomersRouteImport.update({
-  id: '/customers',
-  path: '/customers',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminCouponsRoute = AdminCouponsRouteImport.update({
-  id: '/coupons',
-  path: '/coupons',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
-  id: '/categories',
-  path: '/categories',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminWebOrdersIndexRoute = AdminWebOrdersIndexRouteImport.update({
-  id: '/web-orders/',
-  path: '/web-orders/',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminWebOrdersOrderIdRoute = AdminWebOrdersOrderIdRouteImport.update({
-  id: '/web-orders/$orderId',
-  path: '/web-orders/$orderId',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSettingsIntegrationsRoute =
-  AdminSettingsIntegrationsRouteImport.update({
-    id: '/integrations',
-    path: '/integrations',
-    getParentRoute: () => AdminSettingsRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
-  '/admin': typeof AdminRouteWithChildren
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -271,33 +180,19 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
-  '/admin/categories': typeof AdminCategoriesRoute
-  '/admin/coupons': typeof AdminCouponsRoute
-  '/admin/customers': typeof AdminCustomersRoute
-  '/admin/homepage': typeof AdminHomepageRoute
-  '/admin/inventory': typeof AdminInventoryRoute
-  '/admin/orders': typeof AdminOrdersRoute
-  '/admin/orders-workspace': typeof AdminOrdersWorkspaceRoute
-  '/admin/products': typeof AdminProductsRoute
-  '/admin/reviews': typeof AdminReviewsRoute
-  '/admin/settings': typeof AdminSettingsRouteWithChildren
-  '/admin/staff': typeof AdminStaffRoute
   '/category/$slug': typeof CategorySlugRoute
   '/lp/aurora-lamp': typeof LpAuroraLampRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
-  '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
-  '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
-  '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
-  '/admin/web-orders/': typeof AdminWebOrdersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -312,35 +207,20 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
-  '/admin/categories': typeof AdminCategoriesRoute
-  '/admin/coupons': typeof AdminCouponsRoute
-  '/admin/customers': typeof AdminCustomersRoute
-  '/admin/homepage': typeof AdminHomepageRoute
-  '/admin/inventory': typeof AdminInventoryRoute
-  '/admin/orders': typeof AdminOrdersRoute
-  '/admin/orders-workspace': typeof AdminOrdersWorkspaceRoute
-  '/admin/products': typeof AdminProductsRoute
-  '/admin/reviews': typeof AdminReviewsRoute
-  '/admin/settings': typeof AdminSettingsRouteWithChildren
-  '/admin/staff': typeof AdminStaffRoute
   '/category/$slug': typeof CategorySlugRoute
   '/lp/aurora-lamp': typeof LpAuroraLampRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
-  '/admin': typeof AdminIndexRoute
   '/track': typeof TrackIndexRoute
-  '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
-  '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
-  '/admin/web-orders': typeof AdminWebOrdersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
-  '/admin': typeof AdminRouteWithChildren
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -355,28 +235,13 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
-  '/admin/categories': typeof AdminCategoriesRoute
-  '/admin/coupons': typeof AdminCouponsRoute
-  '/admin/customers': typeof AdminCustomersRoute
-  '/admin/homepage': typeof AdminHomepageRoute
-  '/admin/inventory': typeof AdminInventoryRoute
-  '/admin/orders': typeof AdminOrdersRoute
-  '/admin/orders-workspace': typeof AdminOrdersWorkspaceRoute
-  '/admin/products': typeof AdminProductsRoute
-  '/admin/reviews': typeof AdminReviewsRoute
-  '/admin/settings': typeof AdminSettingsRouteWithChildren
-  '/admin/staff': typeof AdminStaffRoute
   '/category/$slug': typeof CategorySlugRoute
   '/lp/aurora-lamp': typeof LpAuroraLampRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
-  '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
-  '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
-  '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
-  '/admin/web-orders/': typeof AdminWebOrdersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -399,33 +264,19 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/wishlist'
-    | '/admin/categories'
-    | '/admin/coupons'
-    | '/admin/customers'
-    | '/admin/homepage'
-    | '/admin/inventory'
-    | '/admin/orders'
-    | '/admin/orders-workspace'
-    | '/admin/products'
-    | '/admin/reviews'
-    | '/admin/settings'
-    | '/admin/staff'
     | '/category/$slug'
     | '/lp/aurora-lamp'
     | '/lp/origami-combo'
     | '/order-success/$orderId'
     | '/product/$id'
     | '/track/$orderId'
-    | '/admin/'
     | '/track/'
-    | '/admin/settings/integrations'
-    | '/admin/web-orders/$orderId'
-    | '/admin/web-orders/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/account'
+    | '/admin'
     | '/auth'
     | '/checkout'
     | '/contact'
@@ -440,28 +291,13 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/wishlist'
-    | '/admin/categories'
-    | '/admin/coupons'
-    | '/admin/customers'
-    | '/admin/homepage'
-    | '/admin/inventory'
-    | '/admin/orders'
-    | '/admin/orders-workspace'
-    | '/admin/products'
-    | '/admin/reviews'
-    | '/admin/settings'
-    | '/admin/staff'
     | '/category/$slug'
     | '/lp/aurora-lamp'
     | '/lp/origami-combo'
     | '/order-success/$orderId'
     | '/product/$id'
     | '/track/$orderId'
-    | '/admin'
     | '/track'
-    | '/admin/settings/integrations'
-    | '/admin/web-orders/$orderId'
-    | '/admin/web-orders'
   id:
     | '__root__'
     | '/'
@@ -482,35 +318,20 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/wishlist'
-    | '/admin/categories'
-    | '/admin/coupons'
-    | '/admin/customers'
-    | '/admin/homepage'
-    | '/admin/inventory'
-    | '/admin/orders'
-    | '/admin/orders-workspace'
-    | '/admin/products'
-    | '/admin/reviews'
-    | '/admin/settings'
-    | '/admin/staff'
     | '/category/$slug'
     | '/lp/aurora-lamp'
     | '/lp/origami-combo'
     | '/order-success/$orderId'
     | '/product/$id'
     | '/track/$orderId'
-    | '/admin/'
     | '/track/'
-    | '/admin/settings/integrations'
-    | '/admin/web-orders/$orderId'
-    | '/admin/web-orders/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
-  AdminRoute: typeof AdminRouteWithChildren
+  AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
@@ -669,13 +490,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/track/$orderId': {
       id: '/track/$orderId'
       path: '/track/$orderId'
@@ -718,160 +532,14 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/staff': {
-      id: '/admin/staff'
-      path: '/staff'
-      fullPath: '/admin/staff'
-      preLoaderRoute: typeof AdminStaffRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/settings': {
-      id: '/admin/settings'
-      path: '/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminSettingsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/reviews': {
-      id: '/admin/reviews'
-      path: '/reviews'
-      fullPath: '/admin/reviews'
-      preLoaderRoute: typeof AdminReviewsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/products': {
-      id: '/admin/products'
-      path: '/products'
-      fullPath: '/admin/products'
-      preLoaderRoute: typeof AdminProductsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/orders-workspace': {
-      id: '/admin/orders-workspace'
-      path: '/orders-workspace'
-      fullPath: '/admin/orders-workspace'
-      preLoaderRoute: typeof AdminOrdersWorkspaceRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/orders': {
-      id: '/admin/orders'
-      path: '/orders'
-      fullPath: '/admin/orders'
-      preLoaderRoute: typeof AdminOrdersRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/inventory': {
-      id: '/admin/inventory'
-      path: '/inventory'
-      fullPath: '/admin/inventory'
-      preLoaderRoute: typeof AdminInventoryRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/homepage': {
-      id: '/admin/homepage'
-      path: '/homepage'
-      fullPath: '/admin/homepage'
-      preLoaderRoute: typeof AdminHomepageRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/customers': {
-      id: '/admin/customers'
-      path: '/customers'
-      fullPath: '/admin/customers'
-      preLoaderRoute: typeof AdminCustomersRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/coupons': {
-      id: '/admin/coupons'
-      path: '/coupons'
-      fullPath: '/admin/coupons'
-      preLoaderRoute: typeof AdminCouponsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/categories': {
-      id: '/admin/categories'
-      path: '/categories'
-      fullPath: '/admin/categories'
-      preLoaderRoute: typeof AdminCategoriesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/web-orders/': {
-      id: '/admin/web-orders/'
-      path: '/web-orders'
-      fullPath: '/admin/web-orders/'
-      preLoaderRoute: typeof AdminWebOrdersIndexRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/web-orders/$orderId': {
-      id: '/admin/web-orders/$orderId'
-      path: '/web-orders/$orderId'
-      fullPath: '/admin/web-orders/$orderId'
-      preLoaderRoute: typeof AdminWebOrdersOrderIdRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/settings/integrations': {
-      id: '/admin/settings/integrations'
-      path: '/integrations'
-      fullPath: '/admin/settings/integrations'
-      preLoaderRoute: typeof AdminSettingsIntegrationsRouteImport
-      parentRoute: typeof AdminSettingsRoute
-    }
   }
 }
-
-interface AdminSettingsRouteChildren {
-  AdminSettingsIntegrationsRoute: typeof AdminSettingsIntegrationsRoute
-}
-
-const AdminSettingsRouteChildren: AdminSettingsRouteChildren = {
-  AdminSettingsIntegrationsRoute: AdminSettingsIntegrationsRoute,
-}
-
-const AdminSettingsRouteWithChildren = AdminSettingsRoute._addFileChildren(
-  AdminSettingsRouteChildren,
-)
-
-interface AdminRouteChildren {
-  AdminCategoriesRoute: typeof AdminCategoriesRoute
-  AdminCouponsRoute: typeof AdminCouponsRoute
-  AdminCustomersRoute: typeof AdminCustomersRoute
-  AdminHomepageRoute: typeof AdminHomepageRoute
-  AdminInventoryRoute: typeof AdminInventoryRoute
-  AdminOrdersRoute: typeof AdminOrdersRoute
-  AdminOrdersWorkspaceRoute: typeof AdminOrdersWorkspaceRoute
-  AdminProductsRoute: typeof AdminProductsRoute
-  AdminReviewsRoute: typeof AdminReviewsRoute
-  AdminSettingsRoute: typeof AdminSettingsRouteWithChildren
-  AdminStaffRoute: typeof AdminStaffRoute
-  AdminIndexRoute: typeof AdminIndexRoute
-  AdminWebOrdersOrderIdRoute: typeof AdminWebOrdersOrderIdRoute
-  AdminWebOrdersIndexRoute: typeof AdminWebOrdersIndexRoute
-}
-
-const AdminRouteChildren: AdminRouteChildren = {
-  AdminCategoriesRoute: AdminCategoriesRoute,
-  AdminCouponsRoute: AdminCouponsRoute,
-  AdminCustomersRoute: AdminCustomersRoute,
-  AdminHomepageRoute: AdminHomepageRoute,
-  AdminInventoryRoute: AdminInventoryRoute,
-  AdminOrdersRoute: AdminOrdersRoute,
-  AdminOrdersWorkspaceRoute: AdminOrdersWorkspaceRoute,
-  AdminProductsRoute: AdminProductsRoute,
-  AdminReviewsRoute: AdminReviewsRoute,
-  AdminSettingsRoute: AdminSettingsRouteWithChildren,
-  AdminStaffRoute: AdminStaffRoute,
-  AdminIndexRoute: AdminIndexRoute,
-  AdminWebOrdersOrderIdRoute: AdminWebOrdersOrderIdRoute,
-  AdminWebOrdersIndexRoute: AdminWebOrdersIndexRoute,
-}
-
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
-  AdminRoute: AdminRouteWithChildren,
+  AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
