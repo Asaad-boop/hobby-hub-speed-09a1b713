@@ -42,7 +42,7 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
   }, [open, onClose]);
 
   const reset = () => {
-    setRating(0); setHover(0); setName(""); setLocation(""); setText(""); setPhotos([]); setSubmitted(false); setError("");
+    setRating(0); setHover(0); setName(""); setPhone(""); setText(""); setPhotos([]); setSubmitted(false); setError("");
   };
 
   const handleClose = () => { reset(); onClose(); };
