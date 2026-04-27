@@ -80,6 +80,20 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
     });
   };
 
+  const handleVideos = (files: FileList | null) => {
+    if (!files) return;
+    setError("");
+    const remaining = MAX_VIDEOS - videos.length;
+    const valid = Array.from(files).slice(0, remaining).filter((f) => {
+      if (!f.type.startsWith("video/")) { setError("Only video files allowed"); return false; }
+      if (f.size > MAX_VIDEO_MB * 1024 * 1024) { setError(`Each video must be under ${MAX_VIDEO_MB}MB`); return false; }
+      return true;
+    });
+    const urls = valid.map((f) => URL.createObjectURL(f));
+    setVideos((v) => [...v, ...urls].slice(0, MAX_VIDEOS));
+    setVideoFiles((v) => [...v, ...valid].slice(0, MAX_VIDEOS));
+  };
+
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -96,7 +110,7 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
 
     setSubmitting(true);
     try {
-      await onSubmit({ name: trimmedName, location: trimmedLoc, rating, text: trimmedText, photos, photoFiles });
+      await onSubmit({ name: trimmedName, location: trimmedLoc, rating, text: trimmedText, photos, photoFiles, videos, videoFiles });
       setSubmitted(true);
       setTimeout(handleClose, 1600);
     } catch (err) {
