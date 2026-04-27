@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Star, BadgeCheck, ChevronDown, MessageSquare, Loader2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Star, BadgeCheck, ChevronDown, MessageSquare, Loader2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { computeBreakdown, type ReviewWithProfile } from "@/lib/reviews";
 
 type Props = {
@@ -15,6 +15,22 @@ const PAGE_SIZE = 10;
 export default function ReviewsList({ reviews, loading, fallbackRating = 0, fallbackCount = 0 }: Props) {
   const [sort, setSort] = useState<Sort>("newest");
   const [page, setPage] = useState(1);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightbox(null);
+      if (e.key === "ArrowRight") setLightbox((l) => (l ? { ...l, index: (l.index + 1) % l.images.length } : l));
+      if (e.key === "ArrowLeft") setLightbox((l) => (l ? { ...l, index: (l.index - 1 + l.images.length) % l.images.length } : l));
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [lightbox]);
 
   const breakdown = useMemo(() => computeBreakdown(reviews), [reviews]);
   const sorted = useMemo(() => {
@@ -32,6 +48,7 @@ export default function ReviewsList({ reviews, loading, fallbackRating = 0, fall
   const headerCount = breakdown.total || fallbackCount;
 
   return (
+    <>
     <div className="grid gap-6 md:grid-cols-3">
       {/* Summary */}
       <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/5 to-transparent p-5 md:col-span-1 md:sticky md:top-24 md:self-start">
@@ -151,22 +168,23 @@ export default function ReviewsList({ reviews, loading, fallbackRating = 0, fall
                     <p className="mt-1.5 text-xs leading-relaxed text-foreground">{r.comment}</p>
                   )}
                   {r.images && r.images.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1.5">
+                    <div className="mt-3 flex flex-wrap gap-2">
                       {r.images.map((src, i) => (
-                        <a
+                        <button
                           key={i}
-                          href={src}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block h-16 w-16 overflow-hidden rounded-lg border border-border"
+                          type="button"
+                          onClick={() => setLightbox({ images: r.images, index: i })}
+                          className="group relative h-20 w-20 overflow-hidden rounded-xl border border-border bg-muted shadow-sm transition hover:border-primary hover:shadow-md sm:h-24 sm:w-24"
+                          aria-label={`View review photo ${i + 1}`}
                         >
                           <img
                             src={src}
                             alt={`Review photo ${i + 1}`}
                             loading="lazy"
-                            className="h-full w-full object-cover transition hover:scale-105"
+                            className="h-full w-full object-cover transition duration-300 group-hover:scale-110"
                           />
-                        </a>
+                          <span className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/10" />
+                        </button>
                       ))}
                     </div>
                   )}
@@ -186,5 +204,58 @@ export default function ReviewsList({ reviews, loading, fallbackRating = 0, fall
         )}
       </div>
     </div>
+
+    {lightbox && (
+      <div
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
+        onClick={() => setLightbox(null)}
+        role="dialog"
+        aria-modal="true"
+      >
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setLightbox(null); }}
+          className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20"
+          aria-label="Close"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        {lightbox.images.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setLightbox((l) => l ? { ...l, index: (l.index - 1 + l.images.length) % l.images.length } : l); }}
+              className="absolute left-4 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20"
+              aria-label="Previous"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setLightbox((l) => l ? { ...l, index: (l.index + 1) % l.images.length } : l); }}
+              className="absolute right-4 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20"
+              aria-label="Next"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          </>
+        )}
+
+        <img
+          src={lightbox.images[lightbox.index]}
+          alt={`Review photo ${lightbox.index + 1}`}
+          onClick={(e) => e.stopPropagation()}
+          className="max-h-[88vh] max-w-[92vw] rounded-xl object-contain shadow-2xl"
+        />
+
+        {lightbox.images.length > 1 && (
+          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+            {lightbox.index + 1} / {lightbox.images.length}
+          </div>
+        )}
+      </div>
+    )}
+    </>
   );
 }
