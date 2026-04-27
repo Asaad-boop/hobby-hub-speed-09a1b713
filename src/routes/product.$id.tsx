@@ -204,10 +204,6 @@ function ProductPage() {
     : null;
 
   const handleReviewSubmit = async (r: NewReview) => {
-    if (!eligibleOrderId) {
-      toast.error("You must have a delivered order of this product to leave a review.");
-      throw new Error("Not eligible");
-    }
     try {
       let imageUrls: string[] = [];
       if (r.photoFiles && r.photoFiles.length > 0) {
@@ -215,11 +211,12 @@ function ProductPage() {
       }
       await submitReview({
         product_id: product.id,
-        order_id: eligibleOrderId,
+        order_id: eligibleOrderId ?? null,
         rating: r.rating,
-        title: r.name ? `${r.name}${r.location ? ` · ${r.location}` : ""}` : undefined,
         comment: r.text,
         images: imageUrls,
+        guest_name: r.name,
+        guest_phone: r.location, // ReviewModal field re-used as phone
       });
       toast.success("Review submitted! Visible after admin approval.");
       setUserReviews((prev) => [r, ...prev]);
