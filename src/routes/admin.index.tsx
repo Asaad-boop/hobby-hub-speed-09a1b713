@@ -311,8 +311,8 @@ function AdminDashboard() {
         ))}
       </div>
 
-      {/* Sales chart + Pending orders */}
-      <div className="grid gap-4 lg:grid-cols-3">
+      {/* Sales chart + Live visitors + Pending orders */}
+      <div className="grid gap-4 lg:grid-cols-4">
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
             <div>
