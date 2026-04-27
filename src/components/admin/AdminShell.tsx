@@ -10,6 +10,7 @@ import {
   Boxes,
   BarChart3,
   Settings,
+  Star,
   LogOut,
   Loader2,
 } from "lucide-react";
