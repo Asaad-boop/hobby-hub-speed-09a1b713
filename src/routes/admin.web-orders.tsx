@@ -228,7 +228,7 @@ function OrderEditModal({
 
   async function save() {
     setSaving(true);
-    const { error } = await supabase.from("orders").update(form).eq("id", order.id);
+    const { error } = await supabase.from("orders").update(form as any).eq("id", order.id);
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Saved");
