@@ -1181,6 +1181,7 @@ export type Database = {
           guest_name: string | null
           guest_phone: string | null
           id: string
+          images: string[]
           is_approved: boolean
           order_id: string | null
           product_id: string
@@ -1196,6 +1197,7 @@ export type Database = {
           guest_name?: string | null
           guest_phone?: string | null
           id?: string
+          images?: string[]
           is_approved?: boolean
           order_id?: string | null
           product_id: string
@@ -1211,6 +1213,7 @@ export type Database = {
           guest_name?: string | null
           guest_phone?: string | null
           id?: string
+          images?: string[]
           is_approved?: boolean
           order_id?: string | null
           product_id?: string
