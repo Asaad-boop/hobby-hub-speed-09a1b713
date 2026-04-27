@@ -120,42 +120,43 @@ export async function submitReview(input: {
   const { data: sess } = await supabase.auth.getSession();
   const user = sess.session?.user;
 
-  // Guest submission path
-  if (!user) {
-    if (!input.guest_name || !input.guest_phone) {
-      throw new Error("Name and phone are required");
-    }
+  // Verified-buyer path: logged in AND has eligible delivered order
+  if (user && input.order_id) {
     const { error } = await supabase.from("reviews").insert({
       product_id: input.product_id,
-      user_id: null,
-      order_id: null,
+      user_id: user.id,
+      order_id: input.order_id,
       rating: input.rating,
       title: input.title?.trim() || null,
       comment: input.comment?.trim() || null,
       images: input.images ?? [],
-      guest_name: input.guest_name.trim(),
-      guest_phone: input.guest_phone.trim(),
-      is_approved: false,
     });
-    if (error) throw error;
+    if (error) {
+      if (error.code === "23505") {
+        throw new Error("You have already reviewed this product for that order.");
+      }
+      throw error;
+    }
     return;
   }
 
+  // Guest path (also used by logged-in users without an eligible order)
+  if (!input.guest_name || !input.guest_phone) {
+    throw new Error("Name and phone are required");
+  }
   const { error } = await supabase.from("reviews").insert({
     product_id: input.product_id,
-    user_id: user.id,
-    order_id: input.order_id ?? null,
+    user_id: null,
+    order_id: null,
     rating: input.rating,
     title: input.title?.trim() || null,
     comment: input.comment?.trim() || null,
     images: input.images ?? [],
+    guest_name: input.guest_name.trim(),
+    guest_phone: input.guest_phone.trim(),
+    is_approved: false,
   });
-  if (error) {
-    if (error.code === "23505") {
-      throw new Error("You have already reviewed this product for that order.");
-    }
-    throw error;
-  }
+  if (error) throw error;
 }
 
 // ─── Admin helpers ─────────────────────────────────────────────────────────
