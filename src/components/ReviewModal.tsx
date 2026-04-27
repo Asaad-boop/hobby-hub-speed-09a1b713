@@ -214,7 +214,10 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
                     <img src={src} alt={`Upload ${i + 1}`} className="h-full w-full object-cover" />
                     <button
                       type="button"
-                      onClick={() => setPhotos((p) => p.filter((_, j) => j !== i))}
+                      onClick={() => {
+                        setPhotos((p) => p.filter((_, j) => j !== i));
+                        setPhotoFiles((p) => p.filter((_, j) => j !== i));
+                      }}
                       className="absolute right-1 top-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-foreground/80 text-background opacity-0 transition group-hover:opacity-100"
                       aria-label="Remove photo"
                     >
