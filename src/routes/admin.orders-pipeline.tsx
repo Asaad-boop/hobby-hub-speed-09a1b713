@@ -97,7 +97,7 @@ function PipelinePage() {
   async function bulkUpdate(updates: Record<string, any>) {
     if (selected.size === 0) return toast.error("Select orders first");
     const ids = Array.from(selected);
-    const { error } = await supabase.from("orders").update(updates).in("id", ids);
+    const { error } = await supabase.from("orders").update(updates as any).in("id", ids);
     if (error) return toast.error(error.message);
     toast.success(`Updated ${ids.length} orders`);
     setSelected(new Set());
@@ -105,7 +105,7 @@ function PipelinePage() {
   }
 
   async function singleUpdate(id: string, updates: Record<string, any>, msg: string) {
-    const { error } = await supabase.from("orders").update(updates).eq("id", id);
+    const { error } = await supabase.from("orders").update(updates as any).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(msg);
     refetch();
