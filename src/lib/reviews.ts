@@ -146,7 +146,7 @@ export async function fetchAdminReviews(): Promise<AdminReview[]> {
       ...(r as ReviewRow),
       product_title: prod?.title ?? null,
       product_image: prod?.image ?? null,
-      customer_name: profiles.get(r.user_id) ?? null,
+      customer_name: (r.guest_name as string | null) ?? (r.user_id ? profiles.get(r.user_id) ?? null : null),
     };
   });
 }
