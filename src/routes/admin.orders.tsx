@@ -482,6 +482,61 @@ function AdminOrdersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={!!courierOrderId} onOpenChange={(o) => !o && setCourierOrderId(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Assign Courier</DialogTitle>
+            <DialogDescription>
+              Pick courier and (optional) tracking number. Order chole jabe Courier Entry stage e.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">Courier</label>
+              <Select value={courierName} onValueChange={setCourierName}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pathao">Pathao</SelectItem>
+                  <SelectItem value="steadfast">Steadfast</SelectItem>
+                  <SelectItem value="redx">Redx</SelectItem>
+                  <SelectItem value="sundarban">Sundarban</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                Tracking number (optional)
+              </label>
+              <Input
+                value={trackingNumber}
+                onChange={(e) => setTrackingNumber(e.target.value)}
+                placeholder="e.g. PTH123456"
+              />
+            </div>
+          </div>
+          <Separator />
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setCourierOrderId(null)}>
+              Cancel
+            </Button>
+            <Button
+              disabled={assignCourier.isPending}
+              onClick={() =>
+                courierOrderId &&
+                assignCourier.mutate({
+                  id: courierOrderId,
+                  courier: courierName,
+                  tracking: trackingNumber.trim(),
+                })
+              }
+            >
+              {assignCourier.isPending ? "Saving…" : "Assign & Move"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
