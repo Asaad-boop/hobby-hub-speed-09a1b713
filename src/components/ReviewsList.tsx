@@ -48,6 +48,7 @@ export default function ReviewsList({ reviews, loading, fallbackRating = 0, fall
   const headerCount = breakdown.total || fallbackCount;
 
   return (
+    <>
     <div className="grid gap-6 md:grid-cols-3">
       {/* Summary */}
       <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/5 to-transparent p-5 md:col-span-1 md:sticky md:top-24 md:self-start">
