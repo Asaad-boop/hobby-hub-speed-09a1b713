@@ -21,7 +21,9 @@ function AdminLayout() {
   const navigate = useNavigate();
   // Customer service and operations can also access the admin shell, but with
   // a restricted sidebar.
-  const allowedAccess = isAdmin || hasRole(["customer_service", "operations"]);
+  const allowedAccess =
+    isAdmin ||
+    hasRole(["customer_service", "operations", "moderator", "packer", "accountant"]);
 
   useEffect(() => {
     if (!loading && !user) {
