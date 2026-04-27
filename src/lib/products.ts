@@ -78,6 +78,8 @@ const toProduct = (r: ProductRow): Product => {
     description: r.description ?? "",
     isNewArrival: r.is_new_arrival,
     isFeatured: r.is_featured,
+    shippingFeeInside: r.shipping_fee_inside != null ? Number(r.shipping_fee_inside) : null,
+    shippingFeeOutside: r.shipping_fee_outside != null ? Number(r.shipping_fee_outside) : null,
   };
 };
 
