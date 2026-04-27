@@ -271,6 +271,7 @@ function ReviewsPage() {
                   <th className="px-3 py-2">Customer</th>
                   <th className="px-3 py-2">Rating</th>
                   <th className="px-3 py-2">Comment</th>
+                  <th className="px-3 py-2">Photos</th>
                   <th className="px-3 py-2">Status</th>
                   <th className="px-3 py-2">Date</th>
                   <th className="px-3 py-2 text-right">Actions</th>
