@@ -102,10 +102,11 @@ function Checkout() {
   const bumpItem = allProducts[1] ?? allProducts[0];
   const bumpPrice = 199;
   const defaultShippingFee = shipMethod === "inside" ? 60 : 130;
-  const overrideFees = items
-    .map((i) => (shipMethod === "inside" ? i.product.shippingFeeInside : i.product.shippingFeeOutside))
-    .filter((v): v is number => typeof v === "number" && !Number.isNaN(v));
-  const shippingFee = overrideFees.length ? Math.max(...overrideFees, ...(overrideFees.length === items.length ? [] : [defaultShippingFee])) : defaultShippingFee;
+  const perItemFees = items.map((i) => {
+    const override = shipMethod === "inside" ? i.product.shippingFeeInside : i.product.shippingFeeOutside;
+    return typeof override === "number" && !Number.isNaN(override) ? override : defaultShippingFee;
+  });
+  const shippingFee = perItemFees.length ? Math.max(...perItemFees) : defaultShippingFee;
   const subtotalWithBump = total + (bump ? bumpPrice : 0);
   const couponDiscount = appliedCoupon
     ? appliedCoupon.type === "percentage"
