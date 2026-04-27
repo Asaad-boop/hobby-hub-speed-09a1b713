@@ -91,12 +91,29 @@ export async function fetchEligibleOrderId(productId: string): Promise<string | 
   return row?.order_id ?? null;
 }
 
+export async function uploadReviewImages(files: File[]): Promise<string[]> {
+  const urls: string[] = [];
+  for (const file of files) {
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
+    const { error } = await supabase.storage.from("review-images").upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
+    if (error) throw error;
+    const { data } = supabase.storage.from("review-images").getPublicUrl(path);
+    urls.push(data.publicUrl);
+  }
+  return urls;
+}
+
 export async function submitReview(input: {
   product_id: string;
   order_id: string;
   rating: number;
   title?: string;
   comment?: string;
+  images?: string[];
 }) {
   const { data: sess } = await supabase.auth.getSession();
   const user = sess.session?.user;
@@ -109,6 +126,7 @@ export async function submitReview(input: {
     rating: input.rating,
     title: input.title?.trim() || null,
     comment: input.comment?.trim() || null,
+    images: input.images ?? [],
   });
   if (error) {
     if (error.code === "23505") {
