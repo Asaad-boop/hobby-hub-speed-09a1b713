@@ -647,15 +647,29 @@ function ExistingUserAssign({ onDone }: { onDone: () => void }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<AppRole>("customer_service");
   const assignRoleByEmailFn = useServerFn(assignRoleByEmail);
+  const queryClient = useQueryClient();
 
   const mut = useMutation({
-    mutationFn: () => assignRoleByEmailFn({ data: { email, role } }),
-    onSuccess: () => {
-      toast.success(`Role "${role}" assigned to ${email}`);
+    mutationFn: async () => {
+      const trimmedEmail = email.trim().toLowerCase();
+      if (!trimmedEmail || !trimmedEmail.includes("@")) {
+        throw new Error("Please enter a valid email address");
+      }
+      return assignRoleByEmailFn({ data: { email: trimmedEmail, role } });
+    },
+    onSuccess: async (res) => {
+      toast.success(
+        `Role "${role}" assigned to ${email} (user id: ${res.user_id.slice(0, 8)}…)`,
+      );
       setEmail("");
+      await queryClient.invalidateQueries({ queryKey: ["staff", "list"] });
+      await queryClient.refetchQueries({ queryKey: ["staff", "list"] });
       onDone();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      console.error("[assignRole] failed:", e);
+      toast.error(e.message || "Failed to assign role");
+    },
   });
 
   return (
