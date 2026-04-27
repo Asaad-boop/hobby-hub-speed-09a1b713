@@ -23,7 +23,7 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [name, setName] = useState("");
-  const [location, setLocation] = useState("");
+  const [phone, setPhone] = useState("");
   const [text, setText] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
