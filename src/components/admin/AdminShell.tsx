@@ -27,6 +27,7 @@ const NAV: NavItem[] = [
   { title: "Categories", url: "/admin/categories", icon: Tags },
   { title: "Customers", url: "/admin/customers", icon: UserCircle },
   { title: "Inventory", url: "/admin/inventory", icon: Boxes },
+  { title: "Reviews", url: "/admin/reviews", icon: Star },
   { title: "Reports", url: "/admin/reports", icon: BarChart3 },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
