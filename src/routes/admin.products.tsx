@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Search, Trash2, Pencil } from "lucide-react";
+import { Plus, Search, Trash2, Pencil, Upload, X, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   PageHeader, Card, Loading, Empty, Badge, Btn, Input, Modal, Textarea, Select,
@@ -21,6 +21,7 @@ type Product = {
   old_price: number | null;
   stock: number;
   image: string;
+  gallery: string[];
   description: string;
   is_active: boolean;
   is_featured: boolean;
@@ -75,7 +76,7 @@ function ProductsPage() {
               <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
               <Input placeholder="Search…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-7 w-64" />
             </div>
-            <Btn variant="primary" onClick={() => setEditing({ is_active: true, stock: 0, price: 0, title: "", slug: "", description: "", image: "" })}>
+            <Btn variant="primary" onClick={() => setEditing({ is_active: true, stock: 0, price: 0, title: "", slug: "", description: "", image: "", gallery: [] })}>
               <Plus className="h-3.5 w-3.5" /> New product
             </Btn>
           </>
