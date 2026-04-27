@@ -1178,6 +1178,8 @@ export type Database = {
           admin_note: string | null
           comment: string | null
           created_at: string
+          guest_name: string | null
+          guest_phone: string | null
           id: string
           is_approved: boolean
           order_id: string | null
@@ -1185,12 +1187,14 @@ export type Database = {
           rating: number
           title: string | null
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           admin_note?: string | null
           comment?: string | null
           created_at?: string
+          guest_name?: string | null
+          guest_phone?: string | null
           id?: string
           is_approved?: boolean
           order_id?: string | null
@@ -1198,12 +1202,14 @@ export type Database = {
           rating: number
           title?: string | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           admin_note?: string | null
           comment?: string | null
           created_at?: string
+          guest_name?: string | null
+          guest_phone?: string | null
           id?: string
           is_approved?: boolean
           order_id?: string | null
@@ -1211,7 +1217,7 @@ export type Database = {
           rating?: number
           title?: string | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
