@@ -89,7 +89,7 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
 
     setSubmitting(true);
     try {
-      await onSubmit({ name: trimmedName, location: trimmedLoc, rating, text: trimmedText, photos });
+      await onSubmit({ name: trimmedName, location: trimmedLoc, rating, text: trimmedText, photos, photoFiles });
       setSubmitted(true);
       setTimeout(handleClose, 1600);
     } catch (err) {
