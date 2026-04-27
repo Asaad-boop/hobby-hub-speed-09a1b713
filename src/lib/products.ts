@@ -22,6 +22,8 @@ export type Product = {
   description: string;
   isNewArrival?: boolean;
   isFeatured?: boolean;
+  shippingFeeInside?: number | null;
+  shippingFeeOutside?: number | null;
 };
 
 type ProductRow = {
