@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Star, BadgeCheck, ChevronDown, MessageSquare, Loader2, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, BadgeCheck, ChevronDown, MessageSquare, Loader2, X, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { computeBreakdown, type ReviewWithProfile } from "@/lib/reviews";
 
 type Props = {
@@ -185,6 +185,22 @@ export default function ReviewsList({ reviews, loading, fallbackRating = 0, fall
                           />
                           <span className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/10" />
                         </button>
+                      ))}
+                    </div>
+                  )}
+                  {r.videos && r.videos.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {r.videos.map((src, i) => (
+                        <video
+                          key={i}
+                          src={src}
+                          controls
+                          preload="metadata"
+                          playsInline
+                          className="h-40 w-auto max-w-full rounded-xl border border-border bg-black shadow-sm sm:h-48"
+                        >
+                          <track kind="captions" />
+                        </video>
                       ))}
                     </div>
                   )}
