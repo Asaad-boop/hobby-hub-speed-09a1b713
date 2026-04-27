@@ -118,14 +118,41 @@ export const createStaffUser = createServerFn({ method: "POST" })
       const password = String(input?.password ?? "");
       const display_name = input?.display_name?.trim() || null;
       const role = input?.role;
-      if (!email || !email.includes("@")) throw new Error("Valid email required");
-      if (password.length < 8) throw new Error("Password must be at least 8 characters");
-      if (!STAFF_ROLES.includes(role)) throw new Error("Invalid role");
+      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email) throw new Error("Email is required");
+      if (!emailRe.test(email)) throw new Error("Please enter a valid email address (e.g. name@example.com)");
+      if (email.length > 255) throw new Error("Email must be less than 255 characters");
+      if (!password) throw new Error("Password is required");
+      if (password.length < 8) throw new Error("Password must be at least 8 characters long");
+      if (password.length > 72) throw new Error("Password must be less than 72 characters");
+      if (display_name && display_name.length > 100) throw new Error("Display name must be less than 100 characters");
+      if (!role) throw new Error("Role is required");
+      if (!STAFF_ROLES.includes(role)) throw new Error(`Invalid role "${role}". Must be one of: ${STAFF_ROLES.join(", ")}`);
       return { email, password, display_name, role };
     },
   )
   .handler(async ({ context, data }) => {
     await assertAdmin(context.userId);
+
+    // Pre-check: does a user with this email already exist?
+    const existingUserId = await findUserIdByEmail(data.email);
+    if (existingUserId) {
+      // Check if they already have this role
+      const { data: existingRole } = await supabaseAdmin
+        .from("user_roles")
+        .select("id")
+        .eq("user_id", existingUserId)
+        .eq("role", data.role)
+        .maybeSingle();
+      if (existingRole) {
+        throw new Error(
+          `A user with email "${data.email}" already exists and already has the "${data.role}" role. Use "Assign existing" to manage their roles instead.`,
+        );
+      }
+      throw new Error(
+        `A user with email "${data.email}" already exists. Use "Assign existing" to add the "${data.role}" role to them instead of creating a new account.`,
+      );
+    }
 
     const { data: created, error: createErr } =
       await supabaseAdmin.auth.admin.createUser({
@@ -135,7 +162,7 @@ export const createStaffUser = createServerFn({ method: "POST" })
         user_metadata: data.display_name ? { display_name: data.display_name } : {},
       });
     if (createErr || !created.user) {
-      throw new Error(createErr?.message ?? "Failed to create user");
+      throw new Error(humanizeAuthError(createErr, data.email));
     }
 
     // Profile is auto-created via trigger; ensure display_name is set.
@@ -149,7 +176,11 @@ export const createStaffUser = createServerFn({ method: "POST" })
     const { error: roleErr } = await supabaseAdmin
       .from("user_roles")
       .insert({ user_id: created.user.id, role: data.role });
-    if (roleErr) throw new Error(roleErr.message);
+    if (roleErr) {
+      throw new Error(
+        `User account "${data.email}" was created, but assigning the "${data.role}" role failed: ${roleErr.message}. You can retry from "Assign existing".`,
+      );
+    }
 
     return { success: true as const, user_id: created.user.id };
   });
