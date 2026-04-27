@@ -207,7 +207,12 @@ function ProductPage() {
     try {
       let imageUrls: string[] = [];
       if (r.photoFiles && r.photoFiles.length > 0) {
-        imageUrls = await uploadReviewImages(r.photoFiles);
+        try {
+          imageUrls = await uploadReviewImages(r.photoFiles);
+        } catch (upErr) {
+          const m = upErr instanceof Error ? upErr.message : String(upErr);
+          throw new Error(`Image upload failed: ${m}`);
+        }
       }
       await submitReview({
         product_id: product.id,
@@ -218,12 +223,17 @@ function ProductPage() {
         guest_name: r.name,
         guest_phone: r.location, // ReviewModal field re-used as phone
       });
-      toast.success("Review submitted! Visible after admin approval.");
+      toast.success("Review submitted!", {
+        description: "Your review is awaiting admin approval and will appear once approved.",
+      });
       setUserReviews((prev) => [r, ...prev]);
       qc.invalidateQueries({ queryKey: ["product_reviews", product.id] });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to submit review";
-      toast.error(msg);
+      toast.error("Couldn't submit review", {
+        description: msg,
+        duration: 8000,
+      });
       throw err;
     }
   };
