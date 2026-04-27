@@ -128,7 +128,7 @@ function WebOrdersInboxPage() {
   const allowed = hasRole(["admin", "customer_service"]);
   const queryClient = useQueryClient();
   const { tab, q } = Route.useSearch();
-  const navigate = useNavigate({ from: "/admin/web-orders" });
+  const navigate = useNavigate({ from: "/admin/web-orders/" });
 
   const [searchInput, setSearchInput] = useState(q);
 
