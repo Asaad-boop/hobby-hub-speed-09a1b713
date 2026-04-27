@@ -75,10 +75,11 @@ export function useMyPermissions() {
     return () => sub.subscription.unsubscribe();
   }, [qc]);
 
+  const perms = data as PermissionMap;
   const has = (key: PermissionKey): boolean => {
     if (isAdmin) return true;
-    return data[key] === true;
+    return perms[key] === true;
   };
 
-  return { permissions: data as PermissionMap, has, isAdmin, loading: isLoading };
+  return { permissions: perms, has, isAdmin, loading: isLoading };
 }
