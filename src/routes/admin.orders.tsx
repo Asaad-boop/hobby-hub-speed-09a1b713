@@ -234,7 +234,27 @@ function AdminOrdersPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  return (
+  const assignCourier = useMutation({
+    mutationFn: async ({ id, courier, tracking }: { id: string; courier: string; tracking: string }) => {
+      const { error } = await supabase
+        .from("orders")
+        .update({
+          status: "courier_entry" as OrderStatus,
+          courier_name: courier,
+          tracking_number: tracking || null,
+          courier_assigned_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Courier assigned");
+      setCourierOrderId(null);
+      setTrackingNumber("");
+      queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
