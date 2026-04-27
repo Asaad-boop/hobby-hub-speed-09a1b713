@@ -141,7 +141,7 @@ function AccessDeniedScreen({ email, roles }: { email: string; roles: AppRole[] 
                   aria-label="Copy email"
                 >
                   {copied ? (
-                    <Check className="h-3.5 w-3.5 text-green-600" />
+                    <Check className="h-3.5 w-3.5 text-primary" />
                   ) : (
                     <Copy className="h-3.5 w-3.5 text-muted-foreground" />
                   )}
