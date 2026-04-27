@@ -33,15 +33,20 @@ export async function fetchProductReviews(productId: string): Promise<ReviewWith
   const list = (reviews ?? []) as ReviewRow[];
   if (list.length === 0) return [];
 
-  const userIds = Array.from(new Set(list.map((r) => r.user_id)));
-  const { data: profiles } = await supabase
-    .from("profiles")
-    .select("id, display_name")
-    .in("id", userIds);
-  const nameMap = new Map<string, string | null>();
-  (profiles ?? []).forEach((p) => nameMap.set(p.id, p.display_name));
+  const userIds = Array.from(new Set(list.map((r) => r.user_id).filter((id): id is string => !!id)));
+  const profileMap = new Map<string, string | null>();
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, display_name")
+      .in("id", userIds);
+    (profiles ?? []).forEach((p) => profileMap.set(p.id, p.display_name));
+  }
 
-  return list.map((r) => ({ ...r, display_name: nameMap.get(r.user_id) ?? null }));
+  return list.map((r) => ({
+    ...r,
+    display_name: r.guest_name ?? (r.user_id ? profileMap.get(r.user_id) ?? null : null),
+  }));
 }
 
 export type RatingBreakdown = {
