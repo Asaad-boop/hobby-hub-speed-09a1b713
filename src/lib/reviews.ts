@@ -107,6 +107,23 @@ export async function uploadReviewImages(files: File[]): Promise<string[]> {
   return urls;
 }
 
+function formatSupabaseError(error: { message?: string; code?: string; details?: string; hint?: string }, fallback: string): Error {
+  // Map common Postgres / PostgREST errors to friendly explanations
+  const code = error.code;
+  const raw = [error.message, error.details, error.hint].filter(Boolean).join(" — ");
+
+  if (code === "23505") return new Error("You have already submitted a review for this product.");
+  if (code === "23514") return new Error(`Validation failed: ${raw || "a value is out of allowed range."}`);
+  if (code === "23502") return new Error(`Missing required field: ${error.message || raw}`);
+  if (code === "42501" || /row-level security/i.test(error.message || "")) {
+    return new Error(
+      `Permission denied by server. ${raw || ""} (Likely cause: the form fields don't satisfy the review insert rules — name ≥ 2 chars, phone ≥ 6 chars, rating 1–5.)`,
+    );
+  }
+  if (raw) return new Error(`${fallback}: ${raw}`);
+  return new Error(fallback);
+}
+
 export async function submitReview(input: {
   product_id: string;
   order_id?: string | null;
@@ -120,6 +137,12 @@ export async function submitReview(input: {
   const { data: sess } = await supabase.auth.getSession();
   const user = sess.session?.user;
 
+  // Pre-flight client-side validation with clear messages
+  if (!input.product_id) throw new Error("Missing product reference.");
+  if (!Number.isInteger(input.rating) || input.rating < 1 || input.rating > 5) {
+    throw new Error("Please choose a star rating between 1 and 5.");
+  }
+
   // Verified-buyer path: logged in AND has eligible delivered order
   if (user && input.order_id) {
     const { error } = await supabase.from("reviews").insert({
@@ -131,19 +154,16 @@ export async function submitReview(input: {
       comment: input.comment?.trim() || null,
       images: input.images ?? [],
     });
-    if (error) {
-      if (error.code === "23505") {
-        throw new Error("You have already reviewed this product for that order.");
-      }
-      throw error;
-    }
+    if (error) throw formatSupabaseError(error, "Could not submit your review");
     return;
   }
 
   // Guest path (also used by logged-in users without an eligible order)
-  if (!input.guest_name || !input.guest_phone) {
-    throw new Error("Name and phone are required");
-  }
+  const name = input.guest_name?.trim() ?? "";
+  const phone = input.guest_phone?.trim() ?? "";
+  if (name.length < 2) throw new Error("Please enter your name (at least 2 characters).");
+  if (phone.length < 6) throw new Error("Please enter a valid phone number (at least 6 digits).");
+
   const { error } = await supabase.from("reviews").insert({
     product_id: input.product_id,
     user_id: null,
@@ -152,11 +172,11 @@ export async function submitReview(input: {
     title: input.title?.trim() || null,
     comment: input.comment?.trim() || null,
     images: input.images ?? [],
-    guest_name: input.guest_name.trim(),
-    guest_phone: input.guest_phone.trim(),
+    guest_name: name,
+    guest_phone: phone,
     is_approved: false,
   });
-  if (error) throw error;
+  if (error) throw formatSupabaseError(error, "Could not submit your review");
 }
 
 // ─── Admin helpers ─────────────────────────────────────────────────────────
