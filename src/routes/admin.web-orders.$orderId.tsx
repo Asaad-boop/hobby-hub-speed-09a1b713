@@ -106,6 +106,13 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
   on_hold: "On Hold",
   advance_payment_pending: "Advance Pending",
   incomplete: "Incomplete",
+  ready_to_pack: "Ready to Pack",
+  courier_entry: "Courier Entry",
+  exchange: "Exchange",
+  paid_return: "Paid Return",
+  unpaid_return: "Unpaid Return",
+  partial_return: "Partial Return",
+  pending_return: "Pending Return",
 };
 
 const STATUS_TONES: Record<OrderStatus, string> = {
@@ -126,6 +133,13 @@ const STATUS_TONES: Record<OrderStatus, string> = {
   on_hold: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 border-yellow-500/30",
   advance_payment_pending: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/30",
   incomplete: "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/30",
+  ready_to_pack: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30",
+  courier_entry: "bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30",
+  exchange: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30",
+  paid_return: "bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/30",
+  unpaid_return: "bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/30",
+  partial_return: "bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/30",
+  pending_return: "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/30",
 };
 
 type OrderWithItems = OrderRow & {
@@ -514,6 +528,10 @@ function WebOrderDetailPage() {
       user_id: null,
       variant_id: null,
       variant_label: null,
+      unit_price: p.price,
+      discount_amount: 0,
+      discount_type: "flat",
+      line_total: p.price,
     };
     setItems((prev) => [...prev, newItem]);
     toast.success(`Added ${p.title}`);

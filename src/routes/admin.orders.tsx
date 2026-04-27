@@ -88,6 +88,13 @@ const statusMeta: Record<OrderStatus, { label: string; className: string; icon: 
   on_hold: { label: "On Hold", className: "bg-muted text-muted-foreground border-border", icon: Clock },
   advance_payment_pending: { label: "Advance Pending", className: "bg-yellow-500/10 text-yellow-700 border-yellow-500/30", icon: Clock },
   incomplete: { label: "Incomplete", className: "bg-muted text-muted-foreground border-border", icon: AlertTriangle },
+  ready_to_pack: { label: "Ready to Pack", className: "bg-blue-500/10 text-blue-700 border-blue-500/30", icon: Package },
+  courier_entry: { label: "Courier Entry", className: "bg-teal-500/10 text-teal-700 border-teal-500/30", icon: Truck },
+  exchange: { label: "Exchange", className: "bg-amber-500/10 text-amber-700 border-amber-500/30", icon: Repeat },
+  paid_return: { label: "Paid Return", className: "bg-orange-500/10 text-orange-700 border-orange-500/30", icon: RotateCcw },
+  unpaid_return: { label: "Unpaid Return", className: "bg-orange-500/10 text-orange-700 border-orange-500/30", icon: RotateCcw },
+  partial_return: { label: "Partial Return", className: "bg-orange-500/10 text-orange-700 border-orange-500/30", icon: RotateCcw },
+  pending_return: { label: "Pending Return", className: "bg-muted text-muted-foreground border-border", icon: Clock },
 };
 
 function formatDate(iso: string) {
@@ -165,6 +172,13 @@ function AdminOrdersPage() {
       on_hold: 0,
       advance_payment_pending: 0,
       incomplete: 0,
+      ready_to_pack: 0,
+      courier_entry: 0,
+      exchange: 0,
+      paid_return: 0,
+      unpaid_return: 0,
+      partial_return: 0,
+      pending_return: 0,
     };
     for (const o of orders) c[o.status]++;
     return c;
