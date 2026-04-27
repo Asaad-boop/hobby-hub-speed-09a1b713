@@ -179,12 +179,12 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
                 />
               </div>
               <div>
-                <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Location *</label>
+                <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Phone *</label>
                 <input
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  maxLength={50}
-                  placeholder="e.g. Dhaka"
+                  maxLength={20}
+                  placeholder="01XXXXXXXXX"
                   className="mt-1 w-full rounded-xl border-2 border-border bg-background px-4 py-3 text-sm font-semibold outline-none transition focus:border-primary"
                 />
               </div>
