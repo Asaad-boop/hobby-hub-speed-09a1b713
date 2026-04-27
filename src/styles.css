@@ -244,3 +244,20 @@
 }
 .cta-bump { animation: cta-bump 2.4s ease-in-out infinite; transform-origin: center; }
 .cta-bump:hover { animation-play-state: paused; }
+
+@keyframes buy-jiggle {
+  0%, 60%, 100% { transform: translateY(0) scale(1); }
+  65%           { transform: translateY(-6px) scale(1.04) rotate(-1.5deg); }
+  72%           { transform: translateY(0) scale(0.98) rotate(1.5deg); }
+  78%           { transform: translateY(-3px) scale(1.02) rotate(-1deg); }
+  84%           { transform: translateY(0) scale(1) rotate(0); }
+}
+@keyframes buy-glow {
+  0%, 100% { box-shadow: 0 8px 20px -4px var(--primary), 0 0 0 0 oklch(from var(--primary) l c h / 0.55); }
+  50%      { box-shadow: 0 12px 28px -4px var(--primary), 0 0 0 12px oklch(from var(--primary) l c h / 0); }
+}
+.buy-jiggle {
+  animation: buy-jiggle 1.8s ease-in-out infinite, buy-glow 1.8s ease-in-out infinite;
+  transform-origin: center;
+}
+.buy-jiggle:hover, .buy-jiggle:active { animation-play-state: paused; }
