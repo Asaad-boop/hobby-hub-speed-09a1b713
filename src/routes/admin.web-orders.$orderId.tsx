@@ -1164,6 +1164,16 @@ function WebOrderDetailPage() {
                   Update
                 </Button>
               </div>
+              <Button
+                className="w-full bg-emerald-600 font-semibold hover:bg-emerald-700"
+                onClick={() => confirmOrderMut.mutate()}
+                disabled={confirmOrderMut.isPending || order.web_status === "confirmed"}
+              >
+                {confirmOrderMut.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                {order.web_status === "confirmed" ? "Already Confirmed" : "Confirm Order → Pipeline"}
+              </Button>
             </CardContent>
           </Card>
 
