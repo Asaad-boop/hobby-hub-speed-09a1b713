@@ -83,7 +83,7 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
     const trimmedLoc = location.trim();
     const trimmedText = text.trim();
     if (trimmedName.length < 2 || trimmedName.length > 50) return setError("Name must be 2-50 characters");
-    if (trimmedLoc.length < 2 || trimmedLoc.length > 50) return setError("Location must be 2-50 characters");
+    if (trimmedLoc.length < 6 || trimmedLoc.length > 20) return setError("Phone must be 6-20 characters");
     if (trimmedText.length < 10) return setError("Review must be at least 10 characters");
     if (trimmedText.length > MAX_TEXT) return setError(`Review must be under ${MAX_TEXT} characters`);
 
