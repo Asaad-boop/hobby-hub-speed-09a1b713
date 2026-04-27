@@ -19,9 +19,9 @@ export const lookupOrder = createServerFn({ method: "POST" })
     return { query };
   })
   .handler(async ({ data }) => {
-    const SUPABASE_URL = process.env.SUPABASE_URL;
-    const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
-    if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const SUPABASE_URL = "https://bgsspipkjeuceftuatue.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnc3NwaXBramV1Y2VmdHVhdHVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNDcyMzIsImV4cCI6MjA5MTgyMzIzMn0.h6aRTBUhTvEvKCx8M-lvyA2BCBQbhvWMWKgn8dIyilc";
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.ADMIN_SERVICE_ROLE_KEY) {
       return {
         ok: false as const,
         code: "unavailable" as const,
