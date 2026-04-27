@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      abandoned_carts: {
+        Row: {
+          cart_items: Json
+          converted_order_id: string | null
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          id: string
+          is_converted: boolean
+          last_step: string | null
+          session_id: string | null
+          shipping_address: string | null
+          shipping_city: string | null
+          shipping_district: string | null
+          shipping_thana: string | null
+          subtotal: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          cart_items?: Json
+          converted_order_id?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          is_converted?: boolean
+          last_step?: string | null
+          session_id?: string | null
+          shipping_address?: string | null
+          shipping_city?: string | null
+          shipping_district?: string | null
+          shipping_thana?: string | null
+          subtotal?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          cart_items?: Json
+          converted_order_id?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          is_converted?: boolean
+          last_step?: string | null
+          session_id?: string | null
+          shipping_address?: string | null
+          shipping_city?: string | null
+          shipping_district?: string | null
+          shipping_thana?: string | null
+          subtotal?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       active_sessions: {
         Row: {
           country: string | null
@@ -518,39 +578,51 @@ export type Database = {
       order_items: {
         Row: {
           created_at: string
+          discount_amount: number
+          discount_type: Database["public"]["Enums"]["discount_type"] | null
           id: string
           image: string | null
+          line_total: number | null
           name: string
           order_id: string
           price: number
           product_id: string
           quantity: number
+          unit_price: number | null
           user_id: string | null
           variant_id: string | null
           variant_label: string | null
         }
         Insert: {
           created_at?: string
+          discount_amount?: number
+          discount_type?: Database["public"]["Enums"]["discount_type"] | null
           id?: string
           image?: string | null
+          line_total?: number | null
           name: string
           order_id: string
           price: number
           product_id: string
           quantity?: number
+          unit_price?: number | null
           user_id?: string | null
           variant_id?: string | null
           variant_label?: string | null
         }
         Update: {
           created_at?: string
+          discount_amount?: number
+          discount_type?: Database["public"]["Enums"]["discount_type"] | null
           id?: string
           image?: string | null
+          line_total?: number | null
           name?: string
           order_id?: string
           price?: number
           product_id?: string
           quantity?: number
+          unit_price?: number | null
           user_id?: string | null
           variant_id?: string | null
           variant_label?: string | null
@@ -575,28 +647,38 @@ export type Database = {
       orders: {
         Row: {
           admin_notes: string | null
+          advance_amount: number
+          alternate_phone: string | null
           assigned_to: string | null
           auto_call_enabled: boolean | null
           call_attempt_count: number
           call_status: Database["public"]["Enums"]["call_status"]
+          cancel_reason: string | null
           cancellation_reason: string | null
+          cancelled_at: string | null
           confirmation_status: Database["public"]["Enums"]["confirmation_status"]
           confirmed_at: string | null
           confirmed_by: string | null
           coupon_code: string | null
+          courier_assigned_at: string | null
+          courier_name: string | null
           created_at: string
+          customer_note: string | null
           delivered_at: string | null
           delivery_area_id: string | null
           delivery_city_id: string | null
           delivery_method: string | null
           delivery_zone_id: string | null
           discount_amount: number
+          duplicate_flag: boolean
           guest_email: string | null
           guest_name: string | null
           guest_phone: string | null
           hold_reason: string | null
           hold_until: string | null
           id: string
+          in_transit_at: string | null
+          internal_note: string | null
           is_cross_sale: boolean
           is_guest_order: boolean
           is_preorder: boolean
@@ -607,8 +689,14 @@ export type Database = {
           order_tags: string[]
           packaged_at: string | null
           packaged_by: string | null
+          partial_amount: number | null
           payment_method: string | null
+          pipeline_log: Json
           rejection_reason: string | null
+          return_note: string | null
+          return_type: string | null
+          risk_flag: boolean
+          scheduled_date: string | null
           shipment_id: string | null
           shipped_at: string | null
           shipped_by: string | null
@@ -619,40 +707,55 @@ export type Database = {
           shipping_name: string | null
           shipping_note: string | null
           shipping_phone: string | null
+          shipping_thana: string | null
+          source: Database["public"]["Enums"]["order_source"] | null
           source_platform: string | null
           source_website: string | null
           status: Database["public"]["Enums"]["order_status"]
+          status_log: Json
           subtotal: number
           tags: string[] | null
           total: number
+          tracking_number: string | null
           updated_at: string
           user_id: string | null
           verified_at: string | null
+          web_status: Database["public"]["Enums"]["web_order_status"] | null
         }
         Insert: {
           admin_notes?: string | null
+          advance_amount?: number
+          alternate_phone?: string | null
           assigned_to?: string | null
           auto_call_enabled?: boolean | null
           call_attempt_count?: number
           call_status?: Database["public"]["Enums"]["call_status"]
+          cancel_reason?: string | null
           cancellation_reason?: string | null
+          cancelled_at?: string | null
           confirmation_status?: Database["public"]["Enums"]["confirmation_status"]
           confirmed_at?: string | null
           confirmed_by?: string | null
           coupon_code?: string | null
+          courier_assigned_at?: string | null
+          courier_name?: string | null
           created_at?: string
+          customer_note?: string | null
           delivered_at?: string | null
           delivery_area_id?: string | null
           delivery_city_id?: string | null
           delivery_method?: string | null
           delivery_zone_id?: string | null
           discount_amount?: number
+          duplicate_flag?: boolean
           guest_email?: string | null
           guest_name?: string | null
           guest_phone?: string | null
           hold_reason?: string | null
           hold_until?: string | null
           id?: string
+          in_transit_at?: string | null
+          internal_note?: string | null
           is_cross_sale?: boolean
           is_guest_order?: boolean
           is_preorder?: boolean
@@ -663,8 +766,14 @@ export type Database = {
           order_tags?: string[]
           packaged_at?: string | null
           packaged_by?: string | null
+          partial_amount?: number | null
           payment_method?: string | null
+          pipeline_log?: Json
           rejection_reason?: string | null
+          return_note?: string | null
+          return_type?: string | null
+          risk_flag?: boolean
+          scheduled_date?: string | null
           shipment_id?: string | null
           shipped_at?: string | null
           shipped_by?: string | null
@@ -675,40 +784,55 @@ export type Database = {
           shipping_name?: string | null
           shipping_note?: string | null
           shipping_phone?: string | null
+          shipping_thana?: string | null
+          source?: Database["public"]["Enums"]["order_source"] | null
           source_platform?: string | null
           source_website?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          status_log?: Json
           subtotal?: number
           tags?: string[] | null
           total?: number
+          tracking_number?: string | null
           updated_at?: string
           user_id?: string | null
           verified_at?: string | null
+          web_status?: Database["public"]["Enums"]["web_order_status"] | null
         }
         Update: {
           admin_notes?: string | null
+          advance_amount?: number
+          alternate_phone?: string | null
           assigned_to?: string | null
           auto_call_enabled?: boolean | null
           call_attempt_count?: number
           call_status?: Database["public"]["Enums"]["call_status"]
+          cancel_reason?: string | null
           cancellation_reason?: string | null
+          cancelled_at?: string | null
           confirmation_status?: Database["public"]["Enums"]["confirmation_status"]
           confirmed_at?: string | null
           confirmed_by?: string | null
           coupon_code?: string | null
+          courier_assigned_at?: string | null
+          courier_name?: string | null
           created_at?: string
+          customer_note?: string | null
           delivered_at?: string | null
           delivery_area_id?: string | null
           delivery_city_id?: string | null
           delivery_method?: string | null
           delivery_zone_id?: string | null
           discount_amount?: number
+          duplicate_flag?: boolean
           guest_email?: string | null
           guest_name?: string | null
           guest_phone?: string | null
           hold_reason?: string | null
           hold_until?: string | null
           id?: string
+          in_transit_at?: string | null
+          internal_note?: string | null
           is_cross_sale?: boolean
           is_guest_order?: boolean
           is_preorder?: boolean
@@ -719,8 +843,14 @@ export type Database = {
           order_tags?: string[]
           packaged_at?: string | null
           packaged_by?: string | null
+          partial_amount?: number | null
           payment_method?: string | null
+          pipeline_log?: Json
           rejection_reason?: string | null
+          return_note?: string | null
+          return_type?: string | null
+          risk_flag?: boolean
+          scheduled_date?: string | null
           shipment_id?: string | null
           shipped_at?: string | null
           shipped_by?: string | null
@@ -731,15 +861,20 @@ export type Database = {
           shipping_name?: string | null
           shipping_note?: string | null
           shipping_phone?: string | null
+          shipping_thana?: string | null
+          source?: Database["public"]["Enums"]["order_source"] | null
           source_platform?: string | null
           source_website?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          status_log?: Json
           subtotal?: number
           tags?: string[] | null
           total?: number
+          tracking_number?: string | null
           updated_at?: string
           user_id?: string | null
           verified_at?: string | null
+          web_status?: Database["public"]["Enums"]["web_order_status"] | null
         }
         Relationships: [
           {
@@ -1244,6 +1379,10 @@ export type Database = {
           with_check: string
         }[]
       }
+      append_order_status_log: {
+        Args: { _entry: Json; _log_field: string; _order_id: string }
+        Returns: undefined
+      }
       get_customer_stats: { Args: { p_user_id: string }; Returns: Json }
       hard_delete_order: { Args: { _order_id: string }; Returns: undefined }
       has_permission: {
@@ -1294,6 +1433,8 @@ export type Database = {
       coupon_type: "percentage" | "fixed"
       courier_provider: "pathao" | "steadfast" | "redx" | "manual"
       delivery_zone: "inside_dhaka" | "outside_dhaka" | "sub_city" | "other"
+      discount_type: "flat" | "percent"
+      order_source: "website" | "facebook" | "manual" | "phone"
       order_status:
         | "new"
         | "confirmed"
@@ -1312,6 +1453,13 @@ export type Database = {
         | "on_hold"
         | "advance_payment_pending"
         | "incomplete"
+        | "ready_to_pack"
+        | "courier_entry"
+        | "exchange"
+        | "paid_return"
+        | "unpaid_return"
+        | "partial_return"
+        | "pending_return"
       shipment_status:
         | "booked"
         | "pickup_pending"
@@ -1322,6 +1470,15 @@ export type Database = {
         | "exchanged"
         | "damaged"
         | "lost"
+        | "cancelled"
+      web_order_status:
+        | "processing"
+        | "incomplete"
+        | "good_but_no_response"
+        | "no_response"
+        | "advance_payment"
+        | "on_hold"
+        | "complete"
         | "cancelled"
     }
     CompositeTypes: {
@@ -1480,6 +1637,8 @@ export const Constants = {
       coupon_type: ["percentage", "fixed"],
       courier_provider: ["pathao", "steadfast", "redx", "manual"],
       delivery_zone: ["inside_dhaka", "outside_dhaka", "sub_city", "other"],
+      discount_type: ["flat", "percent"],
+      order_source: ["website", "facebook", "manual", "phone"],
       order_status: [
         "new",
         "confirmed",
@@ -1498,6 +1657,13 @@ export const Constants = {
         "on_hold",
         "advance_payment_pending",
         "incomplete",
+        "ready_to_pack",
+        "courier_entry",
+        "exchange",
+        "paid_return",
+        "unpaid_return",
+        "partial_return",
+        "pending_return",
       ],
       shipment_status: [
         "booked",
@@ -1509,6 +1675,16 @@ export const Constants = {
         "exchanged",
         "damaged",
         "lost",
+        "cancelled",
+      ],
+      web_order_status: [
+        "processing",
+        "incomplete",
+        "good_but_no_response",
+        "no_response",
+        "advance_payment",
+        "on_hold",
+        "complete",
         "cancelled",
       ],
     },
