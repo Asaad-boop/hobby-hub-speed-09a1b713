@@ -255,6 +255,8 @@ function AdminOrdersPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
