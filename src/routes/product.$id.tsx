@@ -204,12 +204,16 @@ function ProductPage() {
     : null;
 
   const handleReviewSubmit = async (r: NewReview) => {
+    if (!eligibleOrderId) {
+      toast.error("You must have a delivered order of this product to leave a review.");
+      throw new Error("Not eligible");
+    }
     try {
       await submitReview({
         product_id: product.id,
+        order_id: eligibleOrderId,
         rating: r.rating,
-        guest_name: r.name,
-        guest_phone: r.phone,
+        title: r.name ? `${r.name}${r.location ? ` · ${r.location}` : ""}` : undefined,
         comment: r.text,
       });
       toast.success("Review submitted! Visible after admin approval.");
@@ -678,15 +682,19 @@ function ProductPage() {
           <div>
             <h2 className="text-2xl font-extrabold md:text-3xl">Customer Reviews</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Share your experience — your review will appear after admin approval.
+              {eligibleOrderId
+                ? "You're a verified buyer — share your experience!"
+                : "Verified buyers can leave a review after their order is delivered."}
             </p>
           </div>
-          <button
-            onClick={() => setReviewOpen(true)}
-            className="inline-flex items-center gap-2 rounded-full border-2 border-foreground px-4 py-2 text-xs font-bold transition hover:bg-foreground hover:text-background"
-          >
-            <MessageSquare className="h-4 w-4" /> Write a review
-          </button>
+          {eligibleOrderId && (
+            <button
+              onClick={() => setReviewOpen(true)}
+              className="inline-flex items-center gap-2 rounded-full border-2 border-foreground px-4 py-2 text-xs font-bold transition hover:bg-foreground hover:text-background"
+            >
+              <MessageSquare className="h-4 w-4" /> Write a review
+            </button>
+          )}
         </div>
 
         <ReviewsList

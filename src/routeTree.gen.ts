@@ -37,6 +37,7 @@ import { Route as LpAuroraLampRouteImport } from './routes/lp.aurora-lamp'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as AdminWebOrdersRouteImport } from './routes/admin.web-orders'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminOrdersPipelineRouteImport } from './routes/admin.orders-pipeline'
@@ -184,6 +185,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminReviewsRoute = AdminReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminReportsRoute = AdminReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -240,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/admin/orders-pipeline': typeof AdminOrdersPipelineRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/web-orders': typeof AdminWebOrdersRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -275,6 +282,7 @@ export interface FileRoutesByTo {
   '/admin/orders-pipeline': typeof AdminOrdersPipelineRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/web-orders': typeof AdminWebOrdersRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -312,6 +320,7 @@ export interface FileRoutesById {
   '/admin/orders-pipeline': typeof AdminOrdersPipelineRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/web-orders': typeof AdminWebOrdersRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -350,6 +359,7 @@ export interface FileRouteTypes {
     | '/admin/orders-pipeline'
     | '/admin/products'
     | '/admin/reports'
+    | '/admin/reviews'
     | '/admin/settings'
     | '/admin/web-orders'
     | '/category/$slug'
@@ -385,6 +395,7 @@ export interface FileRouteTypes {
     | '/admin/orders-pipeline'
     | '/admin/products'
     | '/admin/reports'
+    | '/admin/reviews'
     | '/admin/settings'
     | '/admin/web-orders'
     | '/category/$slug'
@@ -421,6 +432,7 @@ export interface FileRouteTypes {
     | '/admin/orders-pipeline'
     | '/admin/products'
     | '/admin/reports'
+    | '/admin/reviews'
     | '/admin/settings'
     | '/admin/web-orders'
     | '/category/$slug'
@@ -659,6 +671,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/reviews': {
+      id: '/admin/reviews'
+      path: '/reviews'
+      fullPath: '/admin/reviews'
+      preLoaderRoute: typeof AdminReviewsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/reports': {
       id: '/admin/reports'
       path: '/reports'
@@ -711,6 +730,7 @@ interface AdminRouteChildren {
   AdminOrdersPipelineRoute: typeof AdminOrdersPipelineRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminReportsRoute: typeof AdminReportsRoute
+  AdminReviewsRoute: typeof AdminReviewsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminWebOrdersRoute: typeof AdminWebOrdersRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -723,6 +743,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminOrdersPipelineRoute: AdminOrdersPipelineRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminReportsRoute: AdminReportsRoute,
+  AdminReviewsRoute: AdminReviewsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminWebOrdersRoute: AdminWebOrdersRoute,
   AdminIndexRoute: AdminIndexRoute,

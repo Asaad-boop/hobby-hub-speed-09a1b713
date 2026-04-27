@@ -34,18 +34,18 @@ export async function fetchProductReviews(productId: string): Promise<ReviewWith
   if (list.length === 0) return [];
 
   const userIds = Array.from(new Set(list.map((r) => r.user_id).filter((id): id is string => !!id)));
-  const profileMap = new Map<string, string | null>();
+  const nameMap = new Map<string, string | null>();
   if (userIds.length > 0) {
     const { data: profiles } = await supabase
       .from("profiles")
       .select("id, display_name")
       .in("id", userIds);
-    (profiles ?? []).forEach((p) => profileMap.set(p.id, p.display_name));
+    (profiles ?? []).forEach((p) => nameMap.set(p.id, p.display_name));
   }
 
   return list.map((r) => ({
     ...r,
-    display_name: r.guest_name ?? (r.user_id ? profileMap.get(r.user_id) ?? null : null),
+    display_name: r.guest_name ?? (r.user_id ? nameMap.get(r.user_id) ?? null : null),
   }));
 }
 
@@ -92,24 +92,29 @@ export async function fetchEligibleOrderId(productId: string): Promise<string | 
 
 export async function submitReview(input: {
   product_id: string;
+  order_id: string;
   rating: number;
-  guest_name: string;
-  guest_phone: string;
   title?: string;
   comment?: string;
 }) {
+  const { data: sess } = await supabase.auth.getSession();
+  const user = sess.session?.user;
+  if (!user) throw new Error("Login required to submit a review");
+
   const { error } = await supabase.from("reviews").insert({
     product_id: input.product_id,
-    user_id: null,
-    order_id: null,
+    user_id: user.id,
+    order_id: input.order_id,
     rating: input.rating,
-    guest_name: input.guest_name.trim(),
-    guest_phone: input.guest_phone.trim(),
     title: input.title?.trim() || null,
     comment: input.comment?.trim() || null,
-    is_approved: false,
   });
-  if (error) throw error;
+  if (error) {
+    if (error.code === "23505") {
+      throw new Error("You have already reviewed this product for that order.");
+    }
+    throw error;
+  }
 }
 
 // ─── Admin helpers ─────────────────────────────────────────────────────────
@@ -141,7 +146,7 @@ export async function fetchAdminReviews(): Promise<AdminReview[]> {
       ...(r as ReviewRow),
       product_title: prod?.title ?? null,
       product_image: prod?.image ?? null,
-      customer_name: r.guest_name ?? (r.user_id ? profiles.get(r.user_id) ?? null : null),
+      customer_name: (r.guest_name as string | null) ?? (r.user_id ? profiles.get(r.user_id) ?? null : null),
     };
   });
 }
