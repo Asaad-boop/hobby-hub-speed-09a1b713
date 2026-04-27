@@ -3,13 +3,15 @@ import { supabase } from "@/integrations/supabase/client";
 export type ReviewRow = {
   id: string;
   product_id: string;
-  user_id: string;
+  user_id: string | null;
   order_id: string | null;
   rating: number;
   title: string | null;
   comment: string | null;
   is_approved: boolean;
   admin_note: string | null;
+  guest_name: string | null;
+  guest_phone: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -31,15 +33,20 @@ export async function fetchProductReviews(productId: string): Promise<ReviewWith
   const list = (reviews ?? []) as ReviewRow[];
   if (list.length === 0) return [];
 
-  const userIds = Array.from(new Set(list.map((r) => r.user_id)));
-  const { data: profiles } = await supabase
-    .from("profiles")
-    .select("id, display_name")
-    .in("id", userIds);
-  const nameMap = new Map<string, string | null>();
-  (profiles ?? []).forEach((p) => nameMap.set(p.id, p.display_name));
+  const userIds = Array.from(new Set(list.map((r) => r.user_id).filter((id): id is string => !!id)));
+  const profileMap = new Map<string, string | null>();
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, display_name")
+      .in("id", userIds);
+    (profiles ?? []).forEach((p) => profileMap.set(p.id, p.display_name));
+  }
 
-  return list.map((r) => ({ ...r, display_name: nameMap.get(r.user_id) ?? null }));
+  return list.map((r) => ({
+    ...r,
+    display_name: r.guest_name ?? (r.user_id ? profileMap.get(r.user_id) ?? null : null),
+  }));
 }
 
 export type RatingBreakdown = {
@@ -85,29 +92,24 @@ export async function fetchEligibleOrderId(productId: string): Promise<string | 
 
 export async function submitReview(input: {
   product_id: string;
-  order_id: string;
   rating: number;
+  guest_name: string;
+  guest_phone: string;
   title?: string;
   comment?: string;
 }) {
-  const { data: sess } = await supabase.auth.getSession();
-  const user = sess.session?.user;
-  if (!user) throw new Error("Login required to submit a review");
-
   const { error } = await supabase.from("reviews").insert({
     product_id: input.product_id,
-    user_id: user.id,
-    order_id: input.order_id,
+    user_id: null,
+    order_id: null,
     rating: input.rating,
+    guest_name: input.guest_name.trim(),
+    guest_phone: input.guest_phone.trim(),
     title: input.title?.trim() || null,
     comment: input.comment?.trim() || null,
+    is_approved: false,
   });
-  if (error) {
-    if (error.code === "23505") {
-      throw new Error("You have already reviewed this product for that order.");
-    }
-    throw error;
-  }
+  if (error) throw error;
 }
 
 // ─── Admin helpers ─────────────────────────────────────────────────────────
@@ -139,7 +141,7 @@ export async function fetchAdminReviews(): Promise<AdminReview[]> {
       ...(r as ReviewRow),
       product_title: prod?.title ?? null,
       product_image: prod?.image ?? null,
-      customer_name: profiles.get(r.user_id) ?? null,
+      customer_name: r.guest_name ?? (r.user_id ? profiles.get(r.user_id) ?? null : null),
     };
   });
 }

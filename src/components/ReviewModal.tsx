@@ -3,7 +3,7 @@ import { X, Star, Camera, Trash2, Check } from "lucide-react";
 
 export type NewReview = {
   name: string;
-  location: string;
+  phone: string;
   rating: number;
   text: string;
   photos: string[];
@@ -23,7 +23,7 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [name, setName] = useState("");
-  const [location, setLocation] = useState("");
+  const [phone, setPhone] = useState("");
   const [text, setText] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
@@ -42,7 +42,7 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
   }, [open, onClose]);
 
   const reset = () => {
-    setRating(0); setHover(0); setName(""); setLocation(""); setText(""); setPhotos([]); setSubmitted(false); setError("");
+    setRating(0); setHover(0); setName(""); setPhone(""); setText(""); setPhotos([]); setSubmitted(false); setError("");
   };
 
   const handleClose = () => { reset(); onClose(); };
@@ -75,16 +75,16 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
     setError("");
     if (rating === 0) return setError("Please select a star rating");
     const trimmedName = name.trim();
-    const trimmedLoc = location.trim();
+    const trimmedPhone = phone.trim();
     const trimmedText = text.trim();
     if (trimmedName.length < 2 || trimmedName.length > 50) return setError("Name must be 2-50 characters");
-    if (trimmedLoc.length < 2 || trimmedLoc.length > 50) return setError("Location must be 2-50 characters");
+    if (!/^[0-9+\-\s]{6,20}$/.test(trimmedPhone)) return setError("Please enter a valid phone number");
     if (trimmedText.length < 10) return setError("Review must be at least 10 characters");
     if (trimmedText.length > MAX_TEXT) return setError(`Review must be under ${MAX_TEXT} characters`);
 
     setSubmitting(true);
     try {
-      await onSubmit({ name: trimmedName, location: trimmedLoc, rating, text: trimmedText, photos });
+      await onSubmit({ name: trimmedName, phone: trimmedPhone, rating, text: trimmedText, photos });
       setSubmitted(true);
       setTimeout(handleClose, 1600);
     } catch (err) {
@@ -174,12 +174,13 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
                 />
               </div>
               <div>
-                <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Location *</label>
+                <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Phone *</label>
                 <input
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  maxLength={50}
-                  placeholder="e.g. Dhaka"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  maxLength={20}
+                  placeholder="01XXXXXXXXX"
                   className="mt-1 w-full rounded-xl border-2 border-border bg-background px-4 py-3 text-sm font-semibold outline-none transition focus:border-primary"
                 />
               </div>
