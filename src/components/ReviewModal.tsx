@@ -267,6 +267,52 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
               />
             </div>
 
+            {/* Videos */}
+            <div className="mt-3">
+              <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                Add videos (optional) — {videos.length}/{MAX_VIDEOS} · max {MAX_VIDEO_MB}MB each
+              </label>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {videos.map((src, i) => (
+                  <div key={i} className="group relative aspect-video overflow-hidden rounded-xl border-2 border-border bg-black">
+                    <video src={src} className="h-full w-full object-cover" muted playsInline />
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                      <Play className="h-8 w-8 text-white/90 drop-shadow" />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setVideos((p) => p.filter((_, j) => j !== i));
+                        setVideoFiles((p) => p.filter((_, j) => j !== i));
+                      }}
+                      className="absolute right-1 top-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-foreground/80 text-background opacity-0 transition group-hover:opacity-100"
+                      aria-label="Remove video"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+                {videos.length < MAX_VIDEOS && (
+                  <button
+                    type="button"
+                    onClick={() => videoRef.current?.click()}
+                    className="flex aspect-video flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border text-muted-foreground transition hover:border-primary hover:text-primary"
+                  >
+                    <Video className="h-5 w-5" />
+                    <span className="text-[10px] font-bold">Add video</span>
+                  </button>
+                )}
+              </div>
+              <input
+                ref={videoRef}
+                type="file"
+                accept="video/*"
+                multiple
+                className="hidden"
+                onChange={(e) => { handleVideos(e.target.files); e.target.value = ""; }}
+              />
+            </div>
+
             {error && (
               <p className="mt-4 rounded-xl bg-destructive/10 px-4 py-2 text-sm font-semibold text-destructive">
                 {error}
