@@ -505,7 +505,7 @@ function WebOrderDetailPage() {
         is_cross_sale: isCrossSale,
         subtotal,
         total: grandTotal,
-        web_status: "confirmed",
+        web_status: "complete",
         status: "new" as OrderStatus,
         confirmation_status: "confirmed",
         confirmed_at: new Date().toISOString(),
@@ -1167,12 +1167,12 @@ function WebOrderDetailPage() {
               <Button
                 className="w-full bg-emerald-600 font-semibold hover:bg-emerald-700"
                 onClick={() => confirmOrderMut.mutate()}
-                disabled={confirmOrderMut.isPending || order.web_status === "confirmed"}
+                disabled={confirmOrderMut.isPending || order.web_status === "complete"}
               >
                 {confirmOrderMut.isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : null}
-                {order.web_status === "confirmed" ? "Already Confirmed" : "Confirm Order → Pipeline"}
+                {order.web_status === "complete" ? "Already Confirmed" : "Confirm Order → Pipeline"}
               </Button>
             </CardContent>
           </Card>
