@@ -2,10 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Search, Trash2, Pencil, Upload, X, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { Plus, Search, Trash2, Pencil, Upload, X, ArrowLeft, ArrowRight, Loader2, ImageIcon, Tag, DollarSign, Eye, FileText, Star, Sparkles, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  PageHeader, Card, Loading, Empty, Badge, Btn, Input, Modal, Textarea, Select,
+  PageHeader, Card, Loading, Empty, Badge, Btn, Input, Textarea, Select,
   fmtBDT,
 } from "@/components/admin/ui";
 
