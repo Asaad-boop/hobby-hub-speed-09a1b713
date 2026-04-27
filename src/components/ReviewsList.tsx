@@ -195,18 +195,28 @@ export default function ReviewsList({ reviews, loading, fallbackRating = 0, fall
                     </div>
                   )}
                   {r.videos && r.videos.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
+                    <div className="mt-3 flex flex-wrap gap-2">
                       {r.videos.map((src, i) => (
-                        <video
+                        <button
                           key={i}
-                          src={src}
-                          controls
-                          preload="metadata"
-                          playsInline
-                          className="h-40 w-auto max-w-full rounded-xl border border-border bg-black shadow-sm sm:h-48"
+                          type="button"
+                          onClick={() => setVideoLightbox(src)}
+                          className="group relative h-20 w-20 overflow-hidden rounded-xl border border-border bg-black shadow-sm transition hover:border-primary hover:shadow-md sm:h-24 sm:w-24"
+                          aria-label={`Play review video ${i + 1}`}
                         >
-                          <track kind="captions" />
-                        </video>
+                          <video
+                            src={`${src}#t=0.5`}
+                            preload="metadata"
+                            muted
+                            playsInline
+                            className="pointer-events-none h-full w-full object-cover"
+                          />
+                          <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/30 transition group-hover:bg-black/45">
+                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-foreground shadow-lg transition group-hover:scale-110">
+                              <Play className="h-4 w-4 fill-current" />
+                            </span>
+                          </span>
+                        </button>
                       ))}
                     </div>
                   )}
