@@ -101,7 +101,12 @@ function Checkout() {
 
   const bumpItem = allProducts[1] ?? allProducts[0];
   const bumpPrice = 199;
-  const shippingFee = shipMethod === "inside" ? 60 : 130;
+  const defaultShippingFee = shipMethod === "inside" ? 60 : 130;
+  const perItemFees = items.map((i) => {
+    const override = shipMethod === "inside" ? i.product.shippingFeeInside : i.product.shippingFeeOutside;
+    return typeof override === "number" && !Number.isNaN(override) ? override : defaultShippingFee;
+  });
+  const shippingFee = perItemFees.length ? Math.max(...perItemFees) : defaultShippingFee;
   const subtotalWithBump = total + (bump ? bumpPrice : 0);
   const couponDiscount = appliedCoupon
     ? appliedCoupon.type === "percentage"
@@ -441,14 +446,20 @@ function Checkout() {
               <h2 className="text-sm font-bold">Shipping Method</h2>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {[
-                { id: "inside", label: "Inside Dhaka", time: "1-2 days", fee: 60 },
-                { id: "outside", label: "Outside Dhaka", time: "2-4 days", fee: 130 },
-              ].map((opt) => (
+              {([
+                { id: "inside" as const, label: "Inside Dhaka", time: "1-2 days", defaultFee: 60 },
+                { id: "outside" as const, label: "Outside Dhaka", time: "2-4 days", defaultFee: 130 },
+              ]).map((opt) => {
+                const fees = items.map((i) => {
+                  const ov = opt.id === "inside" ? i.product.shippingFeeInside : i.product.shippingFeeOutside;
+                  return typeof ov === "number" && !Number.isNaN(ov) ? ov : opt.defaultFee;
+                });
+                const fee = fees.length ? Math.max(...fees) : opt.defaultFee;
+                return (
                 <button
                   key={opt.id}
                   type="button"
-                  onClick={() => setShipMethod(opt.id as "inside" | "outside")}
+                  onClick={() => setShipMethod(opt.id)}
                   className={`rounded-lg border p-2.5 text-left transition ${
                     shipMethod === opt.id
                       ? "border-primary bg-primary/5 ring-1 ring-primary"
@@ -460,9 +471,10 @@ function Checkout() {
                     {shipMethod === opt.id && <CheckCircle2 className="h-3.5 w-3.5 text-primary" />}
                   </div>
                   <p className="mt-0.5 text-[10px] text-muted-foreground">{opt.time}</p>
-                  <p className="mt-0.5 text-sm font-extrabold text-primary">৳{opt.fee}</p>
+                  <p className="mt-0.5 text-sm font-extrabold text-primary">৳{fee}</p>
                 </button>
-              ))}
+                );
+              })}
             </div>
           </section>
 

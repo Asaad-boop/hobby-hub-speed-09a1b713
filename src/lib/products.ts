@@ -22,6 +22,8 @@ export type Product = {
   description: string;
   isNewArrival?: boolean;
   isFeatured?: boolean;
+  shippingFeeInside?: number | null;
+  shippingFeeOutside?: number | null;
 };
 
 type ProductRow = {
@@ -42,6 +44,8 @@ type ProductRow = {
   is_active: boolean;
   display_order: number;
   category_id: string | null;
+  shipping_fee_inside?: number | string | null;
+  shipping_fee_outside?: number | string | null;
   categories?: { name: string; slug: string } | null;
 };
 
@@ -74,11 +78,13 @@ const toProduct = (r: ProductRow): Product => {
     description: r.description ?? "",
     isNewArrival: r.is_new_arrival,
     isFeatured: r.is_featured,
+    shippingFeeInside: r.shipping_fee_inside != null ? Number(r.shipping_fee_inside) : null,
+    shippingFeeOutside: r.shipping_fee_outside != null ? Number(r.shipping_fee_outside) : null,
   };
 };
 
 const SELECT_COLS =
-  "id,slug,title,description,price,old_price,image,gallery,benefits,rating,reviews,stock,is_new_arrival,is_featured,is_active,display_order,category_id,categories(name,slug)";
+  "id,slug,title,description,price,old_price,image,gallery,benefits,rating,reviews,stock,is_new_arrival,is_featured,is_active,display_order,category_id,shipping_fee_inside,shipping_fee_outside,categories(name,slug)";
 
 async function fetchProducts(): Promise<Product[]> {
   const { data, error } = await supabase

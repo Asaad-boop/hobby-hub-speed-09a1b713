@@ -1068,6 +1068,8 @@ export type Database = {
           price: number
           rating: number
           reviews: number
+          shipping_fee_inside: number | null
+          shipping_fee_outside: number | null
           slug: string
           specs: Json
           stock: number
@@ -1090,6 +1092,8 @@ export type Database = {
           price: number
           rating?: number
           reviews?: number
+          shipping_fee_inside?: number | null
+          shipping_fee_outside?: number | null
           slug: string
           specs?: Json
           stock?: number
@@ -1112,6 +1116,8 @@ export type Database = {
           price?: number
           rating?: number
           reviews?: number
+          shipping_fee_inside?: number | null
+          shipping_fee_outside?: number | null
           slug?: string
           specs?: Json
           stock?: number
