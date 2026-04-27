@@ -344,6 +344,9 @@ export const verifyUserRoles = createServerFn({ method: "POST" })
       "admin",
       "customer_service",
       "operations",
+      "moderator",
+      "packer",
+      "accountant",
     ];
     const canAccessAdmin = roles.some((r) => adminAllowedRoles.includes(r));
 
