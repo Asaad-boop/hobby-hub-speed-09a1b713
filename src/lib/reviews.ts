@@ -13,6 +13,7 @@ export type ReviewRow = {
   guest_name: string | null;
   guest_phone: string | null;
   images: string[];
+  videos: string[];
   created_at: string;
   updated_at: string;
 };
@@ -107,6 +108,23 @@ export async function uploadReviewImages(files: File[]): Promise<string[]> {
   return urls;
 }
 
+export async function uploadReviewVideos(files: File[]): Promise<string[]> {
+  const urls: string[] = [];
+  for (const file of files) {
+    const ext = file.name.split(".").pop() || "mp4";
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
+    const { error } = await supabase.storage.from("review-videos").upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: file.type || "video/mp4",
+    });
+    if (error) throw error;
+    const { data } = supabase.storage.from("review-videos").getPublicUrl(path);
+    urls.push(data.publicUrl);
+  }
+  return urls;
+}
+
 function formatSupabaseError(error: { message?: string; code?: string; details?: string; hint?: string }, fallback: string): Error {
   // Map common Postgres / PostgREST errors to friendly explanations
   const code = error.code;
@@ -131,6 +149,7 @@ export async function submitReview(input: {
   title?: string;
   comment?: string;
   images?: string[];
+  videos?: string[];
   guest_name?: string;
   guest_phone?: string;
 }) {
@@ -153,6 +172,7 @@ export async function submitReview(input: {
       title: input.title?.trim() || null,
       comment: input.comment?.trim() || null,
       images: input.images ?? [],
+      videos: input.videos ?? [],
     });
     if (error) throw formatSupabaseError(error, "Could not submit your review");
     return;
@@ -172,6 +192,7 @@ export async function submitReview(input: {
     title: input.title?.trim() || null,
     comment: input.comment?.trim() || null,
     images: input.images ?? [],
+    videos: input.videos ?? [],
     guest_name: name,
     guest_phone: phone,
     is_approved: false,

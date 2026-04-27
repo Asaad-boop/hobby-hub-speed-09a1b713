@@ -188,6 +188,22 @@ export default function ReviewsList({ reviews, loading, fallbackRating = 0, fall
                       ))}
                     </div>
                   )}
+                  {r.videos && r.videos.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {r.videos.map((src, i) => (
+                        <video
+                          key={i}
+                          src={src}
+                          controls
+                          preload="metadata"
+                          playsInline
+                          className="h-40 w-auto max-w-full rounded-xl border border-border bg-black shadow-sm sm:h-48"
+                        >
+                          <track kind="captions" />
+                        </video>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { fetchProductByIdOrSlug, fetchAllProducts } from "@/lib/products";
-import { fetchProductReviews, submitReview, fetchEligibleOrderId, uploadReviewImages } from "@/lib/reviews";
+import { fetchProductReviews, submitReview, fetchEligibleOrderId, uploadReviewImages, uploadReviewVideos } from "@/lib/reviews";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
@@ -214,12 +214,22 @@ function ProductPage() {
           throw new Error(`Image upload failed: ${m}`);
         }
       }
+      let videoUrls: string[] = [];
+      if (r.videoFiles && r.videoFiles.length > 0) {
+        try {
+          videoUrls = await uploadReviewVideos(r.videoFiles);
+        } catch (upErr) {
+          const m = upErr instanceof Error ? upErr.message : String(upErr);
+          throw new Error(`Video upload failed: ${m}`);
+        }
+      }
       await submitReview({
         product_id: product.id,
         order_id: eligibleOrderId ?? null,
         rating: r.rating,
         comment: r.text,
         images: imageUrls,
+        videos: videoUrls,
         guest_name: r.name,
         guest_phone: r.location, // ReviewModal field re-used as phone
       });

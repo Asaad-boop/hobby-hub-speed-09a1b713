@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { X, Star, Camera, Trash2, Check } from "lucide-react";
+import { X, Star, Camera, Trash2, Check, Video, Play } from "lucide-react";
 
 export type NewReview = {
   name: string;
@@ -8,6 +8,8 @@ export type NewReview = {
   text: string;
   photos: string[];
   photoFiles: File[];
+  videos: string[];
+  videoFiles: File[];
 };
 
 type Props = {
@@ -18,6 +20,8 @@ type Props = {
 };
 
 const MAX_PHOTOS = 4;
+const MAX_VIDEOS = 2;
+const MAX_VIDEO_MB = 30;
 const MAX_TEXT = 500;
 
 export default function ReviewModal({ open, onClose, productTitle, onSubmit }: Props) {
@@ -28,9 +32,12 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
   const [text, setText] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [videos, setVideos] = useState<string[]>([]);
+  const [videoFiles, setVideoFiles] = useState<File[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -44,7 +51,7 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
   }, [open, onClose]);
 
   const reset = () => {
-    setRating(0); setHover(0); setName(""); setLocation(""); setText(""); setPhotos([]); setPhotoFiles([]); setSubmitted(false); setError("");
+    setRating(0); setHover(0); setName(""); setLocation(""); setText(""); setPhotos([]); setPhotoFiles([]); setVideos([]); setVideoFiles([]); setSubmitted(false); setError("");
   };
 
   const handleClose = () => { reset(); onClose(); };
@@ -73,6 +80,20 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
     });
   };
 
+  const handleVideos = (files: FileList | null) => {
+    if (!files) return;
+    setError("");
+    const remaining = MAX_VIDEOS - videos.length;
+    const valid = Array.from(files).slice(0, remaining).filter((f) => {
+      if (!f.type.startsWith("video/")) { setError("Only video files allowed"); return false; }
+      if (f.size > MAX_VIDEO_MB * 1024 * 1024) { setError(`Each video must be under ${MAX_VIDEO_MB}MB`); return false; }
+      return true;
+    });
+    const urls = valid.map((f) => URL.createObjectURL(f));
+    setVideos((v) => [...v, ...urls].slice(0, MAX_VIDEOS));
+    setVideoFiles((v) => [...v, ...valid].slice(0, MAX_VIDEOS));
+  };
+
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,7 +110,7 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
 
     setSubmitting(true);
     try {
-      await onSubmit({ name: trimmedName, location: trimmedLoc, rating, text: trimmedText, photos, photoFiles });
+      await onSubmit({ name: trimmedName, location: trimmedLoc, rating, text: trimmedText, photos, photoFiles, videos, videoFiles });
       setSubmitted(true);
       setTimeout(handleClose, 1600);
     } catch (err) {
@@ -243,6 +264,52 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
                 multiple
                 className="hidden"
                 onChange={(e) => { handleFiles(e.target.files); e.target.value = ""; }}
+              />
+            </div>
+
+            {/* Videos */}
+            <div className="mt-3">
+              <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                Add videos (optional) — {videos.length}/{MAX_VIDEOS} · max {MAX_VIDEO_MB}MB each
+              </label>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {videos.map((src, i) => (
+                  <div key={i} className="group relative aspect-video overflow-hidden rounded-xl border-2 border-border bg-black">
+                    <video src={src} className="h-full w-full object-cover" muted playsInline />
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                      <Play className="h-8 w-8 text-white/90 drop-shadow" />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setVideos((p) => p.filter((_, j) => j !== i));
+                        setVideoFiles((p) => p.filter((_, j) => j !== i));
+                      }}
+                      className="absolute right-1 top-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-foreground/80 text-background opacity-0 transition group-hover:opacity-100"
+                      aria-label="Remove video"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+                {videos.length < MAX_VIDEOS && (
+                  <button
+                    type="button"
+                    onClick={() => videoRef.current?.click()}
+                    className="flex aspect-video flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border text-muted-foreground transition hover:border-primary hover:text-primary"
+                  >
+                    <Video className="h-5 w-5" />
+                    <span className="text-[10px] font-bold">Add video</span>
+                  </button>
+                )}
+              </div>
+              <input
+                ref={videoRef}
+                type="file"
+                accept="video/*"
+                multiple
+                className="hidden"
+                onChange={(e) => { handleVideos(e.target.files); e.target.value = ""; }}
               />
             </div>
 

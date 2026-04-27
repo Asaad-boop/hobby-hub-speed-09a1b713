@@ -321,11 +321,11 @@ function ReviewsPage() {
                       </div>
                     </td>
                     <td className="px-3 py-3">
-                      {r.images && r.images.length > 0 ? (
+                      {((r.images && r.images.length > 0) || (r.videos && r.videos.length > 0)) ? (
                         <div className="flex flex-wrap gap-1">
-                          {r.images.slice(0, 3).map((src, i) => (
+                          {r.images?.slice(0, 3).map((src, i) => (
                             <button
-                              key={i}
+                              key={`img-${i}`}
                               type="button"
                               onClick={() => setLightbox({ images: r.images, index: i })}
                               className="relative h-10 w-10 overflow-hidden rounded-md border border-gray-200 bg-gray-50 transition hover:ring-2 hover:ring-gray-900"
@@ -338,6 +338,20 @@ function ReviewsPage() {
                                 </span>
                               )}
                             </button>
+                          ))}
+                          {r.videos?.map((src, i) => (
+                            <a
+                              key={`vid-${i}`}
+                              href={src}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-black text-white transition hover:ring-2 hover:ring-gray-900"
+                              aria-label={`View video ${i + 1}`}
+                              title="Open video"
+                            >
+                              <video src={src} className="absolute inset-0 h-full w-full object-cover opacity-70" muted preload="metadata" />
+                              <span className="relative text-[9px] font-bold">▶ VIDEO</span>
+                            </a>
                           ))}
                         </div>
                       ) : (
