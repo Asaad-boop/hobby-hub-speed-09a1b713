@@ -15,6 +15,22 @@ const PAGE_SIZE = 10;
 export default function ReviewsList({ reviews, loading, fallbackRating = 0, fallbackCount = 0 }: Props) {
   const [sort, setSort] = useState<Sort>("newest");
   const [page, setPage] = useState(1);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightbox(null);
+      if (e.key === "ArrowRight") setLightbox((l) => (l ? { ...l, index: (l.index + 1) % l.images.length } : l));
+      if (e.key === "ArrowLeft") setLightbox((l) => (l ? { ...l, index: (l.index - 1 + l.images.length) % l.images.length } : l));
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [lightbox]);
 
   const breakdown = useMemo(() => computeBreakdown(reviews), [reviews]);
   const sorted = useMemo(() => {
