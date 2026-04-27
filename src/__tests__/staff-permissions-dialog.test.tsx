@@ -26,40 +26,6 @@ const upsertMock = vi.fn(async (row: Row) => {
   return { error: null };
 });
 
-const selectChain = (userId: string) => ({
-  select: () => ({
-    eq: (_col: string, _val: string) => ({
-      maybeSingle: async () => ({
-        data: STORE[userId] ? { permissions: STORE[userId].permissions } : null,
-        error: null,
-      }),
-    }),
-  }),
-});
-
-vi.mock("@/integrations/supabase/client", () => {
-  return {
-    supabase: {
-      auth: {
-        getSession: async () => ({
-          data: { session: { user: { id: "admin-user" } } },
-        }),
-      },
-      from: (_table: string) => ({
-        ...selectChain(""), // overridden per-call below via closure trick
-        upsert: (row: Row) => ({
-          // saveUserPermissions awaits the chain and reads `error`
-          then: (resolve: (v: { error: null | Error }) => void) =>
-            resolve({ error: null } as const) ||
-            upsertMock(row).then(() => undefined),
-        }),
-      }),
-    },
-  };
-});
-
-// Re-mock with a smarter `from` that supports both .select and .upsert
-// per call (the simple object above can't match both code paths).
 vi.mock("@/integrations/supabase/client", () => {
   return {
     supabase: {
