@@ -749,7 +749,7 @@ function ProductPage() {
           navigate({ to: "/checkout" });
         };
         return (
-          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 shadow-2xl backdrop-blur md:hidden">
+          <div className="fixed inset-x-0 bottom-[64px] z-40 border-t border-border bg-background/95 shadow-2xl backdrop-blur md:hidden">
             <div className="flex items-center justify-between gap-3 px-4 pt-2 pb-1 text-[11px]">
               <span className="font-bold text-muted-foreground">
                 {qty} {qty > 1 ? "PCS" : "PC"}
