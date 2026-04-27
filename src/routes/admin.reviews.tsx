@@ -50,10 +50,42 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
+function toLocalDateTimeInput(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 function ReviewsPage() {
   const [tab, setTab] = useState<Tab>("pending");
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
+  const [savingDateId, setSavingDateId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightbox(null);
+      if (e.key === "ArrowRight") setLightbox((l) => (l ? { ...l, index: (l.index + 1) % l.images.length } : l));
+      if (e.key === "ArrowLeft") setLightbox((l) => (l ? { ...l, index: (l.index - 1 + l.images.length) % l.images.length } : l));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightbox]);
+
+  async function saveDate(id: string, value: string) {
+    setSavingDateId(id);
+    try {
+      await updateReviewDate(id, value);
+      toast.success("Date updated");
+      refetch();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSavingDateId(null);
+    }
+  }
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["admin", "reviews"],
