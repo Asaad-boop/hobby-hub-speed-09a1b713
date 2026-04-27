@@ -57,6 +57,10 @@ import {
   resetStaffPassword,
   verifyUserRoles,
 } from "@/lib/staff.functions";
+import {
+  StaffPermissionsDialog,
+  PermissionsSummary,
+} from "@/components/admin/StaffPermissionsDialog";
 import type { Database } from "@/integrations/supabase/types";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
@@ -169,6 +173,7 @@ function StaffPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Roles</TableHead>
+                <TableHead>Permissions</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -207,11 +212,20 @@ function StaffPage() {
                       ))}
                     </div>
                   </TableCell>
+                  <TableCell>
+                    <PermissionsSummary userId={s.user_id} />
+                  </TableCell>
                   <TableCell className="text-right">
-                    <ResetPasswordDialog
-                      userId={s.user_id}
-                      email={s.email ?? ""}
-                    />
+                    <div className="flex justify-end gap-2">
+                      <StaffPermissionsDialog
+                        userId={s.user_id}
+                        email={s.email ?? ""}
+                      />
+                      <ResetPasswordDialog
+                        userId={s.user_id}
+                        email={s.email ?? ""}
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
