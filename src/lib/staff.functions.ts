@@ -23,6 +23,57 @@ async function assertAdmin(userId: string) {
   if (!data || data.length === 0) throw new Error("Forbidden: admin only");
 }
 
+/** Find an existing auth user by email (case-insensitive) and return its id, or null. */
+async function findUserIdByEmail(email: string): Promise<string | null> {
+  const target = email.trim().toLowerCase();
+  let page = 1;
+  const perPage = 200;
+  while (page <= 20) {
+    const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({
+      page,
+      perPage,
+    });
+    if (error) throw new Error(`Failed to look up users: ${error.message}`);
+    const found = list.users.find((u) => (u.email ?? "").toLowerCase() === target);
+    if (found) return found.id;
+    if (list.users.length < perPage) break;
+    page += 1;
+  }
+  return null;
+}
+
+/** Convert raw Supabase auth errors into actionable, human-readable messages. */
+function humanizeAuthError(
+  err: { message?: string; status?: number; code?: string } | null,
+  email: string,
+): string {
+  const raw = (err?.message ?? "").toLowerCase();
+  if (!raw) return "Failed to create user (unknown error)";
+
+  if (
+    raw.includes("already registered") ||
+    raw.includes("already been registered") ||
+    raw.includes("already exists") ||
+    raw.includes("duplicate") ||
+    raw.includes("user already")
+  ) {
+    return `A user with email "${email}" already exists. Use "Assign existing" to add a role to them instead.`;
+  }
+  if (raw.includes("password") && (raw.includes("weak") || raw.includes("short") || raw.includes("character"))) {
+    return "Password is too weak. Use at least 8 characters with a mix of letters and numbers.";
+  }
+  if (raw.includes("invalid") && raw.includes("email")) {
+    return `"${email}" is not a valid email address.`;
+  }
+  if (raw.includes("rate limit") || err?.status === 429) {
+    return "Too many requests — please wait a minute and try again.";
+  }
+  if (raw.includes("smtp") || raw.includes("email") && raw.includes("send")) {
+    return "User created, but confirmation email could not be sent. They can still sign in.";
+  }
+  return `Failed to create user: ${err?.message ?? "unknown error"}`;
+}
+
 /** List all staff (users with any non-customer role) with email + name + roles. */
 export const listStaff = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
