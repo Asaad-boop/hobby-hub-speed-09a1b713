@@ -1,10 +1,21 @@
 import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { Loader2, ShieldAlert } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, ShieldAlert, Copy, Check, Mail } from "lucide-react";
+import { toast } from "sonner";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { Button } from "@/components/ui/button";
-import { useAdminAuth } from "@/lib/admin";
+import { Badge } from "@/components/ui/badge";
+import { useAdminAuth, type AppRole } from "@/lib/admin";
+
+const STAFF_ROLES: AppRole[] = [
+  "admin",
+  "moderator",
+  "customer_service",
+  "operations",
+  "packer",
+  "accountant",
+];
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -44,30 +55,7 @@ function AdminLayout() {
   }
 
   if (!allowedAccess) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <div className="max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
-            <ShieldAlert className="h-7 w-7 text-destructive" />
-          </div>
-          <h1 className="text-xl font-bold">Access denied</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Tomar account e admin/staff permission nei. Admin ke bolun role assign korte.
-          </p>
-          <p className="mt-3 text-xs text-muted-foreground break-all">
-            Logged in as: <span className="font-mono">{user.email}</span>
-          </p>
-          <div className="mt-5 flex justify-center gap-2">
-            <Button variant="outline" asChild>
-              <Link to="/">Go home</Link>
-            </Button>
-            <Button asChild>
-              <Link to="/account">My account</Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
+    return <AccessDeniedScreen email={user.email ?? ""} roles={roles} />;
   }
 
   return (
