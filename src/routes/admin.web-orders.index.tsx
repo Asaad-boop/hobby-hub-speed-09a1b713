@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
@@ -128,7 +128,7 @@ function WebOrdersInboxPage() {
   const allowed = hasRole(["admin", "customer_service"]);
   const queryClient = useQueryClient();
   const { tab, q } = Route.useSearch();
-  const navigate = useNavigate({ from: "/admin/web-orders/" });
+  const navigate = Route.useNavigate();
 
   const [searchInput, setSearchInput] = useState(q);
 
