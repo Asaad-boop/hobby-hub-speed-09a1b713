@@ -209,12 +209,17 @@ function ProductPage() {
       throw new Error("Not eligible");
     }
     try {
+      let imageUrls: string[] = [];
+      if (r.photoFiles && r.photoFiles.length > 0) {
+        imageUrls = await uploadReviewImages(r.photoFiles);
+      }
       await submitReview({
         product_id: product.id,
         order_id: eligibleOrderId,
         rating: r.rating,
         title: r.name ? `${r.name}${r.location ? ` · ${r.location}` : ""}` : undefined,
         comment: r.text,
+        images: imageUrls,
       });
       toast.success("Review submitted! Visible after admin approval.");
       setUserReviews((prev) => [r, ...prev]);
