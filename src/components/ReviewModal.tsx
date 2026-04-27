@@ -3,7 +3,7 @@ import { X, Star, Camera, Trash2, Check } from "lucide-react";
 
 export type NewReview = {
   name: string;
-  location: string;
+  phone: string;
   rating: number;
   text: string;
   photos: string[];
