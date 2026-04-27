@@ -379,6 +379,42 @@ function AdminOrdersPage() {
                           <PackageCheck className="h-4 w-4" /> Ready
                         </Button>
                       )}
+                      {o.status === "ready_to_pack" && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          title="Mark Packed"
+                          onClick={() => updateStatus.mutate({ id: o.id, status: "packed" })}
+                        >
+                          <Package className="h-4 w-4" /> Packed
+                        </Button>
+                      )}
+                      {o.status === "packed" && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          title="Courier Entry"
+                          onClick={() => {
+                            setCourierOrderId(o.id);
+                            setCourierName(o.courier_name ?? "pathao");
+                            setTrackingNumber(o.tracking_number ?? "");
+                          }}
+                        >
+                          <Truck className="h-4 w-4" /> Courier
+                        </Button>
+                      )}
+                      {o.status === "courier_entry" && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          title="Ready to Ship"
+                          onClick={() =>
+                            updateStatus.mutate({ id: o.id, status: "ready_to_ship" })
+                          }
+                        >
+                          <Truck className="h-4 w-4" /> Ship
+                        </Button>
+                      )}
                       <Button size="sm" variant="outline" onClick={() => setOpenOrderId(o.id)}>
                         <Eye className="h-4 w-4" />
                       </Button>
