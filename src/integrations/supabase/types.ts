@@ -1189,6 +1189,7 @@ export type Database = {
           title: string | null
           updated_at: string
           user_id: string | null
+          videos: string[]
         }
         Insert: {
           admin_note?: string | null
@@ -1205,6 +1206,7 @@ export type Database = {
           title?: string | null
           updated_at?: string
           user_id?: string | null
+          videos?: string[]
         }
         Update: {
           admin_note?: string | null
@@ -1221,6 +1223,7 @@ export type Database = {
           title?: string | null
           updated_at?: string
           user_id?: string | null
+          videos?: string[]
         }
         Relationships: [
           {
