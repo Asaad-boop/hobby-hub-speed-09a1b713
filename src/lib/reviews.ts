@@ -92,29 +92,24 @@ export async function fetchEligibleOrderId(productId: string): Promise<string | 
 
 export async function submitReview(input: {
   product_id: string;
-  order_id: string;
   rating: number;
+  guest_name: string;
+  guest_phone: string;
   title?: string;
   comment?: string;
 }) {
-  const { data: sess } = await supabase.auth.getSession();
-  const user = sess.session?.user;
-  if (!user) throw new Error("Login required to submit a review");
-
   const { error } = await supabase.from("reviews").insert({
     product_id: input.product_id,
-    user_id: user.id,
-    order_id: input.order_id,
+    user_id: null,
+    order_id: null,
     rating: input.rating,
+    guest_name: input.guest_name.trim(),
+    guest_phone: input.guest_phone.trim(),
     title: input.title?.trim() || null,
     comment: input.comment?.trim() || null,
+    is_approved: false,
   });
-  if (error) {
-    if (error.code === "23505") {
-      throw new Error("You have already reviewed this product for that order.");
-    }
-    throw error;
-  }
+  if (error) throw error;
 }
 
 // ─── Admin helpers ─────────────────────────────────────────────────────────
