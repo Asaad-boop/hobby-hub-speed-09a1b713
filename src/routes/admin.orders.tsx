@@ -342,6 +342,18 @@ function AdminOrdersPage() {
                           ))}
                         </SelectContent>
                       </Select>
+                      {o.status === "confirmed" && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          title="Move to Ready to Pack"
+                          onClick={() =>
+                            updateStatus.mutate({ id: o.id, status: "ready_to_pack" })
+                          }
+                        >
+                          <PackageCheck className="h-4 w-4" /> Ready
+                        </Button>
+                      )}
                       <Button size="sm" variant="outline" onClick={() => setOpenOrderId(o.id)}>
                         <Eye className="h-4 w-4" />
                       </Button>
