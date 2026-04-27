@@ -84,7 +84,7 @@ const toProduct = (r: ProductRow): Product => {
 };
 
 const SELECT_COLS =
-  "id,slug,title,description,price,old_price,image,gallery,benefits,rating,reviews,stock,is_new_arrival,is_featured,is_active,display_order,category_id,categories(name,slug)";
+  "id,slug,title,description,price,old_price,image,gallery,benefits,rating,reviews,stock,is_new_arrival,is_featured,is_active,display_order,category_id,shipping_fee_inside,shipping_fee_outside,categories(name,slug)";
 
 async function fetchProducts(): Promise<Product[]> {
   const { data, error } = await supabase
