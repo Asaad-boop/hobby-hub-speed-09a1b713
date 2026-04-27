@@ -479,6 +479,50 @@ function WebOrderDetailPage() {
     onError: (e: Error) => toast.error(e.message || "Update failed"),
   });
 
+  const confirmOrderMut = useMutation({
+    mutationFn: async () => {
+      if (!order) throw new Error("No order");
+      // Validate before handoff
+      if (!phoneInput || !isValidBdPhone(phoneInput)) {
+        throw new Error("Valid mobile number required before confirming");
+      }
+      if (!address.trim()) throw new Error("Shipping address required");
+      if (items.length === 0) throw new Error("Add at least one product");
+
+      // Persist any pending edits, then flip web_status → confirmed and pipeline status → new
+      const payload = {
+        shipping_name: name || null,
+        shipping_phone: phoneInput || null,
+        shipping_address: address || null,
+        shipping_district: district || null,
+        shipping_city: city || null,
+        notes: shippingNote || null,
+        shipping_fee: shippingFee,
+        discount_amount: discount,
+        advance_payment_amount: advance,
+        order_tags: tags,
+        is_preorder: isPreorder,
+        is_cross_sale: isCrossSale,
+        subtotal,
+        total: grandTotal,
+        web_status: "confirmed",
+        status: "new" as OrderStatus,
+        confirmation_status: "confirmed",
+        confirmed_at: new Date().toISOString(),
+      };
+      const { error } = await supabase.from("orders").update(payload).eq("id", order.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Order confirmed — moved to Pipeline");
+      qc.invalidateQueries({ queryKey: ["web_order_detail", orderId] });
+      qc.invalidateQueries({ queryKey: ["web-orders"] });
+      qc.invalidateQueries({ queryKey: ["admin", "orders"] });
+      navigate({ to: "/admin/orders" });
+    },
+    onError: (e: Error) => toast.error(e.message || "Confirm failed"),
+  });
+
   const addNoteMutation = useMutation({
     mutationFn: async () => {
       if (!order || !noteDraft.trim()) return;
