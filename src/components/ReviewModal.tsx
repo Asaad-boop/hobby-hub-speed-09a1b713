@@ -75,16 +75,16 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
     setError("");
     if (rating === 0) return setError("Please select a star rating");
     const trimmedName = name.trim();
-    const trimmedLoc = location.trim();
+    const trimmedPhone = phone.trim();
     const trimmedText = text.trim();
     if (trimmedName.length < 2 || trimmedName.length > 50) return setError("Name must be 2-50 characters");
-    if (trimmedLoc.length < 2 || trimmedLoc.length > 50) return setError("Location must be 2-50 characters");
+    if (!/^[0-9+\-\s]{6,20}$/.test(trimmedPhone)) return setError("Please enter a valid phone number");
     if (trimmedText.length < 10) return setError("Review must be at least 10 characters");
     if (trimmedText.length > MAX_TEXT) return setError(`Review must be under ${MAX_TEXT} characters`);
 
     setSubmitting(true);
     try {
-      await onSubmit({ name: trimmedName, location: trimmedLoc, rating, text: trimmedText, photos });
+      await onSubmit({ name: trimmedName, phone: trimmedPhone, rating, text: trimmedText, photos });
       setSubmitted(true);
       setTimeout(handleClose, 1600);
     } catch (err) {
