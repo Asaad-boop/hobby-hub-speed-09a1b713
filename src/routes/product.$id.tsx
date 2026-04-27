@@ -689,17 +689,15 @@ function ProductPage() {
             <p className="mt-1 text-sm text-muted-foreground">
               {eligibleOrderId
                 ? "You're a verified buyer — share your experience!"
-                : "Verified buyers can leave a review after their order is delivered."}
+                : "Share your experience with this product."}
             </p>
           </div>
-          {eligibleOrderId && (
-            <button
-              onClick={() => setReviewOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full border-2 border-foreground px-4 py-2 text-xs font-bold transition hover:bg-foreground hover:text-background"
-            >
-              <MessageSquare className="h-4 w-4" /> Write a review
-            </button>
-          )}
+          <button
+            onClick={() => setReviewOpen(true)}
+            className="inline-flex items-center gap-2 rounded-full border-2 border-foreground px-4 py-2 text-xs font-bold transition hover:bg-foreground hover:text-background"
+          >
+            <MessageSquare className="h-4 w-4" /> Write a review
+          </button>
         </div>
 
         <ReviewsList
