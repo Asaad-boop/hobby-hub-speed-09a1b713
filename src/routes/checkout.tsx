@@ -285,10 +285,7 @@ function Checkout() {
         if (couponErr) console.warn("Coupon usage log failed (non-fatal):", couponErr);
       }
 
-      // Fire Telegram notification immediately (don't await — pg_net trigger is too slow)
-      void supabase.functions
-        .invoke("notify-order-telegram", { body: { order_id: order.id } })
-        .catch((e) => console.warn("Telegram notify failed (non-fatal):", e));
+      // Telegram notification is sent automatically by the DB trigger (notify_telegram_on_new_order)
 
       clear();
       toast.success("Order placed! We'll call you to confirm soon.");
