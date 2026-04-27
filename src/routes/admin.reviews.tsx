@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, X, Trash2, Star, Search } from "lucide-react";
+import { Check, X, Trash2, Star, Search, ImageIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   PageHeader,
   Card,
@@ -11,7 +11,6 @@ import {
   Btn,
   Input,
   Badge,
-  fmtDate,
 } from "@/components/admin/ui";
 import {
   fetchAdminReviews,
@@ -19,6 +18,7 @@ import {
   bulkSetApproval,
   deleteReview,
   bulkDelete,
+  updateReviewDate,
   type AdminReview,
 } from "@/lib/reviews";
 
@@ -50,10 +50,42 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
+function toLocalDateTimeInput(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 function ReviewsPage() {
   const [tab, setTab] = useState<Tab>("pending");
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
+  const [savingDateId, setSavingDateId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightbox(null);
+      if (e.key === "ArrowRight") setLightbox((l) => (l ? { ...l, index: (l.index + 1) % l.images.length } : l));
+      if (e.key === "ArrowLeft") setLightbox((l) => (l ? { ...l, index: (l.index - 1 + l.images.length) % l.images.length } : l));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightbox]);
+
+  async function saveDate(id: string, value: string) {
+    setSavingDateId(id);
+    try {
+      await updateReviewDate(id, value);
+      toast.success("Date updated");
+      refetch();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSavingDateId(null);
+    }
+  }
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["admin", "reviews"],
@@ -239,6 +271,7 @@ function ReviewsPage() {
                   <th className="px-3 py-2">Customer</th>
                   <th className="px-3 py-2">Rating</th>
                   <th className="px-3 py-2">Comment</th>
+                  <th className="px-3 py-2">Photos</th>
                   <th className="px-3 py-2">Status</th>
                   <th className="px-3 py-2">Date</th>
                   <th className="px-3 py-2 text-right">Actions</th>
@@ -288,14 +321,53 @@ function ReviewsPage() {
                       </div>
                     </td>
                     <td className="px-3 py-3">
+                      {r.images && r.images.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {r.images.slice(0, 3).map((src, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => setLightbox({ images: r.images, index: i })}
+                              className="relative h-10 w-10 overflow-hidden rounded-md border border-gray-200 bg-gray-50 transition hover:ring-2 hover:ring-gray-900"
+                              aria-label={`View photo ${i + 1}`}
+                            >
+                              <img src={src} alt="" className="h-full w-full object-cover" />
+                              {i === 2 && r.images.length > 3 && (
+                                <span className="absolute inset-0 flex items-center justify-center bg-black/60 text-[10px] font-bold text-white">
+                                  +{r.images.length - 3}
+                                </span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] text-gray-400">
+                          <ImageIcon className="h-3.5 w-3.5" /> none
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-3">
                       {r.is_approved ? (
                         <Badge tone="green">Approved</Badge>
                       ) : (
                         <Badge tone="yellow">Pending</Badge>
                       )}
                     </td>
-                    <td className="px-3 py-3 text-xs text-gray-500">
-                      {fmtDate(r.created_at)}
+                    <td className="px-3 py-3">
+                      <input
+                        type="datetime-local"
+                        defaultValue={toLocalDateTimeInput(r.created_at)}
+                        disabled={savingDateId === r.id}
+                        onBlur={(e) => {
+                          const v = e.target.value;
+                          if (!v) return;
+                          const newIso = new Date(v).toISOString();
+                          if (newIso !== new Date(r.created_at).toISOString()) {
+                            saveDate(r.id, v);
+                          }
+                        }}
+                        className="rounded border border-gray-300 bg-white px-2 py-1 text-[11px] text-gray-700 focus:border-gray-900 focus:outline-none disabled:opacity-60"
+                      />
                     </td>
                     <td className="px-3 py-3">
                       <div className="flex justify-end gap-1.5">
@@ -320,6 +392,55 @@ function ReviewsPage() {
           </div>
         )}
       </Card>
+
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
+          onClick={() => setLightbox(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setLightbox(null); }}
+            className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          {lightbox.images.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setLightbox((l) => l ? { ...l, index: (l.index - 1 + l.images.length) % l.images.length } : l); }}
+                className="absolute left-4 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20"
+                aria-label="Previous"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setLightbox((l) => l ? { ...l, index: (l.index + 1) % l.images.length } : l); }}
+                className="absolute right-4 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20"
+                aria-label="Next"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </>
+          )}
+          <img
+            src={lightbox.images[lightbox.index]}
+            alt={`Review photo ${lightbox.index + 1}`}
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[88vh] max-w-[92vw] rounded-xl object-contain shadow-2xl"
+          />
+          {lightbox.images.length > 1 && (
+            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+              {lightbox.index + 1} / {lightbox.images.length}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

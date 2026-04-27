@@ -242,3 +242,13 @@ export async function updateAdminNote(id: string, admin_note: string | null) {
     .eq("id", id);
   if (error) throw error;
 }
+
+export async function updateReviewDate(id: string, isoDate: string) {
+  const d = new Date(isoDate);
+  if (isNaN(d.getTime())) throw new Error("Invalid date");
+  const { error } = await supabase
+    .from("reviews")
+    .update({ created_at: d.toISOString() })
+    .eq("id", id);
+  if (error) throw error;
+}
