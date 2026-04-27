@@ -242,34 +242,22 @@ export const assignRoleByEmail = createServerFn({ method: "POST" })
   .inputValidator((input: { email: string; role: AppRole }) => {
     const email = String(input?.email ?? "").trim().toLowerCase();
     const role = input?.role;
-    if (!email || !email.includes("@")) throw new Error("Valid email required");
-    if (!STAFF_ROLES.includes(role)) throw new Error("Invalid role");
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) throw new Error("Email is required");
+    if (!emailRe.test(email)) throw new Error("Please enter a valid email address (e.g. name@example.com)");
+    if (!role) throw new Error("Role is required");
+    if (!STAFF_ROLES.includes(role)) throw new Error(`Invalid role "${role}". Must be one of: ${STAFF_ROLES.join(", ")}`);
     return { email, role };
   })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.userId);
 
-    // Find user
-    let userId: string | null = null;
-    let page = 1;
-    const perPage = 200;
-    while (page <= 20) {
-      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({
-        page,
-        perPage,
-      });
-      if (error) throw new Error(error.message);
-      const found = list.users.find(
-        (u) => (u.email ?? "").toLowerCase() === data.email,
+    const userId = await findUserIdByEmail(data.email);
+    if (!userId) {
+      throw new Error(
+        `No user account found for "${data.email}". Use "Create user" to make a new staff account first.`,
       );
-      if (found) {
-        userId = found.id;
-        break;
-      }
-      if (list.users.length < perPage) break;
-      page += 1;
     }
-    if (!userId) throw new Error("No user found with that email. Create one first.");
 
     // Check if already has this role
     const { data: existing } = await supabaseAdmin
@@ -278,12 +266,16 @@ export const assignRoleByEmail = createServerFn({ method: "POST" })
       .eq("user_id", userId)
       .eq("role", data.role)
       .maybeSingle();
-    if (existing) throw new Error("User already has this role");
+    if (existing) {
+      throw new Error(`"${data.email}" already has the "${data.role}" role.`);
+    }
 
     const { error } = await supabaseAdmin
       .from("user_roles")
       .insert({ user_id: userId, role: data.role });
-    if (error) throw new Error(error.message);
+    if (error) {
+      throw new Error(`Failed to assign role "${data.role}" to "${data.email}": ${error.message}`);
+    }
 
     return { success: true as const, user_id: userId };
   });
