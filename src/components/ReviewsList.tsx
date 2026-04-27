@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Star, BadgeCheck, ChevronDown, MessageSquare, Loader2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Star, BadgeCheck, ChevronDown, MessageSquare, Loader2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { computeBreakdown, type ReviewWithProfile } from "@/lib/reviews";
 
 type Props = {
