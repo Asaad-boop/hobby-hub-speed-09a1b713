@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { fetchProductByIdOrSlug, fetchAllProducts } from "@/lib/products";
-import { fetchProductReviews, submitReview, fetchEligibleOrderId } from "@/lib/reviews";
+import { fetchProductReviews, submitReview, fetchEligibleOrderId, uploadReviewImages } from "@/lib/reviews";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
@@ -209,12 +209,17 @@ function ProductPage() {
       throw new Error("Not eligible");
     }
     try {
+      let imageUrls: string[] = [];
+      if (r.photoFiles && r.photoFiles.length > 0) {
+        imageUrls = await uploadReviewImages(r.photoFiles);
+      }
       await submitReview({
         product_id: product.id,
         order_id: eligibleOrderId,
         rating: r.rating,
         title: r.name ? `${r.name}${r.location ? ` · ${r.location}` : ""}` : undefined,
         comment: r.text,
+        images: imageUrls,
       });
       toast.success("Review submitted! Visible after admin approval.");
       setUserReviews((prev) => [r, ...prev]);

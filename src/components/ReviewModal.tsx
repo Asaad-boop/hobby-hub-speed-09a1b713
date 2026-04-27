@@ -7,6 +7,7 @@ export type NewReview = {
   rating: number;
   text: string;
   photos: string[];
+  photoFiles: File[];
 };
 
 type Props = {
@@ -26,6 +27,7 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
   const [location, setLocation] = useState("");
   const [text, setText] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -42,7 +44,7 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
   }, [open, onClose]);
 
   const reset = () => {
-    setRating(0); setHover(0); setName(""); setLocation(""); setText(""); setPhotos([]); setSubmitted(false); setError("");
+    setRating(0); setHover(0); setName(""); setLocation(""); setText(""); setPhotos([]); setPhotoFiles([]); setSubmitted(false); setError("");
   };
 
   const handleClose = () => { reset(); onClose(); };
@@ -65,7 +67,10 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
             r.readAsDataURL(f);
           }),
       ),
-    ).then((urls) => setPhotos((p) => [...p, ...urls].slice(0, MAX_PHOTOS)));
+    ).then((urls) => {
+      setPhotos((p) => [...p, ...urls].slice(0, MAX_PHOTOS));
+      setPhotoFiles((p) => [...p, ...valid].slice(0, MAX_PHOTOS));
+    });
   };
 
   const [submitting, setSubmitting] = useState(false);
@@ -84,7 +89,7 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
 
     setSubmitting(true);
     try {
-      await onSubmit({ name: trimmedName, location: trimmedLoc, rating, text: trimmedText, photos });
+      await onSubmit({ name: trimmedName, location: trimmedLoc, rating, text: trimmedText, photos, photoFiles });
       setSubmitted(true);
       setTimeout(handleClose, 1600);
     } catch (err) {
@@ -209,7 +214,10 @@ export default function ReviewModal({ open, onClose, productTitle, onSubmit }: P
                     <img src={src} alt={`Upload ${i + 1}`} className="h-full w-full object-cover" />
                     <button
                       type="button"
-                      onClick={() => setPhotos((p) => p.filter((_, j) => j !== i))}
+                      onClick={() => {
+                        setPhotos((p) => p.filter((_, j) => j !== i));
+                        setPhotoFiles((p) => p.filter((_, j) => j !== i));
+                      }}
                       className="absolute right-1 top-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-foreground/80 text-background opacity-0 transition group-hover:opacity-100"
                       aria-label="Remove photo"
                     >

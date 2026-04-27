@@ -150,6 +150,26 @@ export default function ReviewsList({ reviews, loading, fallbackRating = 0, fall
                   {r.comment && (
                     <p className="mt-1.5 text-xs leading-relaxed text-foreground">{r.comment}</p>
                   )}
+                  {r.images && r.images.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {r.images.map((src, i) => (
+                        <a
+                          key={i}
+                          href={src}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block h-16 w-16 overflow-hidden rounded-lg border border-border"
+                        >
+                          <img
+                            src={src}
+                            alt={`Review photo ${i + 1}`}
+                            loading="lazy"
+                            className="h-full w-full object-cover transition hover:scale-105"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
