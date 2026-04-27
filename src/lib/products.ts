@@ -44,6 +44,8 @@ type ProductRow = {
   is_active: boolean;
   display_order: number;
   category_id: string | null;
+  shipping_fee_inside?: number | string | null;
+  shipping_fee_outside?: number | string | null;
   categories?: { name: string; slug: string } | null;
 };
 
