@@ -782,8 +782,9 @@ function ProductPage() {
               </button>
               <button
                 onClick={stickyBuy}
-                className="flex-[1.3] rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground shadow-lg"
+                className="buy-jiggle relative flex-[1.3] rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground"
               >
+                <Zap className="mr-1 inline-block h-4 w-4 fill-current align-[-2px]" />
                 Buy ৳{totalPrice}
               </button>
             </div>
