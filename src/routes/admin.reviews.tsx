@@ -321,14 +321,53 @@ function ReviewsPage() {
                       </div>
                     </td>
                     <td className="px-3 py-3">
+                      {r.images && r.images.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {r.images.slice(0, 3).map((src, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => setLightbox({ images: r.images, index: i })}
+                              className="relative h-10 w-10 overflow-hidden rounded-md border border-gray-200 bg-gray-50 transition hover:ring-2 hover:ring-gray-900"
+                              aria-label={`View photo ${i + 1}`}
+                            >
+                              <img src={src} alt="" className="h-full w-full object-cover" />
+                              {i === 2 && r.images.length > 3 && (
+                                <span className="absolute inset-0 flex items-center justify-center bg-black/60 text-[10px] font-bold text-white">
+                                  +{r.images.length - 3}
+                                </span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] text-gray-400">
+                          <ImageIcon className="h-3.5 w-3.5" /> none
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-3">
                       {r.is_approved ? (
                         <Badge tone="green">Approved</Badge>
                       ) : (
                         <Badge tone="yellow">Pending</Badge>
                       )}
                     </td>
-                    <td className="px-3 py-3 text-xs text-gray-500">
-                      {fmtDate(r.created_at)}
+                    <td className="px-3 py-3">
+                      <input
+                        type="datetime-local"
+                        defaultValue={toLocalDateTimeInput(r.created_at)}
+                        disabled={savingDateId === r.id}
+                        onBlur={(e) => {
+                          const v = e.target.value;
+                          if (!v) return;
+                          const newIso = new Date(v).toISOString();
+                          if (newIso !== new Date(r.created_at).toISOString()) {
+                            saveDate(r.id, v);
+                          }
+                        }}
+                        className="rounded border border-gray-300 bg-white px-2 py-1 text-[11px] text-gray-700 focus:border-gray-900 focus:outline-none disabled:opacity-60"
+                      />
                     </td>
                     <td className="px-3 py-3">
                       <div className="flex justify-end gap-1.5">
