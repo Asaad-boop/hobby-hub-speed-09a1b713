@@ -367,6 +367,8 @@ function AdminDashboard() {
           </div>
         </div>
 
+        <LiveVisitorsCard />
+
         {/* Low stock */}
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
