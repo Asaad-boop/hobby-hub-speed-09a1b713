@@ -583,7 +583,7 @@ function ProductPage() {
                 <button
                   onClick={handleBuy}
                   disabled={variantBlocksAddToCart}
-                  className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-primary px-4 py-4 text-sm font-extrabold text-primary-foreground shadow-[var(--shadow-card)] transition hover:shadow-2xl disabled:cursor-not-allowed disabled:opacity-50"
+                  className="buy-jiggle group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-primary px-4 py-4 text-sm font-extrabold text-primary-foreground transition hover:shadow-2xl disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                   <Zap className="h-4 w-4 fill-current" /> Buy Now — ৳{totalPrice}
