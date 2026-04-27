@@ -168,22 +168,23 @@ export default function ReviewsList({ reviews, loading, fallbackRating = 0, fall
                     <p className="mt-1.5 text-xs leading-relaxed text-foreground">{r.comment}</p>
                   )}
                   {r.images && r.images.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1.5">
+                    <div className="mt-3 flex flex-wrap gap-2">
                       {r.images.map((src, i) => (
-                        <a
+                        <button
                           key={i}
-                          href={src}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block h-16 w-16 overflow-hidden rounded-lg border border-border"
+                          type="button"
+                          onClick={() => setLightbox({ images: r.images, index: i })}
+                          className="group relative h-20 w-20 overflow-hidden rounded-xl border border-border bg-muted shadow-sm transition hover:border-primary hover:shadow-md sm:h-24 sm:w-24"
+                          aria-label={`View review photo ${i + 1}`}
                         >
                           <img
                             src={src}
                             alt={`Review photo ${i + 1}`}
                             loading="lazy"
-                            className="h-full w-full object-cover transition hover:scale-105"
+                            className="h-full w-full object-cover transition duration-300 group-hover:scale-110"
                           />
-                        </a>
+                          <span className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/10" />
+                        </button>
                       ))}
                     </div>
                   )}
