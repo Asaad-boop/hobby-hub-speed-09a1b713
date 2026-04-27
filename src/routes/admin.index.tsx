@@ -13,6 +13,8 @@ import {
   Truck,
   XCircle,
   PackageCheck,
+  Activity,
+  Eye,
 } from "lucide-react";
 import {
   Area,
