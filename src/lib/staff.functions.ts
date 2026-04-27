@@ -15,9 +15,9 @@ const STAFF_ROLES: AppRole[] = [
 ];
 
 async function assertAdmin(userId: string) {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.ADMIN_SERVICE_ROLE_KEY) {
     throw new Error(
-      "Server is missing SUPABASE_SERVICE_ROLE_KEY. Open Lovable Cloud settings and reconnect/sync the Supabase integration so the service role key is provisioned to this project.",
+      "Server is missing the Supabase service role key. Add it as the secret ADMIN_SERVICE_ROLE_KEY (copy it from Supabase Dashboard → Project Settings → API → service_role).",
     );
   }
   const { data, error } = await supabaseAdmin
