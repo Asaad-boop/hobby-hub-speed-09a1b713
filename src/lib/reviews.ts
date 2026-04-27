@@ -172,6 +172,7 @@ export async function submitReview(input: {
       title: input.title?.trim() || null,
       comment: input.comment?.trim() || null,
       images: input.images ?? [],
+      videos: input.videos ?? [],
     });
     if (error) throw formatSupabaseError(error, "Could not submit your review");
     return;
@@ -191,6 +192,7 @@ export async function submitReview(input: {
     title: input.title?.trim() || null,
     comment: input.comment?.trim() || null,
     images: input.images ?? [],
+    videos: input.videos ?? [],
     guest_name: name,
     guest_phone: phone,
     is_approved: false,
