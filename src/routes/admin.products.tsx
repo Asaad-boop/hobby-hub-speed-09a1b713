@@ -151,9 +151,82 @@ function ProductEditor({ product, categories, onClose, onSaved }: {
   categories: { id: string; name: string }[];
   onClose: () => void; onSaved: () => void;
 }) {
-  const [form, setForm] = useState<Partial<Product>>(product);
+  const [form, setForm] = useState<Partial<Product>>({ ...product, gallery: product.gallery ?? [] });
   const [saving, setSaving] = useState(false);
+  const [uploadingMain, setUploadingMain] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const mainRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
   const isNew = !product.id;
+
+  async function uploadFiles(files: File[]): Promise<string[]> {
+    const urls: string[] = [];
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) {
+        toast.error(`${file.name}: not an image`);
+        continue;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`${file.name}: must be under 5MB`);
+        continue;
+      }
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
+      const { error } = await supabase.storage.from("product-images").upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type,
+      });
+      if (error) {
+        toast.error(`${file.name}: ${error.message}`);
+        continue;
+      }
+      const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+      urls.push(data.publicUrl);
+    }
+    return urls;
+  }
+
+  async function handleMainUpload(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setUploadingMain(true);
+    const urls = await uploadFiles([files[0]]);
+    if (urls[0]) setForm((f) => ({ ...f, image: urls[0] }));
+    setUploadingMain(false);
+  }
+
+  async function handleGalleryUpload(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setUploadingGallery(true);
+    const urls = await uploadFiles(Array.from(files));
+    if (urls.length > 0) setForm((f) => ({ ...f, gallery: [...(f.gallery ?? []), ...urls] }));
+    setUploadingGallery(false);
+  }
+
+  function removeGallery(i: number) {
+    setForm((f) => ({ ...f, gallery: (f.gallery ?? []).filter((_, j) => j !== i) }));
+  }
+
+  function moveGallery(i: number, dir: -1 | 1) {
+    setForm((f) => {
+      const arr = [...(f.gallery ?? [])];
+      const j = i + dir;
+      if (j < 0 || j >= arr.length) return f;
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+      return { ...f, gallery: arr };
+    });
+  }
+
+  function setAsMain(i: number) {
+    setForm((f) => {
+      const arr = [...(f.gallery ?? [])];
+      const oldMain = f.image;
+      const newMain = arr[i];
+      arr.splice(i, 1);
+      if (oldMain) arr.unshift(oldMain);
+      return { ...f, image: newMain, gallery: arr };
+    });
+  }
 
   async function save() {
     if (!form.title || !form.slug) return toast.error("Title and slug required");
@@ -166,6 +239,7 @@ function ProductEditor({ product, categories, onClose, onSaved }: {
       old_price: form.old_price ? Number(form.old_price) : null,
       stock: Number(form.stock) || 0,
       image: form.image ?? "",
+      gallery: form.gallery ?? [],
       category_id: form.category_id || null,
       is_active: form.is_active ?? true,
       is_featured: form.is_featured ?? false,
@@ -179,8 +253,10 @@ function ProductEditor({ product, categories, onClose, onSaved }: {
     toast.success("Saved"); onSaved();
   }
 
+  const gallery = form.gallery ?? [];
+
   return (
-    <Modal open onClose={onClose} title={isNew ? "New product" : "Edit product"} width="max-w-2xl">
+    <Modal open onClose={onClose} title={isNew ? "New product" : "Edit product"} width="max-w-3xl">
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Title" full><Input value={form.title ?? ""} onChange={(e) => setForm({ ...form, title: e.target.value, slug: form.slug || e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-") })} /></Field>
         <Field label="Slug"><Input value={form.slug ?? ""} onChange={(e) => setForm({ ...form, slug: e.target.value })} /></Field>
@@ -193,7 +269,124 @@ function ProductEditor({ product, categories, onClose, onSaved }: {
         <Field label="Price"><Input type="number" value={form.price ?? 0} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} /></Field>
         <Field label="Old price"><Input type="number" value={form.old_price ?? ""} onChange={(e) => setForm({ ...form, old_price: e.target.value ? Number(e.target.value) : null })} /></Field>
         <Field label="Stock"><Input type="number" value={form.stock ?? 0} onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })} /></Field>
-        <Field label="Image URL"><Input value={form.image ?? ""} onChange={(e) => setForm({ ...form, image: e.target.value })} /></Field>
+
+        {/* Main image */}
+        <Field label="Main image" full>
+          <div className="flex items-start gap-3">
+            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-50">
+              {form.image ? (
+                <img src={form.image} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-400">No image</div>
+              )}
+            </div>
+            <div className="flex-1 space-y-2">
+              <Input placeholder="https://… or upload" value={form.image ?? ""} onChange={(e) => setForm({ ...form, image: e.target.value })} />
+              <div className="flex gap-2">
+                <Btn onClick={() => mainRef.current?.click()} disabled={uploadingMain}>
+                  {uploadingMain ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                  {uploadingMain ? "Uploading…" : "Upload"}
+                </Btn>
+                {form.image && <Btn variant="danger" onClick={() => setForm({ ...form, image: "" })}><X className="h-3 w-3" /> Clear</Btn>}
+              </div>
+              <input
+                ref={mainRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => { handleMainUpload(e.target.files); e.target.value = ""; }}
+              />
+            </div>
+          </div>
+        </Field>
+
+        {/* Gallery */}
+        <Field label={`Gallery images (${gallery.length})`} full>
+          <div className="space-y-3">
+            {gallery.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+                {gallery.map((src, i) => (
+                  <div key={`${src}-${i}`} className="group relative aspect-square overflow-hidden rounded-md border border-gray-200 bg-gray-50">
+                    <img src={src} alt="" className="h-full w-full object-cover" />
+                    <div className="absolute inset-0 flex flex-col justify-between bg-black/0 p-1 opacity-0 transition group-hover:bg-black/40 group-hover:opacity-100">
+                      <div className="flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => removeGallery(i)}
+                          className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-white shadow"
+                          aria-label="Remove"
+                          title="Remove"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between gap-1">
+                        <button
+                          type="button"
+                          onClick={() => moveGallery(i, -1)}
+                          disabled={i === 0}
+                          className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow disabled:opacity-40"
+                          aria-label="Move left"
+                          title="Move left"
+                        >
+                          <ArrowLeft className="h-3 w-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAsMain(i)}
+                          className="rounded-full bg-white/90 px-1.5 py-0.5 text-[9px] font-bold text-gray-800 shadow"
+                          title="Set as main image"
+                        >
+                          ★ Main
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveGallery(i, 1)}
+                          disabled={i === gallery.length - 1}
+                          className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow disabled:opacity-40"
+                          aria-label="Move right"
+                          title="Move right"
+                        >
+                          <ArrowRight className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex flex-wrap items-center gap-2">
+              <Btn onClick={() => galleryRef.current?.click()} disabled={uploadingGallery}>
+                {uploadingGallery ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                {uploadingGallery ? "Uploading…" : "Upload images"}
+              </Btn>
+              <Input
+                placeholder="Or paste image URL and press Enter"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    const v = (e.target as HTMLInputElement).value.trim();
+                    if (v) {
+                      setForm((f) => ({ ...f, gallery: [...(f.gallery ?? []), v] }));
+                      (e.target as HTMLInputElement).value = "";
+                    }
+                  }
+                }}
+                className="flex-1 min-w-[200px]"
+              />
+            </div>
+            <input
+              ref={galleryRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => { handleGalleryUpload(e.target.files); e.target.value = ""; }}
+            />
+            <p className="text-[11px] text-gray-500">Hover an image to remove, reorder, or set as main. Max 5MB per image.</p>
+          </div>
+        </Field>
+
         <Field label="Description" full><Textarea rows={4} value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
         <div className="flex flex-wrap gap-4 sm:col-span-2 text-sm">
           <label className="flex items-center gap-2"><input type="checkbox" checked={!!form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} /> Active</label>
