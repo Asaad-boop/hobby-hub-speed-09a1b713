@@ -619,7 +619,17 @@ function WebOrdersPage() {
                             Checking…
                           </div>
                         ) : stat.total === 0 ? (
-                          <span className="text-xs text-muted-foreground">No history</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">No history</span>
+                            <button
+                              type="button"
+                              onClick={() => refreshCourierStat(phoneKey)}
+                              title="Update courier rating (calls BD Courier API)"
+                              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                            >
+                              <RefreshCw className="h-3 w-3" />
+                            </button>
+                          </div>
                         ) : (
                           <div className="flex items-center gap-2">
                             <div className="relative flex h-10 w-10 items-center justify-center">
