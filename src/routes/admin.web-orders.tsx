@@ -193,9 +193,11 @@ function matchesTab(o: OrderRow, tab: TabKey): boolean {
     case "cancel":
       return s === "cancelled" || s === "fake";
     case "good_no_response":
-      return PROCESSING_STATUSES.has(s) && (cs === "busy" || cs === "no_answer");
+      // Reached customer but no confirmation yet (e.g. busy line, asked to call back)
+      return PROCESSING_STATUSES.has(s) && cs === "busy";
     case "no_response":
-      return PROCESSING_STATUSES.has(s) && cs === "not_called";
+      // Tried calling but customer didn't pick up
+      return PROCESSING_STATUSES.has(s) && cs === "no_answer";
     default:
       return true;
   }
