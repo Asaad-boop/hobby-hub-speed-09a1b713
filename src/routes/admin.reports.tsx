@@ -54,15 +54,16 @@ function ReportsPage() {
 
   const max = Math.max(1, ...Object.values(data.days));
 
-  function exportCsv() {
+  const reportData = data;
+  const exportCsv = () => {
     const lines = ["Date,Revenue"];
-    for (const [d, v] of Object.entries(data.days)) lines.push(`${d},${v}`);
+    for (const [d, v] of Object.entries(reportData.days)) lines.push(`${d},${v}`);
     lines.push("");
     lines.push("Top Products,Qty,Revenue");
-    for (const p of data.top) lines.push(`"${p.name.replace(/"/g, '""')}",${p.qty},${p.revenue}`);
+    for (const p of reportData.top) lines.push(`"${p.name.replace(/"/g, '""')}",${p.qty},${p.revenue}`);
     lines.push("");
     lines.push("Status,Count");
-    for (const [s, c] of Object.entries(data.statusCounts)) lines.push(`${s},${c}`);
+    for (const [s, c] of Object.entries(reportData.statusCounts)) lines.push(`${s},${c}`);
     const blob = new Blob([lines.join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -70,7 +71,7 @@ function ReportsPage() {
     a.download = `report-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  }
+  };
 
   return (
     <div>
