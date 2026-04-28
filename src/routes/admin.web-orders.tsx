@@ -393,9 +393,9 @@ function WebOrdersPage() {
         const apiErr = (data as { error?: string } | null)?.error;
         const payloadErr = courierPayloadError(data?.data);
         if (error || apiErr || payloadErr || !data?.data) {
-          const msg = apiErr || payloadErr || error?.message;
+          const msg = normalizeCourierError(apiErr || payloadErr || error?.message);
           // Detect quota / rate-limit and trip the circuit breaker
-          if (msg && /limit|quota|429/i.test(msg)) {
+          if (/limit|quota|429|503/i.test(msg)) {
             if (!quotaExhaustedRef.current) {
               quotaExhaustedRef.current = true;
               toast.error("BD Courier API limit reached — top up credits to resume", {
@@ -433,7 +433,7 @@ function WebOrdersPage() {
         if (cancelled) return;
         setCourierStats((prev) => ({
           ...prev,
-          [phone]: { total: 0, success: 0, rate: 0, loading: false, error: (e as Error).message },
+          [phone]: { total: 0, success: 0, rate: 0, loading: false, error: normalizeCourierError((e as Error).message) },
         }));
       }
     };
