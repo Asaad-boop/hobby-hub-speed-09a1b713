@@ -272,7 +272,8 @@ Deno.serve(async (req) => {
       .maybeSingle();
     const validCached = cached && !hasCachedApiError(cached) ? cached : null;
 
-    const apiKey = Deno.env.get("BD_COURIER_API_KEY");
+    // Prefer API key from integrations.config (UI-managed), fallback to env secret
+    const apiKey = (cfg.api_key && String(cfg.api_key).trim()) || Deno.env.get("BD_COURIER_API_KEY");
     console.log(
       "BD_COURIER_API_KEY present:",
       !!apiKey,
