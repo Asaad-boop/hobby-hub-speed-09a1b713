@@ -71,7 +71,21 @@ type CourierStat = {
   rate: number;
   loading: boolean;
   error?: string;
+  requestedAt?: number;
 };
+
+const COURIER_CLIENT_TIMEOUT_MS = 25_000;
+
+async function invokeCourierStats(phone: string, forceRefresh = false) {
+  return await Promise.race([
+    supabase.functions.invoke("fetch-courier-stats", {
+      body: { phone, ...(forceRefresh ? { force_refresh: true } : {}) },
+    }),
+    new Promise<never>((_, reject) =>
+      window.setTimeout(() => reject(new Error("BD Courier request timed out")), COURIER_CLIENT_TIMEOUT_MS),
+    ),
+  ]);
+}
 
 function normalizeCourierError(message: string | undefined): string {
   if (!message) return "Could not load courier rating";
@@ -252,12 +266,10 @@ function WebOrdersPage() {
   const refreshCourierStat = async (phone: string) => {
     setCourierStats((prev) => ({
       ...prev,
-      [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: true, error: undefined },
+      [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: true, error: undefined, requestedAt: Date.now() },
     }));
     try {
-      const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
-        body: { phone, force_refresh: true },
-      });
+      const { data, error } = await invokeCourierStats(phone, true);
       // Edge fn returns { error: "..." } on upstream failure (e.g. quota)
       const apiErr = (data as { error?: string } | null)?.error;
       const payloadErr = courierPayloadError(data?.data);
@@ -374,7 +386,7 @@ function WebOrdersPage() {
     setCourierStats((prev) => {
       const next = { ...prev };
       phones.forEach((p) => {
-        next[p] = { total: 0, success: 0, rate: 0, loading: true };
+          next[p] = { total: 0, success: 0, rate: 0, loading: true, requestedAt: Date.now() };
       });
       return next;
     });
@@ -386,9 +398,7 @@ function WebOrdersPage() {
 
     const runOne = async (phone: string) => {
       try {
-        const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
-          body: { phone },
-        });
+        const { data, error } = await invokeCourierStats(phone);
         if (cancelled) return;
         const apiErr = (data as { error?: string } | null)?.error;
         const payloadErr = courierPayloadError(data?.data);
@@ -403,7 +413,7 @@ function WebOrdersPage() {
               });
             }
             // Drain queue: mark all pending as errored so spinners stop
-            const pendingPhones = [...queue];
+            const pendingPhones = [...phones];
             queue.length = 0;
             setCourierStats((prev) => {
               const next = { ...prev };
