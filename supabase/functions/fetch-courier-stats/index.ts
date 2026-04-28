@@ -259,6 +259,7 @@ Deno.serve(async (req) => {
     const cfg = (integration?.config ?? {}) as {
       cache_hours?: number;
       stale_while_revalidate?: boolean;
+      api_key?: string;
     };
     const cacheHours = Number(cfg.cache_hours ?? DEFAULT_CACHE_HOURS);
     const swr = cfg.stale_while_revalidate !== false; // default ON
@@ -271,7 +272,8 @@ Deno.serve(async (req) => {
       .maybeSingle();
     const validCached = cached && !hasCachedApiError(cached) ? cached : null;
 
-    const apiKey = Deno.env.get("BD_COURIER_API_KEY");
+    // Prefer API key from integrations.config (UI-managed), fallback to env secret
+    const apiKey = (cfg.api_key && String(cfg.api_key).trim()) || Deno.env.get("BD_COURIER_API_KEY");
     console.log(
       "BD_COURIER_API_KEY present:",
       !!apiKey,
