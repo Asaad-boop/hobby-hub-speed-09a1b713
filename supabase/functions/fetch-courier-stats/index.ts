@@ -66,6 +66,9 @@ async function fetchAndCache(
   let statusCode = 0;
   let errorMsg: string | null = null;
 
+  // Hard timeout — never let upstream hang the worker
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), 20_000); // 20s max
   try {
     const r = await fetch("https://bdcourier.com/api/courier-check", {
       method: "POST",
@@ -75,11 +78,14 @@ async function fetchAndCache(
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({ phone: cleanPhone }),
+      signal: ac.signal,
     });
     statusCode = r.status;
     apiResp = await r.json();
   } catch (e) {
-    errorMsg = (e as Error).message;
+    errorMsg = (e as Error).name === "AbortError" ? "Upstream timeout (>20s)" : (e as Error).message;
+  } finally {
+    clearTimeout(timer);
   }
 
   await supabase.from("integration_logs").insert({
@@ -308,10 +314,15 @@ Deno.serve(async (req) => {
 
     // 4. Stale-while-revalidate: stale cache + not forced → return stale, refresh in background
     if (!force_refresh && cached && swr) {
-      // Fire and forget — do not await
-      fetchAndCache(supabase, cleanPhone, apiKey, cacheHours).catch((e) =>
+      // Background refresh — use EdgeRuntime.waitUntil so the worker can be released
+      // immediately after the response is sent (otherwise the unawaited promise keeps
+      // the isolate alive until the 150s idle timeout).
+      const bg = fetchAndCache(supabase, cleanPhone, apiKey, cacheHours).catch((e) =>
         console.error("[BD Courier] background refresh failed:", e),
       );
+      // deno-lint-ignore no-explicit-any
+      const er = (globalThis as any).EdgeRuntime;
+      if (er?.waitUntil) er.waitUntil(bg);
       return new Response(
         JSON.stringify({
           data: cached,
