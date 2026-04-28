@@ -64,33 +64,6 @@ type OrderRow = {
   }[];
 };
 
-type CourierStat = {
-  total: number;
-  success: number;
-  rate: number;
-  loading: boolean;
-  error?: string;
-  requestedAt?: number;
-};
-
-const COURIER_CLIENT_TIMEOUT_MS = 25_000;
-
-async function invokeCourierStats(phone: string, forceRefresh = false) {
-  return await Promise.race([
-    supabase.functions.invoke("fetch-courier-stats", {
-      body: { phone, ...(forceRefresh ? { force_refresh: true } : {}) },
-    }),
-    new Promise<never>((_, reject) =>
-      window.setTimeout(() => reject(new Error("BD Courier request timed out")), COURIER_CLIENT_TIMEOUT_MS),
-    ),
-  ]);
-}
-
-function normalizeCourierError(message: string | undefined): string {
-  if (!message) return "Could not load courier rating";
-  if (/limit|quota|429|503/i.test(message)) return "BD Courier API limit reached";
-  return message;
-}
 
 function formatDateTime(iso: string) {
   const d = new Date(iso);
