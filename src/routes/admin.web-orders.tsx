@@ -430,67 +430,6 @@ function WebOrdersPage() {
                         </div>
                       </TableCell>
                       <TableCell className="pt-3">
-                        {!phoneKey ? (
-                          <span className="text-xs text-muted-foreground">No phone</span>
-                        ) : !stat || stat.loading ? (
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            Checking…
-                          </div>
-                        ) : stat.total === 0 ? (
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`text-xs ${stat.error ? "text-destructive" : "text-muted-foreground"}`}
-                              title={stat.error || undefined}
-                            >
-                              {stat.error
-                                ? /limit|quota|429/i.test(stat.error)
-                                  ? "API limit"
-                                  : "API error"
-                                : "No history"}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => refreshCourierStat(phoneKey)}
-                              title={
-                                stat.error
-                                  ? `${stat.error} — click to retry`
-                                  : "Update courier rating (calls BD Courier API)"
-                              }
-                              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                            >
-                              <RefreshCw className="h-3 w-3" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <div className="relative flex h-10 w-10 items-center justify-center">
-                              <CircularProgress percent={stat.rate} />
-                              <span className="absolute text-[10px] font-semibold">
-                                {Math.round(stat.rate)}%
-                              </span>
-                            </div>
-                            <div className="leading-tight">
-                              <div className="text-xs text-muted-foreground">
-                                {stat.total} orders
-                              </div>
-                              <div className="flex items-center gap-0.5 text-xs">
-                                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                                {stat.success}/{stat.total}
-                              </div>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => refreshCourierStat(phoneKey)}
-                              title="Update courier rating (calls BD Courier API)"
-                              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                            >
-                              <RefreshCw className="h-3 w-3" />
-                            </button>
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell className="pt-3">
                         <div className="flex flex-wrap items-center gap-1">
                           {tags.map((t) => (
                             <Badge
