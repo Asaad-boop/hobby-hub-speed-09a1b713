@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { PageHeader, Card, Loading, fmtBDT } from "@/components/admin/ui";
+import { PageHeader, Card, Loading, fmtBDT, Btn } from "@/components/admin/ui";
 
 export const Route = createFileRoute("/admin/reports")({
   component: ReportsPage,
@@ -53,9 +54,36 @@ function ReportsPage() {
 
   const max = Math.max(1, ...Object.values(data.days));
 
+  const reportData = data;
+  const exportCsv = () => {
+    const lines = ["Date,Revenue"];
+    for (const [d, v] of Object.entries(reportData.days)) lines.push(`${d},${v}`);
+    lines.push("");
+    lines.push("Top Products,Qty,Revenue");
+    for (const p of reportData.top) lines.push(`"${p.name.replace(/"/g, '""')}",${p.qty},${p.revenue}`);
+    lines.push("");
+    lines.push("Status,Count");
+    for (const [s, c] of Object.entries(reportData.statusCounts)) lines.push(`${s},${c}`);
+    const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `report-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div>
-      <PageHeader title="Reports" description="Last 30 days" />
+      <PageHeader
+        title="Reports"
+        description="Last 30 days"
+        actions={
+          <Btn variant="primary" onClick={exportCsv}>
+            <Download className="h-3.5 w-3.5" /> Export CSV
+          </Btn>
+        }
+      />
 
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
         <Stat label="Revenue (delivered)" value={fmtBDT(data.totalRevenue)} />
