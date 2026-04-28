@@ -52,6 +52,11 @@ function ageHours(iso: string): number {
   return Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000);
 }
 
+function hasCachedApiError(cached: Record<string, unknown> | null | undefined): boolean {
+  const raw = cached?.raw_response as { error?: unknown } | null | undefined;
+  return typeof raw?.error === "string" && raw.error.trim().length > 0;
+}
+
 const COURIER_WARNING =
   "BD Courier API may omit some couriers (e.g. Carrybee, eCourier). Numbers reflect what the upstream API returns.";
 
@@ -260,6 +265,7 @@ Deno.serve(async (req) => {
       .select("*")
       .eq("phone", cleanPhone)
       .maybeSingle();
+    const validCached = cached && !hasCachedApiError(cached) ? cached : null;
 
     const apiKey = Deno.env.get("BD_COURIER_API_KEY");
     console.log(
@@ -284,13 +290,13 @@ Deno.serve(async (req) => {
     }
 
     // 3. Fresh cache hit (and not forced) → return immediately
-    if (!force_refresh && cached && new Date(cached.expires_at) > new Date()) {
+    if (!force_refresh && validCached && new Date(validCached.expires_at) > new Date()) {
       return new Response(
         JSON.stringify({
-          data: cached,
+          data: validCached,
           source: "cache",
           cache_hit: true,
-          age_hours: ageHours(cached.last_fetched_at),
+          age_hours: ageHours(validCached.last_fetched_at),
           warning: COURIER_WARNING,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -299,13 +305,13 @@ Deno.serve(async (req) => {
 
     // No API key configured
     if (!apiKey) {
-      if (cached) {
+      if (validCached) {
         return new Response(
           JSON.stringify({
-            data: cached,
+            data: validCached,
             source: "stale_cache",
             cache_hit: true,
-            age_hours: ageHours(cached.last_fetched_at),
+            age_hours: ageHours(validCached.last_fetched_at),
             warning: "API not configured — showing cached data",
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -320,7 +326,7 @@ Deno.serve(async (req) => {
     }
 
     // 4. Stale-while-revalidate: stale cache + not forced → return stale, refresh in background
-    if (!force_refresh && cached && swr) {
+    if (!force_refresh && validCached && swr) {
       // Background refresh — use EdgeRuntime.waitUntil so the worker can be released
       // immediately after the response is sent (otherwise the unawaited promise keeps
       // the isolate alive until the 150s idle timeout).
@@ -332,10 +338,10 @@ Deno.serve(async (req) => {
       if (er?.waitUntil) er.waitUntil(bg);
       return new Response(
         JSON.stringify({
-          data: cached,
+          data: validCached,
           source: "stale_cache",
           cache_hit: true,
-          age_hours: ageHours(cached.last_fetched_at),
+          age_hours: ageHours(validCached.last_fetched_at),
           message: "Showing cached data, refreshing in background",
           warning: COURIER_WARNING,
         }),
@@ -346,13 +352,13 @@ Deno.serve(async (req) => {
     // 5. Live fetch (forced, no cache, or SWR off + stale)
     const result = await fetchAndCache(supabase, cleanPhone, apiKey, cacheHours);
     if (!result.ok) {
-      if (cached) {
+      if (validCached) {
         return new Response(
           JSON.stringify({
-            data: cached,
+            data: validCached,
             source: "stale_cache",
             cache_hit: true,
-            age_hours: ageHours(cached.last_fetched_at),
+            age_hours: ageHours(validCached.last_fetched_at),
             warning: "API unavailable — showing cached data",
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
