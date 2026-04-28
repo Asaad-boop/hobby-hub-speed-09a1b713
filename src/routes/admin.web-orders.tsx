@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Phone,
   MessageCircle,
@@ -7,7 +7,6 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
-  Star,
   Globe,
   Loader2,
   RefreshCw,
@@ -65,33 +64,6 @@ type OrderRow = {
   }[];
 };
 
-type CourierStat = {
-  total: number;
-  success: number;
-  rate: number;
-  loading: boolean;
-  error?: string;
-  requestedAt?: number;
-};
-
-const COURIER_CLIENT_TIMEOUT_MS = 25_000;
-
-async function invokeCourierStats(phone: string, forceRefresh = false) {
-  return await Promise.race([
-    supabase.functions.invoke("fetch-courier-stats", {
-      body: { phone, ...(forceRefresh ? { force_refresh: true } : {}) },
-    }),
-    new Promise<never>((_, reject) =>
-      window.setTimeout(() => reject(new Error("BD Courier request timed out")), COURIER_CLIENT_TIMEOUT_MS),
-    ),
-  ]);
-}
-
-function normalizeCourierError(message: string | undefined): string {
-  if (!message) return "Could not load courier rating";
-  if (/limit|quota|429|503/i.test(message)) return "BD Courier API limit reached";
-  return message;
-}
 
 function formatDateTime(iso: string) {
   const d = new Date(iso);
@@ -127,42 +99,6 @@ function AutoCallBadge({ enabled, status }: { enabled: boolean | null; status: s
       {m.label}
     </span>
   );
-}
-
-function CircularProgress({ percent }: { percent: number }) {
-  const r = 16;
-  const c = 2 * Math.PI * r;
-  const offset = c - (percent / 100) * c;
-  const color =
-    percent >= 80 ? "text-emerald-500" : percent >= 60 ? "text-amber-500" : "text-rose-500";
-  return (
-    <svg width="40" height="40" viewBox="0 0 40 40" className="-rotate-90">
-      <circle cx="20" cy="20" r={r} strokeWidth="3" className="stroke-muted" fill="none" />
-      <circle
-        cx="20"
-        cy="20"
-        r={r}
-        strokeWidth="3"
-        strokeLinecap="round"
-        className={`${color} transition-all`}
-        stroke="currentColor"
-        fill="none"
-        strokeDasharray={c}
-        strokeDashoffset={offset}
-      />
-    </svg>
-  );
-}
-
-function cleanPhone(p: string | null | undefined): string | null {
-  if (!p) return null;
-  const digits = p.replace(/[^0-9]/g, "").slice(-11);
-  return /^01[3-9]\d{8}$/.test(digits) ? digits : null;
-}
-
-function courierPayloadError(payload: unknown): string | undefined {
-  const raw = (payload as { raw_response?: { error?: unknown } } | null)?.raw_response;
-  return typeof raw?.error === "string" && raw.error.trim() ? raw.error : undefined;
 }
 
 type TabKey =
@@ -232,106 +168,6 @@ function matchesTab(o: OrderRow, tab: TabKey): boolean {
 function WebOrdersPage() {
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [courierStats, setCourierStats] = useState<Record<string, CourierStat>>(() => {
-    if (typeof window === "undefined") return {};
-    try {
-      const raw = window.localStorage.getItem("courier_stats_v1");
-      if (!raw) return {};
-      const parsed = JSON.parse(raw) as Record<string, CourierStat>;
-      // Drop any stale "loading" entries from previous sessions
-      const clean: Record<string, CourierStat> = {};
-      Object.entries(parsed).forEach(([k, v]) => {
-        if (v && !v.loading) clean[k] = v;
-      });
-      return clean;
-    } catch {
-      return {};
-    }
-  });
-
-  // Persist courier stats to localStorage so we never re-call BD Courier (paid) on reload
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const toSave: Record<string, CourierStat> = {};
-      Object.entries(courierStats).forEach(([k, v]) => {
-        if (v && !v.loading) toSave[k] = v;
-      });
-      window.localStorage.setItem("courier_stats_v1", JSON.stringify(toSave));
-    } catch {
-      /* quota or private mode — ignore */
-    }
-  }, [courierStats]);
-
-  useEffect(() => {
-    const loadingEntries = Object.entries(courierStats).filter(([, v]) => v?.loading);
-    if (loadingEntries.length === 0) return;
-
-    const now = Date.now();
-    const overduePhones = loadingEntries
-      .filter(([, v]) => !v.requestedAt || now - v.requestedAt > COURIER_CLIENT_TIMEOUT_MS)
-      .map(([phone]) => phone);
-
-    if (overduePhones.length > 0) {
-      setCourierStats((prev) => {
-        const next = { ...prev };
-        overduePhones.forEach((phone) => {
-          next[phone] = { total: 0, success: 0, rate: 0, loading: false, error: "BD Courier request timed out" };
-        });
-        return next;
-      });
-      return;
-    }
-
-    const nextTimeout = Math.min(
-      ...loadingEntries.map(([, v]) => COURIER_CLIENT_TIMEOUT_MS - (now - (v.requestedAt ?? now))),
-    );
-    const timer = window.setTimeout(() => {
-      setCourierStats((prev) => ({ ...prev }));
-    }, Math.max(500, nextTimeout));
-
-    return () => window.clearTimeout(timer);
-  }, [courierStats]);
-
-  const refreshCourierStat = async (phone: string) => {
-    setCourierStats((prev) => ({
-      ...prev,
-      [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: true, error: undefined, requestedAt: Date.now() },
-    }));
-    try {
-      const { data, error } = await invokeCourierStats(phone, true);
-      // Edge fn returns { error: "..." } on upstream failure (e.g. quota)
-      const apiErr = (data as { error?: string } | null)?.error;
-      const payloadErr = courierPayloadError(data?.data);
-      if (error || apiErr || payloadErr || !data?.data) {
-        const msg = normalizeCourierError(apiErr || payloadErr || error?.message);
-        toast.error(msg);
-        setCourierStats((prev) => ({
-          ...prev,
-          [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: false, error: msg },
-        }));
-        return;
-      }
-      const d = data.data;
-      setCourierStats((prev) => ({
-        ...prev,
-        [phone]: {
-          total: d.overall_total ?? 0,
-          success: d.overall_success ?? 0,
-          rate: d.overall_success_rate ?? 0,
-          loading: false,
-        },
-      }));
-      toast.success("Courier rating updated");
-    } catch (e) {
-      const msg = normalizeCourierError((e as Error).message);
-      toast.error(msg);
-      setCourierStats((prev) => ({
-        ...prev,
-        [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: false, error: msg },
-      }));
-    }
-  };
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -398,103 +234,6 @@ function WebOrdersPage() {
     return filteredOrders.slice(start, start + pageSize);
   }, [page, pageSize, filteredOrders]);
 
-  // Fetch courier stats for visible page (cache-first via edge fn)
-  // Session-scoped circuit breaker: if BD Courier quota is hit, stop auto-fetching.
-  const quotaExhaustedRef = useRef(false);
-  useEffect(() => {
-    if (quotaExhaustedRef.current) return;
-    const phones = Array.from(
-      new Set(
-        rows
-          .map((r) => cleanPhone(r.shipping_phone || r.guest_phone))
-          .filter((p): p is string => !!p),
-      ),
-    ).filter((p) => courierStats[p] === undefined);
-
-    if (phones.length === 0) return;
-
-    setCourierStats((prev) => {
-      const next = { ...prev };
-      phones.forEach((p) => {
-          next[p] = { total: 0, success: 0, rate: 0, loading: true, requestedAt: Date.now() };
-      });
-      return next;
-    });
-
-    // Limit concurrency — at most 3 in-flight invocations at a time
-    let cancelled = false;
-    const queue = [...phones];
-    const CONCURRENCY = 3;
-
-    const runOne = async (phone: string) => {
-      try {
-        const { data, error } = await invokeCourierStats(phone);
-        if (cancelled) return;
-        const apiErr = (data as { error?: string } | null)?.error;
-        const payloadErr = courierPayloadError(data?.data);
-        if (error || apiErr || payloadErr || !data?.data) {
-          const msg = normalizeCourierError(apiErr || payloadErr || error?.message);
-          // Detect quota / rate-limit and trip the circuit breaker
-          if (/limit|quota|429|503/i.test(msg)) {
-            if (!quotaExhaustedRef.current) {
-              quotaExhaustedRef.current = true;
-              toast.error("BD Courier API limit reached — top up credits to resume", {
-                duration: 8000,
-              });
-            }
-            // Drain queue: mark all pending as errored so spinners stop
-            const pendingPhones = [...phones];
-            queue.length = 0;
-            setCourierStats((prev) => {
-              const next = { ...prev };
-              pendingPhones.forEach((p) => {
-                next[p] = { total: 0, success: 0, rate: 0, loading: false, error: msg };
-              });
-              return next;
-            });
-          }
-          setCourierStats((prev) => ({
-            ...prev,
-            [phone]: { total: 0, success: 0, rate: 0, loading: false, error: msg },
-          }));
-          return;
-        }
-        const d = data.data;
-        setCourierStats((prev) => ({
-          ...prev,
-          [phone]: {
-            total: d.overall_total ?? 0,
-            success: d.overall_success ?? 0,
-            rate: d.overall_success_rate ?? 0,
-            loading: false,
-          },
-        }));
-      } catch (e) {
-        if (cancelled) return;
-        setCourierStats((prev) => ({
-          ...prev,
-          [phone]: { total: 0, success: 0, rate: 0, loading: false, error: normalizeCourierError((e as Error).message) },
-        }));
-      }
-    };
-
-    const worker = async () => {
-      while (!cancelled) {
-        const phone = queue.shift();
-        if (!phone) return;
-        await runOne(phone);
-      }
-    };
-
-    Array.from({ length: Math.min(CONCURRENCY, phones.length) }).forEach(() => {
-      void worker();
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [rows]);
-
   const allChecked = rows.length > 0 && rows.every((r) => selected.has(r.id));
   const toggleAll = () => {
     const next = new Set(selected);
@@ -515,7 +254,7 @@ function WebOrdersPage() {
         <div>
           <h2 className="text-xl font-semibold tracking-tight">Web Orders</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            All incoming orders from your storefront. Success rate via BD Courier.
+            All incoming orders from your storefront.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -578,7 +317,7 @@ function WebOrdersPage() {
                 <TableHead>Customer</TableHead>
                 <TableHead>Note</TableHead>
                 <TableHead>Order Items</TableHead>
-                <TableHead>Success Rate</TableHead>
+                
                 <TableHead>Tags</TableHead>
                 <TableHead>Site</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -587,7 +326,7 @@ function WebOrdersPage() {
             <TableBody>
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={10} className="py-12 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={9} className="py-12 text-center text-sm text-muted-foreground">
                     <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />
                     Loading orders…
                   </TableCell>
@@ -595,7 +334,7 @@ function WebOrdersPage() {
               )}
               {!loading && rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={10} className="py-12 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={9} className="py-12 text-center text-sm text-muted-foreground">
                     No orders yet.
                   </TableCell>
                 </TableRow>
@@ -604,8 +343,6 @@ function WebOrdersPage() {
                 rows.map((o) => {
                   const dt = formatDateTime(o.created_at);
                   const phone = o.shipping_phone || o.guest_phone || "";
-                  const phoneKey = cleanPhone(phone);
-                  const stat = phoneKey ? courierStats[phoneKey] : undefined;
                   const name = o.shipping_name || o.guest_name || "—";
                   const address = [o.shipping_address, o.shipping_city]
                     .filter(Boolean)
@@ -691,67 +428,6 @@ function WebOrdersPage() {
                             </div>
                           ))}
                         </div>
-                      </TableCell>
-                      <TableCell className="pt-3">
-                        {!phoneKey ? (
-                          <span className="text-xs text-muted-foreground">No phone</span>
-                        ) : !stat || stat.loading ? (
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            Checking…
-                          </div>
-                        ) : stat.total === 0 ? (
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`text-xs ${stat.error ? "text-destructive" : "text-muted-foreground"}`}
-                              title={stat.error || undefined}
-                            >
-                              {stat.error
-                                ? /limit|quota|429/i.test(stat.error)
-                                  ? "API limit"
-                                  : "API error"
-                                : "No history"}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => refreshCourierStat(phoneKey)}
-                              title={
-                                stat.error
-                                  ? `${stat.error} — click to retry`
-                                  : "Update courier rating (calls BD Courier API)"
-                              }
-                              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                            >
-                              <RefreshCw className="h-3 w-3" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <div className="relative flex h-10 w-10 items-center justify-center">
-                              <CircularProgress percent={stat.rate} />
-                              <span className="absolute text-[10px] font-semibold">
-                                {Math.round(stat.rate)}%
-                              </span>
-                            </div>
-                            <div className="leading-tight">
-                              <div className="text-xs text-muted-foreground">
-                                {stat.total} orders
-                              </div>
-                              <div className="flex items-center gap-0.5 text-xs">
-                                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                                {stat.success}/{stat.total}
-                              </div>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => refreshCourierStat(phoneKey)}
-                              title="Update courier rating (calls BD Courier API)"
-                              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                            >
-                              <RefreshCw className="h-3 w-3" />
-                            </button>
-                          </div>
-                        )}
                       </TableCell>
                       <TableCell className="pt-3">
                         <div className="flex flex-wrap items-center gap-1">
