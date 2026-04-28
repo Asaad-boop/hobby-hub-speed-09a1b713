@@ -453,7 +453,7 @@ function WebOrdersPage() {
     return () => {
       cancelled = true;
     };
-  }, [rows, courierStats]);
+  }, [rows]);
 
   const allChecked = rows.length > 0 && rows.every((r) => selected.has(r.id));
   const toggleAll = () => {
