@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import {
   Phone,
   MessageCircle,
@@ -9,6 +9,8 @@ import {
   ChevronRight,
   Star,
   Globe,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,129 +31,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/web-orders")({
   component: WebOrdersPage,
 });
 
-type WebOrder = {
+type OrderRow = {
   id: string;
-  createdAt: string;
-  autoCall: "pending" | "called" | "no-answer" | "off";
-  customer: { name: string; phone: string; address: string };
-  noteUpdatedDaysAgo: number | null;
-  items: { sku: string; thumb: string; qty: number; name: string }[];
-  successRate: { percent: number; orders: number; rating: number };
-  tags: string[];
-  site: string;
+  created_at: string;
+  auto_call_enabled: boolean | null;
+  call_status: string | null;
+  shipping_name: string | null;
+  shipping_phone: string | null;
+  shipping_address: string | null;
+  shipping_city: string | null;
+  guest_name: string | null;
+  guest_phone: string | null;
+  latest_note: string | null;
+  admin_notes: string | null;
+  updated_at: string;
+  tags: string[] | null;
+  order_tags: string[] | null;
+  source_website: string | null;
+  total: number;
+  status: string;
+  order_items: {
+    name: string;
+    image: string | null;
+    quantity: number;
+    product_id: string;
+  }[];
 };
 
-const DUMMY: WebOrder[] = [
-  {
-    id: "WO-10245",
-    createdAt: "2026-04-28T09:14:00",
-    autoCall: "called",
-    customer: {
-      name: "Rahim Uddin",
-      phone: "01712345678",
-      address: "House 12, Road 4, Dhanmondi, Dhaka",
-    },
-    noteUpdatedDaysAgo: 2,
-    items: [
-      { sku: "BOW-MIR-01", thumb: "https://picsum.photos/seed/p1/64", qty: 1, name: "Bow Brush" },
-    ],
-    successRate: { percent: 86, orders: 14, rating: 4.6 },
-    tags: ["VIP"],
-    site: "hobbyshopbd.com",
-  },
-  {
-    id: "WO-10244",
-    createdAt: "2026-04-28T08:42:00",
-    autoCall: "pending",
-    customer: {
-      name: "Nusrat Jahan",
-      phone: "01898765432",
-      address: "Flat 3B, Gulshan Avenue, Dhaka",
-    },
-    noteUpdatedDaysAgo: 0,
-    items: [
-      { sku: "AUR-LMP-02", thumb: "https://picsum.photos/seed/p2/64", qty: 2, name: "Aurora Lamp" },
-      { sku: "ORG-CMB-01", thumb: "https://picsum.photos/seed/p3/64", qty: 1, name: "Origami Combo" },
-    ],
-    successRate: { percent: 72, orders: 8, rating: 4.2 },
-    tags: ["Repeat", "COD"],
-    site: "hobbyshopbd.com",
-  },
-  {
-    id: "WO-10243",
-    createdAt: "2026-04-27T19:05:00",
-    autoCall: "no-answer",
-    customer: {
-      name: "Tanvir Hasan",
-      phone: "01611223344",
-      address: "Sector 7, Uttara, Dhaka",
-    },
-    noteUpdatedDaysAgo: 5,
-    items: [
-      { sku: "BOW-MIR-01", thumb: "https://picsum.photos/seed/p4/64", qty: 1, name: "Bow Brush" },
-    ],
-    successRate: { percent: 45, orders: 3, rating: 3.4 },
-    tags: [],
-    site: "hobbyshopbd.com",
-  },
-  {
-    id: "WO-10242",
-    createdAt: "2026-04-27T15:31:00",
-    autoCall: "off",
-    customer: {
-      name: "Sadia Akter",
-      phone: "01755667788",
-      address: "Mirpur 10, Dhaka",
-    },
-    noteUpdatedDaysAgo: 1,
-    items: [
-      { sku: "AUR-LMP-02", thumb: "https://picsum.photos/seed/p5/64", qty: 1, name: "Aurora Lamp" },
-    ],
-    successRate: { percent: 91, orders: 22, rating: 4.8 },
-    tags: ["VIP", "Wholesale"],
-    site: "hobbyshopbd.com",
-  },
-  {
-    id: "WO-10241",
-    createdAt: "2026-04-27T11:12:00",
-    autoCall: "called",
-    customer: {
-      name: "Imran Hossain",
-      phone: "01999887766",
-      address: "Banani Road 11, Dhaka",
-    },
-    noteUpdatedDaysAgo: 9,
-    items: [
-      { sku: "ORG-CMB-01", thumb: "https://picsum.photos/seed/p6/64", qty: 3, name: "Origami Combo" },
-    ],
-    successRate: { percent: 60, orders: 5, rating: 3.9 },
-    tags: ["New"],
-    site: "hobbyshopbd.com",
-  },
-  {
-    id: "WO-10240",
-    createdAt: "2026-04-26T20:48:00",
-    autoCall: "pending",
-    customer: {
-      name: "Fariha Rahman",
-      phone: "01633445566",
-      address: "Bashundhara R/A, Block C, Dhaka",
-    },
-    noteUpdatedDaysAgo: null,
-    items: [
-      { sku: "BOW-MIR-01", thumb: "https://picsum.photos/seed/p7/64", qty: 1, name: "Bow Brush" },
-      { sku: "AUR-LMP-02", thumb: "https://picsum.photos/seed/p8/64", qty: 1, name: "Aurora Lamp" },
-    ],
-    successRate: { percent: 78, orders: 11, rating: 4.4 },
-    tags: ["COD"],
-    site: "hobbyshopbd.com",
-  },
-];
+type CourierStat = {
+  total: number;
+  success: number;
+  rate: number;
+  loading: boolean;
+};
 
 function formatDateTime(iso: string) {
   const d = new Date(iso);
@@ -161,14 +80,27 @@ function formatDateTime(iso: string) {
   };
 }
 
-function AutoCallBadge({ status }: { status: WebOrder["autoCall"] }) {
-  const map = {
-    pending: { label: "Pending", cls: "bg-amber-50 text-amber-700 border-amber-200" },
+function daysAgo(iso: string | null): number | null {
+  if (!iso) return null;
+  const ms = Date.now() - new Date(iso).getTime();
+  return Math.floor(ms / (1000 * 60 * 60 * 24));
+}
+
+function AutoCallBadge({ enabled, status }: { enabled: boolean | null; status: string | null }) {
+  if (!enabled) {
+    return (
+      <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+        Off
+      </span>
+    );
+  }
+  const map: Record<string, { label: string; cls: string }> = {
+    not_called: { label: "Pending", cls: "bg-amber-50 text-amber-700 border-amber-200" },
     called: { label: "Called", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-    "no-answer": { label: "No Answer", cls: "bg-rose-50 text-rose-700 border-rose-200" },
-    off: { label: "Off", cls: "bg-slate-50 text-slate-600 border-slate-200" },
-  } as const;
-  const m = map[status];
+    no_answer: { label: "No Answer", cls: "bg-rose-50 text-rose-700 border-rose-200" },
+    busy: { label: "Busy", cls: "bg-orange-50 text-orange-700 border-orange-200" },
+  };
+  const m = map[status || "not_called"] ?? map.not_called;
   return (
     <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${m.cls}`}>
       {m.label}
@@ -201,17 +133,104 @@ function CircularProgress({ percent }: { percent: number }) {
   );
 }
 
+function cleanPhone(p: string | null | undefined): string | null {
+  if (!p) return null;
+  const digits = p.replace(/[^0-9]/g, "").slice(-11);
+  return /^01[3-9]\d{8}$/.test(digits) ? digits : null;
+}
+
 function WebOrdersPage() {
+  const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [courierStats, setCourierStats] = useState<Record<string, CourierStat>>({});
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const total = DUMMY.length;
+  async function loadOrders() {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("orders")
+      .select(
+        `id, created_at, auto_call_enabled, call_status, shipping_name, shipping_phone,
+         shipping_address, shipping_city, guest_name, guest_phone, latest_note, admin_notes,
+         updated_at, tags, order_tags, source_website, total, status,
+         order_items ( name, image, quantity, product_id )`,
+      )
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    if (error) {
+      toast.error("Failed to load orders: " + error.message);
+      setOrders([]);
+    } else {
+      setOrders((data ?? []) as unknown as OrderRow[]);
+    }
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    loadOrders();
+  }, []);
+
+  // Fetch courier stats for visible page (cache-first via edge fn)
+  const total = orders.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const rows = useMemo(() => {
     const start = (page - 1) * pageSize;
-    return DUMMY.slice(start, start + pageSize);
-  }, [page, pageSize]);
+    return orders.slice(start, start + pageSize);
+  }, [page, pageSize, orders]);
+
+  useEffect(() => {
+    const phones = Array.from(
+      new Set(
+        rows
+          .map((r) => cleanPhone(r.shipping_phone || r.guest_phone))
+          .filter((p): p is string => !!p),
+      ),
+    ).filter((p) => courierStats[p] === undefined);
+
+    if (phones.length === 0) return;
+
+    // mark loading
+    setCourierStats((prev) => {
+      const next = { ...prev };
+      phones.forEach((p) => {
+        next[p] = { total: 0, success: 0, rate: 0, loading: true };
+      });
+      return next;
+    });
+
+    phones.forEach(async (phone) => {
+      try {
+        const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
+          body: { phone },
+        });
+        if (error || !data?.data) {
+          setCourierStats((prev) => ({
+            ...prev,
+            [phone]: { total: 0, success: 0, rate: 0, loading: false },
+          }));
+          return;
+        }
+        const d = data.data;
+        setCourierStats((prev) => ({
+          ...prev,
+          [phone]: {
+            total: d.overall_total ?? 0,
+            success: d.overall_success ?? 0,
+            rate: d.overall_success_rate ?? 0,
+            loading: false,
+          },
+        }));
+      } catch {
+        setCourierStats((prev) => ({
+          ...prev,
+          [phone]: { total: 0, success: 0, rate: 0, loading: false },
+        }));
+      }
+    });
+  }, [rows, courierStats]);
 
   const allChecked = rows.length > 0 && rows.every((r) => selected.has(r.id));
   const toggleAll = () => {
@@ -222,7 +241,8 @@ function WebOrdersPage() {
   };
   const toggleOne = (id: string) => {
     const next = new Set(selected);
-    next.has(id) ? next.delete(id) : next.add(id);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
     setSelected(next);
   };
 
@@ -232,12 +252,17 @@ function WebOrdersPage() {
         <div>
           <h2 className="text-xl font-semibold tracking-tight">Web Orders</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            All incoming orders from your storefront.
+            All incoming orders from your storefront. Success rate via BD Courier.
           </p>
         </div>
-        <div className="text-xs text-muted-foreground">
-          {selected.size > 0 && <span className="mr-3">{selected.size} selected</span>}
-          {total} orders
+        <div className="flex items-center gap-3">
+          <div className="text-xs text-muted-foreground">
+            {selected.size > 0 && <span className="mr-3">{selected.size} selected</span>}
+            {total} orders
+          </div>
+          <Button variant="outline" size="sm" onClick={loadOrders} disabled={loading}>
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+          </Button>
         </div>
       </div>
 
@@ -261,128 +286,177 @@ function WebOrdersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map((o) => {
-                const dt = formatDateTime(o.createdAt);
-                return (
-                  <TableRow key={o.id} className="align-top">
-                    <TableCell className="pt-4">
-                      <Checkbox
-                        checked={selected.has(o.id)}
-                        onCheckedChange={() => toggleOne(o.id)}
-                      />
-                    </TableCell>
-                    <TableCell className="pt-3">
-                      <div className="text-sm font-medium text-foreground">{dt.date}</div>
-                      <div className="text-xs text-muted-foreground">{dt.time}</div>
-                      <div className="mt-1 text-[11px] text-muted-foreground">#{o.id}</div>
-                    </TableCell>
-                    <TableCell className="pt-3">
-                      <AutoCallBadge status={o.autoCall} />
-                    </TableCell>
-                    <TableCell className="pt-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{o.customer.phone}</span>
-                        <a
-                          href={`tel:${o.customer.phone}`}
-                          className="rounded-md p-1 text-emerald-600 hover:bg-emerald-50"
-                          aria-label="Call"
-                        >
-                          <Phone className="h-3.5 w-3.5" />
-                        </a>
-                        <a
-                          href={`https://wa.me/${o.customer.phone}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="rounded-md p-1 text-green-600 hover:bg-green-50"
-                          aria-label="WhatsApp"
-                        >
-                          <MessageCircle className="h-3.5 w-3.5" />
-                        </a>
-                      </div>
-                      <div className="mt-0.5 text-sm text-foreground">{o.customer.name}</div>
-                      <div className="text-xs text-muted-foreground line-clamp-2 max-w-[220px]">
-                        {o.customer.address}
-                      </div>
-                    </TableCell>
-                    <TableCell className="pt-3">
-                      <span className="text-xs text-muted-foreground">
-                        {o.noteUpdatedDaysAgo === null
-                          ? "No notes"
-                          : o.noteUpdatedDaysAgo === 0
-                            ? "Updated today"
-                            : `Updated ${o.noteUpdatedDaysAgo} day${o.noteUpdatedDaysAgo > 1 ? "s" : ""} ago`}
-                      </span>
-                    </TableCell>
-                    <TableCell className="pt-3">
-                      <div className="space-y-1.5">
-                        {o.items.map((it) => (
-                          <div key={it.sku} className="flex items-center gap-2">
-                            <img
-                              src={it.thumb}
-                              alt={it.name}
-                              className="h-9 w-9 rounded-md border object-cover"
-                            />
-                            <div className="min-w-0">
-                              <div className="text-[11px] font-mono text-muted-foreground">
-                                {it.sku}
+              {loading && (
+                <TableRow>
+                  <TableCell colSpan={10} className="py-12 text-center text-sm text-muted-foreground">
+                    <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />
+                    Loading orders…
+                  </TableCell>
+                </TableRow>
+              )}
+              {!loading && rows.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={10} className="py-12 text-center text-sm text-muted-foreground">
+                    No orders yet.
+                  </TableCell>
+                </TableRow>
+              )}
+              {!loading &&
+                rows.map((o) => {
+                  const dt = formatDateTime(o.created_at);
+                  const phone = o.shipping_phone || o.guest_phone || "";
+                  const phoneKey = cleanPhone(phone);
+                  const stat = phoneKey ? courierStats[phoneKey] : undefined;
+                  const name = o.shipping_name || o.guest_name || "—";
+                  const address = [o.shipping_address, o.shipping_city]
+                    .filter(Boolean)
+                    .join(", ");
+                  const noteSource = o.latest_note || o.admin_notes;
+                  const noteAge = daysAgo(noteSource ? o.updated_at : null);
+                  const tags = [...(o.tags || []), ...(o.order_tags || [])];
+                  const items = o.order_items || [];
+                  return (
+                    <TableRow key={o.id} className="align-top">
+                      <TableCell className="pt-4">
+                        <Checkbox
+                          checked={selected.has(o.id)}
+                          onCheckedChange={() => toggleOne(o.id)}
+                        />
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <div className="text-sm font-medium text-foreground">{dt.date}</div>
+                        <div className="text-xs text-muted-foreground">{dt.time}</div>
+                        <div className="mt-1 text-[11px] text-muted-foreground font-mono">
+                          #{o.id.slice(0, 8)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <AutoCallBadge enabled={o.auto_call_enabled} status={o.call_status} />
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">{phone || "—"}</span>
+                          {phone && (
+                            <>
+                              <a
+                                href={`tel:${phone}`}
+                                className="rounded-md p-1 text-emerald-600 hover:bg-emerald-50"
+                                aria-label="Call"
+                              >
+                                <Phone className="h-3.5 w-3.5" />
+                              </a>
+                              <a
+                                href={`https://wa.me/88${phone.replace(/[^0-9]/g, "")}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="rounded-md p-1 text-green-600 hover:bg-green-50"
+                                aria-label="WhatsApp"
+                              >
+                                <MessageCircle className="h-3.5 w-3.5" />
+                              </a>
+                            </>
+                          )}
+                        </div>
+                        <div className="mt-0.5 text-sm text-foreground">{name}</div>
+                        <div className="text-xs text-muted-foreground line-clamp-2 max-w-[220px]">
+                          {address || "—"}
+                        </div>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <span className="text-xs text-muted-foreground">
+                          {!noteSource
+                            ? "No notes"
+                            : noteAge === 0
+                              ? "Updated today"
+                              : `Updated ${noteAge} day${(noteAge ?? 0) > 1 ? "s" : ""} ago`}
+                        </span>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <div className="space-y-1.5">
+                          {items.length === 0 && (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                          {items.map((it, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                              <img
+                                src={it.image || "https://picsum.photos/seed/p/64"}
+                                alt={it.name}
+                                className="h-9 w-9 rounded-md border object-cover"
+                              />
+                              <div className="min-w-0 max-w-[160px]">
+                                <div className="text-[11px] text-muted-foreground line-clamp-1">
+                                  {it.name}
+                                </div>
+                                <div className="text-xs">Qty: {it.quantity}</div>
                               </div>
-                              <div className="text-xs">Qty: {it.qty}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        {!phoneKey ? (
+                          <span className="text-xs text-muted-foreground">No phone</span>
+                        ) : !stat || stat.loading ? (
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            Checking…
+                          </div>
+                        ) : stat.total === 0 ? (
+                          <span className="text-xs text-muted-foreground">No history</span>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <div className="relative flex h-10 w-10 items-center justify-center">
+                              <CircularProgress percent={stat.rate} />
+                              <span className="absolute text-[10px] font-semibold">
+                                {Math.round(stat.rate)}%
+                              </span>
+                            </div>
+                            <div className="leading-tight">
+                              <div className="text-xs text-muted-foreground">
+                                {stat.total} orders
+                              </div>
+                              <div className="flex items-center gap-0.5 text-xs">
+                                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                                {stat.success}/{stat.total}
+                              </div>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell className="pt-3">
-                      <div className="flex items-center gap-2">
-                        <div className="relative flex h-10 w-10 items-center justify-center">
-                          <CircularProgress percent={o.successRate.percent} />
-                          <span className="absolute text-[10px] font-semibold">
-                            {o.successRate.percent}%
-                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <div className="flex flex-wrap items-center gap-1">
+                          {tags.map((t) => (
+                            <Badge
+                              key={t}
+                              variant="secondary"
+                              className="rounded-full text-[10px] font-medium"
+                            >
+                              {t}
+                            </Badge>
+                          ))}
+                          <button className="inline-flex items-center gap-0.5 rounded-full border border-dashed px-1.5 py-0.5 text-[10px] text-muted-foreground hover:bg-muted">
+                            <Plus className="h-2.5 w-2.5" />
+                            Add
+                          </button>
                         </div>
-                        <div className="leading-tight">
-                          <div className="text-xs text-muted-foreground">
-                            {o.successRate.orders} orders
-                          </div>
-                          <div className="flex items-center gap-0.5 text-xs">
-                            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                            {o.successRate.rating}
-                          </div>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Globe className="h-3.5 w-3.5" />
+                          {o.source_website || "main"}
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="pt-3">
-                      <div className="flex flex-wrap items-center gap-1">
-                        {o.tags.map((t) => (
-                          <Badge
-                            key={t}
-                            variant="secondary"
-                            className="rounded-full text-[10px] font-medium"
-                          >
-                            {t}
-                          </Badge>
-                        ))}
-                        <button className="inline-flex items-center gap-0.5 rounded-full border border-dashed px-1.5 py-0.5 text-[10px] text-muted-foreground hover:bg-muted">
-                          <Plus className="h-2.5 w-2.5" />
-                          Add
-                        </button>
-                      </div>
-                    </TableCell>
-                    <TableCell className="pt-3">
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Globe className="h-3.5 w-3.5" />
-                        {o.site}
-                      </div>
-                    </TableCell>
-                    <TableCell className="pt-3 text-right">
-                      <Button size="sm" variant="outline" className="h-7 gap-1 text-xs">
-                        <ExternalLink className="h-3 w-3" />
-                        Open
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                      </TableCell>
+                      <TableCell className="pt-3 text-right">
+                        <Button asChild size="sm" variant="outline" className="h-7 gap-1 text-xs">
+                          <Link to="/admin/orders-pipeline">
+                            <ExternalLink className="h-3 w-3" />
+                            Open
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
             </TableBody>
           </Table>
         </CardContent>
