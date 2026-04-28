@@ -66,6 +66,9 @@ async function fetchAndCache(
   let statusCode = 0;
   let errorMsg: string | null = null;
 
+  // Hard timeout — never let upstream hang the worker
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), 20_000); // 20s max
   try {
     const r = await fetch("https://bdcourier.com/api/courier-check", {
       method: "POST",
@@ -75,11 +78,14 @@ async function fetchAndCache(
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({ phone: cleanPhone }),
+      signal: ac.signal,
     });
     statusCode = r.status;
     apiResp = await r.json();
   } catch (e) {
-    errorMsg = (e as Error).message;
+    errorMsg = (e as Error).name === "AbortError" ? "Upstream timeout (>20s)" : (e as Error).message;
+  } finally {
+    clearTimeout(timer);
   }
 
   await supabase.from("integration_logs").insert({
