@@ -140,6 +140,11 @@ function cleanPhone(p: string | null | undefined): string | null {
   return /^01[3-9]\d{8}$/.test(digits) ? digits : null;
 }
 
+function courierPayloadError(payload: unknown): string | undefined {
+  const raw = (payload as { raw_response?: { error?: unknown } } | null)?.raw_response;
+  return typeof raw?.error === "string" && raw.error.trim() ? raw.error : undefined;
+}
+
 type TabKey =
   | "processing"
   | "incomplete"
@@ -249,8 +254,9 @@ function WebOrdersPage() {
       });
       // Edge fn returns { error: "..." } on upstream failure (e.g. quota)
       const apiErr = (data as { error?: string } | null)?.error;
-      if (error || apiErr || !data?.data) {
-        const msg = apiErr || error?.message || "Could not refresh courier rating";
+      const payloadErr = courierPayloadError(data?.data);
+      if (error || apiErr || payloadErr || !data?.data) {
+        const msg = apiErr || payloadErr || error?.message || "Could not refresh courier rating";
         toast.error(msg);
         setCourierStats((prev) => ({
           ...prev,
@@ -379,8 +385,9 @@ function WebOrdersPage() {
         });
         if (cancelled) return;
         const apiErr = (data as { error?: string } | null)?.error;
-        if (error || apiErr || !data?.data) {
-          const msg = apiErr || error?.message;
+        const payloadErr = courierPayloadError(data?.data);
+        if (error || apiErr || payloadErr || !data?.data) {
+          const msg = apiErr || payloadErr || error?.message;
           // Detect quota / rate-limit and trip the circuit breaker
           if (msg && /limit|quota|429/i.test(msg)) {
             if (!quotaExhaustedRef.current) {
@@ -390,7 +397,15 @@ function WebOrdersPage() {
               });
             }
             // Drain queue: mark all pending as errored so spinners stop
+            const pendingPhones = [...queue];
             queue.length = 0;
+            setCourierStats((prev) => {
+              const next = { ...prev };
+              pendingPhones.forEach((p) => {
+                next[p] = { total: 0, success: 0, rate: 0, loading: false, error: msg };
+              });
+              return next;
+            });
           }
           setCourierStats((prev) => ({
             ...prev,
