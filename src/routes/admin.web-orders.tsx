@@ -70,6 +70,7 @@ type CourierStat = {
   success: number;
   rate: number;
   loading: boolean;
+  error?: string;
 };
 
 function formatDateTime(iso: string) {
