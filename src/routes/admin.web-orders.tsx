@@ -68,6 +68,46 @@ type OrderRow = {
 };
 
 
+type CourierStat = {
+  total: number;
+  success: number;
+  rate: number;
+  loading: boolean;
+  error?: string;
+  stale?: boolean;
+};
+
+function cleanPhone(p: string | null | undefined): string | null {
+  if (!p) return null;
+  const digits = p.replace(/[^0-9]/g, "").slice(-11);
+  return /^01[3-9]\d{8}$/.test(digits) ? digits : null;
+}
+
+function CircularProgress({ percent }: { percent: number }) {
+  const r = 16;
+  const c = 2 * Math.PI * r;
+  const offset = c - (Math.max(0, Math.min(100, percent)) / 100) * c;
+  const color =
+    percent >= 80 ? "text-emerald-500" : percent >= 60 ? "text-amber-500" : "text-rose-500";
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40" className="-rotate-90">
+      <circle cx="20" cy="20" r={r} strokeWidth="3" className="stroke-muted" fill="none" />
+      <circle
+        cx="20"
+        cy="20"
+        r={r}
+        strokeWidth="3"
+        strokeLinecap="round"
+        className={`${color} transition-all`}
+        stroke="currentColor"
+        fill="none"
+        strokeDasharray={c}
+        strokeDashoffset={offset}
+      />
+    </svg>
+  );
+}
+
 function formatDateTime(iso: string) {
   const d = new Date(iso);
   return {
