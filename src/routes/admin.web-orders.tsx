@@ -34,7 +34,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/admin/web-orders/")({
+export const Route = createFileRoute("/admin/web-orders")({
   component: WebOrdersPage,
 });
 
@@ -599,7 +599,7 @@ function WebOrdersPage() {
                       </TableCell>
                       <TableCell className="pt-3 text-right">
                         <Button asChild size="sm" variant="outline" className="h-7 gap-1 text-xs">
-                          <Link to="/admin/web-orders/$orderId" params={{ orderId: o.id }}>
+                          <Link to="/admin/orders-pipeline">
                             <ExternalLink className="h-3 w-3" />
                             Open
                           </Link>
