@@ -73,6 +73,12 @@ type CourierStat = {
   error?: string;
 };
 
+function normalizeCourierError(message: string | undefined): string {
+  if (!message) return "Could not load courier rating";
+  if (/limit|quota|429|503/i.test(message)) return "BD Courier API limit reached";
+  return message;
+}
+
 function formatDateTime(iso: string) {
   const d = new Date(iso);
   return {
@@ -256,7 +262,7 @@ function WebOrdersPage() {
       const apiErr = (data as { error?: string } | null)?.error;
       const payloadErr = courierPayloadError(data?.data);
       if (error || apiErr || payloadErr || !data?.data) {
-        const msg = apiErr || payloadErr || error?.message || "Could not refresh courier rating";
+        const msg = normalizeCourierError(apiErr || payloadErr || error?.message);
         toast.error(msg);
         setCourierStats((prev) => ({
           ...prev,
@@ -276,7 +282,7 @@ function WebOrdersPage() {
       }));
       toast.success("Courier rating updated");
     } catch (e) {
-      const msg = (e as Error).message || "Could not refresh courier rating";
+      const msg = normalizeCourierError((e as Error).message);
       toast.error(msg);
       setCourierStats((prev) => ({
         ...prev,
@@ -387,9 +393,9 @@ function WebOrdersPage() {
         const apiErr = (data as { error?: string } | null)?.error;
         const payloadErr = courierPayloadError(data?.data);
         if (error || apiErr || payloadErr || !data?.data) {
-          const msg = apiErr || payloadErr || error?.message;
+          const msg = normalizeCourierError(apiErr || payloadErr || error?.message);
           // Detect quota / rate-limit and trip the circuit breaker
-          if (msg && /limit|quota|429/i.test(msg)) {
+          if (/limit|quota|429|503/i.test(msg)) {
             if (!quotaExhaustedRef.current) {
               quotaExhaustedRef.current = true;
               toast.error("BD Courier API limit reached — top up credits to resume", {
@@ -427,7 +433,7 @@ function WebOrdersPage() {
         if (cancelled) return;
         setCourierStats((prev) => ({
           ...prev,
-          [phone]: { total: 0, success: 0, rate: 0, loading: false, error: (e as Error).message },
+          [phone]: { total: 0, success: 0, rate: 0, loading: false, error: normalizeCourierError((e as Error).message) },
         }));
       }
     };

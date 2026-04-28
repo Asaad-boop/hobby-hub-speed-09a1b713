@@ -12,6 +12,13 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+function jsonResponse(payload: Record<string, unknown>, status = 200) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 interface CourierSummary {
   total?: number;
   success?: number;
@@ -234,10 +241,7 @@ Deno.serve(async (req) => {
     const cleanPhone = String(phone || "").replace(/[^0-9]/g, "").slice(-11);
 
     if (!/^01[3-9]\d{8}$/.test(cleanPhone)) {
-      return new Response(JSON.stringify({ error: "Invalid BD phone number" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "Invalid BD phone number", data: null, source: "error" });
     }
 
     const supabase = createClient(
@@ -291,39 +295,36 @@ Deno.serve(async (req) => {
 
     // 3. Fresh cache hit (and not forced) → return immediately
     if (!force_refresh && validCached && new Date(validCached.expires_at) > new Date()) {
-      return new Response(
-        JSON.stringify({
+      return jsonResponse(
+        {
           data: validCached,
           source: "cache",
           cache_hit: true,
           age_hours: ageHours(validCached.last_fetched_at),
           warning: COURIER_WARNING,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        },
       );
     }
 
     // No API key configured
     if (!apiKey) {
       if (validCached) {
-        return new Response(
-          JSON.stringify({
+        return jsonResponse(
+          {
             data: validCached,
             source: "stale_cache",
             cache_hit: true,
             age_hours: ageHours(validCached.last_fetched_at),
             warning: "API not configured — showing cached data",
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          },
         );
       }
-      return new Response(
-        JSON.stringify({
+      return jsonResponse(
+        {
           error: "BD Courier API not configured. Add API key in Settings → Integrations.",
           data: null,
           source: "error",
-        }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        },
       );
     }
 
@@ -338,16 +339,15 @@ Deno.serve(async (req) => {
       // deno-lint-ignore no-explicit-any
       const er = (globalThis as any).EdgeRuntime;
       if (er?.waitUntil) er.waitUntil(bg);
-      return new Response(
-        JSON.stringify({
+      return jsonResponse(
+        {
           data: validCached,
           source: "stale_cache",
           cache_hit: true,
           age_hours: ageHours(validCached.last_fetched_at),
           message: "Showing cached data, refreshing in background",
           warning: COURIER_WARNING,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        },
       );
     }
 
@@ -355,37 +355,29 @@ Deno.serve(async (req) => {
     const result = await fetchAndCache(supabase, cleanPhone, apiKey, cacheHours);
     if (!result.ok) {
       if (validCached) {
-        return new Response(
-          JSON.stringify({
+        return jsonResponse(
+          {
             data: validCached,
             source: "stale_cache",
             cache_hit: true,
             age_hours: ageHours(validCached.last_fetched_at),
             warning: "API unavailable — showing cached data",
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          },
         );
       }
-      return new Response(JSON.stringify({ error: result.error, data: null, source: "error" }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: result.error, data: null, source: "error" });
     }
 
-    return new Response(
-      JSON.stringify({
+    return jsonResponse(
+      {
         data: result.data,
         source: "fresh",
         cache_hit: false,
         age_hours: 0,
         warning: COURIER_WARNING,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      },
     );
   } catch (e) {
-    return new Response(JSON.stringify({ error: (e as Error).message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: (e as Error).message, data: null, source: "error" });
   }
 });
