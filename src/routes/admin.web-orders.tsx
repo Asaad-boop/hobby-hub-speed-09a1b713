@@ -641,11 +641,24 @@ function WebOrdersPage() {
                           </div>
                         ) : stat.total === 0 ? (
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">No history</span>
+                            <span
+                              className={`text-xs ${stat.error ? "text-destructive" : "text-muted-foreground"}`}
+                              title={stat.error || undefined}
+                            >
+                              {stat.error
+                                ? /limit|quota|429/i.test(stat.error)
+                                  ? "API limit"
+                                  : "API error"
+                                : "No history"}
+                            </span>
                             <button
                               type="button"
                               onClick={() => refreshCourierStat(phoneKey)}
-                              title="Update courier rating (calls BD Courier API)"
+                              title={
+                                stat.error
+                                  ? `${stat.error} — click to retry`
+                                  : "Update courier rating (calls BD Courier API)"
+                              }
                               className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
                             >
                               <RefreshCw className="h-3 w-3" />
