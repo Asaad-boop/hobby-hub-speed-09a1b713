@@ -599,7 +599,7 @@ function WebOrdersPage() {
                       </TableCell>
                       <TableCell className="pt-3 text-right">
                         <Button asChild size="sm" variant="outline" className="h-7 gap-1 text-xs">
-                          <Link to="/admin/orders-pipeline">
+                          <Link to="/admin/web-orders/$orderId" params={{ orderId: o.id }}>
                             <ExternalLink className="h-3 w-3" />
                             Open
                           </Link>
