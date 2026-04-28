@@ -254,7 +254,7 @@ function WebOrdersPage() {
         <div>
           <h2 className="text-xl font-semibold tracking-tight">Web Orders</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            All incoming orders from your storefront. Success rate via BD Courier.
+            All incoming orders from your storefront.
           </p>
         </div>
         <div className="flex items-center gap-3">
