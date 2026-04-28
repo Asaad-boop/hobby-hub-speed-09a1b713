@@ -320,8 +320,10 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({
           error: "BD Courier API not configured. Add API key in Settings → Integrations.",
+          data: null,
+          source: "error",
         }),
-        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -364,8 +366,8 @@ Deno.serve(async (req) => {
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-      return new Response(JSON.stringify({ error: result.error }), {
-        status: 503,
+      return new Response(JSON.stringify({ error: result.error, data: null, source: "error" }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
