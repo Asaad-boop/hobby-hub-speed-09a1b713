@@ -25,7 +25,7 @@ type Coupon = {
   id: string;
   code: string;
   description: string | null;
-  type: "percentage" | "flat";
+  type: "percentage" | "fixed";
   value: number;
   min_order_amount: number;
   max_discount: number | null;
@@ -206,10 +206,10 @@ function DiscountsPage() {
               <Field label="Type">
                 <Select
                   value={editing.type ?? "percentage"}
-                  onChange={(e) => setEditing({ ...editing, type: e.target.value as "percentage" | "flat" })}
+                  onChange={(e) => setEditing({ ...editing, type: e.target.value as "percentage" | "fixed" })}
                 >
                   <option value="percentage">Percentage (%)</option>
-                  <option value="flat">Flat amount (৳)</option>
+                  <option value="fixed">Fixed amount (৳)</option>
                 </Select>
               </Field>
               <Field label="Value">
