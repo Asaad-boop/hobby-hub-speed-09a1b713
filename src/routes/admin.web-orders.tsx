@@ -206,7 +206,73 @@ function matchesTab(o: OrderRow, tab: TabKey): boolean {
 function WebOrdersPage() {
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [courierStats, setCourierStats] = useState<Record<string, CourierStat>>({});
+  const [courierStats, setCourierStats] = useState<Record<string, CourierStat>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const raw = window.localStorage.getItem("courier_stats_v1");
+      if (!raw) return {};
+      const parsed = JSON.parse(raw) as Record<string, CourierStat>;
+      // Drop any stale "loading" entries from previous sessions
+      const clean: Record<string, CourierStat> = {};
+      Object.entries(parsed).forEach(([k, v]) => {
+        if (v && !v.loading) clean[k] = v;
+      });
+      return clean;
+    } catch {
+      return {};
+    }
+  });
+
+  // Persist courier stats to localStorage so we never re-call BD Courier (paid) on reload
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const toSave: Record<string, CourierStat> = {};
+      Object.entries(courierStats).forEach(([k, v]) => {
+        if (v && !v.loading) toSave[k] = v;
+      });
+      window.localStorage.setItem("courier_stats_v1", JSON.stringify(toSave));
+    } catch {
+      /* quota or private mode — ignore */
+    }
+  }, [courierStats]);
+
+  const refreshCourierStat = async (phone: string) => {
+    setCourierStats((prev) => ({
+      ...prev,
+      [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: true },
+    }));
+    try {
+      const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
+        body: { phone, force_refresh: true },
+      });
+      if (error || !data?.data) {
+        toast.error("Could not refresh courier rating");
+        setCourierStats((prev) => ({
+          ...prev,
+          [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: false },
+        }));
+        return;
+      }
+      const d = data.data;
+      setCourierStats((prev) => ({
+        ...prev,
+        [phone]: {
+          total: d.overall_total ?? 0,
+          success: d.overall_success ?? 0,
+          rate: d.overall_success_rate ?? 0,
+          loading: false,
+        },
+      }));
+      toast.success("Courier rating updated");
+    } catch {
+      toast.error("Could not refresh courier rating");
+      setCourierStats((prev) => ({
+        ...prev,
+        [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: false },
+      }));
+    }
+  };
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -553,7 +619,17 @@ function WebOrdersPage() {
                             Checking…
                           </div>
                         ) : stat.total === 0 ? (
-                          <span className="text-xs text-muted-foreground">No history</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">No history</span>
+                            <button
+                              type="button"
+                              onClick={() => refreshCourierStat(phoneKey)}
+                              title="Update courier rating (calls BD Courier API)"
+                              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                            >
+                              <RefreshCw className="h-3 w-3" />
+                            </button>
+                          </div>
                         ) : (
                           <div className="flex items-center gap-2">
                             <div className="relative flex h-10 w-10 items-center justify-center">
@@ -571,6 +647,14 @@ function WebOrdersPage() {
                                 {stat.success}/{stat.total}
                               </div>
                             </div>
+                            <button
+                              type="button"
+                              onClick={() => refreshCourierStat(phoneKey)}
+                              title="Update courier rating (calls BD Courier API)"
+                              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                            >
+                              <RefreshCw className="h-3 w-3" />
+                            </button>
                           </div>
                         )}
                       </TableCell>
