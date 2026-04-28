@@ -215,6 +215,46 @@ function WebOrdersPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [tab, setTab] = useState<TabKey>("processing");
+  const [courierStats, setCourierStats] = useState<Record<string, CourierStat>>({});
+  const fetchStatsFn = useServerFn(fetchCourierStats);
+
+  const refreshCourierStat = async (phone: string, force = false) => {
+    setCourierStats((prev) => ({
+      ...prev,
+      [phone]: { ...(prev[phone] ?? { total: 0, success: 0, rate: 0 }), loading: true, error: undefined },
+    }));
+    try {
+      const res = await fetchStatsFn({ data: { phone, force_refresh: force } });
+      if (res.ok && res.data) {
+        setCourierStats((prev) => ({
+          ...prev,
+          [phone]: {
+            total: res.data!.overall_total,
+            success: res.data!.overall_success,
+            rate: Number(res.data!.overall_success_rate),
+            loading: false,
+            stale: res.stale,
+            error: res.stale ? res.error : undefined,
+          },
+        }));
+        if (force) toast.success("Courier rating updated");
+      } else {
+        const msg = res.error ?? "Failed to fetch courier stats";
+        setCourierStats((prev) => ({
+          ...prev,
+          [phone]: { ...(prev[phone] ?? { total: 0, success: 0, rate: 0 }), loading: false, error: msg },
+        }));
+        if (force) toast.error(msg);
+      }
+    } catch (e) {
+      const msg = (e as Error).message;
+      setCourierStats((prev) => ({
+        ...prev,
+        [phone]: { ...(prev[phone] ?? { total: 0, success: 0, rate: 0 }), loading: false, error: msg },
+      }));
+      if (force) toast.error(msg);
+    }
+  };
 
   async function loadOrders() {
     setLoading(true);
