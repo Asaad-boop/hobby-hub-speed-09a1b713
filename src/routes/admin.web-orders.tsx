@@ -139,6 +139,68 @@ function cleanPhone(p: string | null | undefined): string | null {
   return /^01[3-9]\d{8}$/.test(digits) ? digits : null;
 }
 
+type TabKey =
+  | "processing"
+  | "incomplete"
+  | "good_no_response"
+  | "no_response"
+  | "advance_payment"
+  | "on_hold"
+  | "complete"
+  | "cancel"
+  | "all";
+
+const TABS: { key: TabKey; label: string }[] = [
+  { key: "processing", label: "Processing" },
+  { key: "incomplete", label: "Incomplete" },
+  { key: "good_no_response", label: "Good But No Response" },
+  { key: "no_response", label: "No Response" },
+  { key: "advance_payment", label: "Advance Payment" },
+  { key: "on_hold", label: "On Hold" },
+  { key: "complete", label: "Complete" },
+  { key: "cancel", label: "Cancel" },
+  { key: "all", label: "All" },
+];
+
+const PROCESSING_STATUSES = new Set([
+  "new",
+  "confirmed",
+  "packaging",
+  "packed",
+  "ready_to_pack",
+  "ready_to_ship",
+  "courier_entry",
+  "shipped",
+  "in_transit",
+]);
+
+function matchesTab(o: OrderRow, tab: TabKey): boolean {
+  const s = o.status;
+  const cs = o.call_status;
+  switch (tab) {
+    case "all":
+      return true;
+    case "processing":
+      return PROCESSING_STATUSES.has(s);
+    case "incomplete":
+      return s === "incomplete";
+    case "advance_payment":
+      return s === "advance_payment_pending";
+    case "on_hold":
+      return s === "on_hold";
+    case "complete":
+      return s === "delivered" || s === "partial_delivered";
+    case "cancel":
+      return s === "cancelled" || s === "fake";
+    case "good_no_response":
+      return PROCESSING_STATUSES.has(s) && (cs === "busy" || cs === "no_answer");
+    case "no_response":
+      return PROCESSING_STATUSES.has(s) && cs === "not_called";
+    default:
+      return true;
+  }
+}
+
 function WebOrdersPage() {
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -146,6 +208,7 @@ function WebOrdersPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [tab, setTab] = useState<TabKey>("processing");
 
   async function loadOrders() {
     setLoading(true);
