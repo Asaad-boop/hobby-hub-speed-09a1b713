@@ -139,6 +139,68 @@ function cleanPhone(p: string | null | undefined): string | null {
   return /^01[3-9]\d{8}$/.test(digits) ? digits : null;
 }
 
+type TabKey =
+  | "processing"
+  | "incomplete"
+  | "good_no_response"
+  | "no_response"
+  | "advance_payment"
+  | "on_hold"
+  | "complete"
+  | "cancel"
+  | "all";
+
+const TABS: { key: TabKey; label: string }[] = [
+  { key: "processing", label: "Processing" },
+  { key: "incomplete", label: "Incomplete" },
+  { key: "good_no_response", label: "Good But No Response" },
+  { key: "no_response", label: "No Response" },
+  { key: "advance_payment", label: "Advance Payment" },
+  { key: "on_hold", label: "On Hold" },
+  { key: "complete", label: "Complete" },
+  { key: "cancel", label: "Cancel" },
+  { key: "all", label: "All" },
+];
+
+const PROCESSING_STATUSES = new Set([
+  "new",
+  "confirmed",
+  "packaging",
+  "packed",
+  "ready_to_pack",
+  "ready_to_ship",
+  "courier_entry",
+  "shipped",
+  "in_transit",
+]);
+
+function matchesTab(o: OrderRow, tab: TabKey): boolean {
+  const s = o.status;
+  const cs = o.call_status;
+  switch (tab) {
+    case "all":
+      return true;
+    case "processing":
+      return PROCESSING_STATUSES.has(s);
+    case "incomplete":
+      return s === "incomplete";
+    case "advance_payment":
+      return s === "advance_payment_pending";
+    case "on_hold":
+      return s === "on_hold";
+    case "complete":
+      return s === "delivered" || s === "partial_delivered";
+    case "cancel":
+      return s === "cancelled" || s === "fake";
+    case "good_no_response":
+      return PROCESSING_STATUSES.has(s) && (cs === "busy" || cs === "no_answer");
+    case "no_response":
+      return PROCESSING_STATUSES.has(s) && cs === "not_called";
+    default:
+      return true;
+  }
+}
+
 function WebOrdersPage() {
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -146,6 +208,7 @@ function WebOrdersPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [tab, setTab] = useState<TabKey>("processing");
 
   async function loadOrders() {
     setLoading(true);
@@ -173,14 +236,42 @@ function WebOrdersPage() {
     loadOrders();
   }, []);
 
-  // Fetch courier stats for visible page (cache-first via edge fn)
-  const total = orders.length;
+  // Counts per tab (computed from full orders list)
+  const tabCounts = useMemo(() => {
+    const counts: Record<TabKey, number> = {
+      processing: 0,
+      incomplete: 0,
+      good_no_response: 0,
+      no_response: 0,
+      advance_payment: 0,
+      on_hold: 0,
+      complete: 0,
+      cancel: 0,
+      all: orders.length,
+    };
+    for (const o of orders) {
+      for (const t of TABS) {
+        if (t.key === "all") continue;
+        if (matchesTab(o, t.key)) counts[t.key]++;
+      }
+    }
+    return counts;
+  }, [orders]);
+
+  // Apply tab filter
+  const filteredOrders = useMemo(
+    () => orders.filter((o) => matchesTab(o, tab)),
+    [orders, tab],
+  );
+
+  const total = filteredOrders.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const rows = useMemo(() => {
     const start = (page - 1) * pageSize;
-    return orders.slice(start, start + pageSize);
-  }, [page, pageSize, orders]);
+    return filteredOrders.slice(start, start + pageSize);
+  }, [page, pageSize, filteredOrders]);
 
+  // Fetch courier stats for visible page (cache-first via edge fn)
   useEffect(() => {
     const phones = Array.from(
       new Set(
@@ -192,7 +283,6 @@ function WebOrdersPage() {
 
     if (phones.length === 0) return;
 
-    // mark loading
     setCourierStats((prev) => {
       const next = { ...prev };
       phones.forEach((p) => {
@@ -264,6 +354,42 @@ function WebOrdersPage() {
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
           </Button>
         </div>
+      </div>
+
+      {/* Status filter tabs */}
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-border">
+        {TABS.map((t) => {
+          const active = tab === t.key;
+          const count = tabCounts[t.key];
+          return (
+            <button
+              key={t.key}
+              onClick={() => {
+                setTab(t.key);
+                setPage(1);
+              }}
+              className={`group relative inline-flex items-center gap-2 whitespace-nowrap px-3 py-2.5 text-sm transition-colors ${
+                active
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <span className={active ? "font-medium" : ""}>{t.label}</span>
+              <span
+                className={`inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold ${
+                  active
+                    ? "bg-primary/10 text-primary"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {count}
+              </span>
+              {active && (
+                <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-primary" />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       <Card className="overflow-hidden">
