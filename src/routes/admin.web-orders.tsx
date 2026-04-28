@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Phone,
   MessageCircle,
@@ -7,7 +7,6 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
-  Star,
   Globe,
   Loader2,
   RefreshCw,
