@@ -73,6 +73,12 @@ type CourierStat = {
   error?: string;
 };
 
+function normalizeCourierError(message: string | undefined): string {
+  if (!message) return "Could not load courier rating";
+  if (/limit|quota|429|503/i.test(message)) return "BD Courier API limit reached";
+  return message;
+}
+
 function formatDateTime(iso: string) {
   const d = new Date(iso);
   return {
@@ -256,7 +262,7 @@ function WebOrdersPage() {
       const apiErr = (data as { error?: string } | null)?.error;
       const payloadErr = courierPayloadError(data?.data);
       if (error || apiErr || payloadErr || !data?.data) {
-        const msg = apiErr || payloadErr || error?.message || "Could not refresh courier rating";
+        const msg = normalizeCourierError(apiErr || payloadErr || error?.message);
         toast.error(msg);
         setCourierStats((prev) => ({
           ...prev,
@@ -276,7 +282,7 @@ function WebOrdersPage() {
       }));
       toast.success("Courier rating updated");
     } catch (e) {
-      const msg = (e as Error).message || "Could not refresh courier rating";
+      const msg = normalizeCourierError((e as Error).message);
       toast.error(msg);
       setCourierStats((prev) => ({
         ...prev,
