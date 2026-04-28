@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Phone,
   MessageCircle,
@@ -70,6 +70,7 @@ type CourierStat = {
   success: number;
   rate: number;
   loading: boolean;
+  error?: string;
 };
 
 function formatDateTime(iso: string) {
@@ -240,17 +241,20 @@ function WebOrdersPage() {
   const refreshCourierStat = async (phone: string) => {
     setCourierStats((prev) => ({
       ...prev,
-      [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: true },
+      [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: true, error: undefined },
     }));
     try {
       const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
         body: { phone, force_refresh: true },
       });
-      if (error || !data?.data) {
-        toast.error("Could not refresh courier rating");
+      // Edge fn returns { error: "..." } on upstream failure (e.g. quota)
+      const apiErr = (data as { error?: string } | null)?.error;
+      if (error || apiErr || !data?.data) {
+        const msg = apiErr || error?.message || "Could not refresh courier rating";
+        toast.error(msg);
         setCourierStats((prev) => ({
           ...prev,
-          [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: false },
+          [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: false, error: msg },
         }));
         return;
       }
@@ -265,11 +269,12 @@ function WebOrdersPage() {
         },
       }));
       toast.success("Courier rating updated");
-    } catch {
-      toast.error("Could not refresh courier rating");
+    } catch (e) {
+      const msg = (e as Error).message || "Could not refresh courier rating";
+      toast.error(msg);
       setCourierStats((prev) => ({
         ...prev,
-        [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: false },
+        [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: false, error: msg },
       }));
     }
   };
@@ -340,7 +345,10 @@ function WebOrdersPage() {
   }, [page, pageSize, filteredOrders]);
 
   // Fetch courier stats for visible page (cache-first via edge fn)
+  // Session-scoped circuit breaker: if BD Courier quota is hit, stop auto-fetching.
+  const quotaExhaustedRef = useRef(false);
   useEffect(() => {
+    if (quotaExhaustedRef.current) return;
     const phones = Array.from(
       new Set(
         rows
@@ -370,10 +378,23 @@ function WebOrdersPage() {
           body: { phone },
         });
         if (cancelled) return;
-        if (error || !data?.data) {
+        const apiErr = (data as { error?: string } | null)?.error;
+        if (error || apiErr || !data?.data) {
+          const msg = apiErr || error?.message;
+          // Detect quota / rate-limit and trip the circuit breaker
+          if (msg && /limit|quota|429/i.test(msg)) {
+            if (!quotaExhaustedRef.current) {
+              quotaExhaustedRef.current = true;
+              toast.error("BD Courier API limit reached — top up credits to resume", {
+                duration: 8000,
+              });
+            }
+            // Drain queue: mark all pending as errored so spinners stop
+            queue.length = 0;
+          }
           setCourierStats((prev) => ({
             ...prev,
-            [phone]: { total: 0, success: 0, rate: 0, loading: false },
+            [phone]: { total: 0, success: 0, rate: 0, loading: false, error: msg },
           }));
           return;
         }
@@ -387,11 +408,11 @@ function WebOrdersPage() {
             loading: false,
           },
         }));
-      } catch {
+      } catch (e) {
         if (cancelled) return;
         setCourierStats((prev) => ({
           ...prev,
-          [phone]: { total: 0, success: 0, rate: 0, loading: false },
+          [phone]: { total: 0, success: 0, rate: 0, loading: false, error: (e as Error).message },
         }));
       }
     };
@@ -620,11 +641,24 @@ function WebOrdersPage() {
                           </div>
                         ) : stat.total === 0 ? (
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">No history</span>
+                            <span
+                              className={`text-xs ${stat.error ? "text-destructive" : "text-muted-foreground"}`}
+                              title={stat.error || undefined}
+                            >
+                              {stat.error
+                                ? /limit|quota|429/i.test(stat.error)
+                                  ? "API limit"
+                                  : "API error"
+                                : "No history"}
+                            </span>
                             <button
                               type="button"
                               onClick={() => refreshCourierStat(phoneKey)}
-                              title="Update courier rating (calls BD Courier API)"
+                              title={
+                                stat.error
+                                  ? `${stat.error} — click to retry`
+                                  : "Update courier rating (calls BD Courier API)"
+                              }
                               className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
                             >
                               <RefreshCw className="h-3 w-3" />
