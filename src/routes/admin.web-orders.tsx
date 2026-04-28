@@ -459,6 +459,7 @@ function WebOrdersPage() {
                 <TableHead>Customer</TableHead>
                 <TableHead>Note</TableHead>
                 <TableHead>Order Items</TableHead>
+                <TableHead>Success Rate</TableHead>
                 
                 <TableHead>Tags</TableHead>
                 <TableHead>Site</TableHead>
