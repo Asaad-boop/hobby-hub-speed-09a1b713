@@ -241,17 +241,20 @@ function WebOrdersPage() {
   const refreshCourierStat = async (phone: string) => {
     setCourierStats((prev) => ({
       ...prev,
-      [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: true },
+      [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: true, error: undefined },
     }));
     try {
       const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
         body: { phone, force_refresh: true },
       });
-      if (error || !data?.data) {
-        toast.error("Could not refresh courier rating");
+      // Edge fn returns { error: "..." } on upstream failure (e.g. quota)
+      const apiErr = (data as { error?: string } | null)?.error;
+      if (error || apiErr || !data?.data) {
+        const msg = apiErr || error?.message || "Could not refresh courier rating";
+        toast.error(msg);
         setCourierStats((prev) => ({
           ...prev,
-          [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: false },
+          [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: false, error: msg },
         }));
         return;
       }
@@ -266,11 +269,12 @@ function WebOrdersPage() {
         },
       }));
       toast.success("Courier rating updated");
-    } catch {
-      toast.error("Could not refresh courier rating");
+    } catch (e) {
+      const msg = (e as Error).message || "Could not refresh courier rating";
+      toast.error(msg);
       setCourierStats((prev) => ({
         ...prev,
-        [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: false },
+        [phone]: { ...(prev[phone] || { total: 0, success: 0, rate: 0 }), loading: false, error: msg },
       }));
     }
   };
