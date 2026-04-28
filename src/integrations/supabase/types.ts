@@ -551,6 +551,63 @@ export type Database = {
           },
         ]
       }
+      courier_stats_cache: {
+        Row: {
+          carrybee: Json | null
+          expires_at: string
+          fetch_count: number
+          last_fetched_at: string
+          overall_cancel: number
+          overall_success: number
+          overall_success_rate: number
+          overall_total: number
+          paperfly: Json | null
+          parceldex: Json | null
+          pathao: Json | null
+          phone: string
+          raw_response: Json | null
+          redx: Json | null
+          risk_level: string | null
+          steadfast: Json | null
+        }
+        Insert: {
+          carrybee?: Json | null
+          expires_at?: string
+          fetch_count?: number
+          last_fetched_at?: string
+          overall_cancel?: number
+          overall_success?: number
+          overall_success_rate?: number
+          overall_total?: number
+          paperfly?: Json | null
+          parceldex?: Json | null
+          pathao?: Json | null
+          phone: string
+          raw_response?: Json | null
+          redx?: Json | null
+          risk_level?: string | null
+          steadfast?: Json | null
+        }
+        Update: {
+          carrybee?: Json | null
+          expires_at?: string
+          fetch_count?: number
+          last_fetched_at?: string
+          overall_cancel?: number
+          overall_success?: number
+          overall_success_rate?: number
+          overall_total?: number
+          paperfly?: Json | null
+          parceldex?: Json | null
+          pathao?: Json | null
+          phone?: string
+          raw_response?: Json | null
+          redx?: Json | null
+          risk_level?: string | null
+          steadfast?: Json | null
+        }
+        Relationships: []
+      }
       homepage_versions: {
         Row: {
           created_at: string
