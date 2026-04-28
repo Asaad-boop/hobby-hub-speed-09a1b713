@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, Card, Loading, Btn, Input, Textarea, Modal, Empty, Badge } from "@/components/admin/ui";
+import BDCourierIntegration from "@/components/admin/BDCourierIntegration";
 
 export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
@@ -51,7 +52,8 @@ function SettingsPage() {
     <div>
       <PageHeader title="Settings" description="Site configuration and staff roles" />
 
-      
+      <BDCourierIntegration />
+
 
       <Card className="mb-5">
         <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3" style={{ borderBottomWidth: "0.5px" }}>

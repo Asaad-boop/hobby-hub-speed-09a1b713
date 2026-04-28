@@ -7,6 +7,7 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
+  Star,
   Globe,
   Loader2,
   RefreshCw,
@@ -32,6 +33,8 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { fetchCourierStats } from "@/lib/courier.functions";
 
 export const Route = createFileRoute("/admin/web-orders")({
   component: WebOrdersPage,
@@ -64,6 +67,46 @@ type OrderRow = {
   }[];
 };
 
+
+type CourierStat = {
+  total: number;
+  success: number;
+  rate: number;
+  loading: boolean;
+  error?: string;
+  stale?: boolean;
+};
+
+function cleanPhone(p: string | null | undefined): string | null {
+  if (!p) return null;
+  const digits = p.replace(/[^0-9]/g, "").slice(-11);
+  return /^01[3-9]\d{8}$/.test(digits) ? digits : null;
+}
+
+function CircularProgress({ percent }: { percent: number }) {
+  const r = 16;
+  const c = 2 * Math.PI * r;
+  const offset = c - (Math.max(0, Math.min(100, percent)) / 100) * c;
+  const color =
+    percent >= 80 ? "text-emerald-500" : percent >= 60 ? "text-amber-500" : "text-rose-500";
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40" className="-rotate-90">
+      <circle cx="20" cy="20" r={r} strokeWidth="3" className="stroke-muted" fill="none" />
+      <circle
+        cx="20"
+        cy="20"
+        r={r}
+        strokeWidth="3"
+        strokeLinecap="round"
+        className={`${color} transition-all`}
+        stroke="currentColor"
+        fill="none"
+        strokeDasharray={c}
+        strokeDashoffset={offset}
+      />
+    </svg>
+  );
+}
 
 function formatDateTime(iso: string) {
   const d = new Date(iso);
@@ -172,6 +215,46 @@ function WebOrdersPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [tab, setTab] = useState<TabKey>("processing");
+  const [courierStats, setCourierStats] = useState<Record<string, CourierStat>>({});
+  const fetchStatsFn = useServerFn(fetchCourierStats);
+
+  const refreshCourierStat = async (phone: string, force = false) => {
+    setCourierStats((prev) => ({
+      ...prev,
+      [phone]: { ...(prev[phone] ?? { total: 0, success: 0, rate: 0 }), loading: true, error: undefined },
+    }));
+    try {
+      const res = await fetchStatsFn({ data: { phone, force_refresh: force } });
+      if (res.ok && res.data) {
+        setCourierStats((prev) => ({
+          ...prev,
+          [phone]: {
+            total: res.data!.overall_total,
+            success: res.data!.overall_success,
+            rate: Number(res.data!.overall_success_rate),
+            loading: false,
+            stale: res.stale,
+            error: res.stale ? res.error : undefined,
+          },
+        }));
+        if (force) toast.success("Courier rating updated");
+      } else {
+        const msg = res.error ?? "Failed to fetch courier stats";
+        setCourierStats((prev) => ({
+          ...prev,
+          [phone]: { ...(prev[phone] ?? { total: 0, success: 0, rate: 0 }), loading: false, error: msg },
+        }));
+        if (force) toast.error(msg);
+      }
+    } catch (e) {
+      const msg = (e as Error).message;
+      setCourierStats((prev) => ({
+        ...prev,
+        [phone]: { ...(prev[phone] ?? { total: 0, success: 0, rate: 0 }), loading: false, error: msg },
+      }));
+      if (force) toast.error(msg);
+    }
+  };
 
   async function loadOrders() {
     setLoading(true);
@@ -233,6 +316,65 @@ function WebOrdersPage() {
     const start = (page - 1) * pageSize;
     return filteredOrders.slice(start, start + pageSize);
   }, [page, pageSize, filteredOrders]);
+
+  // Auto-fetch courier stats for visible rows (cache-first, server-side)
+  useEffect(() => {
+    const phones = Array.from(
+      new Set(
+        rows
+          .map((r) => cleanPhone(r.shipping_phone || r.guest_phone))
+          .filter((p): p is string => !!p),
+      ),
+    ).filter((p) => courierStats[p] === undefined);
+    if (phones.length === 0) return;
+    let cancelled = false;
+    const queue = [...phones];
+    const CONCURRENCY = 3;
+    setCourierStats((prev) => {
+      const next = { ...prev };
+      phones.forEach((p) => {
+        next[p] = { total: 0, success: 0, rate: 0, loading: true };
+      });
+      return next;
+    });
+    const worker = async () => {
+      while (!cancelled) {
+        const phone = queue.shift();
+        if (!phone) return;
+        try {
+          const res = await fetchStatsFn({ data: { phone } });
+          if (cancelled) return;
+          if (res.ok && res.data) {
+            setCourierStats((prev) => ({
+              ...prev,
+              [phone]: {
+                total: res.data!.overall_total,
+                success: res.data!.overall_success,
+                rate: Number(res.data!.overall_success_rate),
+                loading: false,
+                stale: res.stale,
+                error: res.stale ? res.error : undefined,
+              },
+            }));
+          } else {
+            setCourierStats((prev) => ({
+              ...prev,
+              [phone]: { total: 0, success: 0, rate: 0, loading: false, error: res.error },
+            }));
+          }
+        } catch (e) {
+          if (cancelled) return;
+          setCourierStats((prev) => ({
+            ...prev,
+            [phone]: { total: 0, success: 0, rate: 0, loading: false, error: (e as Error).message },
+          }));
+        }
+      }
+    };
+    Array.from({ length: Math.min(CONCURRENCY, phones.length) }).forEach(() => void worker());
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows]);
 
   const allChecked = rows.length > 0 && rows.every((r) => selected.has(r.id));
   const toggleAll = () => {
@@ -317,6 +459,7 @@ function WebOrdersPage() {
                 <TableHead>Customer</TableHead>
                 <TableHead>Note</TableHead>
                 <TableHead>Order Items</TableHead>
+                <TableHead>Success Rate</TableHead>
                 
                 <TableHead>Tags</TableHead>
                 <TableHead>Site</TableHead>
@@ -326,7 +469,7 @@ function WebOrdersPage() {
             <TableBody>
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={9} className="py-12 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={10} className="py-12 text-center text-sm text-muted-foreground">
                     <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />
                     Loading orders…
                   </TableCell>
@@ -334,7 +477,7 @@ function WebOrdersPage() {
               )}
               {!loading && rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} className="py-12 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={10} className="py-12 text-center text-sm text-muted-foreground">
                     No orders yet.
                   </TableCell>
                 </TableRow>
@@ -428,6 +571,76 @@ function WebOrdersPage() {
                             </div>
                           ))}
                         </div>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        {(() => {
+                          const phoneKey = cleanPhone(o.shipping_phone || o.guest_phone);
+                          const stat = phoneKey ? courierStats[phoneKey] : undefined;
+                          if (!phoneKey) return <span className="text-xs text-muted-foreground">No phone</span>;
+                          if (!stat || stat.loading)
+                            return (
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Checking…
+                              </div>
+                            );
+                          if (stat.error && stat.total === 0)
+                            return (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-destructive" title={stat.error}>
+                                  {/limit|quota|429/i.test(stat.error) ? "API limit" : "API error"}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => refreshCourierStat(phoneKey, true)}
+                                  className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                                  title={stat.error}
+                                >
+                                  <RefreshCw className="h-3 w-3" />
+                                </button>
+                              </div>
+                            );
+                          if (stat.total === 0)
+                            return (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">No history</span>
+                                <button
+                                  type="button"
+                                  onClick={() => refreshCourierStat(phoneKey, true)}
+                                  className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                                >
+                                  <RefreshCw className="h-3 w-3" />
+                                </button>
+                              </div>
+                            );
+                          return (
+                            <div className="flex items-center gap-2">
+                              <div className="relative flex h-10 w-10 items-center justify-center">
+                                <CircularProgress percent={stat.rate} />
+                                <span className="absolute text-[10px] font-semibold">
+                                  {Math.round(stat.rate)}%
+                                </span>
+                              </div>
+                              <div className="leading-tight">
+                                <div className="text-xs text-muted-foreground">{stat.total} orders</div>
+                                <div className="flex items-center gap-0.5 text-xs">
+                                  <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                                  {stat.success}/{stat.total}
+                                </div>
+                                {stat.stale && (
+                                  <div className="text-[10px] text-amber-600" title={stat.error}>cached</div>
+                                )}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => refreshCourierStat(phoneKey, true)}
+                                className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                                title="Force refresh from BD Courier"
+                              >
+                                <RefreshCw className="h-3 w-3" />
+                              </button>
+                            </div>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell className="pt-3">
                         <div className="flex flex-wrap items-center gap-1">
