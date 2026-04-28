@@ -291,11 +291,17 @@ function WebOrdersPage() {
       return next;
     });
 
-    phones.forEach(async (phone) => {
+    // Limit concurrency — at most 3 in-flight invocations at a time
+    let cancelled = false;
+    const queue = [...phones];
+    const CONCURRENCY = 3;
+
+    const runOne = async (phone: string) => {
       try {
         const { data, error } = await supabase.functions.invoke("fetch-courier-stats", {
           body: { phone },
         });
+        if (cancelled) return;
         if (error || !data?.data) {
           setCourierStats((prev) => ({
             ...prev,
@@ -314,12 +320,29 @@ function WebOrdersPage() {
           },
         }));
       } catch {
+        if (cancelled) return;
         setCourierStats((prev) => ({
           ...prev,
           [phone]: { total: 0, success: 0, rate: 0, loading: false },
         }));
       }
+    };
+
+    const worker = async () => {
+      while (!cancelled) {
+        const phone = queue.shift();
+        if (!phone) return;
+        await runOne(phone);
+      }
+    };
+
+    Array.from({ length: Math.min(CONCURRENCY, phones.length) }).forEach(() => {
+      void worker();
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, [rows, courierStats]);
 
   const allChecked = rows.length > 0 && rows.every((r) => selected.has(r.id));
