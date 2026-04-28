@@ -237,12 +237,6 @@ function WebOrdersPage() {
   }, []);
 
   // Fetch courier stats for visible page (cache-first via edge fn)
-  const total = orders.length;
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const rows = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return orders.slice(start, start + pageSize);
-  }, [page, pageSize, orders]);
 
   useEffect(() => {
     const phones = Array.from(
