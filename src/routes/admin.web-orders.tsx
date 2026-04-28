@@ -1,294 +1,440 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { Search, RefreshCw, Phone, CheckCircle2, XCircle, ExternalLink } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useMemo, useState } from "react";
 import {
-  PageHeader, Card, Loading, Empty, Badge, Btn, Input, Modal, Textarea, Select,
-  fmtBDT, fmtDate,
-} from "@/components/admin/ui";
+  Phone,
+  MessageCircle,
+  Plus,
+  ExternalLink,
+  ChevronLeft,
+  ChevronRight,
+  Star,
+  Globe,
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/admin/web-orders")({
   component: WebOrdersPage,
 });
 
-type Order = {
+type WebOrder = {
   id: string;
-  created_at: string;
-  status: string;
-  web_status: string | null;
-  shipping_name: string | null;
-  shipping_phone: string | null;
-  guest_name: string | null;
-  guest_phone: string | null;
-  shipping_address: string | null;
-  shipping_city: string | null;
-  shipping_district: string | null;
-  total: number;
-  subtotal: number;
-  shipping_fee: number;
-  discount_amount: number;
-  notes: string | null;
-  admin_notes: string | null;
-  call_status: string;
-  source: string | null;
-  is_guest_order: boolean;
+  createdAt: string;
+  autoCall: "pending" | "called" | "no-answer" | "off";
+  customer: { name: string; phone: string; address: string };
+  noteUpdatedDaysAgo: number | null;
+  items: { sku: string; thumb: string; qty: number; name: string }[];
+  successRate: { percent: number; orders: number; rating: number };
+  tags: string[];
+  site: string;
 };
 
-const WEB_STATUSES = ["processing", "incomplete", "good_but_no_response", "no_response", "advance_payment", "on_hold", "complete", "cancelled"];
+const DUMMY: WebOrder[] = [
+  {
+    id: "WO-10245",
+    createdAt: "2026-04-28T09:14:00",
+    autoCall: "called",
+    customer: {
+      name: "Rahim Uddin",
+      phone: "01712345678",
+      address: "House 12, Road 4, Dhanmondi, Dhaka",
+    },
+    noteUpdatedDaysAgo: 2,
+    items: [
+      { sku: "BOW-MIR-01", thumb: "https://picsum.photos/seed/p1/64", qty: 1, name: "Bow Brush" },
+    ],
+    successRate: { percent: 86, orders: 14, rating: 4.6 },
+    tags: ["VIP"],
+    site: "hobbyshopbd.com",
+  },
+  {
+    id: "WO-10244",
+    createdAt: "2026-04-28T08:42:00",
+    autoCall: "pending",
+    customer: {
+      name: "Nusrat Jahan",
+      phone: "01898765432",
+      address: "Flat 3B, Gulshan Avenue, Dhaka",
+    },
+    noteUpdatedDaysAgo: 0,
+    items: [
+      { sku: "AUR-LMP-02", thumb: "https://picsum.photos/seed/p2/64", qty: 2, name: "Aurora Lamp" },
+      { sku: "ORG-CMB-01", thumb: "https://picsum.photos/seed/p3/64", qty: 1, name: "Origami Combo" },
+    ],
+    successRate: { percent: 72, orders: 8, rating: 4.2 },
+    tags: ["Repeat", "COD"],
+    site: "hobbyshopbd.com",
+  },
+  {
+    id: "WO-10243",
+    createdAt: "2026-04-27T19:05:00",
+    autoCall: "no-answer",
+    customer: {
+      name: "Tanvir Hasan",
+      phone: "01611223344",
+      address: "Sector 7, Uttara, Dhaka",
+    },
+    noteUpdatedDaysAgo: 5,
+    items: [
+      { sku: "BOW-MIR-01", thumb: "https://picsum.photos/seed/p4/64", qty: 1, name: "Bow Brush" },
+    ],
+    successRate: { percent: 45, orders: 3, rating: 3.4 },
+    tags: [],
+    site: "hobbyshopbd.com",
+  },
+  {
+    id: "WO-10242",
+    createdAt: "2026-04-27T15:31:00",
+    autoCall: "off",
+    customer: {
+      name: "Sadia Akter",
+      phone: "01755667788",
+      address: "Mirpur 10, Dhaka",
+    },
+    noteUpdatedDaysAgo: 1,
+    items: [
+      { sku: "AUR-LMP-02", thumb: "https://picsum.photos/seed/p5/64", qty: 1, name: "Aurora Lamp" },
+    ],
+    successRate: { percent: 91, orders: 22, rating: 4.8 },
+    tags: ["VIP", "Wholesale"],
+    site: "hobbyshopbd.com",
+  },
+  {
+    id: "WO-10241",
+    createdAt: "2026-04-27T11:12:00",
+    autoCall: "called",
+    customer: {
+      name: "Imran Hossain",
+      phone: "01999887766",
+      address: "Banani Road 11, Dhaka",
+    },
+    noteUpdatedDaysAgo: 9,
+    items: [
+      { sku: "ORG-CMB-01", thumb: "https://picsum.photos/seed/p6/64", qty: 3, name: "Origami Combo" },
+    ],
+    successRate: { percent: 60, orders: 5, rating: 3.9 },
+    tags: ["New"],
+    site: "hobbyshopbd.com",
+  },
+  {
+    id: "WO-10240",
+    createdAt: "2026-04-26T20:48:00",
+    autoCall: "pending",
+    customer: {
+      name: "Fariha Rahman",
+      phone: "01633445566",
+      address: "Bashundhara R/A, Block C, Dhaka",
+    },
+    noteUpdatedDaysAgo: null,
+    items: [
+      { sku: "BOW-MIR-01", thumb: "https://picsum.photos/seed/p7/64", qty: 1, name: "Bow Brush" },
+      { sku: "AUR-LMP-02", thumb: "https://picsum.photos/seed/p8/64", qty: 1, name: "Aurora Lamp" },
+    ],
+    successRate: { percent: 78, orders: 11, rating: 4.4 },
+    tags: ["COD"],
+    site: "hobbyshopbd.com",
+  },
+];
+
+function formatDateTime(iso: string) {
+  const d = new Date(iso);
+  return {
+    date: d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+    time: d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
+  };
+}
+
+function AutoCallBadge({ status }: { status: WebOrder["autoCall"] }) {
+  const map = {
+    pending: { label: "Pending", cls: "bg-amber-50 text-amber-700 border-amber-200" },
+    called: { label: "Called", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+    "no-answer": { label: "No Answer", cls: "bg-rose-50 text-rose-700 border-rose-200" },
+    off: { label: "Off", cls: "bg-slate-50 text-slate-600 border-slate-200" },
+  } as const;
+  const m = map[status];
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${m.cls}`}>
+      {m.label}
+    </span>
+  );
+}
+
+function CircularProgress({ percent }: { percent: number }) {
+  const r = 16;
+  const c = 2 * Math.PI * r;
+  const offset = c - (percent / 100) * c;
+  const color =
+    percent >= 80 ? "text-emerald-500" : percent >= 60 ? "text-amber-500" : "text-rose-500";
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40" className="-rotate-90">
+      <circle cx="20" cy="20" r={r} strokeWidth="3" className="stroke-muted" fill="none" />
+      <circle
+        cx="20"
+        cy="20"
+        r={r}
+        strokeWidth="3"
+        strokeLinecap="round"
+        className={`${color} transition-all`}
+        stroke="currentColor"
+        fill="none"
+        strokeDasharray={c}
+        strokeDashoffset={offset}
+      />
+    </svg>
+  );
+}
 
 function WebOrdersPage() {
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<string>("all");
-  const [editing, setEditing] = useState<Order | null>(null);
-  const qc = useQueryClient();
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["admin", "web-orders"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("status", "new")
-        .order("created_at", { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return data as Order[];
-    },
-  });
+  const total = DUMMY.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const rows = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return DUMMY.slice(start, start + pageSize);
+  }, [page, pageSize]);
 
-  // Realtime
-  useEffect(() => {
-    const channel = supabase
-      .channel("web-orders-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
-        qc.invalidateQueries({ queryKey: ["admin", "web-orders"] });
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [qc]);
-
-  const filtered = useMemo(() => {
-    let rows = data ?? [];
-    if (filter !== "all") rows = rows.filter((r) => (r.web_status ?? "processing") === filter);
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      rows = rows.filter((r) =>
-        (r.shipping_name ?? r.guest_name ?? "").toLowerCase().includes(q) ||
-        (r.shipping_phone ?? r.guest_phone ?? "").includes(q) ||
-        r.id.toLowerCase().includes(q)
-      );
-    }
-    return rows;
-  }, [data, filter, search]);
-
-  async function confirmToPipeline(orderId: string) {
-    const { error } = await supabase
-      .from("orders")
-      .update({ status: "confirmed", confirmation_status: "confirmed", web_status: "complete", confirmed_at: new Date().toISOString() })
-      .eq("id", orderId);
-    if (error) return toast.error(error.message);
-    toast.success("Order confirmed → moved to Pipeline");
-    refetch();
-  }
-
-  async function markCancelled(orderId: string, reason: string) {
-    const { error } = await supabase
-      .from("orders")
-      .update({ status: "cancelled", web_status: "cancelled", cancellation_reason: reason, cancelled_at: new Date().toISOString() })
-      .eq("id", orderId);
-    if (error) return toast.error(error.message);
-    toast.success("Order cancelled");
-    refetch();
-  }
+  const allChecked = rows.length > 0 && rows.every((r) => selected.has(r.id));
+  const toggleAll = () => {
+    const next = new Set(selected);
+    if (allChecked) rows.forEach((r) => next.delete(r.id));
+    else rows.forEach((r) => next.add(r.id));
+    setSelected(next);
+  };
+  const toggleOne = (id: string) => {
+    const next = new Set(selected);
+    next.has(id) ? next.delete(id) : next.add(id);
+    setSelected(next);
+  };
 
   return (
-    <div>
-      <PageHeader
-        title="Web Orders"
-        description="Raw inbox — review, edit and confirm to send into the order pipeline."
-        actions={
-          <>
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
-              <Input
-                placeholder="Search name, phone, ID"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-7 w-64"
-              />
-            </div>
-            <Btn onClick={() => refetch()}><RefreshCw className="h-3.5 w-3.5" /> Refresh</Btn>
-          </>
-        }
-      />
-
-      <div className="mb-3 flex flex-wrap gap-1">
-        {["all", ...WEB_STATUSES].map((s) => (
-          <button
-            key={s}
-            onClick={() => setFilter(s)}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-              filter === s ? "bg-gray-900 text-white" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
-            }`}
-          >
-            {s.replace(/_/g, " ")}
-          </button>
-        ))}
-      </div>
-
-      <Card>
-        {isLoading ? (
-          <Loading />
-        ) : filtered.length === 0 ? (
-          <Empty title="No web orders" description="New orders from the website will appear here." />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-xs text-gray-500">
-                <tr>
-                  <th className="px-4 py-2 text-left font-medium">Order</th>
-                  <th className="px-4 py-2 text-left font-medium">Customer</th>
-                  <th className="px-4 py-2 text-left font-medium">Phone</th>
-                  <th className="px-4 py-2 text-left font-medium">Total</th>
-                  <th className="px-4 py-2 text-left font-medium">Status</th>
-                  <th className="px-4 py-2 text-left font-medium">Created</th>
-                  <th className="px-4 py-2 text-right font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((o) => (
-                  <tr key={o.id} className="border-t border-gray-100 hover:bg-gray-50">
-                    <td className="px-4 py-2.5 font-mono text-xs text-gray-600">#{o.id.slice(0, 8)}</td>
-                    <td className="px-4 py-2.5">{o.shipping_name ?? o.guest_name ?? "—"}</td>
-                    <td className="px-4 py-2.5">
-                      {o.shipping_phone || o.guest_phone ? (
-                        <a href={`tel:${o.shipping_phone ?? o.guest_phone}`} className="text-blue-600 hover:underline">
-                          {o.shipping_phone ?? o.guest_phone}
-                        </a>
-                      ) : "—"}
-                    </td>
-                    <td className="px-4 py-2.5 font-medium">{fmtBDT(o.total)}</td>
-                    <td className="px-4 py-2.5">
-                      <Badge tone={o.web_status === "complete" ? "green" : o.web_status === "cancelled" ? "red" : "blue"}>
-                        {(o.web_status ?? "processing").replace(/_/g, " ")}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-2.5 text-xs text-gray-500">{fmtDate(o.created_at)}</td>
-                    <td className="px-4 py-2.5">
-                      <div className="flex justify-end gap-1">
-                        <Btn onClick={() => setEditing(o)}><ExternalLink className="h-3 w-3" /> Open</Btn>
-                        <Btn variant="primary" onClick={() => confirmToPipeline(o.id)}>
-                          <CheckCircle2 className="h-3 w-3" /> Confirm
-                        </Btn>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
-
-      {editing && (
-        <OrderEditModal
-          order={editing}
-          onClose={() => setEditing(null)}
-          onSaved={() => { setEditing(null); refetch(); }}
-          onConfirm={() => confirmToPipeline(editing.id).then(() => setEditing(null))}
-          onCancel={(reason) => markCancelled(editing.id, reason).then(() => setEditing(null))}
-        />
-      )}
-    </div>
-  );
-}
-
-function OrderEditModal({
-  order, onClose, onSaved, onConfirm, onCancel,
-}: {
-  order: Order;
-  onClose: () => void;
-  onSaved: () => void;
-  onConfirm: () => void;
-  onCancel: (reason: string) => void;
-}) {
-  const [form, setForm] = useState({
-    shipping_name: order.shipping_name ?? "",
-    shipping_phone: order.shipping_phone ?? "",
-    shipping_address: order.shipping_address ?? "",
-    shipping_city: order.shipping_city ?? "",
-    shipping_district: order.shipping_district ?? "",
-    web_status: order.web_status ?? "processing",
-    admin_notes: order.admin_notes ?? "",
-    call_status: order.call_status ?? "not_called",
-  });
-  const [saving, setSaving] = useState(false);
-
-  async function save() {
-    setSaving(true);
-    const { error } = await supabase.from("orders").update(form as any).eq("id", order.id);
-    setSaving(false);
-    if (error) return toast.error(error.message);
-    toast.success("Saved");
-    onSaved();
-  }
-
-  return (
-    <Modal open onClose={onClose} title={`Order #${order.id.slice(0, 8)}`} width="max-w-2xl">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Customer Name"><Input value={form.shipping_name} onChange={(e) => setForm({ ...form, shipping_name: e.target.value })} /></Field>
-        <Field label="Phone"><Input value={form.shipping_phone} onChange={(e) => setForm({ ...form, shipping_phone: e.target.value })} /></Field>
-        <Field label="District"><Input value={form.shipping_district} onChange={(e) => setForm({ ...form, shipping_district: e.target.value })} /></Field>
-        <Field label="City / Thana"><Input value={form.shipping_city} onChange={(e) => setForm({ ...form, shipping_city: e.target.value })} /></Field>
-        <Field label="Address" full><Textarea rows={2} value={form.shipping_address} onChange={(e) => setForm({ ...form, shipping_address: e.target.value })} /></Field>
-        <Field label="Web Status">
-          <Select value={form.web_status} onChange={(e) => setForm({ ...form, web_status: e.target.value })}>
-            {WEB_STATUSES.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
-          </Select>
-        </Field>
-        <Field label="Call Status">
-          <Select value={form.call_status} onChange={(e) => setForm({ ...form, call_status: e.target.value })}>
-            {["not_called","attempting","reached","no_response","wrong_number","customer_confirmed","customer_cancelled","needs_followup"].map((s) =>
-              <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
-            )}
-          </Select>
-        </Field>
-        <Field label="Admin Notes" full><Textarea rows={3} value={form.admin_notes} onChange={(e) => setForm({ ...form, admin_notes: e.target.value })} /></Field>
-      </div>
-
-      <div className="mt-4 rounded-md border border-gray-200 bg-gray-50 p-3 text-xs" style={{ borderWidth: "0.5px" }}>
-        <div className="flex justify-between"><span>Subtotal</span><span>{fmtBDT(order.subtotal)}</span></div>
-        <div className="flex justify-between"><span>Shipping</span><span>{fmtBDT(order.shipping_fee)}</span></div>
-        <div className="flex justify-between"><span>Discount</span><span>-{fmtBDT(order.discount_amount)}</span></div>
-        <div className="mt-1 flex justify-between border-t border-gray-200 pt-1 font-semibold"><span>Total</span><span>{fmtBDT(order.total)}</span></div>
-      </div>
-
-      <div className="mt-5 flex flex-wrap justify-between gap-2">
-        <Btn variant="danger" onClick={() => {
-          const reason = prompt("Cancel reason?") ?? "";
-          if (reason) onCancel(reason);
-        }}>
-          <XCircle className="h-3.5 w-3.5" /> Cancel order
-        </Btn>
-        <div className="flex gap-2">
-          <Btn onClick={onClose}>Close</Btn>
-          <Btn onClick={save} disabled={saving}>{saving ? "Saving…" : "Save"}</Btn>
-          <Btn variant="primary" onClick={onConfirm}>
-            <CheckCircle2 className="h-3.5 w-3.5" /> Confirm to pipeline
-          </Btn>
+    <div className="space-y-4">
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight">Web Orders</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            All incoming orders from your storefront.
+          </p>
+        </div>
+        <div className="text-xs text-muted-foreground">
+          {selected.size > 0 && <span className="mr-3">{selected.size} selected</span>}
+          {total} orders
         </div>
       </div>
-    </Modal>
-  );
-}
 
-function Field({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
-  return (
-    <div className={full ? "sm:col-span-2" : ""}>
-      <div className="mb-1 text-xs font-medium text-gray-600">{label}</div>
-      {children}
+      <Card className="overflow-hidden">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/40 hover:bg-muted/40">
+                <TableHead className="w-10">
+                  <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
+                </TableHead>
+                <TableHead>Created At</TableHead>
+                <TableHead>Auto Call</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Note</TableHead>
+                <TableHead>Order Items</TableHead>
+                <TableHead>Success Rate</TableHead>
+                <TableHead>Tags</TableHead>
+                <TableHead>Site</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((o) => {
+                const dt = formatDateTime(o.createdAt);
+                return (
+                  <TableRow key={o.id} className="align-top">
+                    <TableCell className="pt-4">
+                      <Checkbox
+                        checked={selected.has(o.id)}
+                        onCheckedChange={() => toggleOne(o.id)}
+                      />
+                    </TableCell>
+                    <TableCell className="pt-3">
+                      <div className="text-sm font-medium text-foreground">{dt.date}</div>
+                      <div className="text-xs text-muted-foreground">{dt.time}</div>
+                      <div className="mt-1 text-[11px] text-muted-foreground">#{o.id}</div>
+                    </TableCell>
+                    <TableCell className="pt-3">
+                      <AutoCallBadge status={o.autoCall} />
+                    </TableCell>
+                    <TableCell className="pt-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{o.customer.phone}</span>
+                        <a
+                          href={`tel:${o.customer.phone}`}
+                          className="rounded-md p-1 text-emerald-600 hover:bg-emerald-50"
+                          aria-label="Call"
+                        >
+                          <Phone className="h-3.5 w-3.5" />
+                        </a>
+                        <a
+                          href={`https://wa.me/${o.customer.phone}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-md p-1 text-green-600 hover:bg-green-50"
+                          aria-label="WhatsApp"
+                        >
+                          <MessageCircle className="h-3.5 w-3.5" />
+                        </a>
+                      </div>
+                      <div className="mt-0.5 text-sm text-foreground">{o.customer.name}</div>
+                      <div className="text-xs text-muted-foreground line-clamp-2 max-w-[220px]">
+                        {o.customer.address}
+                      </div>
+                    </TableCell>
+                    <TableCell className="pt-3">
+                      <span className="text-xs text-muted-foreground">
+                        {o.noteUpdatedDaysAgo === null
+                          ? "No notes"
+                          : o.noteUpdatedDaysAgo === 0
+                            ? "Updated today"
+                            : `Updated ${o.noteUpdatedDaysAgo} day${o.noteUpdatedDaysAgo > 1 ? "s" : ""} ago`}
+                      </span>
+                    </TableCell>
+                    <TableCell className="pt-3">
+                      <div className="space-y-1.5">
+                        {o.items.map((it) => (
+                          <div key={it.sku} className="flex items-center gap-2">
+                            <img
+                              src={it.thumb}
+                              alt={it.name}
+                              className="h-9 w-9 rounded-md border object-cover"
+                            />
+                            <div className="min-w-0">
+                              <div className="text-[11px] font-mono text-muted-foreground">
+                                {it.sku}
+                              </div>
+                              <div className="text-xs">Qty: {it.qty}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell className="pt-3">
+                      <div className="flex items-center gap-2">
+                        <div className="relative flex h-10 w-10 items-center justify-center">
+                          <CircularProgress percent={o.successRate.percent} />
+                          <span className="absolute text-[10px] font-semibold">
+                            {o.successRate.percent}%
+                          </span>
+                        </div>
+                        <div className="leading-tight">
+                          <div className="text-xs text-muted-foreground">
+                            {o.successRate.orders} orders
+                          </div>
+                          <div className="flex items-center gap-0.5 text-xs">
+                            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                            {o.successRate.rating}
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="pt-3">
+                      <div className="flex flex-wrap items-center gap-1">
+                        {o.tags.map((t) => (
+                          <Badge
+                            key={t}
+                            variant="secondary"
+                            className="rounded-full text-[10px] font-medium"
+                          >
+                            {t}
+                          </Badge>
+                        ))}
+                        <button className="inline-flex items-center gap-0.5 rounded-full border border-dashed px-1.5 py-0.5 text-[10px] text-muted-foreground hover:bg-muted">
+                          <Plus className="h-2.5 w-2.5" />
+                          Add
+                        </button>
+                      </div>
+                    </TableCell>
+                    <TableCell className="pt-3">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Globe className="h-3.5 w-3.5" />
+                        {o.site}
+                      </div>
+                    </TableCell>
+                    <TableCell className="pt-3 text-right">
+                      <Button size="sm" variant="outline" className="h-7 gap-1 text-xs">
+                        <ExternalLink className="h-3 w-3" />
+                        Open
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Pagination */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>Rows per page</span>
+          <Select
+            value={String(pageSize)}
+            onValueChange={(v) => {
+              setPageSize(Number(v));
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="h-8 w-[72px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[5, 10, 20, 50].map((n) => (
+                <SelectItem key={n} value={String(n)}>
+                  {n}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-muted-foreground">
+            Page {page} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-8 p-0"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-8 p-0"
+            disabled={page >= totalPages}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
