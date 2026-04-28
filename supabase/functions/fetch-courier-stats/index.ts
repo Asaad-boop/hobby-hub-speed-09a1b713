@@ -259,6 +259,7 @@ Deno.serve(async (req) => {
     const cfg = (integration?.config ?? {}) as {
       cache_hours?: number;
       stale_while_revalidate?: boolean;
+      api_key?: string;
     };
     const cacheHours = Number(cfg.cache_hours ?? DEFAULT_CACHE_HOURS);
     const swr = cfg.stale_while_revalidate !== false; // default ON
