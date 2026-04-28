@@ -356,7 +356,42 @@ function WebOrdersPage() {
         </div>
       </div>
 
-      <Card className="overflow-hidden">
+      {/* Status filter tabs */}
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-border">
+        {TABS.map((t) => {
+          const active = tab === t.key;
+          const count = tabCounts[t.key];
+          return (
+            <button
+              key={t.key}
+              onClick={() => {
+                setTab(t.key);
+                setPage(1);
+              }}
+              className={`group relative inline-flex items-center gap-2 whitespace-nowrap px-3 py-2.5 text-sm transition-colors ${
+                active
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <span className={active ? "font-medium" : ""}>{t.label}</span>
+              <span
+                className={`inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold ${
+                  active
+                    ? "bg-primary/10 text-primary"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {count}
+              </span>
+              {active && (
+                <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-primary" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
         <CardContent className="p-0">
           <Table>
             <TableHeader>
