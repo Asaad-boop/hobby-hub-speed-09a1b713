@@ -637,6 +637,14 @@ function WebOrdersPage() {
                                 {stat.success}/{stat.total}
                               </div>
                             </div>
+                            <button
+                              type="button"
+                              onClick={() => refreshCourierStat(phoneKey)}
+                              title="Update courier rating (calls BD Courier API)"
+                              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                            >
+                              <RefreshCw className="h-3 w-3" />
+                            </button>
                           </div>
                         )}
                       </TableCell>
