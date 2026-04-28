@@ -102,6 +102,13 @@ async function fetchAndCache(
   if (errorMsg || !apiResp) {
     return { ok: false as const, error: errorMsg ?? "BD Courier API failed" };
   }
+  // Upstream returned an error envelope (e.g. quota exceeded, invalid key)
+  if (statusCode >= 400 || (apiResp as { error?: string })?.error) {
+    return {
+      ok: false as const,
+      error: (apiResp as { error?: string })?.error ?? `BD Courier API error (${statusCode})`,
+    };
+  }
 
   // deno-lint-ignore no-explicit-any
   const r: any = apiResp;
