@@ -263,6 +263,36 @@ function WebOrdersPage() {
     }
   }, [courierStats]);
 
+  useEffect(() => {
+    const loadingEntries = Object.entries(courierStats).filter(([, v]) => v?.loading);
+    if (loadingEntries.length === 0) return;
+
+    const now = Date.now();
+    const overduePhones = loadingEntries
+      .filter(([, v]) => !v.requestedAt || now - v.requestedAt > COURIER_CLIENT_TIMEOUT_MS)
+      .map(([phone]) => phone);
+
+    if (overduePhones.length > 0) {
+      setCourierStats((prev) => {
+        const next = { ...prev };
+        overduePhones.forEach((phone) => {
+          next[phone] = { total: 0, success: 0, rate: 0, loading: false, error: "BD Courier request timed out" };
+        });
+        return next;
+      });
+      return;
+    }
+
+    const nextTimeout = Math.min(
+      ...loadingEntries.map(([, v]) => COURIER_CLIENT_TIMEOUT_MS - (now - (v.requestedAt ?? now))),
+    );
+    const timer = window.setTimeout(() => {
+      setCourierStats((prev) => ({ ...prev }));
+    }, Math.max(500, nextTimeout));
+
+    return () => window.clearTimeout(timer);
+  }, [courierStats]);
+
   const refreshCourierStat = async (phone: string) => {
     setCourierStats((prev) => ({
       ...prev,
