@@ -345,7 +345,10 @@ function WebOrdersPage() {
   }, [page, pageSize, filteredOrders]);
 
   // Fetch courier stats for visible page (cache-first via edge fn)
+  // Session-scoped circuit breaker: if BD Courier quota is hit, stop auto-fetching.
+  const quotaExhaustedRef = useRef(false);
   useEffect(() => {
+    if (quotaExhaustedRef.current) return;
     const phones = Array.from(
       new Set(
         rows
@@ -375,10 +378,23 @@ function WebOrdersPage() {
           body: { phone },
         });
         if (cancelled) return;
-        if (error || !data?.data) {
+        const apiErr = (data as { error?: string } | null)?.error;
+        if (error || apiErr || !data?.data) {
+          const msg = apiErr || error?.message;
+          // Detect quota / rate-limit and trip the circuit breaker
+          if (msg && /limit|quota|429/i.test(msg)) {
+            if (!quotaExhaustedRef.current) {
+              quotaExhaustedRef.current = true;
+              toast.error("BD Courier API limit reached — top up credits to resume", {
+                duration: 8000,
+              });
+            }
+            // Drain queue: mark all pending as errored so spinners stop
+            queue.length = 0;
+          }
           setCourierStats((prev) => ({
             ...prev,
-            [phone]: { total: 0, success: 0, rate: 0, loading: false },
+            [phone]: { total: 0, success: 0, rate: 0, loading: false, error: msg },
           }));
           return;
         }
@@ -392,11 +408,11 @@ function WebOrdersPage() {
             loading: false,
           },
         }));
-      } catch {
+      } catch (e) {
         if (cancelled) return;
         setCourierStats((prev) => ({
           ...prev,
-          [phone]: { total: 0, success: 0, rate: 0, loading: false },
+          [phone]: { total: 0, success: 0, rate: 0, loading: false, error: (e as Error).message },
         }));
       }
     };
