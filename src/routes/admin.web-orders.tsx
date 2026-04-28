@@ -236,8 +236,42 @@ function WebOrdersPage() {
     loadOrders();
   }, []);
 
-  // Fetch courier stats for visible page (cache-first via edge fn)
+  // Counts per tab (computed from full orders list)
+  const tabCounts = useMemo(() => {
+    const counts: Record<TabKey, number> = {
+      processing: 0,
+      incomplete: 0,
+      good_no_response: 0,
+      no_response: 0,
+      advance_payment: 0,
+      on_hold: 0,
+      complete: 0,
+      cancel: 0,
+      all: orders.length,
+    };
+    for (const o of orders) {
+      for (const t of TABS) {
+        if (t.key === "all") continue;
+        if (matchesTab(o, t.key)) counts[t.key]++;
+      }
+    }
+    return counts;
+  }, [orders]);
 
+  // Apply tab filter
+  const filteredOrders = useMemo(
+    () => orders.filter((o) => matchesTab(o, tab)),
+    [orders, tab],
+  );
+
+  const total = filteredOrders.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const rows = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredOrders.slice(start, start + pageSize);
+  }, [page, pageSize, filteredOrders]);
+
+  // Fetch courier stats for visible page (cache-first via edge fn)
   useEffect(() => {
     const phones = Array.from(
       new Set(
@@ -249,7 +283,6 @@ function WebOrdersPage() {
 
     if (phones.length === 0) return;
 
-    // mark loading
     setCourierStats((prev) => {
       const next = { ...prev };
       phones.forEach((p) => {
@@ -289,41 +322,7 @@ function WebOrdersPage() {
     });
   }, [rows, courierStats]);
 
-  // Counts per tab (computed from full orders list)
-  const tabCounts = useMemo(() => {
-    const counts: Record<TabKey, number> = {
-      processing: 0,
-      incomplete: 0,
-      good_no_response: 0,
-      no_response: 0,
-      advance_payment: 0,
-      on_hold: 0,
-      complete: 0,
-      cancel: 0,
-      all: orders.length,
-    };
-    for (const o of orders) {
-      for (const t of TABS) {
-        if (t.key === "all") continue;
-        if (matchesTab(o, t.key)) counts[t.key]++;
-      }
-    }
-    return counts;
-  }, [orders]);
-
-  // Apply tab filter
-  const filteredOrders = useMemo(
-    () => orders.filter((o) => matchesTab(o, tab)),
-    [orders, tab],
-  );
-
-  const total = filteredOrders.length;
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const rows = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredOrders.slice(start, start + pageSize);
-  }, [page, pageSize, filteredOrders]);
-
+  const allChecked = rows.length > 0 && rows.every((r) => selected.has(r.id));
   const toggleAll = () => {
     const next = new Set(selected);
     if (allChecked) rows.forEach((r) => next.delete(r.id));
