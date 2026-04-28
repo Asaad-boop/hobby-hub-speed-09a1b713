@@ -343,8 +343,6 @@ function WebOrdersPage() {
                 rows.map((o) => {
                   const dt = formatDateTime(o.created_at);
                   const phone = o.shipping_phone || o.guest_phone || "";
-                  const phoneKey = cleanPhone(phone);
-                  const stat = phoneKey ? courierStats[phoneKey] : undefined;
                   const name = o.shipping_name || o.guest_name || "—";
                   const address = [o.shipping_address, o.shipping_city]
                     .filter(Boolean)
