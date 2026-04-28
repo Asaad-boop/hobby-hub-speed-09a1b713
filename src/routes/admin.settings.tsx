@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { PageHeader, Card, Loading, Btn, Input, Textarea, Modal, Empty } from "@/components/admin/ui";
+import { PageHeader, Card, Loading, Btn, Input, Textarea, Modal, Empty, Badge } from "@/components/admin/ui";
 
 export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
