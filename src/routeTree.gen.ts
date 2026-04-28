@@ -35,7 +35,6 @@ import { Route as OrderSuccessOrderIdRouteImport } from './routes/order-success.
 import { Route as LpOrigamiComboRouteImport } from './routes/lp.origami-combo'
 import { Route as LpAuroraLampRouteImport } from './routes/lp.aurora-lamp'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
-import { Route as AdminWebOrdersRouteImport } from './routes/admin.web-orders'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
@@ -46,6 +45,7 @@ import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminDiscountsRouteImport } from './routes/admin.discounts'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminWebOrdersIndexRouteImport } from './routes/admin.web-orders.index'
 import { Route as AdminWebOrdersOrderIdRouteImport } from './routes/admin.web-orders.$orderId'
 
 const WishlistRoute = WishlistRouteImport.update({
@@ -178,11 +178,6 @@ const CategorySlugRoute = CategorySlugRouteImport.update({
   path: '/category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminWebOrdersRoute = AdminWebOrdersRouteImport.update({
-  id: '/web-orders',
-  path: '/web-orders',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -233,10 +228,15 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminWebOrdersIndexRoute = AdminWebOrdersIndexRouteImport.update({
+  id: '/web-orders/',
+  path: '/web-orders/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminWebOrdersOrderIdRoute = AdminWebOrdersOrderIdRouteImport.update({
-  id: '/$orderId',
-  path: '/$orderId',
-  getParentRoute: () => AdminWebOrdersRoute,
+  id: '/web-orders/$orderId',
+  path: '/web-orders/$orderId',
+  getParentRoute: () => AdminRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -268,7 +268,6 @@ export interface FileRoutesByFullPath {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
-  '/admin/web-orders': typeof AdminWebOrdersRouteWithChildren
   '/category/$slug': typeof CategorySlugRoute
   '/lp/aurora-lamp': typeof LpAuroraLampRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
@@ -278,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
   '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
+  '/admin/web-orders/': typeof AdminWebOrdersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -307,7 +307,6 @@ export interface FileRoutesByTo {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
-  '/admin/web-orders': typeof AdminWebOrdersRouteWithChildren
   '/category/$slug': typeof CategorySlugRoute
   '/lp/aurora-lamp': typeof LpAuroraLampRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
@@ -317,6 +316,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/track': typeof TrackIndexRoute
   '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
+  '/admin/web-orders': typeof AdminWebOrdersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -348,7 +348,6 @@ export interface FileRoutesById {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/settings': typeof AdminSettingsRoute
-  '/admin/web-orders': typeof AdminWebOrdersRouteWithChildren
   '/category/$slug': typeof CategorySlugRoute
   '/lp/aurora-lamp': typeof LpAuroraLampRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
@@ -358,6 +357,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
   '/admin/web-orders/$orderId': typeof AdminWebOrdersOrderIdRoute
+  '/admin/web-orders/': typeof AdminWebOrdersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -390,7 +390,6 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/reviews'
     | '/admin/settings'
-    | '/admin/web-orders'
     | '/category/$slug'
     | '/lp/aurora-lamp'
     | '/lp/origami-combo'
@@ -400,6 +399,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/track/'
     | '/admin/web-orders/$orderId'
+    | '/admin/web-orders/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -429,7 +429,6 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/reviews'
     | '/admin/settings'
-    | '/admin/web-orders'
     | '/category/$slug'
     | '/lp/aurora-lamp'
     | '/lp/origami-combo'
@@ -439,6 +438,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/track'
     | '/admin/web-orders/$orderId'
+    | '/admin/web-orders'
   id:
     | '__root__'
     | '/'
@@ -469,7 +469,6 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/reviews'
     | '/admin/settings'
-    | '/admin/web-orders'
     | '/category/$slug'
     | '/lp/aurora-lamp'
     | '/lp/origami-combo'
@@ -479,6 +478,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/track/'
     | '/admin/web-orders/$orderId'
+    | '/admin/web-orders/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -693,13 +693,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/web-orders': {
-      id: '/admin/web-orders'
-      path: '/web-orders'
-      fullPath: '/admin/web-orders'
-      preLoaderRoute: typeof AdminWebOrdersRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
@@ -770,27 +763,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/web-orders/': {
+      id: '/admin/web-orders/'
+      path: '/web-orders'
+      fullPath: '/admin/web-orders/'
+      preLoaderRoute: typeof AdminWebOrdersIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/web-orders/$orderId': {
       id: '/admin/web-orders/$orderId'
-      path: '/$orderId'
+      path: '/web-orders/$orderId'
       fullPath: '/admin/web-orders/$orderId'
       preLoaderRoute: typeof AdminWebOrdersOrderIdRouteImport
-      parentRoute: typeof AdminWebOrdersRoute
+      parentRoute: typeof AdminRoute
     }
   }
 }
-
-interface AdminWebOrdersRouteChildren {
-  AdminWebOrdersOrderIdRoute: typeof AdminWebOrdersOrderIdRoute
-}
-
-const AdminWebOrdersRouteChildren: AdminWebOrdersRouteChildren = {
-  AdminWebOrdersOrderIdRoute: AdminWebOrdersOrderIdRoute,
-}
-
-const AdminWebOrdersRouteWithChildren = AdminWebOrdersRoute._addFileChildren(
-  AdminWebOrdersRouteChildren,
-)
 
 interface AdminRouteChildren {
   AdminCategoriesRoute: typeof AdminCategoriesRoute
@@ -803,8 +791,9 @@ interface AdminRouteChildren {
   AdminReportsRoute: typeof AdminReportsRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
-  AdminWebOrdersRoute: typeof AdminWebOrdersRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminWebOrdersOrderIdRoute: typeof AdminWebOrdersOrderIdRoute
+  AdminWebOrdersIndexRoute: typeof AdminWebOrdersIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -818,8 +807,9 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminReportsRoute: AdminReportsRoute,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
-  AdminWebOrdersRoute: AdminWebOrdersRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
+  AdminWebOrdersOrderIdRoute: AdminWebOrdersOrderIdRoute,
+  AdminWebOrdersIndexRoute: AdminWebOrdersIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
