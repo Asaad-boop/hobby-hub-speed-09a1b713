@@ -7,6 +7,7 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
+  Star,
   Globe,
   Loader2,
   RefreshCw,
