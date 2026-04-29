@@ -13,6 +13,10 @@ export const Route = createFileRoute("/admin/inventory")({
   errorComponent: AdminErrorPanel,
 });
 
+function safeArray<T>(value: T[] | null | undefined): T[] {
+  return Array.isArray(value) ? value : [];
+}
+
 function InventoryPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
@@ -34,26 +38,28 @@ function InventoryPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const productRows = useMemo(() => safeArray(productsQ.data), [productsQ.data]);
+
   const products = useMemo(() => {
-    let list = productsQ.data ?? [];
+    let list = productRows;
     if (search) {
       const q = search.toLowerCase();
-      list = list.filter((p) => p.title.toLowerCase().includes(q));
+      list = list.filter((p) => (p.title ?? "").toLowerCase().includes(q));
     }
     if (filter === "low") list = list.filter((p) => p.stock > 0 && p.stock <= 5);
     if (filter === "out") list = list.filter((p) => p.stock === 0);
     return list;
-  }, [productsQ.data, search, filter]);
+  }, [productRows, search, filter]);
 
   const stats = useMemo(() => {
-    const list = productsQ.data ?? [];
+    const list = productRows;
     return {
       total: list.length,
       out: list.filter((p) => p.stock === 0).length,
       low: list.filter((p) => p.stock > 0 && p.stock <= 5).length,
       value: list.reduce((s, p) => s + Number(p.price) * p.stock, 0),
     };
-  }, [productsQ.data]);
+  }, [productRows]);
 
   const handleAdjust = (id: string, delta: number) => {
     const reason = delta > 0 ? "restock" : "manual_adjustment";
