@@ -775,7 +775,220 @@ function WebOrdersPage() {
           </Button>
         </div>
       </div>
+
+      <OrderDetailModal order={openOrder} onClose={() => setOpenOrder(null)} />
     </div>
+  );
+}
+
+const fmtBDT = (n: number | null | undefined) =>
+  typeof n === "number" ? `৳${n.toLocaleString("en-BD")}` : "—";
+
+const fmtFullDate = (iso: string | null | undefined) => {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+function StatusPill({ label, tone = "slate" }: { label: string; tone?: string }) {
+  const tones: Record<string, string> = {
+    slate: "bg-slate-100 text-slate-700 border-slate-200",
+    green: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    amber: "bg-amber-50 text-amber-700 border-amber-200",
+    rose: "bg-rose-50 text-rose-700 border-rose-200",
+    blue: "bg-blue-50 text-blue-700 border-blue-200",
+  };
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${tones[tone] ?? tones.slate}`}>
+      {label}
+    </span>
+  );
+}
+
+function statusTone(s: string): string {
+  if (["delivered", "partial_delivered", "complete"].includes(s)) return "green";
+  if (["cancelled", "fake", "returned"].includes(s)) return "rose";
+  if (["shipped", "in_transit"].includes(s)) return "blue";
+  if (["packed", "ready_to_ship", "courier_entry", "packaging", "ready_to_pack"].includes(s)) return "amber";
+  return "slate";
+}
+
+function Section({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-4">
+      <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
+        <span className="text-muted-foreground">{icon}</span>
+        {title}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex justify-between gap-3 py-1 text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="text-right font-medium text-foreground">{value ?? "—"}</span>
+    </div>
+  );
+}
+
+function OrderDetailModal({ order, onClose }: { order: OrderRow | null; onClose: () => void }) {
+  if (!order) return null;
+  const phone = order.shipping_phone || order.guest_phone || "";
+  const name = order.shipping_name || order.guest_name || "—";
+  const email = order.guest_email;
+  const fullAddress = [
+    order.shipping_address,
+    order.shipping_thana,
+    order.shipping_city,
+    order.shipping_district,
+  ].filter(Boolean).join(", ");
+  const tags = [...(order.tags || []), ...(order.order_tags || [])];
+
+  return (
+    <Dialog open={!!order} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex flex-wrap items-center gap-2">
+            <span>Order #{order.id.slice(0, 8)}</span>
+            <StatusPill label={order.status.replace(/_/g, " ")} tone={statusTone(order.status)} />
+            {order.confirmation_status && (
+              <StatusPill label={`Confirm: ${order.confirmation_status}`} tone="slate" />
+            )}
+            {order.web_status && <StatusPill label={order.web_status} tone="blue" />}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <Section icon={<User className="h-4 w-4" />} title="Customer">
+            <Row label="Name" value={name} />
+            <Row label="Phone" value={phone ? (
+              <span className="flex items-center justify-end gap-2">
+                {phone}
+                <a href={`tel:${phone}`} className="text-emerald-600"><Phone className="h-3.5 w-3.5" /></a>
+                <a href={`https://wa.me/88${phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="text-green-600">
+                  <MessageCircle className="h-3.5 w-3.5" />
+                </a>
+              </span>
+            ) : "—"} />
+            {order.alternate_phone && <Row label="Alt phone" value={order.alternate_phone} />}
+            {email && <Row label="Email" value={email} />}
+            <Row label="Type" value={order.is_guest_order ? "Guest" : "Registered"} />
+          </Section>
+
+          <Section icon={<MapPin className="h-4 w-4" />} title="Shipping address">
+            <div className="text-sm">{fullAddress || "—"}</div>
+          </Section>
+
+          <Section icon={<Package className="h-4 w-4" />} title={`Items (${order.order_items?.length ?? 0})`}>
+            <div className="space-y-2">
+              {(order.order_items ?? []).map((it, i) => (
+                <div key={i} className="flex items-center gap-3 rounded-md border border-border/60 p-2">
+                  <img
+                    src={it.image || "https://picsum.photos/seed/p/64"}
+                    alt={it.name}
+                    className="h-12 w-12 rounded-md border object-cover"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="line-clamp-2 text-xs font-medium">{it.name}</div>
+                    {it.variant_label && (
+                      <div className="text-[11px] text-muted-foreground">{it.variant_label}</div>
+                    )}
+                    <div className="text-[11px] text-muted-foreground">
+                      Qty: {it.quantity} × {fmtBDT(it.unit_price ?? it.price)}
+                    </div>
+                  </div>
+                  <div className="text-sm font-semibold">
+                    {fmtBDT(it.line_total ?? (it.price ?? 0) * it.quantity)}
+                  </div>
+                </div>
+              ))}
+              {(!order.order_items || order.order_items.length === 0) && (
+                <div className="text-xs text-muted-foreground">No items</div>
+              )}
+            </div>
+          </Section>
+
+          <Section icon={<CreditCard className="h-4 w-4" />} title="Payment & totals">
+            <Row label="Subtotal" value={fmtBDT(order.subtotal)} />
+            <Row label="Shipping fee" value={fmtBDT(order.shipping_fee)} />
+            {order.discount_amount ? <Row label="Discount" value={`- ${fmtBDT(order.discount_amount)}`} /> : null}
+            {order.coupon_code && <Row label="Coupon" value={order.coupon_code} />}
+            {order.advance_amount ? <Row label="Advance paid" value={fmtBDT(order.advance_amount)} /> : null}
+            <div className="my-1 border-t border-border" />
+            <Row label="Total" value={<span className="text-base font-bold">{fmtBDT(order.total)}</span>} />
+            <Row label="Payment method" value={order.payment_method ?? "COD"} />
+          </Section>
+
+          <Section icon={<Package className="h-4 w-4" />} title="Delivery & courier">
+            <Row label="Delivery method" value={order.delivery_method} />
+            <Row label="Courier" value={order.courier_name} />
+            <Row label="Tracking #" value={order.tracking_number} />
+          </Section>
+
+          <Section icon={<Calendar className="h-4 w-4" />} title="Activity">
+            <Row label="Created" value={fmtFullDate(order.created_at)} />
+            <Row label="Updated" value={fmtFullDate(order.updated_at)} />
+            <Row label="Source" value={order.source ?? order.source_website ?? "website"} />
+            <Row label="Auto-call" value={order.auto_call_enabled ? "On" : "Off"} />
+            <Row label="Call status" value={order.call_status ?? "—"} />
+            <Row label="Call attempts" value={order.call_attempt_count ?? 0} />
+          </Section>
+
+          {(order.customer_note || order.latest_note || order.admin_notes || order.internal_note) && (
+            <Section icon={<FileText className="h-4 w-4" />} title="Notes">
+              {order.customer_note && (
+                <div className="mb-2">
+                  <div className="text-[11px] font-medium uppercase text-muted-foreground">Customer</div>
+                  <div className="text-sm">{order.customer_note}</div>
+                </div>
+              )}
+              {order.latest_note && (
+                <div className="mb-2">
+                  <div className="text-[11px] font-medium uppercase text-muted-foreground">Latest</div>
+                  <div className="text-sm">{order.latest_note}</div>
+                </div>
+              )}
+              {order.admin_notes && (
+                <div className="mb-2">
+                  <div className="text-[11px] font-medium uppercase text-muted-foreground">Admin</div>
+                  <div className="text-sm whitespace-pre-wrap">{order.admin_notes}</div>
+                </div>
+              )}
+              {order.internal_note && (
+                <div>
+                  <div className="text-[11px] font-medium uppercase text-muted-foreground">Internal</div>
+                  <div className="text-sm whitespace-pre-wrap">{order.internal_note}</div>
+                </div>
+              )}
+            </Section>
+          )}
+
+          {tags.length > 0 && (
+            <Section icon={<Tag className="h-4 w-4" />} title="Tags">
+              <div className="flex flex-wrap gap-1">
+                {tags.map((t) => (
+                  <Badge key={t} variant="secondary" className="rounded-full text-[10px]">{t}</Badge>
+                ))}
+              </div>
+            </Section>
+          )}
+        </div>
+
+        <div className="mt-3 flex justify-end">
+          <Button variant="outline" size="sm" onClick={onClose}>
+            <X className="h-3.5 w-3.5 mr-1" /> Close
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
