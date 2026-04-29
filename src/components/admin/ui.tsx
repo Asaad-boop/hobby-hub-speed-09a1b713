@@ -62,13 +62,14 @@ export function Card({ className = "", ...props }: DivProps) {
 }
 
 type BtnProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "ghost" | "danger" | "outline";
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "outline" | "default";
   size?: "sm" | "md";
 };
 export function Btn({ variant = "secondary", size = "md", className = "", ...props }: BtnProps) {
   const sz = size === "sm" ? "h-8 px-2.5 text-xs" : "h-9 px-3 text-sm";
   const variants: Record<string, string> = {
     primary: "bg-[#1D9E75] text-white hover:bg-[#178A65]",
+    default: "bg-[#1D9E75] text-white hover:bg-[#178A65]",
     secondary: "border border-gray-200 bg-white text-foreground hover:bg-gray-50",
     ghost: "text-foreground hover:bg-gray-100",
     danger: "bg-rose-600 text-white hover:bg-rose-700",
@@ -119,14 +120,16 @@ Select.displayName = "Select";
 
 export function Badge({
   children, tone = "gray", className = "",
-}: { children: React.ReactNode; tone?: "gray" | "green" | "amber" | "red" | "blue" | "teal"; className?: string }) {
+}: { children: React.ReactNode; tone?: "gray" | "green" | "amber" | "red" | "blue" | "teal" | "purple" | "yellow"; className?: string }) {
   const tones: Record<string, string> = {
     gray: "bg-gray-100 text-gray-700 ring-gray-200",
     green: "bg-emerald-50 text-emerald-700 ring-emerald-200",
     amber: "bg-amber-50 text-amber-700 ring-amber-200",
+    yellow: "bg-amber-50 text-amber-700 ring-amber-200",
     red: "bg-rose-50 text-rose-700 ring-rose-200",
     blue: "bg-blue-50 text-blue-700 ring-blue-200",
     teal: "bg-teal-50 text-teal-700 ring-teal-200",
+    purple: "bg-violet-50 text-violet-700 ring-violet-200",
   };
   return (
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${tones[tone]} ${className}`}>
