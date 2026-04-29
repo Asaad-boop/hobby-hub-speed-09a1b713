@@ -39,6 +39,7 @@ const GROUPS: NavGroup[] = [
   {
     label: "Sales",
     items: [
+      { title: "Orders", url: "/admin/orders", icon: ShoppingCart },
       { title: "Web Orders", url: "/admin/web-orders", icon: PhoneCall },
       { title: "Payments", url: "/admin/payments", icon: CreditCard },
     ],
