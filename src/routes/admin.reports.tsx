@@ -82,13 +82,16 @@ function ReportsPage() {
                 <div className="mb-3 text-sm font-semibold">By status</div>
                 <table className="w-full text-sm">
                   <tbody className="divide-y divide-border">
-                    {Object.entries(q.data.byStatus).map(([k, v]) => (
-                      <tr key={k}>
-                        <td className="py-2 capitalize">{k}</td>
-                        <td className="py-2 text-right text-muted-foreground">{v.count}</td>
-                        <td className="py-2 text-right font-semibold">{fmtBDT(v.revenue)}</td>
-                      </tr>
-                    ))}
+                    {Object.entries(q.data.byStatus).map(([k, v]) => {
+                      const row = (v ?? {}) as { count?: number; revenue?: number };
+                      return (
+                        <tr key={k}>
+                          <td className="py-2 capitalize">{k}</td>
+                          <td className="py-2 text-right text-muted-foreground">{row.count ?? 0}</td>
+                          <td className="py-2 text-right font-semibold">{fmtBDT(Number(row.revenue) || 0)}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </Card>
