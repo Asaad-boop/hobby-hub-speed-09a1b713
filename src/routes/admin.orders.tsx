@@ -788,6 +788,8 @@ function OrderDetailModalBody({
   const subtotal = Number(o.subtotal ?? 0);
   const liveTotal =
     subtotal + (Number(form.shipping_fee) || 0) - (Number(form.discount_amount) || 0);
+  const detailItems = safeArray(detail.data.items);
+  const detailLogs = safeArray(detail.data.logs);
 
   return (
     <div className="flex max-h-[94vh] flex-col overflow-hidden rounded-2xl bg-white">
@@ -876,9 +878,9 @@ function OrderDetailModalBody({
 
         {/* ITEMS */}
         <div className="mt-3">
-          <PanelCard title={`Items (${(detail.data.items ?? []).length})`} icon={<Package className="h-3 w-3" />}>
+          <PanelCard title={`Items (${detailItems.length})`} icon={<Package className="h-3 w-3" />}>
             <ul className="-mx-1 divide-y divide-border/70 text-xs">
-              {(detail.data.items ?? []).map((it) => (
+              {detailItems.map((it) => (
                 <li key={it.id} className="flex items-center gap-3 px-1 py-2">
                   {it.image ? (
                     <img src={it.image} alt="" className="h-9 w-9 rounded-md border border-border object-cover" />
@@ -928,11 +930,11 @@ function OrderDetailModalBody({
 
           {/* ACTIVITY */}
           <PanelCard title="Activity" icon={<FileText className="h-3 w-3" />}>
-            {(detail.data.logs ?? []).length === 0 ? (
+            {detailLogs.length === 0 ? (
               <div className="py-3 text-center text-xs text-muted-foreground">No activity yet</div>
             ) : (
               <ul className="space-y-2 text-xs">
-                {(detail.data.logs ?? []).slice(0, 6).map((l) => (
+                {detailLogs.slice(0, 6).map((l) => (
                   <li key={l.id} className="border-l-2 border-[#1D9E75]/40 pl-2">
                     <div className="font-medium capitalize">{l.action.replace(/_/g, " ")}</div>
                     {l.note && <div className="text-muted-foreground">{l.note}</div>}
