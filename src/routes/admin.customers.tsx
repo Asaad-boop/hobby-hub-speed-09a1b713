@@ -1,84 +1,135 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { PageHeader, Card, Loading, Empty, Badge, Input, fmtBDT, fmtDate } from "@/components/admin/ui";
+import { Search, Flag } from "lucide-react";
+import { listCustomers } from "@/server/oms.functions";
+import { Card, Loading, MetricCard, PageHeader, Empty } from "@/components/admin/ui";
+import { fmtBDT, fmtDateShort } from "@/lib/oms";
 
 export const Route = createFileRoute("/admin/customers")({
   component: CustomersPage,
 });
 
-type Profile = {
-  id: string; display_name: string | null; customer_segment: string | null;
-  total_orders: number | null; total_spent: number | null;
-  is_flagged: boolean; flag_reason: string | null;
-  fake_order_count: number; cancellation_count: number;
-  created_at: string;
-};
-
 function CustomersPage() {
   const [search, setSearch] = useState("");
-  const { data, isLoading } = useQuery({
-    queryKey: ["admin", "customers"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(500);
-      if (error) throw error;
-      return data as Profile[];
-    },
+  const q = useQuery({
+    queryKey: ["oms", "customers"],
+    queryFn: () => listCustomers(),
   });
-  const filtered = (data ?? []).filter((p) => !search || (p.display_name ?? "").toLowerCase().includes(search.toLowerCase()));
+
+  const customers = useMemo(() => {
+    const list = q.data ?? [];
+    if (!search) return list;
+    const term = search.toLowerCase();
+    return list.filter((c) => (c.display_name ?? "").toLowerCase().includes(term));
+  }, [q.data, search]);
+
+  const stats = useMemo(() => {
+    const list = q.data ?? [];
+    return {
+      total: list.length,
+      flagged: list.filter((c) => c.is_flagged).length,
+      vip: list.filter((c) => c.customer_segment === "vip").length,
+      revenue: list.reduce((s, c) => s + Number(c.total_spent ?? 0), 0),
+    };
+  }, [q.data]);
 
   return (
-    <div>
-      <PageHeader title="Customers" description={`${data?.length ?? 0} profiles`}
-        actions={
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search…" className="pl-7 w-64" />
+    <div className="flex h-full flex-col overflow-hidden">
+      <PageHeader title="Customers" subtitle={`${stats.total} registered`} />
+      <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <MetricCard label="Total Customers" value={stats.total} />
+          <MetricCard label="VIP" value={stats.vip} hint="6+ orders" accent />
+          <MetricCard
+            label="Flagged"
+            value={stats.flagged}
+            hint="Risk customers"
+            icon={<Flag className="h-4 w-4" />}
+          />
+          <MetricCard label="Lifetime Value" value={fmtBDT(stats.revenue)} />
+        </div>
+
+        <Card className="mt-6">
+          <div className="border-b border-border p-3">
+            <div className="relative max-w-xs">
+              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name…"
+                className="h-8 w-full rounded-md border border-border bg-white pl-8 pr-3 text-sm outline-none focus:border-[#1D9E75]"
+              />
+            </div>
           </div>
-        }
-      />
-      <Card>
-        {isLoading ? <Loading /> : filtered.length === 0 ? <Empty title="No customers" /> : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-xs text-gray-500">
-                <tr>
-                  <th className="px-4 py-2 text-left font-medium">Name</th>
-                  <th className="px-4 py-2 text-left font-medium">Segment</th>
-                  <th className="px-4 py-2 text-left font-medium">Orders</th>
-                  <th className="px-4 py-2 text-left font-medium">Spent</th>
-                  <th className="px-4 py-2 text-left font-medium">Cancelled / Fake</th>
-                  <th className="px-4 py-2 text-left font-medium">Joined</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((p) => (
-                  <tr key={p.id} className="border-t border-gray-100 hover:bg-gray-50">
-                    <td className="px-4 py-2.5">
-                      <div className="font-medium flex items-center gap-2">
-                        {p.display_name ?? "—"}
-                        {p.is_flagged && <Badge tone="red">Flagged</Badge>}
-                      </div>
-                      {p.flag_reason && <div className="text-[11px] text-red-500">{p.flag_reason}</div>}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <Badge tone={p.customer_segment === "vip" ? "purple" : p.customer_segment === "regular" ? "blue" : "gray"}>
-                        {p.customer_segment ?? "new"}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-2.5">{p.total_orders ?? 0}</td>
-                    <td className="px-4 py-2.5 font-medium">{fmtBDT(p.total_spent)}</td>
-                    <td className="px-4 py-2.5 text-xs">{p.cancellation_count} / {p.fake_order_count}</td>
-                    <td className="px-4 py-2.5 text-xs text-gray-500">{fmtDate(p.created_at)}</td>
+          {q.isLoading ? (
+            <Loading />
+          ) : customers.length === 0 ? (
+            <Empty label="No customers" />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="px-3 py-2.5 text-left">Name</th>
+                    <th className="px-3 py-2.5 text-center">Segment</th>
+                    <th className="px-3 py-2.5 text-right">Orders</th>
+                    <th className="px-3 py-2.5 text-right">Spent</th>
+                    <th className="px-3 py-2.5 text-center">Cancellations</th>
+                    <th className="px-3 py-2.5 text-center">Fake Orders</th>
+                    <th className="px-3 py-2.5 text-left">Joined</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {customers.map((c) => (
+                    <tr key={c.id} className="hover:bg-muted/40">
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{c.display_name ?? "—"}</span>
+                          {c.is_flagged && (
+                            <span
+                              title={c.flag_reason ?? "Flagged"}
+                              className="inline-flex items-center gap-0.5 rounded-full bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700"
+                            >
+                              <Flag className="h-2.5 w-2.5" /> Flag
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        <span
+                          className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                            c.customer_segment === "vip"
+                              ? "bg-violet-100 text-violet-700"
+                              : c.customer_segment === "regular"
+                                ? "bg-sky-100 text-sky-700"
+                                : "bg-zinc-100 text-zinc-700"
+                          }`}
+                        >
+                          {c.customer_segment ?? "new"}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 text-right font-medium">{c.total_orders ?? 0}</td>
+                      <td className="px-3 py-2 text-right font-semibold">
+                        {fmtBDT(Number(c.total_spent ?? 0))}
+                      </td>
+                      <td className="px-3 py-2 text-center text-muted-foreground">
+                        {c.cancellation_count}
+                      </td>
+                      <td className="px-3 py-2 text-center text-muted-foreground">
+                        {c.fake_order_count}
+                      </td>
+                      <td className="px-3 py-2 text-xs text-muted-foreground">
+                        {fmtDateShort(c.created_at)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }

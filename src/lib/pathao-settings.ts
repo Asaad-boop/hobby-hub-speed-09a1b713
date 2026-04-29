@@ -1,52 +1,57 @@
-// Pathao courier settings — persisted in localStorage (client-side).
-// These get sent to the server function which proxies the actual Pathao API
-// (avoids browser CORS + keeps the request body clean).
+// Pathao credentials helper — stored in localStorage (per-user device).
+// Settings page er madhome user fill korbe.
 
-export type PathaoSettings = {
-  baseUrl: string;       // https://api-hermes.pathao.com  OR  https://courier-api-sandbox.pathao.com
+export type PathaoCreds = {
+  baseUrl: string;
   clientId: string;
   clientSecret: string;
   username: string;
   password: string;
-  storeId: string;       // numeric store id from Pathao merchant panel
-  // Default sender info (city/zone/area IDs from Pathao geo APIs)
+  storeId: string;
   senderName: string;
   senderPhone: string;
-  recipientCityId: string;   // default city id (e.g. "1" Dhaka)
-  recipientZoneId: string;   // default zone id
+  recipientCityId: string;
+  recipientZoneId: string;
+  environment: "sandbox" | "production";
 };
 
-const KEY = "brandoms.pathao.settings.v1";
+const KEY = "brand_oms_pathao_creds_v1";
 
-export const DEFAULT_PATHAO_SETTINGS: PathaoSettings = {
+const DEFAULTS: PathaoCreds = {
   baseUrl: "https://courier-api-sandbox.pathao.com",
   clientId: "",
   clientSecret: "",
   username: "",
   password: "",
   storeId: "",
-  senderName: "Florencia",
-  senderPhone: "01700000000",
-  recipientCityId: "1",
-  recipientZoneId: "1",
+  senderName: "",
+  senderPhone: "",
+  recipientCityId: "1", // Dhaka
+  recipientZoneId: "298", // Mirpur (sandbox default — user override korbe)
+  environment: "sandbox",
 };
 
-export function loadPathaoSettings(): PathaoSettings {
-  if (typeof window === "undefined") return DEFAULT_PATHAO_SETTINGS;
+export function loadPathaoCreds(): PathaoCreds {
+  if (typeof window === "undefined") return DEFAULTS;
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (!raw) return DEFAULT_PATHAO_SETTINGS;
-    return { ...DEFAULT_PATHAO_SETTINGS, ...JSON.parse(raw) };
+    if (!raw) return DEFAULTS;
+    return { ...DEFAULTS, ...(JSON.parse(raw) as Partial<PathaoCreds>) };
   } catch {
-    return DEFAULT_PATHAO_SETTINGS;
+    return DEFAULTS;
   }
 }
 
-export function savePathaoSettings(s: PathaoSettings) {
+export function savePathaoCreds(creds: PathaoCreds) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(KEY, JSON.stringify(s));
+  // Auto-set baseUrl from environment
+  const baseUrl =
+    creds.environment === "production"
+      ? "https://api-hermes.pathao.com"
+      : "https://courier-api-sandbox.pathao.com";
+  window.localStorage.setItem(KEY, JSON.stringify({ ...creds, baseUrl }));
 }
 
-export function isPathaoConfigured(s: PathaoSettings): boolean {
-  return Boolean(s.clientId && s.clientSecret && s.username && s.password && s.storeId);
+export function isPathaoConfigured(c: PathaoCreds): boolean {
+  return !!(c.clientId && c.clientSecret && c.username && c.password && c.storeId);
 }
