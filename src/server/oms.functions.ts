@@ -157,7 +157,8 @@ export const getOrderDetail = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid() }).parse(input),
   )
   .handler(async ({ context, data }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     const [orderRes, itemsRes, logsRes] = await Promise.all([
       supabase.from("orders").select("*").eq("id", data.id).single(),
       supabase.from("order_items").select("*").eq("order_id", data.id),
@@ -185,7 +186,8 @@ export const updateOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => updateOrderInput.parse(input))
   .handler(async ({ context, data }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     const { error } = await supabase
       .from("orders")
       .update(data.patch as never)
@@ -202,7 +204,8 @@ export const bulkUpdateOrders = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => bulkUpdateInput.parse(input))
   .handler(async ({ context, data }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     const { error } = await supabase
       .from("orders")
       .update(data.patch as never)
