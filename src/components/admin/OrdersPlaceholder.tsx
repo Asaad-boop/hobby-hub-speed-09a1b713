@@ -14,10 +14,11 @@ import {
   Truck,
   PhoneCall,
   MessageCircle,
+  ArrowRight,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOpsStore, type DataSource } from "@/lib/ops-store";
-import type { MockOrder, MockOrderItem } from "@/lib/mock-data";
+import { nextOrderStatus, type MockOrder, type MockOrderItem, type OrderStatus } from "@/lib/mock-data";
 
 const TITLES: Record<string, string> = {
   dashboard: "Dashboard",
@@ -51,10 +52,11 @@ type UIOrder = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
+  pending: "bg-blue-50 text-blue-700 ring-blue-200",
   new: "bg-blue-50 text-blue-700 ring-blue-200",
   confirmed: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  packaging: "bg-amber-50 text-amber-700 ring-amber-200",
   packed: "bg-amber-50 text-amber-700 ring-amber-200",
+  packaging: "bg-amber-50 text-amber-700 ring-amber-200",
   ready_to_ship: "bg-indigo-50 text-indigo-700 ring-indigo-200",
   shipped: "bg-indigo-50 text-indigo-700 ring-indigo-200",
   delivered: "bg-[#1D9E75]/10 text-[#1D9E75] ring-[#1D9E75]/20",
@@ -212,18 +214,26 @@ function OrdersWorkspace() {
 
   const selected = orders.find((o) => o.id === selectedId) ?? null;
 
-  const handleConfirm = () => {
+  const advance = (target?: OrderStatus) => {
     if (!selected) return;
-    if (dataSource === "mock") updateOrderStatus(selected.id, "confirmed");
+    const next = target ?? nextOrderStatus(selected.status as OrderStatus);
+    if (!next) return;
+    if (dataSource === "mock") updateOrderStatus(selected.id, next);
   };
+  const handleAdvance = () => advance();
+  const handleConfirm = () => advance("confirmed");
+  const handleShip = () => advance("shipped");
   const handleReject = () => {
     if (!selected) return;
     if (dataSource === "mock") updateOrderStatus(selected.id, "cancelled");
   };
-  const handleShip = () => {
-    if (!selected) return;
-    if (dataSource === "mock") updateOrderStatus(selected.id, "shipped");
-  };
+
+  const nextLabel = selected
+    ? (() => {
+        const n = nextOrderStatus(selected.status as OrderStatus);
+        return n ? n[0].toUpperCase() + n.slice(1) : null;
+      })()
+    : null;
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] flex-col">
@@ -348,24 +358,35 @@ function OrdersWorkspace() {
                   </button>
                   <button
                     onClick={handleReject}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-md bg-rose-50 px-3 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200 transition hover:bg-rose-100"
+                    disabled={selected.status === "cancelled" || selected.status === "delivered"}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-md bg-rose-50 px-3 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200 transition hover:bg-rose-100 disabled:opacity-50"
                   >
                     <XCircle className="h-4 w-4" />
-                    Reject
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirm}
+                    disabled={selected.status !== "pending"}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-foreground shadow-sm transition hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    Confirm
                   </button>
                   <button
                     onClick={handleShip}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-foreground shadow-sm transition hover:bg-gray-50"
+                    disabled={selected.status !== "packed"}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-foreground shadow-sm transition hover:bg-gray-50 disabled:opacity-50"
                   >
                     <Truck className="h-4 w-4" />
                     Ship
                   </button>
                   <button
-                    onClick={handleConfirm}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[#1D9E75] px-3.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#178A65]"
+                    onClick={handleAdvance}
+                    disabled={!nextLabel}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[#1D9E75] px-3.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#178A65] disabled:opacity-50"
                   >
-                    <CheckCircle2 className="h-4 w-4" />
-                    Confirm Order
+                    Mark as {nextLabel ?? "Done"}
+                    <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
               </div>

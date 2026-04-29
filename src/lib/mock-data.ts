@@ -2,14 +2,27 @@
 // Pure TypeScript — no network. Used by the Zustand store.
 
 export type OrderStatus =
-  | "new"
+  | "pending"
   | "confirmed"
-  | "packaging"
-  | "ready_to_ship"
+  | "packed"
   | "shipped"
   | "delivered"
-  | "cancelled"
-  | "returned";
+  | "cancelled";
+
+// Canonical pipeline order
+export const ORDER_PIPELINE: OrderStatus[] = [
+  "pending",
+  "confirmed",
+  "packed",
+  "shipped",
+  "delivered",
+];
+
+export function nextOrderStatus(s: OrderStatus): OrderStatus | null {
+  if (s === "cancelled" || s === "delivered") return null;
+  const i = ORDER_PIPELINE.indexOf(s);
+  return i >= 0 && i < ORDER_PIPELINE.length - 1 ? ORDER_PIPELINE[i + 1] : null;
+}
 
 export type Courier = "Pathao" | "Steadfast" | "RedX" | "Paperfly" | "eCourier";
 
@@ -90,15 +103,13 @@ export const MOCK_CUSTOMERS: MockCustomer[] = [
 
 // ---------- Helpers ----------
 const STATUSES: OrderStatus[] = [
-  "new", "new", "new",
-  "confirmed", "confirmed",
-  "packaging",
-  "ready_to_ship",
+  "pending", "pending", "pending", "pending",
+  "confirmed", "confirmed", "confirmed",
+  "packed", "packed",
   "shipped", "shipped",
-  "delivered", "delivered", "delivered",
+  "delivered", "delivered",
   "cancelled",
-  "returned",
-  "new",
+  "pending",
 ];
 const COURIERS: Courier[] = ["Pathao", "Steadfast", "RedX", "Paperfly", "eCourier"];
 const PAY: MockOrder["paymentMethod"][] = ["COD", "COD", "COD", "bKash", "Nagad", "Card"];
