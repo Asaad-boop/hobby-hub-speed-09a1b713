@@ -478,26 +478,151 @@ function QuickCourierModal({ order, onClose, onAssign }: { order: Order; onClose
   );
 }
 
-function BulkCourierModal({ orders, onClose, onAssign }: { orders: Order[]; onClose: () => void; onAssign: (c: CourierName) => void }) {
+type PathaoResult = { orderId: string } & (
+  | { ok: true; trackingNumber: string }
+  | { ok: false; error: string }
+);
+
+function BulkCourierModal({
+  orders, onClose, onAssignMock, onPathaoResult, onOpenSettings,
+}: {
+  orders: Order[];
+  onClose: () => void;
+  onAssignMock: (c: CourierName) => void;
+  onPathaoResult: (results: PathaoResult[]) => void;
+  onOpenSettings: () => void;
+}) {
   const [c, setC] = useState<CourierName>("Pathao");
+  const [submitting, setSubmitting] = useState(false);
+  const [results, setResults] = useState<PathaoResult[] | null>(null);
+  const settings = loadPathaoSettings();
+  const pathaoReady = isPathaoConfigured(settings);
+
+  const submitPathao = async () => {
+    setSubmitting(true);
+    setResults(null);
+    const out: PathaoResult[] = [];
+    for (const o of orders) {
+      try {
+        const res = await createPathaoConsignment({
+          data: {
+            creds: settings,
+            order: {
+              merchantOrderId: o.id,
+              recipientName: o.customerName,
+              recipientPhone: o.phone,
+              recipientAddress: `${o.address}, ${o.district}`,
+              amountToCollect: o.paymentMethod === "COD" ? Math.round(o.total) : 0,
+              itemDescription: o.items.map((i) => `${i.name} x${i.quantity}`).join(", ").slice(0, 200),
+              itemQuantity: o.items.reduce((s, i) => s + i.quantity, 0),
+              itemWeight: 0.5,
+            },
+          },
+        });
+        if (res.ok) out.push({ orderId: o.id, ok: true, trackingNumber: res.trackingNumber });
+        else out.push({ orderId: o.id, ok: false, error: res.error });
+      } catch (e: any) {
+        out.push({ orderId: o.id, ok: false, error: e?.message || "Network error" });
+      }
+      setResults([...out]);
+    }
+    setSubmitting(false);
+    onPathaoResult(out);
+  };
+
+  const handleSubmit = () => {
+    if (c === "Pathao") {
+      if (!pathaoReady) {
+        toast.error("Pathao API not configured", { description: "Open Settings to add credentials." });
+        return;
+      }
+      void submitPathao();
+    } else {
+      onAssignMock(c);
+    }
+  };
+
+  const primaryLabel =
+    c === "Pathao"
+      ? (submitting ? "Creating consignments…" : `Send ${orders.length} to Pathao`)
+      : `Assign to ${c}`;
+
   return (
-    <Modal open onClose={onClose} title={`1-Click Courier Entry · ${orders.length} pending orders`}
-      footer={<div className="flex justify-end gap-2"><Btn onClick={onClose}>Cancel</Btn><Btn variant="primary" onClick={() => onAssign(c)}>Assign to {c}</Btn></div>}>
+    <Modal open onClose={submitting ? () => {} : onClose} title={`1-Click Courier Entry · ${orders.length} pending orders`}
+      footer={
+        <div className="flex justify-end gap-2">
+          <Btn onClick={onClose} disabled={submitting}>Close</Btn>
+          <Btn variant="primary" onClick={handleSubmit} disabled={submitting || (c === "Pathao" && !pathaoReady)}>
+            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Truck className="h-4 w-4" />}
+            {primaryLabel}
+          </Btn>
+        </div>
+      }>
       <div className="mb-3 grid grid-cols-2 gap-2">
         {COURIERS.map((opt) => (
-          <button key={opt.name} type="button" onClick={() => setC(opt.name)}
-            className={`rounded-md border px-3 py-2 text-left text-sm ${c === opt.name ? "border-[#1D9E75] bg-[#1D9E75]/5 ring-2 ring-[#1D9E75]/20" : "border-gray-200 hover:bg-gray-50"}`}>
-            <div className="font-medium">{opt.name}</div>
+          <button key={opt.name} type="button" onClick={() => setC(opt.name)} disabled={submitting}
+            className={`rounded-md border px-3 py-2 text-left text-sm transition ${c === opt.name ? "border-[#1D9E75] bg-[#1D9E75]/5 ring-2 ring-[#1D9E75]/20" : "border-gray-200 hover:bg-gray-50"} ${submitting ? "opacity-60" : ""}`}>
+            <div className="flex items-center justify-between">
+              <div className="font-medium">{opt.name}</div>
+              {opt.name === "Pathao" && (
+                <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${pathaoReady ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+                  {pathaoReady ? "API LIVE" : "NOT SET"}
+                </span>
+              )}
+            </div>
             <div className="text-[11px] text-muted-foreground">{opt.coverage} · {formatBDT(opt.rate)}</div>
           </button>
         ))}
       </div>
-      <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-xs">
-        <div className="mb-1 font-semibold">Will assign tracking + ship status to:</div>
-        <ul className="list-disc pl-4 text-muted-foreground">
-          {orders.map((o) => <li key={o.id}>{o.id} · {o.customerName} · {o.phone}</li>)}
-        </ul>
-      </div>
+
+      {c === "Pathao" && !pathaoReady && (
+        <div className="mb-3 flex items-center justify-between rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+          <span>Pathao credentials missing. Configure them in Settings before sending consignments.</span>
+          <Btn size="sm" onClick={onOpenSettings}><SettingsIcon className="h-3.5 w-3.5" />Open Settings</Btn>
+        </div>
+      )}
+
+      {!results && (
+        <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-xs">
+          <div className="mb-1 font-semibold">
+            {c === "Pathao" ? "Will create real Pathao consignments for:" : "Will assign tracking + ship status to:"}
+          </div>
+          <ul className="list-disc pl-4 text-muted-foreground">
+            {orders.map((o) => <li key={o.id}>{o.id} · {o.customerName} · {o.phone} · {formatBDT(o.total)}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {results && (
+        <div className="space-y-1.5">
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pathao response</div>
+          {orders.map((o) => {
+            const r = results.find((x) => x.orderId === o.id);
+            return (
+              <div key={o.id} className={`flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm ${
+                !r ? "border-gray-200 bg-gray-50" :
+                r.ok ? "border-emerald-200 bg-emerald-50" : "border-rose-200 bg-rose-50"
+              }`}>
+                <div className="flex items-center gap-2 min-w-0">
+                  {!r ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> :
+                    r.ok ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> :
+                    <XCircle className="h-4 w-4 text-rose-600" />}
+                  <span className="font-mono text-xs">{o.id}</span>
+                  <span className="truncate text-muted-foreground">{o.customerName}</span>
+                </div>
+                <div className="text-right text-xs">
+                  {!r && <span className="text-muted-foreground">Sending…</span>}
+                  {r?.ok && <span className="font-mono font-semibold text-emerald-700">{r.trackingNumber}</span>}
+                  {r && !r.ok && <span className="text-rose-700" title={r.error}>{r.error.slice(0, 60)}</span>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Modal>
+  );
+}
     </Modal>
   );
 }
