@@ -608,6 +608,45 @@ export type Database = {
         }
         Relationships: []
       }
+      fraud_checks: {
+        Row: {
+          cancelled_orders: number
+          checked_at: string
+          expires_at: string
+          id: string
+          phone: string
+          raw_response: Json | null
+          risk_level: Database["public"]["Enums"]["fraud_risk_level"]
+          success_rate: number
+          successful_orders: number
+          total_orders: number
+        }
+        Insert: {
+          cancelled_orders?: number
+          checked_at?: string
+          expires_at?: string
+          id?: string
+          phone: string
+          raw_response?: Json | null
+          risk_level?: Database["public"]["Enums"]["fraud_risk_level"]
+          success_rate?: number
+          successful_orders?: number
+          total_orders?: number
+        }
+        Update: {
+          cancelled_orders?: number
+          checked_at?: string
+          expires_at?: string
+          id?: string
+          phone?: string
+          raw_response?: Json | null
+          risk_level?: Database["public"]["Enums"]["fraud_risk_level"]
+          success_rate?: number
+          successful_orders?: number
+          total_orders?: number
+        }
+        Relationships: []
+      }
       homepage_versions: {
         Row: {
           created_at: string
@@ -704,8 +743,42 @@ export type Database = {
         }
         Relationships: []
       }
+      low_stock_alerts: {
+        Row: {
+          created_at: string
+          current_stock: number
+          id: string
+          is_resolved: boolean
+          product_id: string
+          resolved_at: string | null
+          threshold: number
+          variant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_stock: number
+          id?: string
+          is_resolved?: boolean
+          product_id: string
+          resolved_at?: string | null
+          threshold: number
+          variant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_stock?: number
+          id?: string
+          is_resolved?: boolean
+          product_id?: string
+          resolved_at?: string | null
+          threshold?: number
+          variant_id?: string | null
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
+          cost_price: number | null
           created_at: string
           discount_amount: number
           discount_type: Database["public"]["Enums"]["discount_type"] | null
@@ -717,12 +790,14 @@ export type Database = {
           price: number
           product_id: string
           quantity: number
+          tax_amount: number
           unit_price: number | null
           user_id: string | null
           variant_id: string | null
           variant_label: string | null
         }
         Insert: {
+          cost_price?: number | null
           created_at?: string
           discount_amount?: number
           discount_type?: Database["public"]["Enums"]["discount_type"] | null
@@ -734,12 +809,14 @@ export type Database = {
           price: number
           product_id: string
           quantity?: number
+          tax_amount?: number
           unit_price?: number | null
           user_id?: string | null
           variant_id?: string | null
           variant_label?: string | null
         }
         Update: {
+          cost_price?: number | null
           created_at?: string
           discount_amount?: number
           discount_type?: Database["public"]["Enums"]["discount_type"] | null
@@ -751,6 +828,7 @@ export type Database = {
           price?: number
           product_id?: string
           quantity?: number
+          tax_amount?: number
           unit_price?: number | null
           user_id?: string | null
           variant_id?: string | null
@@ -773,6 +851,69 @@ export type Database = {
           },
         ]
       }
+      order_notes: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_internal: boolean
+          order_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_internal?: boolean
+          order_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_internal?: boolean
+          order_id?: string
+        }
+        Relationships: []
+      }
+      order_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          metadata: Json | null
+          note: string | null
+          order_id: string
+          reason: string | null
+          to_status: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          metadata?: Json | null
+          note?: string | null
+          order_id: string
+          reason?: string | null
+          to_status: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          metadata?: Json | null
+          note?: string | null
+          order_id?: string
+          reason?: string | null
+          to_status?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           admin_notes: string | null
@@ -792,14 +933,17 @@ export type Database = {
           courier_assigned_at: string | null
           courier_name: string | null
           created_at: string
+          customer_ip: string | null
           customer_note: string | null
           delivered_at: string | null
           delivery_area_id: string | null
           delivery_city_id: string | null
           delivery_method: string | null
           delivery_zone_id: string | null
+          device_info: Json | null
           discount_amount: number
           duplicate_flag: boolean
+          expected_delivery_date: string | null
           guest_email: string | null
           guest_name: string | null
           guest_phone: string | null
@@ -820,7 +964,10 @@ export type Database = {
           packaged_by: string | null
           partial_amount: number | null
           payment_method: string | null
+          payment_status: Database["public"]["Enums"]["payment_status"]
           pipeline_log: Json
+          priority: Database["public"]["Enums"]["order_priority"]
+          refund_amount: number
           rejection_reason: string | null
           return_note: string | null
           return_type: string | null
@@ -869,14 +1016,17 @@ export type Database = {
           courier_assigned_at?: string | null
           courier_name?: string | null
           created_at?: string
+          customer_ip?: string | null
           customer_note?: string | null
           delivered_at?: string | null
           delivery_area_id?: string | null
           delivery_city_id?: string | null
           delivery_method?: string | null
           delivery_zone_id?: string | null
+          device_info?: Json | null
           discount_amount?: number
           duplicate_flag?: boolean
+          expected_delivery_date?: string | null
           guest_email?: string | null
           guest_name?: string | null
           guest_phone?: string | null
@@ -897,7 +1047,10 @@ export type Database = {
           packaged_by?: string | null
           partial_amount?: number | null
           payment_method?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
           pipeline_log?: Json
+          priority?: Database["public"]["Enums"]["order_priority"]
+          refund_amount?: number
           rejection_reason?: string | null
           return_note?: string | null
           return_type?: string | null
@@ -946,14 +1099,17 @@ export type Database = {
           courier_assigned_at?: string | null
           courier_name?: string | null
           created_at?: string
+          customer_ip?: string | null
           customer_note?: string | null
           delivered_at?: string | null
           delivery_area_id?: string | null
           delivery_city_id?: string | null
           delivery_method?: string | null
           delivery_zone_id?: string | null
+          device_info?: Json | null
           discount_amount?: number
           duplicate_flag?: boolean
+          expected_delivery_date?: string | null
           guest_email?: string | null
           guest_name?: string | null
           guest_phone?: string | null
@@ -974,7 +1130,10 @@ export type Database = {
           packaged_by?: string | null
           partial_amount?: number | null
           payment_method?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
           pipeline_log?: Json
+          priority?: Database["public"]["Enums"]["order_priority"]
+          refund_amount?: number
           rejection_reason?: string | null
           return_note?: string | null
           return_type?: string | null
@@ -1193,6 +1352,7 @@ export type Database = {
           is_active: boolean
           is_featured: boolean
           is_new_arrival: boolean
+          low_stock_threshold: number
           old_price: number | null
           price: number
           rating: number
@@ -1217,6 +1377,7 @@ export type Database = {
           is_active?: boolean
           is_featured?: boolean
           is_new_arrival?: boolean
+          low_stock_threshold?: number
           old_price?: number | null
           price: number
           rating?: number
@@ -1241,6 +1402,7 @@ export type Database = {
           is_active?: boolean
           is_featured?: boolean
           is_new_arrival?: boolean
+          low_stock_threshold?: number
           old_price?: number | null
           price?: number
           rating?: number
@@ -1513,6 +1675,10 @@ export type Database = {
       }
     }
     Functions: {
+      add_order_note: {
+        Args: { _body: string; _is_internal?: boolean; _order_id: string }
+        Returns: string
+      }
       admin_rls_audit: {
         Args: never
         Returns: {
@@ -1551,6 +1717,15 @@ export type Database = {
       }
       release_stock: { Args: { _order_id: string }; Returns: undefined }
       reserve_stock: { Args: { _order_id: string }; Returns: undefined }
+      transition_order_status: {
+        Args: {
+          _new_status: Database["public"]["Enums"]["order_status"]
+          _note?: string
+          _order_id: string
+          _reason?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role:
@@ -1581,6 +1756,8 @@ export type Database = {
       courier_provider: "pathao" | "steadfast" | "redx" | "manual"
       delivery_zone: "inside_dhaka" | "outside_dhaka" | "sub_city" | "other"
       discount_type: "flat" | "percent"
+      fraud_risk_level: "low" | "medium" | "high" | "unknown"
+      order_priority: "low" | "normal" | "high" | "urgent"
       order_source: "website" | "facebook" | "manual" | "phone"
       order_status:
         | "new"
@@ -1607,6 +1784,7 @@ export type Database = {
         | "unpaid_return"
         | "partial_return"
         | "pending_return"
+      payment_status: "unpaid" | "partial" | "paid" | "refunded"
       shipment_status:
         | "booked"
         | "pickup_pending"
@@ -1785,6 +1963,8 @@ export const Constants = {
       courier_provider: ["pathao", "steadfast", "redx", "manual"],
       delivery_zone: ["inside_dhaka", "outside_dhaka", "sub_city", "other"],
       discount_type: ["flat", "percent"],
+      fraud_risk_level: ["low", "medium", "high", "unknown"],
+      order_priority: ["low", "normal", "high", "urgent"],
       order_source: ["website", "facebook", "manual", "phone"],
       order_status: [
         "new",
@@ -1812,6 +1992,7 @@ export const Constants = {
         "partial_return",
         "pending_return",
       ],
+      payment_status: ["unpaid", "partial", "paid", "refunded"],
       shipment_status: [
         "booked",
         "pickup_pending",
