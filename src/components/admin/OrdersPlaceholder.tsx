@@ -4,6 +4,7 @@ import OrdersPage from "./pages/OrdersPage";
 import InventoryPage from "./pages/InventoryPage";
 import CourierFraudPage from "./pages/CourierFraudPage";
 import ReportsPage from "./pages/ReportsPage";
+import SettingsPage from "./pages/SettingsPage";
 
 export default function OrdersPlaceholder() {
   const active = useOpsStore((s) => s.active);
@@ -12,5 +13,6 @@ export default function OrdersPlaceholder() {
   if (active === "inventory") return <InventoryPage />;
   if (active === "courier") return <CourierFraudPage />;
   if (active === "reports") return <ReportsPage />;
+  if (active === "settings") return <SettingsPage />;
   return <DashboardPage />;
 }

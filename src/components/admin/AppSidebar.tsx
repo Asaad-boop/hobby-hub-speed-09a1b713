@@ -1,4 +1,4 @@
-import { LayoutDashboard, ShoppingCart, Boxes, ShieldAlert, BarChart3 } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Boxes, ShieldAlert, BarChart3, Settings as SettingsIcon } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -21,6 +21,7 @@ const ITEMS: NavItem[] = [
   { key: "inventory", title: "Inventory", icon: Boxes },
   { key: "courier", title: "Courier & Fraud", icon: ShieldAlert },
   { key: "reports", title: "Reports", icon: BarChart3 },
+  { key: "settings", title: "Settings", icon: SettingsIcon },
 ];
 
 export function AppSidebar() {
