@@ -23,7 +23,10 @@ function CustomersPage() {
     queryFn: () => listCustomers(),
   });
 
-  const customerRows = useMemo(() => safeArray(q.data), [q.data]);
+  const customerRows = useMemo(
+    () => safeArray(q.data).filter((c): c is NonNullable<typeof c> => !!c && !!c.id),
+    [q.data],
+  );
 
   const customers = useMemo(() => {
     const list = customerRows;
@@ -36,9 +39,12 @@ function CustomersPage() {
     const list = customerRows;
     return {
       total: list.length,
-      flagged: list.filter((c) => c.is_flagged).length,
+      flagged: list.filter((c) => !!c.is_flagged).length,
       vip: list.filter((c) => c.customer_segment === "vip").length,
-      revenue: list.reduce((s, c) => s + Number(c.total_spent ?? 0), 0),
+      revenue: list.reduce((s, c) => {
+        const v = Number(c.total_spent ?? 0);
+        return s + (Number.isFinite(v) ? v : 0);
+      }, 0),
     };
   }, [customerRows]);
 
