@@ -562,9 +562,78 @@ function OrderDetailModalBody({
 }) {
   const qc = useQueryClient();
   const [note, setNote] = useState("");
+  const [form, setForm] = useState<Record<string, string>>({});
+  const [dirty, setDirty] = useState(false);
+
   const detail = useQuery({
     queryKey: ["oms", "order", id],
     queryFn: () => getOrderDetail({ data: { id } }),
+  });
+
+  // Hydrate form from order
+  useEffect(() => {
+    if (!detail.data) return;
+    const o = detail.data.order;
+    setForm({
+      shipping_name: (o.shipping_name ?? o.guest_name ?? "") as string,
+      shipping_phone: (o.shipping_phone ?? o.guest_phone ?? "") as string,
+      alternate_phone: (o.alternate_phone ?? "") as string,
+      shipping_address: (o.shipping_address ?? "") as string,
+      shipping_city: (o.shipping_city ?? "") as string,
+      shipping_district: (o.shipping_district ?? "") as string,
+      shipping_thana: (o.shipping_thana ?? "") as string,
+      payment_method: (o.payment_method ?? "cod") as string,
+      advance_amount: String(o.advance_amount ?? 0),
+      shipping_fee: String(o.shipping_fee ?? 0),
+      discount_amount: String(o.discount_amount ?? 0),
+      courier_name: (o.courier_name ?? "") as string,
+      tracking_number: (o.tracking_number ?? "") as string,
+      admin_notes: (o.admin_notes ?? "") as string,
+    });
+    setDirty(false);
+  }, [detail.data]);
+
+  const setField = (k: string, v: string) => {
+    setForm((p) => ({ ...p, [k]: v }));
+    setDirty(true);
+  };
+
+  const saveMut = useMutation({
+    mutationFn: () => {
+      const isGuest = detail.data?.order.is_guest_order;
+      const patch: Record<string, unknown> = {
+        // Always update shipping_* (works for both guest & user)
+        shipping_name: form.shipping_name || null,
+        shipping_phone: form.shipping_phone || null,
+        alternate_phone: form.alternate_phone || null,
+        shipping_address: form.shipping_address || null,
+        shipping_city: form.shipping_city || null,
+        shipping_district: form.shipping_district || null,
+        shipping_thana: form.shipping_thana || null,
+        payment_method: form.payment_method || null,
+        advance_amount: Number(form.advance_amount) || 0,
+        shipping_fee: Number(form.shipping_fee) || 0,
+        discount_amount: Number(form.discount_amount) || 0,
+        courier_name: form.courier_name || null,
+        tracking_number: form.tracking_number || null,
+        admin_notes: form.admin_notes || null,
+      };
+      if (isGuest) {
+        patch.guest_name = form.shipping_name || null;
+        patch.guest_phone = form.shipping_phone || null;
+      }
+      // Recalculate total
+      const subtotal = Number(detail.data?.order.subtotal ?? 0);
+      patch.total =
+        subtotal + (Number(form.shipping_fee) || 0) - (Number(form.discount_amount) || 0);
+      return updateOrder({ data: { id, patch } });
+    },
+    onSuccess: () => {
+      toast.success("Order saved");
+      setDirty(false);
+      qc.invalidateQueries({ queryKey: ["oms"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const noteMut = useMutation({
@@ -577,179 +646,333 @@ function OrderDetailModalBody({
     onError: (e: Error) => toast.error(e.message),
   });
 
+  if (detail.isLoading || !detail.data) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <Loading />
+      </div>
+    );
+  }
+
+  const o = detail.data.order;
+  const stage = deriveStage({
+    status: o.status,
+    confirmation_status: o.confirmation_status,
+    call_status: o.call_status,
+    hold_until: o.hold_until,
+    advance_amount: o.advance_amount,
+  });
+  const name = form.shipping_name || "—";
+  const subtotal = Number(o.subtotal ?? 0);
+  const liveTotal =
+    subtotal + (Number(form.shipping_fee) || 0) - (Number(form.discount_amount) || 0);
+
   return (
     <div className="flex max-h-[90vh] flex-col">
-      <DialogHeader className="border-b border-border bg-gradient-to-b from-[#1D9E75]/[0.06] to-transparent px-5 py-4">
+      {/* Header */}
+      <DialogHeader className="shrink-0 border-b border-border bg-gradient-to-br from-[#1D9E75]/[0.08] via-white to-white px-5 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1D9E75]/10 ring-1 ring-[#1D9E75]/20">
-            <Package className="h-5 w-5 text-[#1D9E75]" />
+          <div
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold ring-2 ring-white shadow-sm ${avatarColor(name)}`}
+          >
+            {initials(name)}
           </div>
-          <div className="min-w-0">
-            <DialogTitle className="font-mono text-base font-semibold">
-              {shortId(id)}
+          <div className="min-w-0 flex-1">
+            <DialogTitle className="flex items-center gap-2 text-base font-semibold">
+              <span className="truncate">{name}</span>
+              <span className="font-mono text-xs text-muted-foreground">{shortId(id)}</span>
             </DialogTitle>
-            {detail.data && (
-              <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
-                <span>{fmtDate(detail.data.order.created_at)}</span>
-                <span>•</span>
-                <StageBadge
-                  stage={deriveStage({
-                    status: detail.data.order.status,
-                    confirmation_status: detail.data.order.confirmation_status,
-                    call_status: detail.data.order.call_status,
-                    hold_until: detail.data.order.hold_until,
-                    advance_amount: detail.data.order.advance_amount,
-                  })}
-                />
-              </div>
-            )}
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+              <StageBadge stage={stage} />
+              <span>•</span>
+              <span>{fmtDate(o.created_at)}</span>
+              {o.is_guest_order && (
+                <>
+                  <span>•</span>
+                  <span className="rounded bg-amber-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-inset ring-amber-200">
+                    Guest
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="hidden text-right md:block">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Total
+            </div>
+            <div className="text-xl font-bold text-[#1D9E75] tabular-nums">
+              {fmtBDT(liveTotal)}
+            </div>
           </div>
         </div>
       </DialogHeader>
 
-      <div className="flex-1 overflow-y-auto px-5 py-4">
-        {detail.isLoading || !detail.data ? (
-          <Loading />
-        ) : (
-          <>
-            {/* Quick actions */}
-            <div className="mb-5 grid grid-cols-3 gap-1.5 sm:grid-cols-5">
-              <Btn variant="primary" size="sm" onClick={() => onMoveStage("confirmed")}>
-                <CheckCircle2 className="h-3 w-3" /> Confirm
-              </Btn>
-              <Btn variant="secondary" size="sm" onClick={() => onMoveStage("call_not_received")}>
-                <Phone className="h-3 w-3" /> No Ans
-              </Btn>
-              <Btn variant="secondary" size="sm" onClick={() => onMoveStage("on_hold")}>
-                <PauseCircle className="h-3 w-3" /> Hold
-              </Btn>
-              <Btn variant="secondary" size="sm" onClick={() => onMoveStage("advance_payment")}>
-                <Package className="h-3 w-3" /> Advance
-              </Btn>
-              <Btn variant="secondary" size="sm" onClick={() => onMoveStage("shipped")}>
-                <Truck className="h-3 w-3" /> Ship
-              </Btn>
-              <Btn variant="secondary" size="sm" onClick={() => onMoveStage("delivered")}>
-                <CheckCircle2 className="h-3 w-3" /> Delivered
-              </Btn>
-              <Btn variant="secondary" size="sm" onClick={() => onMoveStage("returned")}>
-                <RefreshCw className="h-3 w-3" /> Return
-              </Btn>
-              <Btn variant="danger" size="sm" onClick={() => onMoveStage("cancelled")}>
-                <XCircle className="h-3 w-3" /> Cancel
-              </Btn>
-              <Btn variant="ghost" size="sm" onClick={onPrintInvoice}>
-                <Printer className="h-3 w-3" /> Invoice
-              </Btn>
-            </div>
+      {/* Body */}
+      <div className="flex-1 overflow-y-auto bg-muted/20 px-5 py-4">
+        {/* Quick stage actions */}
+        <Section title="Workflow" icon={<RefreshCw className="h-3 w-3" />}>
+          <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5">
+            <Btn variant="primary" size="sm" onClick={() => onMoveStage("confirmed")}>
+              <CheckCircle2 className="h-3 w-3" /> Confirm
+            </Btn>
+            <Btn variant="secondary" size="sm" onClick={() => onMoveStage("call_not_received")}>
+              <Phone className="h-3 w-3" /> No Ans
+            </Btn>
+            <Btn variant="secondary" size="sm" onClick={() => onMoveStage("on_hold")}>
+              <PauseCircle className="h-3 w-3" /> Hold
+            </Btn>
+            <Btn variant="secondary" size="sm" onClick={() => onMoveStage("advance_payment")}>
+              <Wallet className="h-3 w-3" /> Advance
+            </Btn>
+            <Btn variant="secondary" size="sm" onClick={() => onMoveStage("shipped")}>
+              <Truck className="h-3 w-3" /> Ship
+            </Btn>
+            <Btn variant="secondary" size="sm" onClick={() => onMoveStage("delivered")}>
+              <PackageCheck className="h-3 w-3" /> Delivered
+            </Btn>
+            <Btn variant="secondary" size="sm" onClick={() => onMoveStage("returned")}>
+              <Undo2 className="h-3 w-3" /> Return
+            </Btn>
+            <Btn variant="danger" size="sm" onClick={() => onMoveStage("cancelled")}>
+              <XCircle className="h-3 w-3" /> Cancel
+            </Btn>
+            <Btn variant="ghost" size="sm" onClick={onPrintInvoice}>
+              <Printer className="h-3 w-3" /> Invoice
+            </Btn>
+          </div>
+        </Section>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              {/* Customer */}
-              <Section title="Customer">
-                <Field label="Name" value={detail.data.order.shipping_name ?? detail.data.order.guest_name} />
-                <Field label="Phone" value={detail.data.order.shipping_phone ?? detail.data.order.guest_phone} />
-                <Field
+        <div className="grid gap-3 md:grid-cols-2">
+          {/* Customer (editable) */}
+          <Section title="Customer" icon={<User className="h-3 w-3" />}>
+            <div className="grid grid-cols-2 gap-2">
+              <Input label="Name" value={form.shipping_name ?? ""} onChange={(v) => setField("shipping_name", v)} />
+              <Input label="Phone" value={form.shipping_phone ?? ""} onChange={(v) => setField("shipping_phone", v)} />
+              <Input
+                label="Alt phone"
+                value={form.alternate_phone ?? ""}
+                onChange={(v) => setField("alternate_phone", v)}
+              />
+              <Select
+                label="Payment"
+                value={form.payment_method ?? "cod"}
+                onChange={(v) => setField("payment_method", v)}
+                options={[
+                  { value: "cod", label: "COD" },
+                  { value: "bkash", label: "bKash" },
+                  { value: "nagad", label: "Nagad" },
+                  { value: "rocket", label: "Rocket" },
+                  { value: "card", label: "Card" },
+                ]}
+              />
+            </div>
+          </Section>
+
+          {/* Address (editable) */}
+          <Section title="Shipping Address" icon={<MapPin className="h-3 w-3" />}>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="col-span-2">
+                <Input
                   label="Address"
-                  value={[
-                    detail.data.order.shipping_address,
-                    detail.data.order.shipping_city,
-                    detail.data.order.shipping_district,
-                  ]
-                    .filter(Boolean)
-                    .join(", ")}
+                  value={form.shipping_address ?? ""}
+                  onChange={(v) => setField("shipping_address", v)}
                 />
-              </Section>
-
-              {/* Totals */}
-              <Section title="Payment">
-                <Field label="Subtotal" value={fmtBDT(Number(detail.data.order.subtotal))} />
-                <Field label="Shipping" value={fmtBDT(Number(detail.data.order.shipping_fee))} />
-                <Field label="Discount" value={fmtBDT(Number(detail.data.order.discount_amount))} />
-                <Field label="Advance" value={fmtBDT(Number(detail.data.order.advance_amount))} />
-                <Field
-                  label="Total"
-                  value={<span className="font-bold">{fmtBDT(Number(detail.data.order.total))}</span>}
-                />
-                <Field label="Method" value={(detail.data.order.payment_method ?? "COD").toUpperCase()} />
-                {detail.data.order.tracking_number && (
-                  <Field label="Tracking" value={detail.data.order.tracking_number} />
-                )}
-              </Section>
+              </div>
+              <Input label="City" value={form.shipping_city ?? ""} onChange={(v) => setField("shipping_city", v)} />
+              <Input
+                label="District"
+                value={form.shipping_district ?? ""}
+                onChange={(v) => setField("shipping_district", v)}
+              />
+              <Input
+                label="Thana"
+                value={form.shipping_thana ?? ""}
+                onChange={(v) => setField("shipping_thana", v)}
+              />
             </div>
+          </Section>
+        </div>
 
-            {/* Items */}
-            <div className="mt-4">
-              <Section title={`Items (${detail.data.items.length})`}>
-                <ul className="divide-y divide-border text-xs">
-                  {detail.data.items.map((it) => (
-                    <li key={it.id} className="flex items-center justify-between py-1.5">
-                      <div className="min-w-0 flex-1 pr-2">
-                        <div className="truncate font-medium">{it.name}</div>
-                        {it.variant_label && (
-                          <div className="text-muted-foreground">{it.variant_label}</div>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <div>{it.quantity} ×</div>
-                        <div className="font-semibold">{fmtBDT(Number(it.price))}</div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </Section>
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
+          {/* Payment / amounts (editable) */}
+          <Section title="Payment & Charges" icon={<CreditCard className="h-3 w-3" />}>
+            <div className="grid grid-cols-2 gap-2">
+              <ReadOnly label="Subtotal" value={fmtBDT(subtotal)} />
+              <Input
+                label="Shipping fee"
+                type="number"
+                value={form.shipping_fee ?? "0"}
+                onChange={(v) => setField("shipping_fee", v)}
+              />
+              <Input
+                label="Discount"
+                type="number"
+                value={form.discount_amount ?? "0"}
+                onChange={(v) => setField("discount_amount", v)}
+              />
+              <Input
+                label="Advance"
+                type="number"
+                value={form.advance_amount ?? "0"}
+                onChange={(v) => setField("advance_amount", v)}
+              />
             </div>
-
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              {/* Add note */}
-              <Section title="Add note">
-                <textarea
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  rows={2}
-                  placeholder="Internal note…"
-                  className="w-full resize-none rounded-md border border-border bg-white px-2 py-1.5 text-xs outline-none focus:border-[#1D9E75]"
-                />
-                <Btn
-                  variant="primary"
-                  size="sm"
-                  className="mt-1.5 w-full"
-                  disabled={!note.trim() || noteMut.isPending}
-                  onClick={() => noteMut.mutate(note.trim())}
-                >
-                  Add note
-                </Btn>
-              </Section>
-
-              {/* Activity */}
-              <Section title="Activity">
-                {detail.data.logs.length === 0 ? (
-                  <div className="text-xs text-muted-foreground">No activity yet</div>
-                ) : (
-                  <ul className="space-y-2 text-xs">
-                    {detail.data.logs.map((l) => (
-                      <li key={l.id} className="border-l-2 border-border pl-2">
-                        <div className="font-medium">{l.action}</div>
-                        {l.note && <div className="text-muted-foreground">{l.note}</div>}
-                        <div className="text-[10px] text-muted-foreground">
-                          {fmtDate(l.created_at)}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </Section>
+            <div className="mt-2 flex items-center justify-between rounded-md border border-[#1D9E75]/20 bg-[#1D9E75]/5 px-2.5 py-1.5">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#1D9E75]">
+                Total
+              </span>
+              <span className="text-base font-bold text-[#1D9E75] tabular-nums">
+                {fmtBDT(liveTotal)}
+              </span>
             </div>
-          </>
-        )}
+          </Section>
+
+          {/* Courier (editable) */}
+          <Section title="Courier" icon={<Truck className="h-3 w-3" />}>
+            <div className="grid grid-cols-2 gap-2">
+              <Input
+                label="Courier"
+                value={form.courier_name ?? ""}
+                onChange={(v) => setField("courier_name", v)}
+                placeholder="Pathao / Steadfast…"
+              />
+              <Input
+                label="Tracking #"
+                value={form.tracking_number ?? ""}
+                onChange={(v) => setField("tracking_number", v)}
+              />
+            </div>
+            <Textarea
+              label="Internal admin note"
+              value={form.admin_notes ?? ""}
+              onChange={(v) => setField("admin_notes", v)}
+              placeholder="Visible to staff only…"
+              rows={2}
+            />
+          </Section>
+        </div>
+
+        {/* Items */}
+        <div className="mt-3">
+          <Section title={`Items (${detail.data.items.length})`} icon={<Package className="h-3 w-3" />}>
+            <ul className="divide-y divide-border text-xs">
+              {detail.data.items.map((it) => (
+                <li key={it.id} className="flex items-center gap-3 py-2">
+                  {it.image && (
+                    <img
+                      src={it.image}
+                      alt=""
+                      className="h-10 w-10 rounded-md border border-border object-cover"
+                    />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-medium text-foreground">{it.name}</div>
+                    {it.variant_label && (
+                      <div className="text-[11px] text-muted-foreground">{it.variant_label}</div>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[11px] text-muted-foreground">
+                      {it.quantity} × {fmtBDT(Number(it.price))}
+                    </div>
+                    <div className="font-semibold tabular-nums">
+                      {fmtBDT(Number(it.price) * Number(it.quantity))}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </Section>
+        </div>
+
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
+          {/* Add note */}
+          <Section title="Add note" icon={<StickyNote className="h-3 w-3" />}>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={2}
+              placeholder="Internal note…"
+              className="w-full resize-none rounded-md border border-border bg-white px-2 py-1.5 text-xs outline-none transition focus:border-[#1D9E75] focus:ring-2 focus:ring-[#1D9E75]/15"
+            />
+            <Btn
+              variant="primary"
+              size="sm"
+              className="mt-1.5 w-full"
+              disabled={!note.trim() || noteMut.isPending}
+              onClick={() => noteMut.mutate(note.trim())}
+            >
+              <StickyNote className="h-3 w-3" /> Add note
+            </Btn>
+          </Section>
+
+          {/* Activity */}
+          <Section title="Activity" icon={<FileText className="h-3 w-3" />}>
+            {detail.data.logs.length === 0 ? (
+              <div className="py-2 text-center text-xs text-muted-foreground">No activity yet</div>
+            ) : (
+              <ul className="space-y-2 text-xs">
+                {detail.data.logs.slice(0, 6).map((l) => (
+                  <li key={l.id} className="border-l-2 border-[#1D9E75]/40 pl-2">
+                    <div className="font-medium capitalize">{l.action.replace(/_/g, " ")}</div>
+                    {l.note && <div className="text-muted-foreground">{l.note}</div>}
+                    <div className="text-[10px] text-muted-foreground">{fmtDate(l.created_at)}</div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Section>
+        </div>
+      </div>
+
+      {/* Sticky save bar */}
+      <div
+        className={`flex shrink-0 items-center justify-between border-t px-5 py-3 transition-colors ${
+          dirty
+            ? "border-[#1D9E75]/30 bg-[#1D9E75]/5"
+            : "border-border bg-white"
+        }`}
+      >
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          {dirty ? (
+            <>
+              <Pencil className="h-3.5 w-3.5 text-[#1D9E75]" />
+              <span className="font-medium text-[#1D9E75]">Unsaved changes</span>
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+              <span>All changes saved</span>
+            </>
+          )}
+        </div>
+        <Btn
+          variant="primary"
+          size="sm"
+          disabled={!dirty || saveMut.isPending}
+          onClick={() => saveMut.mutate()}
+        >
+          <Save className="h-3.5 w-3.5" />
+          {saveMut.isPending ? "Saving…" : "Save changes"}
+        </Btn>
       </div>
     </div>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3">
-      <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+    <div className="mb-3 rounded-xl border border-border bg-white p-3 shadow-sm last:mb-0">
+      <div className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {icon && <span className="text-[#1D9E75]">{icon}</span>}
         {title}
       </div>
       {children}
@@ -757,11 +980,104 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Field({ label, value }: { label: string; value: React.ReactNode }) {
+function Input({
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  placeholder?: string;
+}) {
   return (
-    <div className="flex items-start justify-between gap-2 py-0.5 text-xs">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="text-right">{value || "—"}</span>
+    <label className="block">
+      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="h-9 w-full rounded-md border border-border bg-white px-2.5 text-xs outline-none transition focus:border-[#1D9E75] focus:ring-2 focus:ring-[#1D9E75]/15"
+      />
+    </label>
+  );
+}
+
+function Select({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-9 w-full rounded-md border border-border bg-white px-2 text-xs outline-none transition focus:border-[#1D9E75] focus:ring-2 focus:ring-[#1D9E75]/15"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function Textarea({
+  label,
+  value,
+  onChange,
+  rows = 2,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  rows?: number;
+  placeholder?: string;
+}) {
+  return (
+    <label className="mt-2 block">
+      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={rows}
+        placeholder={placeholder}
+        className="w-full resize-none rounded-md border border-border bg-white px-2.5 py-1.5 text-xs outline-none transition focus:border-[#1D9E75] focus:ring-2 focus:ring-[#1D9E75]/15"
+      />
+    </label>
+  );
+}
+
+function ReadOnly({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div>
+      <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </div>
+      <div className="flex h-9 items-center rounded-md border border-dashed border-border bg-muted/30 px-2.5 text-xs font-medium text-foreground">
+        {value}
+      </div>
     </div>
   );
 }
