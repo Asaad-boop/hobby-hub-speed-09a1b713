@@ -22,6 +22,8 @@ export default function OrdersPage() {
   const setSel = useOpsStore((s) => s.setSelectedOrderIds);
   const clearSel = useOpsStore((s) => s.clearSelection);
   const bulkAssignCourier = useOpsStore((s) => s.bulkAssignCourier);
+  const setOrderTracking = useOpsStore((s) => s.setOrderTracking);
+  const setActive = useOpsStore((s) => s.setActive);
   const addOrder = useOpsStore((s) => s.addOrder);
 
   const [search, setSearch] = useState("");
