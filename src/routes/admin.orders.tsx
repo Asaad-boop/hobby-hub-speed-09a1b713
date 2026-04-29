@@ -570,6 +570,17 @@ function InvoicePreviewModal({
   onDownload: () => void;
 }) {
   const open = !!preview || loading;
+  const iframeRef = (typeof window !== "undefined") ? null : null;
+  const handlePrint = () => {
+    const el = document.getElementById("invoice-preview-iframe") as HTMLIFrameElement | null;
+    try {
+      el?.contentWindow?.focus();
+      el?.contentWindow?.print();
+    } catch {
+      // Fallback: open the blob in a new tab
+      if (preview?.url) window.open(preview.url, "_blank");
+    }
+  };
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
       <DialogContent className="max-w-5xl w-[95vw] h-[92vh] p-0 gap-0 flex flex-col">
@@ -579,13 +590,24 @@ function InvoicePreviewModal({
           </DialogTitle>
           <div className="flex items-center gap-2">
             <Btn
-              variant="primary"
+              variant="ghost"
               size="sm"
               onClick={onDownload}
               disabled={!preview}
+              title="Download PDF"
             >
               <Download className="h-3.5 w-3.5 mr-1.5" />
               Download
+            </Btn>
+            <Btn
+              variant="primary"
+              size="sm"
+              onClick={handlePrint}
+              disabled={!preview}
+              title="Print invoice"
+            >
+              <Printer className="h-3.5 w-3.5 mr-1.5" />
+              Print
             </Btn>
             <Btn variant="ghost" size="sm" onClick={onClose} title="Close">
               <X className="h-4 w-4" />
@@ -599,6 +621,7 @@ function InvoicePreviewModal({
             </div>
           ) : (
             <iframe
+              id="invoice-preview-iframe"
               key={preview.url}
               src={preview.url}
               title="Invoice preview"
