@@ -27,6 +27,7 @@ export default function AdminShell() {
           </main>
         </SidebarInset>
       </div>
+      <Toaster position="bottom-right" richColors closeButton />
     </SidebarProvider>
   );
 }
