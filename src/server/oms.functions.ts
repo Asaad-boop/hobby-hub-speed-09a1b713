@@ -1,15 +1,28 @@
 // OMS server functions — orders, products, customers, dashboard stats.
-// All authenticated, RLS-respected.
+// Admin-authenticated; admin reads use the service client after role verification.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
+
+async function requireAdmin(userId: string) {
+  const { data, error } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Forbidden: admin only");
+}
 
 // ----------------- DASHBOARD -----------------
 export const getDashboardStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayIso = today.toISOString();
@@ -112,7 +125,8 @@ export const listOrders = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => listOrdersInput.parse(input))
   .handler(async ({ context, data }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     let q = supabase
       .from("orders")
       .select(
@@ -143,7 +157,8 @@ export const getOrderDetail = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid() }).parse(input),
   )
   .handler(async ({ context, data }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     const [orderRes, itemsRes, logsRes] = await Promise.all([
       supabase.from("orders").select("*").eq("id", data.id).single(),
       supabase.from("order_items").select("*").eq("order_id", data.id),
@@ -171,7 +186,8 @@ export const updateOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => updateOrderInput.parse(input))
   .handler(async ({ context, data }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     const { error } = await supabase
       .from("orders")
       .update(data.patch as never)
@@ -188,7 +204,8 @@ export const bulkUpdateOrders = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => bulkUpdateInput.parse(input))
   .handler(async ({ context, data }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     const { error } = await supabase
       .from("orders")
       .update(data.patch as never)
@@ -206,7 +223,9 @@ export const addOrderNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => addNoteInput.parse(input))
   .handler(async ({ context, data }) => {
-    const { supabase, userId } = context;
+    const { userId } = context;
+    await requireAdmin(userId);
+    const supabase = supabaseAdmin;
     const { error } = await supabase.from("activity_logs").insert({
       order_id: data.orderId,
       user_id: userId,
@@ -221,7 +240,8 @@ export const addOrderNote = createServerFn({ method: "POST" })
 export const listProducts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     const { data, error } = await supabase
       .from("products")
       .select("id,title,slug,price,stock,image,is_active,category_id,updated_at")
@@ -241,7 +261,9 @@ export const adjustStock = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => adjustStockInput.parse(input))
   .handler(async ({ context, data }) => {
-    const { supabase, userId } = context;
+    const { userId } = context;
+    await requireAdmin(userId);
+    const supabase = supabaseAdmin;
     const { data: prod, error: getErr } = await supabase
       .from("products")
       .select("stock")
@@ -271,7 +293,8 @@ export const adjustStock = createServerFn({ method: "POST" })
 export const listCustomers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     const { data, error } = await supabase
       .from("profiles")
       .select(
@@ -292,7 +315,8 @@ export const getSalesReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => reportInput.parse(input))
   .handler(async ({ context, data }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     const { data: rows, error } = await supabase
       .from("orders")
       .select("id,total,status,courier_name,created_at,delivered_at")
