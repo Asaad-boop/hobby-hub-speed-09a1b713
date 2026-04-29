@@ -45,6 +45,12 @@ import { generateInvoicePDF } from "@/lib/pdf/invoice";
 import { generatePickingListPDF } from "@/lib/pdf/picking-list";
 import { loadPathaoCreds, isPathaoConfigured } from "@/lib/pathao-settings";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/admin/orders")({
   component: OrdersPage,
