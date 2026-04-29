@@ -171,21 +171,25 @@ function DashboardPage() {
                   </div>
                 ) : (
                   <ul className="divide-y divide-border text-sm">
-                    {data.lowStock.map((p) => (
-                      <li key={p.id} className="flex items-center justify-between py-2">
-                        <span className="truncate pr-2">{p.title}</span>
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                            p.stock === 0
-                              ? "bg-rose-100 text-rose-700"
-                              : "bg-amber-100 text-amber-700"
-                          }`}
-                        >
-                          {p.stock === 0 && <AlertTriangle className="h-3 w-3" />}
-                          {p.stock} left
-                        </span>
-                      </li>
-                    ))}
+                    {data.lowStock.map((p) => {
+                      const stock = Number(p.stock ?? 0);
+                      const safeStock = Number.isFinite(stock) ? stock : 0;
+                      return (
+                        <li key={p.id} className="flex items-center justify-between py-2">
+                          <span className="truncate pr-2">{p.title ?? "—"}</span>
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                              safeStock === 0
+                                ? "bg-rose-100 text-rose-700"
+                                : "bg-amber-100 text-amber-700"
+                            }`}
+                          >
+                            {safeStock === 0 && <AlertTriangle className="h-3 w-3" />}
+                            {safeStock} left
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </Card>
