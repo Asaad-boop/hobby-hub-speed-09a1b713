@@ -4,7 +4,7 @@ import {
   type Order, type Product, type Customer, type OrderStatus,
 } from "./mock-data";
 
-export type OpsNavKey = "dashboard" | "orders" | "inventory" | "courier" | "reports";
+export type OpsNavKey = "dashboard" | "orders" | "inventory" | "courier" | "reports" | "settings";
 
 type OpsState = {
   active: OpsNavKey;
@@ -21,6 +21,7 @@ type OpsState = {
 
   updateOrderStatus: (id: string, status: OrderStatus) => void;
   bulkAssignCourier: (ids: string[], courier: string, trackingPrefix?: string) => void;
+  setOrderTracking: (id: string, trackingNumber: string, courier?: string) => void;
   addOrder: (o: Order) => void;
 
   addProduct: (p: Product) => void;
@@ -58,6 +59,20 @@ export const useOpsStore = create<OpsState>((set) => ({
               courier: courier as Order["courier"],
               status: "Shipped",
               trackingNumber: o.trackingNumber ?? `${trackingPrefix}${Math.floor(Math.random() * 9_000_000) + 1_000_000}`,
+            }
+          : o,
+      ),
+    })),
+
+  setOrderTracking: (id, trackingNumber, courier) =>
+    set((s) => ({
+      orders: s.orders.map((o) =>
+        o.id === id
+          ? {
+              ...o,
+              trackingNumber,
+              courier: (courier as Order["courier"]) ?? o.courier,
+              status: "Shipped",
             }
           : o,
       ),
