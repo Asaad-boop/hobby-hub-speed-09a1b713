@@ -197,20 +197,25 @@ function OrdersPage() {
     let success = 0;
     let failed = 0;
     for (const id of selected) {
-      const o = list.find((x) => x.id === id);
-      if (!o) continue;
+      const o = list.find((x) => x && x.id === id);
+      if (!o || !o.id) continue;
+      const totalNum = Number(o.total);
       const res = await createPathaoConsignment({
         data: {
           creds,
           order: {
-            merchantOrderId: o.id.slice(0, 12),
+            merchantOrderId: String(o.id).slice(0, 12),
             recipientName: o.shipping_name ?? o.guest_name ?? "Customer",
             recipientPhone: o.shipping_phone ?? o.guest_phone ?? "",
             recipientAddress: [o.shipping_address, o.shipping_city, o.shipping_district]
               .filter(Boolean)
               .join(", "),
             amountToCollect:
-              (o.payment_method ?? "cod").toLowerCase() === "cod" ? Number(o.total) : 0,
+              (o.payment_method ?? "cod").toLowerCase() === "cod"
+                ? Number.isFinite(totalNum)
+                  ? totalNum
+                  : 0
+                : 0,
             itemDescription: `Order ${shortId(o.id)}`,
             itemQuantity: 1,
             itemWeight: 0.5,
