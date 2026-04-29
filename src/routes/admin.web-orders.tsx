@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   Phone,
@@ -11,7 +11,21 @@ import {
   Globe,
   Loader2,
   RefreshCw,
+  X,
+  MapPin,
+  CreditCard,
+  Package,
+  User,
+  Calendar,
+  FileText,
+  Tag,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
