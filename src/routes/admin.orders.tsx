@@ -519,24 +519,14 @@ function OrdersPage() {
                           className="px-3 py-3 text-right"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <div className="flex items-center justify-end gap-1">
-                            <Btn
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handlePreviewInvoice(o.id)}
-                              title="Preview invoice"
-                            >
-                              <Eye className="h-3.5 w-3.5" />
-                            </Btn>
-                            <Btn
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handlePrintInvoice(o.id)}
-                              title="Download invoice"
-                            >
-                              <Printer className="h-3.5 w-3.5" />
-                            </Btn>
-                          </div>
+                          <Btn
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handlePreviewInvoice(o.id)}
+                            title="Open invoice"
+                          >
+                            <Printer className="h-3.5 w-3.5" />
+                          </Btn>
                         </td>
                       </tr>
                     );
