@@ -261,18 +261,3 @@
   transform-origin: center;
 }
 .buy-jiggle:hover, .buy-jiggle:active { animation-play-state: paused; }
-
-/* ===== BrandOMS print styles ===== */
-@media print {
-  body * { visibility: hidden !important; }
-  .print-area, .print-area * { visibility: visible !important; }
-  .print-area {
-    position: fixed !important;
-    inset: 0 !important;
-    background: white !important;
-    padding: 24px !important;
-    overflow: visible !important;
-    z-index: 9999 !important;
-  }
-  .print\:hidden { display: none !important; }
-}

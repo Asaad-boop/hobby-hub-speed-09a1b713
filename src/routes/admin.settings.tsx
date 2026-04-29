@@ -1,185 +1,156 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AdminErrorPanel } from "@/components/admin/AdminErrorPanel";
-import { useEffect, useState } from "react";
-import { Save, CheckCircle2, ExternalLink } from "lucide-react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Btn, Card, PageHeader } from "@/components/admin/ui";
-import {
-  loadPathaoCreds,
-  savePathaoCreds,
-  isPathaoConfigured,
-  type PathaoCreds,
-} from "@/lib/pathao-settings";
+import { Plus, Trash2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { PageHeader, Card, Loading, Btn, Input, Textarea, Modal, Empty, Badge } from "@/components/admin/ui";
+import BDCourierIntegration from "@/components/admin/BDCourierIntegration";
 
 export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
-  errorComponent: AdminErrorPanel,
 });
 
+type Setting = { key: string; value: any; description: string | null };
+type RoleRow = { id: string; user_id: string; role: string; created_at: string };
+
 function SettingsPage() {
-  const [creds, setCreds] = useState<PathaoCreds>(loadPathaoCreds());
-  const [saved, setSaved] = useState(false);
+  const [editing, setEditing] = useState<Partial<Setting> | null>(null);
 
-  useEffect(() => {
-    setCreds(loadPathaoCreds());
-  }, []);
+  const { data: settings, isLoading, refetch } = useQuery({
+    queryKey: ["admin", "settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("site_settings").select("*").order("key");
+      if (error) throw error;
+      return data as Setting[];
+    },
+  });
 
-  const handleSave = () => {
-    savePathaoCreds(creds);
-    setSaved(true);
-    toast.success("Pathao settings saved");
-    setTimeout(() => setSaved(false), 2000);
-  };
+  const { data: roles, refetch: refetchRoles } = useQuery({
+    queryKey: ["admin", "roles"],
+    queryFn: async () => {
+      const { data } = await supabase.from("user_roles").select("*").order("created_at", { ascending: false });
+      return (data ?? []) as RoleRow[];
+    },
+  });
 
-  const set = <K extends keyof PathaoCreds>(k: K, v: PathaoCreds[K]) =>
-    setCreds((p) => ({ ...p, [k]: v }));
+  async function deleteSetting(key: string) {
+    if (!confirm(`Delete setting "${key}"?`)) return;
+    const { error } = await supabase.from("site_settings").delete().eq("key", key);
+    if (error) return toast.error(error.message);
+    toast.success("Deleted"); refetch();
+  }
 
-  const configured = isPathaoConfigured(creds);
+  async function deleteRole(id: string) {
+    if (!confirm("Remove role?")) return;
+    const { error } = await supabase.from("user_roles").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Removed"); refetchRoles();
+  }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <PageHeader title="Settings" subtitle="Pathao courier API & store info" />
-      <div className="flex-1 overflow-y-auto px-6 py-6">
-        <div className="mx-auto max-w-3xl space-y-4">
-          <Card className="p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <div className="text-sm font-semibold">Pathao Courier API</div>
-                <div className="text-xs text-muted-foreground">
-                  Credentials stored locally on this device
-                </div>
-              </div>
-              {configured ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-                  <CheckCircle2 className="h-3 w-3" /> Configured
-                </span>
-              ) : (
-                <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
-                  Not configured
-                </span>
-              )}
-            </div>
+    <div>
+      <PageHeader title="Settings" description="Site configuration and staff roles" />
 
-            <div className="grid gap-3 md:grid-cols-2">
-              <Field label="Environment">
-                <select
-                  value={creds.environment}
-                  onChange={(e) => set("environment", e.target.value as "sandbox" | "production")}
-                  className="h-9 w-full rounded-md border border-border bg-white px-2 text-sm outline-none focus:border-[#1D9E75]"
-                >
-                  <option value="sandbox">Sandbox (testing)</option>
-                  <option value="production">Production (live)</option>
-                </select>
-              </Field>
-              <Field label="Store ID">
-                <Input value={creds.storeId} onChange={(v) => set("storeId", v)} />
-              </Field>
-              <Field label="Client ID">
-                <Input value={creds.clientId} onChange={(v) => set("clientId", v)} />
-              </Field>
-              <Field label="Client Secret">
-                <Input
-                  value={creds.clientSecret}
-                  onChange={(v) => set("clientSecret", v)}
-                  type="password"
-                />
-              </Field>
-              <Field label="Username (email)">
-                <Input value={creds.username} onChange={(v) => set("username", v)} />
-              </Field>
-              <Field label="Password">
-                <Input
-                  value={creds.password}
-                  onChange={(v) => set("password", v)}
-                  type="password"
-                />
-              </Field>
-              <Field label="Sender Name">
-                <Input value={creds.senderName} onChange={(v) => set("senderName", v)} />
-              </Field>
-              <Field label="Sender Phone">
-                <Input value={creds.senderPhone} onChange={(v) => set("senderPhone", v)} />
-              </Field>
-              <Field label="Default Recipient City ID">
-                <Input
-                  value={creds.recipientCityId}
-                  onChange={(v) => set("recipientCityId", v)}
-                />
-              </Field>
-              <Field label="Default Recipient Zone ID">
-                <Input
-                  value={creds.recipientZoneId}
-                  onChange={(v) => set("recipientZoneId", v)}
-                />
-              </Field>
-            </div>
+      <BDCourierIntegration />
 
-            <div className="mt-4 flex items-center gap-2">
-              <Btn variant="primary" onClick={handleSave}>
-                <Save className="h-4 w-4" /> {saved ? "Saved!" : "Save settings"}
-              </Btn>
-              <a
-                href="https://merchant.pathao.com/courier/user/api-management"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs font-medium text-[#1D9E75] hover:underline"
-              >
-                Get Pathao API keys <ExternalLink className="h-3 w-3" />
-              </a>
-            </div>
-          </Card>
 
-          <Card className="p-5">
-            <div className="mb-2 text-sm font-semibold">How to get Pathao credentials</div>
-            <ol className="ml-4 list-decimal space-y-1 text-xs text-muted-foreground">
-              <li>
-                Pathao Merchant portal e login koro:{" "}
-                <a
-                  href="https://merchant.pathao.com/"
-                  className="text-[#1D9E75] hover:underline"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  merchant.pathao.com
-                </a>
-              </li>
-              <li>Settings → API Management e jao</li>
-              <li>"Generate API Key" e click koro</li>
-              <li>Client ID, Client Secret, username (email), password copy koro</li>
-              <li>Store ID tomar store list theke pabe</li>
-              <li>Eikhane paste koro ar Save click koro</li>
-            </ol>
-          </Card>
+      <Card className="mb-5">
+        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3" style={{ borderBottomWidth: "0.5px" }}>
+          <div className="text-sm font-semibold">Site settings</div>
+          <Btn variant="primary" onClick={() => setEditing({ key: "", value: "", description: "" })}>
+            <Plus className="h-3.5 w-3.5" /> Add
+          </Btn>
         </div>
-      </div>
+        {isLoading ? <Loading /> : settings?.length === 0 ? <Empty title="No settings yet" /> : (
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-xs text-gray-500">
+              <tr>
+                <th className="px-4 py-2 text-left font-medium">Key</th>
+                <th className="px-4 py-2 text-left font-medium">Value</th>
+                <th className="px-4 py-2 text-right font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {settings?.map((s) => (
+                <tr key={s.key} className="border-t border-gray-100 hover:bg-gray-50">
+                  <td className="px-4 py-2.5 font-mono text-xs">{s.key}</td>
+                  <td className="px-4 py-2.5 text-xs text-gray-600 max-w-md truncate">{JSON.stringify(s.value)}</td>
+                  <td className="px-4 py-2.5">
+                    <div className="flex justify-end gap-1">
+                      <Btn onClick={() => setEditing(s)}>Edit</Btn>
+                      <Btn variant="danger" onClick={() => deleteSetting(s.key)}><Trash2 className="h-3 w-3" /></Btn>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
+
+      <Card>
+        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3" style={{ borderBottomWidth: "0.5px" }}>
+          <div className="text-sm font-semibold">Staff roles</div>
+        </div>
+        {!roles ? <Loading /> : roles.length === 0 ? <Empty title="No staff roles configured" /> : (
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-xs text-gray-500">
+              <tr>
+                <th className="px-4 py-2 text-left font-medium">User ID</th>
+                <th className="px-4 py-2 text-left font-medium">Role</th>
+                <th className="px-4 py-2 text-right font-medium"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {roles.map((r) => (
+                <tr key={r.id} className="border-t border-gray-100">
+                  <td className="px-4 py-2.5 font-mono text-[11px] text-gray-500">{r.user_id}</td>
+                  <td className="px-4 py-2.5"><Badge tone={r.role === "admin" ? "purple" : "blue"}>{r.role}</Badge></td>
+                  <td className="px-4 py-2.5 text-right">
+                    <Btn variant="danger" onClick={() => deleteRole(r.id)}><Trash2 className="h-3 w-3" /></Btn>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
+
+      {editing && <SettingModal s={editing} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); refetch(); }} />}
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function SettingModal({ s, onClose, onSaved }: { s: Partial<Setting>; onClose: () => void; onSaved: () => void }) {
+  const [key, setKey] = useState(s.key ?? "");
+  const [value, setValue] = useState(typeof s.value === "string" ? s.value : JSON.stringify(s.value ?? "", null, 2));
+  const [description, setDescription] = useState(s.description ?? "");
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    if (!key) return toast.error("Key required");
+    let parsed: any = value;
+    try { parsed = JSON.parse(value); } catch { /* keep as string */ }
+    setSaving(true);
+    const { error } = await supabase.from("site_settings").upsert({ key, value: parsed, description } as any, { onConflict: "key" });
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Saved"); onSaved();
+  }
+
   return (
-    <label className="block">
-      <span className="mb-1 block text-xs font-medium text-muted-foreground">{label}</span>
-      {children}
-    </label>
+    <Modal open onClose={onClose} title="Setting">
+      <div className="space-y-3">
+        <div><div className="mb-1 text-xs font-medium text-gray-600">Key</div><Input value={key} onChange={(e) => setKey(e.target.value)} disabled={!!s.key} /></div>
+        <div><div className="mb-1 text-xs font-medium text-gray-600">Value (JSON or string)</div><Textarea rows={6} value={value} onChange={(e) => setValue(e.target.value)} /></div>
+        <div><div className="mb-1 text-xs font-medium text-gray-600">Description</div><Input value={description ?? ""} onChange={(e) => setDescription(e.target.value)} /></div>
+      </div>
+      <div className="mt-4 flex justify-end gap-2">
+        <Btn onClick={onClose}>Cancel</Btn>
+        <Btn variant="primary" onClick={save} disabled={saving}>{saving ? "Saving…" : "Save"}</Btn>
+      </div>
+    </Modal>
   );
 }
 
-function Input({
-  value,
-  onChange,
-  type = "text",
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  type?: string;
-}) {
-  return (
-    <input
-      type={type}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="h-9 w-full rounded-md border border-border bg-white px-2.5 text-sm outline-none focus:border-[#1D9E75]"
-    />
-  );
-}

@@ -1,10 +1,6 @@
-// Vite config.
-//
-// - On Vercel (VERCEL=1): disable Cloudflare and add Nitro. Nitro auto-detects
-//   Vercel and emits `.vercel/output` (Build Output API), so server functions
-//   run as a Vercel serverless function instead of a Cloudflare Worker.
-// - In the Lovable sandbox / local builds: keep the default Cloudflare-based
-//   preset which produces a regular `dist/` output expected by sandbox CI.
+// @lovable.dev/vite-tanstack-config already includes TanStack Start, React,
+// Tailwind, tsconfig paths, and Cloudflare defaults. For Vercel deployments,
+// we add Nitro only outside the Lovable sandbox build.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { nitro } from "nitro/vite";
 
