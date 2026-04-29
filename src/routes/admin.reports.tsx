@@ -82,13 +82,16 @@ function ReportsPage() {
                 <div className="mb-3 text-sm font-semibold">By status</div>
                 <table className="w-full text-sm">
                   <tbody className="divide-y divide-border">
-                    {Object.entries(q.data.byStatus).map(([k, v]) => (
-                      <tr key={k}>
-                        <td className="py-2 capitalize">{k}</td>
-                        <td className="py-2 text-right text-muted-foreground">{v.count}</td>
-                        <td className="py-2 text-right font-semibold">{fmtBDT(v.revenue)}</td>
-                      </tr>
-                    ))}
+                    {Object.entries(q.data.byStatus).map(([k, v]) => {
+                      const row = (v ?? {}) as { count?: number; revenue?: number };
+                      return (
+                        <tr key={k}>
+                          <td className="py-2 capitalize">{k}</td>
+                          <td className="py-2 text-right text-muted-foreground">{row.count ?? 0}</td>
+                          <td className="py-2 text-right font-semibold">{fmtBDT(Number(row.revenue) || 0)}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </Card>
@@ -105,19 +108,24 @@ function ReportsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {Object.entries(q.data.byCourier).map(([k, v]) => (
-                      <tr key={k}>
-                        <td className="py-2">{k}</td>
-                        <td className="py-2 text-right text-muted-foreground">{v.count}</td>
-                        <td className="py-2 text-right">
-                          {v.delivered}{" "}
-                          <span className="text-[10px] text-muted-foreground">
-                            ({v.count ? Math.round((v.delivered / v.count) * 100) : 0}%)
-                          </span>
-                        </td>
-                        <td className="py-2 text-right font-semibold">{fmtBDT(v.revenue)}</td>
-                      </tr>
-                    ))}
+                    {Object.entries(q.data.byCourier).map(([k, v]) => {
+                      const row = (v ?? {}) as { count?: number; delivered?: number; revenue?: number };
+                      const count = Number(row.count) || 0;
+                      const delivered = Number(row.delivered) || 0;
+                      return (
+                        <tr key={k}>
+                          <td className="py-2">{k}</td>
+                          <td className="py-2 text-right text-muted-foreground">{count}</td>
+                          <td className="py-2 text-right">
+                            {delivered}{" "}
+                            <span className="text-[10px] text-muted-foreground">
+                              ({count ? Math.round((delivered / count) * 100) : 0}%)
+                            </span>
+                          </td>
+                          <td className="py-2 text-right font-semibold">{fmtBDT(Number(row.revenue) || 0)}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </Card>

@@ -48,9 +48,9 @@ function DashboardPage() {
         cancelled: raw.cancelled ?? 0,
         returned: raw.returned ?? 0,
         successRate: raw.successRate ?? 0,
-        series: Array.isArray(raw.series) ? raw.series : [],
-        recent: Array.isArray(raw.recent) ? raw.recent : [],
-        lowStock: Array.isArray(raw.lowStock) ? raw.lowStock : [],
+        series: Array.isArray(raw.series) ? raw.series.filter(Boolean) : [],
+        recent: Array.isArray(raw.recent) ? raw.recent.filter((o): o is NonNullable<typeof o> => !!o && !!o.id) : [],
+        lowStock: Array.isArray(raw.lowStock) ? raw.lowStock.filter((p): p is NonNullable<typeof p> => !!p && !!p.id) : [],
       }
     : null;
 
@@ -171,21 +171,25 @@ function DashboardPage() {
                   </div>
                 ) : (
                   <ul className="divide-y divide-border text-sm">
-                    {data.lowStock.map((p) => (
-                      <li key={p.id} className="flex items-center justify-between py-2">
-                        <span className="truncate pr-2">{p.title}</span>
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                            p.stock === 0
-                              ? "bg-rose-100 text-rose-700"
-                              : "bg-amber-100 text-amber-700"
-                          }`}
-                        >
-                          {p.stock === 0 && <AlertTriangle className="h-3 w-3" />}
-                          {p.stock} left
-                        </span>
-                      </li>
-                    ))}
+                    {data.lowStock.map((p) => {
+                      const stock = Number(p.stock ?? 0);
+                      const safeStock = Number.isFinite(stock) ? stock : 0;
+                      return (
+                        <li key={p.id} className="flex items-center justify-between py-2">
+                          <span className="truncate pr-2">{p.title ?? "—"}</span>
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                              safeStock === 0
+                                ? "bg-rose-100 text-rose-700"
+                                : "bg-amber-100 text-amber-700"
+                            }`}
+                          >
+                            {safeStock === 0 && <AlertTriangle className="h-3 w-3" />}
+                            {safeStock} left
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </Card>
@@ -247,7 +251,7 @@ function DashboardPage() {
                               {fmtDateShort(o.created_at)}
                             </td>
                             <td className="py-2 pl-2 text-right font-semibold">
-                              {fmtBDT(Number(o.total))}
+                              {fmtBDT(Number(o.total) || 0)}
                             </td>
                           </tr>
                         );

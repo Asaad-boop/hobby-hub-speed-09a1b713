@@ -32,7 +32,10 @@ function AnalyticsPage() {
     data: qRaw.data
       ? {
           series: Array.isArray(qRaw.data.series) ? qRaw.data.series : [],
-          stageCount: qRaw.data.stageCount ?? {},
+          stageCount:
+            qRaw.data.stageCount && typeof qRaw.data.stageCount === "object"
+              ? (qRaw.data.stageCount as Record<string, number>)
+              : ({} as Record<string, number>),
         }
       : undefined,
   };
@@ -86,7 +89,7 @@ function AnalyticsPage() {
                     <Pie
                       data={Object.entries(q.data.stageCount).map(([name, value]) => ({
                         name,
-                        value,
+                        value: Number(value) || 0,
                       }))}
                       dataKey="value"
                       nameKey="name"

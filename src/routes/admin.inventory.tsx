@@ -38,7 +38,10 @@ function InventoryPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const productRows = useMemo(() => safeArray(productsQ.data), [productsQ.data]);
+  const productRows = useMemo(
+    () => safeArray(productsQ.data).filter((p): p is NonNullable<typeof p> => !!p && !!p.id),
+    [productsQ.data],
+  );
 
   const products = useMemo(() => {
     let list = productRows;
@@ -46,8 +49,8 @@ function InventoryPage() {
       const q = search.toLowerCase();
       list = list.filter((p) => (p.title ?? "").toLowerCase().includes(q));
     }
-    if (filter === "low") list = list.filter((p) => p.stock > 0 && p.stock <= 5);
-    if (filter === "out") list = list.filter((p) => p.stock === 0);
+    if (filter === "low") list = list.filter((p) => Number(p.stock ?? 0) > 0 && Number(p.stock ?? 0) <= 5);
+    if (filter === "out") list = list.filter((p) => Number(p.stock ?? 0) === 0);
     return list;
   }, [productRows, search, filter]);
 
@@ -55,9 +58,15 @@ function InventoryPage() {
     const list = productRows;
     return {
       total: list.length,
-      out: list.filter((p) => p.stock === 0).length,
-      low: list.filter((p) => p.stock > 0 && p.stock <= 5).length,
-      value: list.reduce((s, p) => s + Number(p.price) * p.stock, 0),
+      out: list.filter((p) => Number(p.stock ?? 0) === 0).length,
+      low: list.filter((p) => Number(p.stock ?? 0) > 0 && Number(p.stock ?? 0) <= 5).length,
+      value: list.reduce((s, p) => {
+        const price = Number(p.price);
+        const stock = Number(p.stock);
+        const safePrice = Number.isFinite(price) ? price : 0;
+        const safeStock = Number.isFinite(stock) ? stock : 0;
+        return s + safePrice * safeStock;
+      }, 0),
     };
   }, [productRows]);
 
@@ -130,10 +139,12 @@ function InventoryPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {products.map((p) => {
+                    const stock = Number(p.stock ?? 0);
+                    const safeStock = Number.isFinite(stock) ? stock : 0;
                     const stockColor =
-                      p.stock === 0
+                      safeStock === 0
                         ? "bg-rose-100 text-rose-700"
-                        : p.stock <= 5
+                        : safeStock <= 5
                           ? "bg-amber-100 text-amber-700"
                           : "bg-emerald-100 text-emerald-700";
                     return (
@@ -143,15 +154,15 @@ function InventoryPage() {
                             {p.image && (
                               <img
                                 src={p.image}
-                                alt={p.title}
+                                alt={p.title ?? ""}
                                 className="h-9 w-9 shrink-0 rounded-md object-cover"
                               />
                             )}
-                            <span className="font-medium">{p.title}</span>
+                            <span className="font-medium">{p.title ?? "—"}</span>
                           </div>
                         </td>
                         <td className="px-3 py-2 text-right font-medium">
-                          {fmtBDT(Number(p.price))}
+                          {fmtBDT(Number(p.price) || 0)}
                         </td>
                         <td className="px-3 py-2 text-center">
                           <span
@@ -168,7 +179,7 @@ function InventoryPage() {
                           <span
                             className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-bold ${stockColor}`}
                           >
-                            {p.stock}
+                            {safeStock}
                           </span>
                         </td>
                         <td className="px-3 py-2">
@@ -177,7 +188,7 @@ function InventoryPage() {
                               variant="secondary"
                               size="sm"
                               onClick={() => handleAdjust(p.id, -1)}
-                              disabled={p.stock === 0 || adjustMut.isPending}
+                              disabled={safeStock === 0 || adjustMut.isPending}
                             >
                               <Minus className="h-3 w-3" />
                             </Btn>
