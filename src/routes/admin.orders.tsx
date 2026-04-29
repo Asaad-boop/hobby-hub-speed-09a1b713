@@ -1007,33 +1007,40 @@ function OrderDetailModalBody({
         <div className="mt-3">
           <PanelCard title={`Items (${detailItems.length})`} icon={<Package className="h-3 w-3" />}>
             <ul className="-mx-1 divide-y divide-border/70 text-xs">
-              {detailItems.map((it) => (
-                <li key={it.id} className="flex items-center gap-3 px-1 py-2">
-                  {it.image ? (
-                    <img
-                      src={it.image}
-                      alt=""
-                      className="h-9 w-9 rounded-md border border-border object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/40">
-                      <Package className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate font-medium text-foreground">{it.name}</div>
-                    {it.variant_label && (
-                      <div className="text-[11px] text-muted-foreground">{it.variant_label}</div>
+              {detailItems.map((it, idx) => {
+                if (!it) return null;
+                const qty = Number(it.quantity);
+                const price = Number(it.price);
+                const safeQty = Number.isFinite(qty) ? qty : 0;
+                const safePrice = Number.isFinite(price) ? price : 0;
+                return (
+                  <li key={it.id ?? `item-${idx}`} className="flex items-center gap-3 px-1 py-2">
+                    {it.image ? (
+                      <img
+                        src={it.image}
+                        alt=""
+                        className="h-9 w-9 rounded-md border border-border object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/40">
+                        <Package className="h-4 w-4 text-muted-foreground" />
+                      </div>
                     )}
-                  </div>
-                  <div className="text-right text-[11px] text-muted-foreground">
-                    {it.quantity} × {fmtBDT(Number(it.price))}
-                  </div>
-                  <div className="w-20 text-right text-xs font-semibold tabular-nums">
-                    {fmtBDT(Number(it.price) * Number(it.quantity))}
-                  </div>
-                </li>
-              ))}
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-medium text-foreground">{it.name ?? "—"}</div>
+                      {it.variant_label && (
+                        <div className="text-[11px] text-muted-foreground">{it.variant_label}</div>
+                      )}
+                    </div>
+                    <div className="text-right text-[11px] text-muted-foreground">
+                      {safeQty} × {fmtBDT(safePrice)}
+                    </div>
+                    <div className="w-20 text-right text-xs font-semibold tabular-nums">
+                      {fmtBDT(safePrice * safeQty)}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </PanelCard>
         </div>
