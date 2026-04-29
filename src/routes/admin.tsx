@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/admin/AppSidebar";
 import { TopBar } from "@/components/admin/TopBar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin")({
@@ -25,6 +26,7 @@ function AdminLayout() {
       if (!mounted) return;
       if (!session) {
         setAuthorized(false);
+        window.location.href = "/auth";
         return;
       }
       setEmail(session.user.email ?? null);
@@ -49,6 +51,30 @@ function AdminLayout() {
           </p>
         </div>
       </div>
+    );
+  }
+
+  if (authorized === null) {
+    return (
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full bg-muted/30">
+          <AppSidebar />
+          <SidebarInset className="flex flex-1 flex-col">
+            <TopBar userEmail={email} />
+            <main className="flex-1 p-6">
+              <div className="mx-auto max-w-[1400px] space-y-6">
+                <div className="space-y-2">
+                  <Skeleton className="h-8 w-48" />
+                  <Skeleton className="h-4 w-80" />
+                </div>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)}
+                </div>
+              </div>
+            </main>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
     );
   }
 
