@@ -38,7 +38,10 @@ function InventoryPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const productRows = useMemo(() => safeArray(productsQ.data), [productsQ.data]);
+  const productRows = useMemo(
+    () => safeArray(productsQ.data).filter((p): p is NonNullable<typeof p> => !!p && !!p.id),
+    [productsQ.data],
+  );
 
   const products = useMemo(() => {
     let list = productRows;
@@ -46,8 +49,8 @@ function InventoryPage() {
       const q = search.toLowerCase();
       list = list.filter((p) => (p.title ?? "").toLowerCase().includes(q));
     }
-    if (filter === "low") list = list.filter((p) => p.stock > 0 && p.stock <= 5);
-    if (filter === "out") list = list.filter((p) => p.stock === 0);
+    if (filter === "low") list = list.filter((p) => Number(p.stock ?? 0) > 0 && Number(p.stock ?? 0) <= 5);
+    if (filter === "out") list = list.filter((p) => Number(p.stock ?? 0) === 0);
     return list;
   }, [productRows, search, filter]);
 
@@ -55,9 +58,15 @@ function InventoryPage() {
     const list = productRows;
     return {
       total: list.length,
-      out: list.filter((p) => p.stock === 0).length,
-      low: list.filter((p) => p.stock > 0 && p.stock <= 5).length,
-      value: list.reduce((s, p) => s + Number(p.price) * p.stock, 0),
+      out: list.filter((p) => Number(p.stock ?? 0) === 0).length,
+      low: list.filter((p) => Number(p.stock ?? 0) > 0 && Number(p.stock ?? 0) <= 5).length,
+      value: list.reduce((s, p) => {
+        const price = Number(p.price);
+        const stock = Number(p.stock);
+        const safePrice = Number.isFinite(price) ? price : 0;
+        const safeStock = Number.isFinite(stock) ? stock : 0;
+        return s + safePrice * safeStock;
+      }, 0),
     };
   }, [productRows]);
 
