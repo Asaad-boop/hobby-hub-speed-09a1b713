@@ -139,10 +139,12 @@ function InventoryPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {products.map((p) => {
+                    const stock = Number(p.stock ?? 0);
+                    const safeStock = Number.isFinite(stock) ? stock : 0;
                     const stockColor =
-                      p.stock === 0
+                      safeStock === 0
                         ? "bg-rose-100 text-rose-700"
-                        : p.stock <= 5
+                        : safeStock <= 5
                           ? "bg-amber-100 text-amber-700"
                           : "bg-emerald-100 text-emerald-700";
                     return (
@@ -152,15 +154,15 @@ function InventoryPage() {
                             {p.image && (
                               <img
                                 src={p.image}
-                                alt={p.title}
+                                alt={p.title ?? ""}
                                 className="h-9 w-9 shrink-0 rounded-md object-cover"
                               />
                             )}
-                            <span className="font-medium">{p.title}</span>
+                            <span className="font-medium">{p.title ?? "—"}</span>
                           </div>
                         </td>
                         <td className="px-3 py-2 text-right font-medium">
-                          {fmtBDT(Number(p.price))}
+                          {fmtBDT(Number(p.price) || 0)}
                         </td>
                         <td className="px-3 py-2 text-center">
                           <span
@@ -177,7 +179,7 @@ function InventoryPage() {
                           <span
                             className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-bold ${stockColor}`}
                           >
-                            {p.stock}
+                            {safeStock}
                           </span>
                         </td>
                         <td className="px-3 py-2">
@@ -186,7 +188,7 @@ function InventoryPage() {
                               variant="secondary"
                               size="sm"
                               onClick={() => handleAdjust(p.id, -1)}
-                              disabled={p.stock === 0 || adjustMut.isPending}
+                              disabled={safeStock === 0 || adjustMut.isPending}
                             >
                               <Minus className="h-3 w-3" />
                             </Btn>
