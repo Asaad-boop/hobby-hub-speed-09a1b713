@@ -406,7 +406,7 @@ function OrdersPage() {
                           </td>
                           <td className="px-3 py-2.5">
                             <div className="font-mono text-xs font-semibold text-foreground">
-                              #{shortId(o.id)}
+                              {shortId(o.id)}
                             </div>
                             {o.is_guest_order && (
                               <div className="mt-0.5 inline-block rounded bg-amber-50 px-1 text-[9px] font-medium uppercase tracking-wider text-amber-700">
