@@ -89,7 +89,7 @@ function AnalyticsPage() {
                     <Pie
                       data={Object.entries(q.data.stageCount).map(([name, value]) => ({
                         name,
-                        value,
+                        value: Number(value) || 0,
                       }))}
                       dataKey="value"
                       nameKey="name"
