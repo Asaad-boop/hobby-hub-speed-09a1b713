@@ -345,182 +345,177 @@ function OrdersPage() {
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 overflow-auto px-6 py-4">
-          {ordersQ.isLoading ? (
-            <Loading />
-          ) : orders.length === 0 ? (
-            <Empty label="No orders found" />
-          ) : (
-            <Card className="overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="sticky top-0 z-[1] bg-gradient-to-b from-muted/80 to-muted/50 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground backdrop-blur">
-                    <tr className="border-b border-border">
-                      <th className="w-10 px-3 py-3">
-                        <Checkbox
-                          checked={allChecked}
-                          onCheckedChange={(v) =>
-                            setSelected(v ? orders.map((o) => o.id) : [])
-                          }
-                        />
-                      </th>
-                      <th className="px-3 py-3 text-left">Order</th>
-                      <th className="px-3 py-3 text-left">Customer</th>
-                      <th className="px-3 py-3 text-left">Location</th>
-                      <th className="px-3 py-3 text-right">Amount</th>
-                      <th className="px-3 py-3 text-left">Stage</th>
-                      <th className="px-3 py-3 text-left">Courier</th>
-                      <th className="px-3 py-3 text-left">Date</th>
-                      <th className="px-3 py-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/70">
-                    {orders.map((o) => {
-                      const stage = deriveStage({
-                        status: o.status,
-                        confirmation_status: o.confirmation_status,
-                        call_status: o.call_status,
-                        hold_until: o.hold_until,
-                        advance_amount: o.advance_amount,
-                      });
-                      const isSel = selected.includes(o.id);
-                      const isOpen = openOrderId === o.id;
-                      const name = o.shipping_name ?? o.guest_name ?? "—";
-                      const phone = o.shipping_phone ?? o.guest_phone ?? "—";
-                      const ageHrs = (Date.now() - new Date(o.created_at).getTime()) / 3600_000;
-                      const isUrgent = ageHrs > 24 && (stage === "processing" || stage === "call_not_received");
-                      return (
-                        <tr
-                          key={o.id}
-                          className={`group relative cursor-pointer transition-colors ${
-                            isSel
-                              ? "bg-[#1D9E75]/[0.06] hover:bg-[#1D9E75]/[0.10]"
-                              : isOpen
-                                ? "bg-muted/60"
-                                : "hover:bg-muted/30"
-                          }`}
-                          onClick={() => setOpenOrderId(o.id)}
-                        >
-                          <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
-                            <div className="relative">
-                              {isSel && (
-                                <span className="absolute -left-3 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-full bg-[#1D9E75]" />
-                              )}
-                              <Checkbox
-                                checked={isSel}
-                                onCheckedChange={(v) =>
-                                  setSelected((prev) =>
-                                    v ? [...prev, o.id] : prev.filter((x) => x !== o.id),
-                                  )
-                                }
-                              />
-                            </div>
-                          </td>
-                          <td className="px-3 py-3">
-                            <div className="font-mono text-xs font-semibold text-foreground">
-                              {shortId(o.id)}
-                            </div>
-                            <div className="mt-1 flex items-center gap-1">
-                              {o.is_guest_order && (
-                                <span className="inline-block rounded bg-amber-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-inset ring-amber-200">
-                                  Guest
-                                </span>
-                              )}
-                              {isUrgent && (
-                                <span className="inline-block rounded bg-rose-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-rose-700 ring-1 ring-inset ring-rose-200">
-                                  {Math.floor(ageHrs / 24)}d old
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-3 py-3">
-                            <div className="flex items-center gap-2.5">
-                              <div
-                                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ring-2 ring-white shadow-sm ${avatarColor(name)}`}
-                              >
-                                {initials(name)}
-                              </div>
-                              <div className="min-w-0">
-                                <div className="truncate font-medium text-foreground">{name}</div>
-                                <div className="truncate font-mono text-[11px] text-muted-foreground">
-                                  {phone}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-3 py-3">
-                            <div className="text-xs font-medium text-foreground">
-                              {o.shipping_city ?? "—"}
-                            </div>
-                            {o.shipping_district && (
-                              <div className="text-[11px] text-muted-foreground">
-                                {o.shipping_district}
-                              </div>
+      <div className="flex-1 overflow-auto px-6 py-4">
+        {ordersQ.isLoading ? (
+          <Loading />
+        ) : orders.length === 0 ? (
+          <Empty label="No orders found" />
+        ) : (
+          <Card className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 z-[1] bg-gradient-to-b from-muted/80 to-muted/50 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground backdrop-blur">
+                  <tr className="border-b border-border">
+                    <th className="w-10 px-3 py-3">
+                      <Checkbox
+                        checked={allChecked}
+                        onCheckedChange={(v) =>
+                          setSelected(v ? orders.map((o) => o.id) : [])
+                        }
+                      />
+                    </th>
+                    <th className="px-3 py-3 text-left">Order</th>
+                    <th className="px-3 py-3 text-left">Customer</th>
+                    <th className="px-3 py-3 text-left">Location</th>
+                    <th className="px-3 py-3 text-right">Amount</th>
+                    <th className="px-3 py-3 text-left">Stage</th>
+                    <th className="px-3 py-3 text-left">Courier</th>
+                    <th className="px-3 py-3 text-left">Date</th>
+                    <th className="px-3 py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/70">
+                  {orders.map((o) => {
+                    const stage = deriveStage({
+                      status: o.status,
+                      confirmation_status: o.confirmation_status,
+                      call_status: o.call_status,
+                      hold_until: o.hold_until,
+                      advance_amount: o.advance_amount,
+                    });
+                    const isSel = selected.includes(o.id);
+                    const isOpen = openOrderId === o.id;
+                    const name = o.shipping_name ?? o.guest_name ?? "—";
+                    const phone = o.shipping_phone ?? o.guest_phone ?? "—";
+                    const ageHrs = (Date.now() - new Date(o.created_at).getTime()) / 3600_000;
+                    const isUrgent = ageHrs > 24 && (stage === "processing" || stage === "call_not_received");
+                    return (
+                      <tr
+                        key={o.id}
+                        className={`group relative cursor-pointer transition-colors ${
+                          isSel
+                            ? "bg-[#1D9E75]/[0.06] hover:bg-[#1D9E75]/[0.10]"
+                            : isOpen
+                              ? "bg-muted/60"
+                              : "hover:bg-muted/30"
+                        }`}
+                        onClick={() => setOpenOrderId(o.id)}
+                      >
+                        <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                          <div className="relative">
+                            {isSel && (
+                              <span className="absolute -left-3 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-full bg-[#1D9E75]" />
                             )}
-                          </td>
-                          <td className="px-3 py-3 text-right">
-                            <div className="font-semibold tabular-nums text-foreground">
-                              {fmtBDT(Number(o.total))}
-                            </div>
-                            <div className="mt-0.5 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-600">
-                              {(o.payment_method ?? "COD").toUpperCase()}
-                            </div>
-                          </td>
-                          <td className="px-3 py-3">
-                            <StageBadge stage={stage} />
-                          </td>
-                          <td className="px-3 py-3">
-                            {o.courier_name ? (
-                              <>
-                                <div className="text-xs font-medium">{o.courier_name}</div>
-                                {o.tracking_number && (
-                                  <div className="font-mono text-[10px] text-muted-foreground">
-                                    {o.tracking_number}
-                                  </div>
-                                )}
-                              </>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">—</span>
+                            <Checkbox
+                              checked={isSel}
+                              onCheckedChange={(v) =>
+                                setSelected((prev) =>
+                                  v ? [...prev, o.id] : prev.filter((x) => x !== o.id),
+                                )
+                              }
+                            />
+                          </div>
+                        </td>
+                        <td className="px-3 py-3">
+                          <div className="font-mono text-xs font-semibold text-foreground">
+                            {shortId(o.id)}
+                          </div>
+                          <div className="mt-1 flex items-center gap-1">
+                            {o.is_guest_order && (
+                              <span className="inline-block rounded bg-amber-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-inset ring-amber-200">
+                                Guest
+                              </span>
                             )}
-                          </td>
-                          <td className="px-3 py-3 text-xs text-muted-foreground">
-                            {fmtDateShort(o.created_at)}
-                          </td>
-                          <td
-                            className="px-3 py-3 text-right"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Btn
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handlePrintInvoice(o.id)}
-                              title="Print invoice"
+                            {isUrgent && (
+                              <span className="inline-block rounded bg-rose-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-rose-700 ring-1 ring-inset ring-rose-200">
+                                {Math.floor(ageHrs / 24)}d old
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-3 py-3">
+                          <div className="flex items-center gap-2.5">
+                            <div
+                              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ring-2 ring-white shadow-sm ${avatarColor(name)}`}
                             >
-                              <Printer className="h-3.5 w-3.5" />
-                            </Btn>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
-
-          )}
-        </div>
-
-        {/* Detail drawer */}
-        {openOrderId && (
-          <OrderDetailDrawer
-            id={openOrderId}
-            onClose={() => setOpenOrderId(null)}
-            onMoveStage={(stage) => moveStage(openOrderId, stage)}
-            onPrintInvoice={() => handlePrintInvoice(openOrderId)}
-          />
+                              {initials(name)}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="truncate font-medium text-foreground">{name}</div>
+                              <div className="truncate font-mono text-[11px] text-muted-foreground">
+                                {phone}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 py-3">
+                          <div className="text-xs font-medium text-foreground">
+                            {o.shipping_city ?? "—"}
+                          </div>
+                          {o.shipping_district && (
+                            <div className="text-[11px] text-muted-foreground">
+                              {o.shipping_district}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-3 py-3 text-right">
+                          <div className="font-semibold tabular-nums text-foreground">
+                            {fmtBDT(Number(o.total))}
+                          </div>
+                          <div className="mt-0.5 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-600">
+                            {(o.payment_method ?? "COD").toUpperCase()}
+                          </div>
+                        </td>
+                        <td className="px-3 py-3">
+                          <StageBadge stage={stage} />
+                        </td>
+                        <td className="px-3 py-3">
+                          {o.courier_name ? (
+                            <>
+                              <div className="text-xs font-medium">{o.courier_name}</div>
+                              {o.tracking_number && (
+                                <div className="font-mono text-[10px] text-muted-foreground">
+                                  {o.tracking_number}
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="px-3 py-3 text-xs text-muted-foreground">
+                          {fmtDateShort(o.created_at)}
+                        </td>
+                        <td
+                          className="px-3 py-3 text-right"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Btn
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handlePrintInvoice(o.id)}
+                            title="Print invoice"
+                          >
+                            <Printer className="h-3.5 w-3.5" />
+                          </Btn>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </Card>
         )}
       </div>
+
+      {/* Detail modal */}
+      <OrderDetailModal
+        id={openOrderId}
+        onClose={() => setOpenOrderId(null)}
+        onMoveStage={(stage) => openOrderId && moveStage(openOrderId, stage)}
+        onPrintInvoice={() => openOrderId && handlePrintInvoice(openOrderId)}
+      />
     </div>
   );
 }
