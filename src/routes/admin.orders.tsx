@@ -519,14 +519,24 @@ function OrdersPage() {
                           className="px-3 py-3 text-right"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <Btn
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handlePrintInvoice(o.id)}
-                            title="Print invoice"
-                          >
-                            <Printer className="h-3.5 w-3.5" />
-                          </Btn>
+                          <div className="flex items-center justify-end gap-1">
+                            <Btn
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handlePreviewInvoice(o.id)}
+                              title="Preview invoice"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                            </Btn>
+                            <Btn
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handlePrintInvoice(o.id)}
+                              title="Download invoice"
+                            >
+                              <Printer className="h-3.5 w-3.5" />
+                            </Btn>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -544,8 +554,70 @@ function OrdersPage() {
         onClose={() => setOpenOrderId(null)}
         onMoveStage={(stage) => openOrderId && moveStage(openOrderId, stage)}
         onPrintInvoice={() => openOrderId && handlePrintInvoice(openOrderId)}
+        onPreviewInvoice={() => openOrderId && handlePreviewInvoice(openOrderId)}
+      />
+
+      {/* Invoice preview modal */}
+      <InvoicePreviewModal
+        preview={invoicePreview}
+        loading={previewLoading}
+        onClose={closeInvoicePreview}
+        onDownload={() => invoicePreview && handlePrintInvoice(invoicePreview.orderId)}
       />
     </div>
+  );
+}
+
+function InvoicePreviewModal({
+  preview,
+  loading,
+  onClose,
+  onDownload,
+}: {
+  preview: { url: string; filename: string; orderId: string } | null;
+  loading: boolean;
+  onClose: () => void;
+  onDownload: () => void;
+}) {
+  const open = !!preview || loading;
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-5xl w-[95vw] h-[92vh] p-0 gap-0 flex flex-col">
+        <DialogHeader className="flex flex-row items-center justify-between gap-3 border-b px-4 py-3 space-y-0">
+          <DialogTitle className="text-sm font-semibold">
+            Invoice Preview {preview?.filename ? `— ${preview.filename}` : ""}
+          </DialogTitle>
+          <div className="flex items-center gap-2">
+            <Btn
+              variant="primary"
+              size="sm"
+              onClick={onDownload}
+              disabled={!preview}
+            >
+              <Download className="h-3.5 w-3.5 mr-1.5" />
+              Download
+            </Btn>
+            <Btn variant="ghost" size="sm" onClick={onClose} title="Close">
+              <X className="h-4 w-4" />
+            </Btn>
+          </div>
+        </DialogHeader>
+        <div className="flex-1 bg-muted/30 overflow-hidden">
+          {loading || !preview ? (
+            <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+              <Loading />
+            </div>
+          ) : (
+            <iframe
+              key={preview.url}
+              src={preview.url}
+              title="Invoice preview"
+              className="w-full h-full border-0 bg-white"
+            />
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
