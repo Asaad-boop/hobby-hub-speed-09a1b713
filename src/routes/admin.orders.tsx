@@ -824,7 +824,7 @@ function OrderDetailModalBody({
     hold_until: o.hold_until,
     advance_amount: o.advance_amount,
   });
-  void name;
+  
   const subtotal = Number(o.subtotal ?? 0);
   const liveTotal =
     subtotal + (Number(form.shipping_fee) || 0) - (Number(form.discount_amount) || 0);
