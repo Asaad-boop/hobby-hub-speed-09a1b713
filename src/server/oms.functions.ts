@@ -4,12 +4,25 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
+
+async function requireAdmin(userId: string) {
+  const { data, error } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Forbidden: admin only");
+}
 
 // ----------------- DASHBOARD -----------------
 export const getDashboardStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayIso = today.toISOString();
@@ -112,7 +125,8 @@ export const listOrders = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => listOrdersInput.parse(input))
   .handler(async ({ context, data }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     let q = supabase
       .from("orders")
       .select(
