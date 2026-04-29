@@ -261,7 +261,9 @@ export const adjustStock = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => adjustStockInput.parse(input))
   .handler(async ({ context, data }) => {
-    const { supabase, userId } = context;
+    const { userId } = context;
+    await requireAdmin(userId);
+    const supabase = supabaseAdmin;
     const { data: prod, error: getErr } = await supabase
       .from("products")
       .select("stock")
@@ -291,7 +293,8 @@ export const adjustStock = createServerFn({ method: "POST" })
 export const listCustomers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     const { data, error } = await supabase
       .from("profiles")
       .select(
@@ -312,7 +315,8 @@ export const getSalesReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => reportInput.parse(input))
   .handler(async ({ context, data }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     const { data: rows, error } = await supabase
       .from("orders")
       .select("id,total,status,courier_name,created_at,delivered_at")
