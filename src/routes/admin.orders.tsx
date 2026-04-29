@@ -538,7 +538,7 @@ function OrderDetailModal({
 }) {
   return (
     <Dialog open={!!id} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[92vh] w-[96vw] max-w-4xl overflow-hidden p-0 sm:rounded-2xl">
+      <DialogContent className="max-h-[94vh] w-[96vw] max-w-3xl overflow-hidden border-0 bg-transparent p-0 shadow-2xl sm:rounded-2xl">
         {id && (
           <OrderDetailModalBody
             id={id}
