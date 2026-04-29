@@ -251,7 +251,7 @@ function DashboardPage() {
                               {fmtDateShort(o.created_at)}
                             </td>
                             <td className="py-2 pl-2 text-right font-semibold">
-                              {fmtBDT(Number(o.total))}
+                              {fmtBDT(Number(o.total) || 0)}
                             </td>
                           </tr>
                         );
