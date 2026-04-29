@@ -26,7 +26,16 @@ export const Route = createFileRoute("/admin/analytics")({
 const COLORS = ["#94a3b8", "#10b981", "#0ea5e9", "#22c55e", "#f43f5e", "#a1a1aa"];
 
 function AnalyticsPage() {
-  const q = useQuery({ queryKey: ["oms", "dashboard"], queryFn: () => getDashboardStats() });
+  const qRaw = useQuery({ queryKey: ["oms", "dashboard"], queryFn: () => getDashboardStats() });
+  const q = {
+    ...qRaw,
+    data: qRaw.data
+      ? {
+          series: Array.isArray(qRaw.data.series) ? qRaw.data.series : [],
+          stageCount: qRaw.data.stageCount ?? {},
+        }
+      : undefined,
+  };
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
