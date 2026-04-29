@@ -16,7 +16,8 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useOpsStore } from "@/lib/ops-store";
+import { useOpsStore, type DataSource } from "@/lib/ops-store";
+import type { MockOrder, MockOrderItem } from "@/lib/mock-data";
 
 const TITLES: Record<string, string> = {
   dashboard: "Dashboard",
@@ -26,36 +27,27 @@ const TITLES: Record<string, string> = {
   reports: "Reports",
 };
 
-type OrderItem = {
-  id?: string;
-  name: string;
-  image: string | null;
-  quantity: number;
-  price: number;
-  unit_price?: number | null;
-  variant_label?: string | null;
-  line_total?: number | null;
-};
-
-type OrderRow = {
+// Normalized shape used by the UI (works for both mock + live)
+type UIOrder = {
   id: string;
-  created_at: string;
-  shipping_name: string | null;
-  shipping_phone: string | null;
-  shipping_address: string | null;
-  shipping_city: string | null;
-  shipping_district: string | null;
-  shipping_thana: string | null;
-  guest_name: string | null;
-  guest_phone: string | null;
-  guest_email: string | null;
+  shortId: string;
+  createdAt: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string | null;
+  shippingAddress: string | null;
+  shippingCity: string | null;
+  shippingDistrict?: string | null;
+  shippingThana?: string | null;
+  items: MockOrderItem[];
+  subtotal: number;
+  shippingFee: number;
+  discount: number;
   total: number;
-  subtotal: number | null;
-  shipping_fee: number | null;
-  discount_amount: number | null;
   status: string;
-  payment_method: string | null;
-  order_items: OrderItem[] | null;
+  courier?: string | null;
+  paymentMethod?: string | null;
+  fraudScore: number;
 };
 
 const STATUS_STYLES: Record<string, string> = {
@@ -74,20 +66,14 @@ const STATUS_STYLES: Record<string, string> = {
 function StatusBadge({ status }: { status: string }) {
   const cls = STATUS_STYLES[status] ?? "bg-gray-100 text-gray-700 ring-gray-200";
   return (
-    <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${cls}`}
-    >
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${cls}`}>
       {status.replace(/_/g, " ")}
     </span>
   );
 }
 
 const formatBDT = (n: number) =>
-  new Intl.NumberFormat("en-BD", {
-    style: "currency",
-    currency: "BDT",
-    maximumFractionDigits: 0,
-  })
+  new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT", maximumFractionDigits: 0 })
     .format(n)
     .replace("BDT", "৳");
 
@@ -100,27 +86,53 @@ function formatDate(iso: string) {
   );
 }
 
-// Deterministic placeholder fraud score from order id
-function fraudScoreFor(id: string): number {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return h % 100;
-}
-
 function fraudTone(score: number) {
   if (score < 30) return { label: "Low risk", color: "text-[#1D9E75]", bg: "bg-[#1D9E75]/10", ring: "ring-[#1D9E75]/20" };
   if (score < 65) return { label: "Medium risk", color: "text-amber-700", bg: "bg-amber-50", ring: "ring-amber-200" };
   return { label: "High risk", color: "text-rose-700", bg: "bg-rose-50", ring: "ring-rose-200" };
 }
 
+function fraudScoreFromId(id: string) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return h % 100;
+}
+
+function mockToUI(o: MockOrder): UIOrder {
+  return {
+    id: o.id,
+    shortId: o.id,
+    createdAt: o.createdAt,
+    customerName: o.customerName,
+    customerPhone: o.customerPhone,
+    shippingAddress: o.shippingAddress,
+    shippingCity: o.shippingCity,
+    items: o.items,
+    subtotal: o.subtotal,
+    shippingFee: o.shippingFee,
+    discount: o.discount,
+    total: o.total,
+    status: o.status,
+    courier: o.courier,
+    paymentMethod: o.paymentMethod,
+    fraudScore: o.fraudScore,
+  };
+}
+
 function OrdersWorkspace() {
-  const [orders, setOrders] = useState<OrderRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const dataSource = useOpsStore((s) => s.dataSource);
+  const setDataSource = useOpsStore((s) => s.setDataSource);
+  const mockOrders = useOpsStore((s) => s.orders);
+  const updateOrderStatus = useOpsStore((s) => s.updateOrderStatus);
+  const selectedId = useOpsStore((s) => s.selectedOrderId);
+  const selectOrder = useOpsStore((s) => s.selectOrder);
+
+  const [liveOrders, setLiveOrders] = useState<UIOrder[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
-  const load = async () => {
+  const loadLive = async () => {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
@@ -128,40 +140,90 @@ function OrdersWorkspace() {
       .select(
         `id, created_at, shipping_name, shipping_phone, shipping_address, shipping_city,
          shipping_district, shipping_thana, guest_name, guest_phone, guest_email,
-         total, subtotal, shipping_fee, discount_amount, status, payment_method,
+         total, subtotal, shipping_fee, discount_amount, status, payment_method, courier_name,
          order_items ( id, name, image, quantity, price, unit_price, variant_label, line_total )`,
       )
       .order("created_at", { ascending: false })
       .limit(100);
-    if (error) setError(error.message);
-    else {
-      const rows = (data ?? []) as OrderRow[];
-      setOrders(rows);
-      if (!selectedId && rows.length) setSelectedId(rows[0].id);
+
+    if (error) {
+      setError(error.message);
+    } else {
+      const mapped: UIOrder[] = (data ?? []).map((o: any) => ({
+        id: o.id,
+        shortId: `#${String(o.id).slice(0, 8)}`,
+        createdAt: o.created_at,
+        customerName: o.shipping_name || o.guest_name || "—",
+        customerPhone: o.shipping_phone || o.guest_phone || "",
+        customerEmail: o.guest_email,
+        shippingAddress: o.shipping_address,
+        shippingCity: o.shipping_city,
+        shippingDistrict: o.shipping_district,
+        shippingThana: o.shipping_thana,
+        items: (o.order_items ?? []).map((it: any) => ({
+          productId: it.id ?? "",
+          name: it.name,
+          image: it.image ?? "",
+          quantity: it.quantity ?? 1,
+          unitPrice: Number(it.unit_price ?? it.price) || 0,
+          lineTotal: Number(it.line_total ?? Number(it.price) * (it.quantity ?? 1)) || 0,
+        })),
+        subtotal: Number(o.subtotal ?? 0),
+        shippingFee: Number(o.shipping_fee ?? 0),
+        discount: Number(o.discount_amount ?? 0),
+        total: Number(o.total ?? 0),
+        status: o.status,
+        courier: o.courier_name,
+        paymentMethod: o.payment_method,
+        fraudScore: fraudScoreFromId(o.id),
+      }));
+      setLiveOrders(mapped);
+      if (mapped.length && (!selectedId || !mapped.find((m) => m.id === selectedId))) {
+        selectOrder(mapped[0].id);
+      }
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    load();
+    if (dataSource === "live") loadLive();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dataSource]);
+
+  const orders: UIOrder[] = dataSource === "mock" ? mockOrders.map(mockToUI) : liveOrders;
+
+  // Default selection for mock view
+  useEffect(() => {
+    if (dataSource === "mock" && orders.length && (!selectedId || !orders.find((o) => o.id === selectedId))) {
+      selectOrder(orders[0].id);
+    }
+  }, [dataSource, orders, selectedId, selectOrder]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return orders;
-    return orders.filter((o) => {
-      const name = (o.shipping_name || o.guest_name || "").toLowerCase();
-      const phone = (o.shipping_phone || o.guest_phone || "").toLowerCase();
-      return (
-        name.includes(q) ||
-        phone.includes(q) ||
-        o.id.toLowerCase().includes(q)
-      );
-    });
+    return orders.filter(
+      (o) =>
+        o.customerName.toLowerCase().includes(q) ||
+        o.customerPhone.toLowerCase().includes(q) ||
+        o.id.toLowerCase().includes(q),
+    );
   }, [orders, search]);
 
   const selected = orders.find((o) => o.id === selectedId) ?? null;
+
+  const handleConfirm = () => {
+    if (!selected) return;
+    if (dataSource === "mock") updateOrderStatus(selected.id, "confirmed");
+  };
+  const handleReject = () => {
+    if (!selected) return;
+    if (dataSource === "mock") updateOrderStatus(selected.id, "cancelled");
+  };
+  const handleShip = () => {
+    if (!selected) return;
+    if (dataSource === "mock") updateOrderStatus(selected.id, "shipped");
+  };
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] flex-col">
@@ -170,17 +232,22 @@ function OrdersWorkspace() {
         <div>
           <h2 className="text-base font-semibold tracking-tight text-foreground">Orders</h2>
           <p className="text-xs text-muted-foreground">
-            {orders.length} orders loaded from Supabase
+            {orders.length} orders · {dataSource === "mock" ? "Mock data" : "Live from Supabase"}
           </p>
         </div>
-        <button
-          onClick={load}
-          disabled={loading}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2.5 text-xs font-medium text-foreground shadow-sm transition hover:bg-gray-50 disabled:opacity-50"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <DataSourceToggle value={dataSource} onChange={setDataSource} />
+          {dataSource === "live" && (
+            <button
+              onClick={loadLive}
+              disabled={loading}
+              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2.5 text-xs font-medium text-foreground shadow-sm transition hover:bg-gray-50 disabled:opacity-50"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+              Refresh
+            </button>
+          )}
+        </div>
       </div>
 
       {/* 3-panel body */}
@@ -213,13 +280,11 @@ function OrdersWorkspace() {
             ) : (
               <ul className="divide-y divide-gray-100">
                 {filtered.map((o) => {
-                  const name = o.shipping_name || o.guest_name || "—";
-                  const phone = o.shipping_phone || o.guest_phone || "";
                   const isActive = o.id === selectedId;
                   return (
                     <li key={o.id}>
                       <button
-                        onClick={() => setSelectedId(o.id)}
+                        onClick={() => selectOrder(o.id)}
                         className={`flex w-full flex-col items-stretch gap-1 px-4 py-3 text-left transition ${
                           isActive
                             ? "bg-[#1D9E75]/8 ring-1 ring-inset ring-[#1D9E75]/20"
@@ -228,20 +293,20 @@ function OrdersWorkspace() {
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-mono text-[11px] text-muted-foreground">
-                            #{o.id.slice(0, 8)}
+                            {dataSource === "mock" ? o.id : `#${o.id.slice(0, 8)}`}
                           </span>
                           <StatusBadge status={o.status} />
                         </div>
                         <div className="truncate text-sm font-medium text-foreground">
-                          {name}
+                          {o.customerName}
                         </div>
                         <div className="flex items-center justify-between text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Phone className="h-3 w-3" />
-                            {phone || "—"}
+                            {o.customerPhone || "—"}
                           </span>
                           <span className="font-semibold text-foreground">
-                            {formatBDT(Number(o.total) || 0)}
+                            {formatBDT(o.total)}
                           </span>
                         </div>
                       </button>
@@ -266,7 +331,9 @@ function OrdersWorkspace() {
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-muted-foreground">
                     Order{" "}
-                    <span className="font-mono text-foreground">#{selected.id.slice(0, 8)}</span>
+                    <span className="font-mono text-foreground">
+                      {dataSource === "mock" ? selected.id : `#${selected.id.slice(0, 8)}`}
+                    </span>
                   </span>
                   <StatusBadge status={selected.status} />
                 </div>
@@ -279,15 +346,24 @@ function OrdersWorkspace() {
                     <MessageCircle className="h-4 w-4" />
                     WhatsApp
                   </button>
-                  <button className="inline-flex h-9 items-center gap-1.5 rounded-md bg-rose-50 px-3 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200 transition hover:bg-rose-100">
+                  <button
+                    onClick={handleReject}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-md bg-rose-50 px-3 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200 transition hover:bg-rose-100"
+                  >
                     <XCircle className="h-4 w-4" />
                     Reject
                   </button>
-                  <button className="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-foreground shadow-sm transition hover:bg-gray-50">
+                  <button
+                    onClick={handleShip}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-foreground shadow-sm transition hover:bg-gray-50"
+                  >
                     <Truck className="h-4 w-4" />
                     Ship
                   </button>
-                  <button className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[#1D9E75] px-3.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#178A65]">
+                  <button
+                    onClick={handleConfirm}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[#1D9E75] px-3.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#178A65]"
+                  >
                     <CheckCircle2 className="h-4 w-4" />
                     Confirm Order
                   </button>
@@ -311,17 +387,34 @@ function OrdersWorkspace() {
   );
 }
 
-function OrderDetail({ order }: { order: OrderRow }) {
-  const customerName = order.shipping_name || order.guest_name || "—";
-  const customerPhone = order.shipping_phone || order.guest_phone || "—";
-  const items = order.order_items ?? [];
-  const score = fraudScoreFor(order.id);
-  const tone = fraudTone(score);
+function DataSourceToggle({
+  value,
+  onChange,
+}: {
+  value: DataSource;
+  onChange: (v: DataSource) => void;
+}) {
+  return (
+    <div className="inline-flex rounded-md border border-gray-200 bg-gray-50 p-0.5 text-xs font-medium">
+      {(["mock", "live"] as DataSource[]).map((opt) => (
+        <button
+          key={opt}
+          onClick={() => onChange(opt)}
+          className={`rounded px-2.5 py-1 transition ${
+            value === opt
+              ? "bg-white text-foreground shadow-sm ring-1 ring-gray-200"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {opt === "mock" ? "Mock" : "Live"}
+        </button>
+      ))}
+    </div>
+  );
+}
 
-  const subtotal = Number(order.subtotal ?? 0);
-  const shippingFee = Number(order.shipping_fee ?? 0);
-  const discount = Number(order.discount_amount ?? 0);
-  const total = Number(order.total ?? 0);
+function OrderDetail({ order }: { order: UIOrder }) {
+  const tone = fraudTone(order.fraudScore);
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
@@ -330,40 +423,44 @@ function OrderDetail({ order }: { order: OrderRow }) {
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold tracking-tight text-foreground">
-              Order #{order.id.slice(0, 8)}
+              Order {order.id.startsWith("ORD-") ? order.id : `#${order.id.slice(0, 8)}`}
             </h3>
             <StatusBadge status={order.status} />
+            {order.courier && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-700 ring-1 ring-inset ring-gray-200">
+                <Truck className="h-3 w-3" />
+                {order.courier}
+              </span>
+            )}
           </div>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Placed on {formatDate(order.created_at)}
+            Placed on {formatDate(order.createdAt)}
           </p>
         </div>
-        <div
-          className={`flex flex-col items-end rounded-lg px-3 py-2 ring-1 ring-inset ${tone.bg} ${tone.ring}`}
-        >
+        <div className={`flex flex-col items-end rounded-lg px-3 py-2 ring-1 ring-inset ${tone.bg} ${tone.ring}`}>
           <div className="flex items-center gap-1.5">
             <ShieldAlert className={`h-3.5 w-3.5 ${tone.color}`} />
             <span className={`text-[11px] font-semibold uppercase tracking-wide ${tone.color}`}>
               Fraud Score
             </span>
           </div>
-          <div className={`mt-0.5 text-xl font-bold ${tone.color}`}>{score}</div>
-          <div className={`text-[10px] ${tone.color}`}>{tone.label} (placeholder)</div>
+          <div className={`mt-0.5 text-xl font-bold ${tone.color}`}>{order.fraudScore}</div>
+          <div className={`text-[10px] ${tone.color}`}>{tone.label}</div>
         </div>
       </div>
 
       {/* Customer + Address */}
       <div className="grid gap-4 md:grid-cols-2">
         <Section icon={<User className="h-4 w-4" />} title="Customer">
-          <Field label="Name" value={customerName} />
-          <Field label="Phone" value={customerPhone} />
-          {order.guest_email && <Field label="Email" value={order.guest_email} />}
+          <Field label="Name" value={order.customerName} />
+          <Field label="Phone" value={order.customerPhone || "—"} />
+          {order.customerEmail && <Field label="Email" value={order.customerEmail} />}
         </Section>
 
         <Section icon={<MapPin className="h-4 w-4" />} title="Shipping Address">
-          <p className="text-sm text-foreground">{order.shipping_address || "—"}</p>
+          <p className="text-sm text-foreground">{order.shippingAddress || "—"}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            {[order.shipping_thana, order.shipping_city, order.shipping_district]
+            {[order.shippingThana, order.shippingCity, order.shippingDistrict]
               .filter(Boolean)
               .join(", ") || "—"}
           </p>
@@ -371,13 +468,13 @@ function OrderDetail({ order }: { order: OrderRow }) {
       </div>
 
       {/* Items */}
-      <Section icon={<Package className="h-4 w-4" />} title={`Items (${items.length})`}>
-        {items.length === 0 ? (
+      <Section icon={<Package className="h-4 w-4" />} title={`Items (${order.items.length})`}>
+        {order.items.length === 0 ? (
           <p className="text-xs text-muted-foreground">No items.</p>
         ) : (
           <ul className="divide-y divide-gray-100">
-            {items.map((it, i) => (
-              <li key={it.id ?? i} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+            {order.items.map((it, i) => (
+              <li key={i} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
                 <div className="h-12 w-12 shrink-0 overflow-hidden rounded-md bg-gray-100 ring-1 ring-gray-200">
                   {it.image ? (
                     <img src={it.image} alt={it.name} className="h-full w-full object-cover" />
@@ -389,16 +486,11 @@ function OrderDetail({ order }: { order: OrderRow }) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium text-foreground">{it.name}</div>
-                  {it.variant_label && (
-                    <div className="text-xs text-muted-foreground">{it.variant_label}</div>
-                  )}
                   <div className="text-xs text-muted-foreground">
-                    {it.quantity} × {formatBDT(Number(it.unit_price ?? it.price) || 0)}
+                    {it.quantity} × {formatBDT(it.unitPrice)}
                   </div>
                 </div>
-                <div className="text-sm font-semibold text-foreground">
-                  {formatBDT(Number(it.line_total ?? Number(it.price) * it.quantity) || 0)}
-                </div>
+                <div className="text-sm font-semibold text-foreground">{formatBDT(it.lineTotal)}</div>
               </li>
             ))}
           </ul>
@@ -407,17 +499,17 @@ function OrderDetail({ order }: { order: OrderRow }) {
 
       {/* Totals */}
       <Section title="Payment Summary">
-        <Row label="Subtotal" value={formatBDT(subtotal)} />
-        <Row label="Shipping" value={formatBDT(shippingFee)} />
-        {discount > 0 && (
-          <Row label="Discount" value={`- ${formatBDT(discount)}`} valueClass="text-rose-600" />
+        <Row label="Subtotal" value={formatBDT(order.subtotal)} />
+        <Row label="Shipping" value={formatBDT(order.shippingFee)} />
+        {order.discount > 0 && (
+          <Row label="Discount" value={`- ${formatBDT(order.discount)}`} valueClass="text-rose-600" />
         )}
         <div className="mt-2 flex items-center justify-between border-t border-gray-100 pt-2">
           <span className="text-sm font-semibold text-foreground">Total</span>
-          <span className="text-base font-bold text-[#1D9E75]">{formatBDT(total)}</span>
+          <span className="text-base font-bold text-[#1D9E75]">{formatBDT(order.total)}</span>
         </div>
         <div className="mt-1 text-xs text-muted-foreground">
-          Payment method: {order.payment_method || "—"}
+          Payment method: {order.paymentMethod || "—"}
         </div>
       </Section>
     </div>
@@ -479,9 +571,7 @@ function ComingSoonView({ title }: { title: string }) {
       </div>
       <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white px-6 py-20 text-center shadow-sm">
         <p className="text-sm font-medium text-foreground">Nothing here yet</p>
-        <p className="mt-1 max-w-xs text-xs text-muted-foreground">
-          We'll wire this up next.
-        </p>
+        <p className="mt-1 max-w-xs text-xs text-muted-foreground">We'll wire this up next.</p>
       </div>
     </div>
   );
