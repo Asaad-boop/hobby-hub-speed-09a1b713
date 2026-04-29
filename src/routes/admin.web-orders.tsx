@@ -710,11 +710,14 @@ function WebOrdersPage() {
                         </div>
                       </TableCell>
                       <TableCell className="pt-3 text-right">
-                        <Button asChild size="sm" variant="outline" className="h-7 gap-1 text-xs">
-                          <Link to="/admin/orders-pipeline">
-                            <ExternalLink className="h-3 w-3" />
-                            Open
-                          </Link>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 gap-1 text-xs"
+                          onClick={() => setOpenOrder(o)}
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          Open
                         </Button>
                       </TableCell>
                     </TableRow>
