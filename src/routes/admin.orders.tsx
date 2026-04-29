@@ -804,8 +804,7 @@ function OrderDetailModalBody({
           <ActionPill icon={<PackageCheck className="h-3.5 w-3.5" />} label="Delivered" onClick={() => onMoveStage("delivered")} />
           <ActionPill icon={<Undo2 className="h-3.5 w-3.5" />} label="Return" onClick={() => onMoveStage("returned")} />
           <ActionPill tone="danger" icon={<XCircle className="h-3.5 w-3.5" />} label="Cancel" onClick={() => onMoveStage("cancelled")} />
-          <ActionPill icon={<Eye className="h-3.5 w-3.5" />} label="Preview" onClick={onPreviewInvoice} />
-          <ActionPill icon={<Printer className="h-3.5 w-3.5" />} label="Invoice" onClick={onPrintInvoice} />
+          <ActionPill icon={<Printer className="h-3.5 w-3.5" />} label="Invoice" onClick={onPreviewInvoice} />
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
