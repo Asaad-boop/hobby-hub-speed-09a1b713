@@ -54,12 +54,7 @@ import { generateInvoicePDF } from "@/lib/pdf/invoice";
 import { generatePickingListPDF } from "@/lib/pdf/picking-list";
 import { loadPathaoCreds, isPathaoConfigured } from "@/lib/pathao-settings";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/admin/orders")({
   component: OrdersPage,
@@ -104,14 +99,17 @@ function avatarColor(seed: string) {
   return palette[h % palette.length];
 }
 
-
 function OrdersPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState<WorkflowStage | "all">("all");
   const [selected, setSelected] = useState<string[]>([]);
   const [openOrderId, setOpenOrderId] = useState<string | null>(null);
-  const [invoicePreview, setInvoicePreview] = useState<{ url: string; filename: string; orderId: string } | null>(null);
+  const [invoicePreview, setInvoicePreview] = useState<{
+    url: string;
+    filename: string;
+    orderId: string;
+  } | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
 
   const ordersQ = useQuery({
@@ -303,12 +301,42 @@ function OrdersPage() {
 
       {/* KPI strip */}
       <div className="grid grid-cols-2 gap-3 border-b border-border bg-gradient-to-b from-[#1D9E75]/[0.04] to-transparent px-6 py-4 sm:grid-cols-3 lg:grid-cols-6">
-        <KpiPill label="Total" value={stageCounts.all} tone="slate" icon={<ListFilter className="h-3.5 w-3.5" />} />
-        <KpiPill label="Processing" value={stageCounts.processing ?? 0} tone="amber" icon={<Inbox className="h-3.5 w-3.5" />} />
-        <KpiPill label="On Hold" value={stageCounts.on_hold ?? 0} tone="orange" icon={<PauseCircle className="h-3.5 w-3.5" />} />
-        <KpiPill label="Confirmed" value={stageCounts.confirmed ?? 0} tone="emerald" icon={<CheckCircle2 className="h-3.5 w-3.5" />} />
-        <KpiPill label="Shipped" value={stageCounts.shipped ?? 0} tone="sky" icon={<Truck className="h-3.5 w-3.5" />} />
-        <KpiPill label="Delivered" value={stageCounts.delivered ?? 0} tone="teal" icon={<PackageCheck className="h-3.5 w-3.5" />} />
+        <KpiPill
+          label="Total"
+          value={stageCounts.all}
+          tone="slate"
+          icon={<ListFilter className="h-3.5 w-3.5" />}
+        />
+        <KpiPill
+          label="Processing"
+          value={stageCounts.processing ?? 0}
+          tone="amber"
+          icon={<Inbox className="h-3.5 w-3.5" />}
+        />
+        <KpiPill
+          label="On Hold"
+          value={stageCounts.on_hold ?? 0}
+          tone="orange"
+          icon={<PauseCircle className="h-3.5 w-3.5" />}
+        />
+        <KpiPill
+          label="Confirmed"
+          value={stageCounts.confirmed ?? 0}
+          tone="emerald"
+          icon={<CheckCircle2 className="h-3.5 w-3.5" />}
+        />
+        <KpiPill
+          label="Shipped"
+          value={stageCounts.shipped ?? 0}
+          tone="sky"
+          icon={<Truck className="h-3.5 w-3.5" />}
+        />
+        <KpiPill
+          label="Delivered"
+          value={stageCounts.delivered ?? 0}
+          tone="teal"
+          icon={<PackageCheck className="h-3.5 w-3.5" />}
+        />
       </div>
 
       {/* Stage tabs */}
@@ -396,9 +424,7 @@ function OrdersPage() {
                     <th className="w-10 px-3 py-3">
                       <Checkbox
                         checked={allChecked}
-                        onCheckedChange={(v) =>
-                          setSelected(v ? orders.map((o) => o.id) : [])
-                        }
+                        onCheckedChange={(v) => setSelected(v ? orders.map((o) => o.id) : [])}
                       />
                     </th>
                     <th className="px-3 py-3 text-left">Order</th>
@@ -425,7 +451,8 @@ function OrdersPage() {
                     const name = o.shipping_name ?? o.guest_name ?? "—";
                     const phone = o.shipping_phone ?? o.guest_phone ?? "—";
                     const ageHrs = (Date.now() - new Date(o.created_at).getTime()) / 3600_000;
-                    const isUrgent = ageHrs > 24 && (stage === "processing" || stage === "call_not_received");
+                    const isUrgent =
+                      ageHrs > 24 && (stage === "processing" || stage === "call_not_received");
                     return (
                       <tr
                         key={o.id}
@@ -523,10 +550,7 @@ function OrdersPage() {
                         <td className="px-3 py-3 text-xs text-muted-foreground">
                           {fmtDateShort(o.created_at)}
                         </td>
-                        <td
-                          className="px-3 py-3 text-right"
-                          onClick={(e) => e.stopPropagation()}
-                        >
+                        <td className="px-3 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                           <Btn
                             variant="ghost"
                             size="sm"
@@ -578,7 +602,7 @@ function InvoicePreviewModal({
   onDownload: () => void;
 }) {
   const open = !!preview || loading;
-  const iframeRef = (typeof window !== "undefined") ? null : null;
+  const iframeRef = typeof window !== "undefined" ? null : null;
   const handlePrint = () => {
     const el = document.getElementById("invoice-preview-iframe") as HTMLIFrameElement | null;
     try {
@@ -590,7 +614,12 @@ function InvoicePreviewModal({
     }
   };
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
       <DialogContent className="max-w-5xl w-[95vw] h-[92vh] p-0 gap-0 flex flex-col">
         <DialogHeader className="flex flex-row items-center justify-between gap-3 border-b px-4 py-3 space-y-0">
           <DialogTitle className="text-sm font-semibold">
@@ -809,7 +838,9 @@ function OrderDetailModalBody({
               {o.is_guest_order && (
                 <>
                   <span>•</span>
-                  <span className="font-semibold uppercase tracking-wider text-amber-600">Guest</span>
+                  <span className="font-semibold uppercase tracking-wider text-amber-600">
+                    Guest
+                  </span>
                 </>
               )}
               {dirty && (
@@ -829,37 +860,122 @@ function OrderDetailModalBody({
       <div className="flex-1 overflow-y-auto bg-slate-50/60 px-5 py-4">
         {/* Workflow actions — pill row like screenshot */}
         <div className="mb-4 grid grid-cols-3 gap-1.5 sm:grid-cols-5 md:grid-cols-9">
-          <ActionPill tone="primary" icon={<CheckCircle2 className="h-3.5 w-3.5" />} label="Confirm" onClick={() => onMoveStage("confirmed")} />
-          <ActionPill icon={<Phone className="h-3.5 w-3.5" />} label="No Ans" onClick={() => onMoveStage("call_not_received")} />
-          <ActionPill icon={<PauseCircle className="h-3.5 w-3.5" />} label="Hold" onClick={() => onMoveStage("on_hold")} />
-          <ActionPill icon={<Wallet className="h-3.5 w-3.5" />} label="Advance" onClick={() => onMoveStage("advance_payment")} />
-          <ActionPill icon={<Truck className="h-3.5 w-3.5" />} label="Ship" onClick={() => onMoveStage("shipped")} />
-          <ActionPill icon={<PackageCheck className="h-3.5 w-3.5" />} label="Delivered" onClick={() => onMoveStage("delivered")} />
-          <ActionPill icon={<Undo2 className="h-3.5 w-3.5" />} label="Return" onClick={() => onMoveStage("returned")} />
-          <ActionPill tone="danger" icon={<XCircle className="h-3.5 w-3.5" />} label="Cancel" onClick={() => onMoveStage("cancelled")} />
-          <ActionPill icon={<Printer className="h-3.5 w-3.5" />} label="Invoice" onClick={onPreviewInvoice} />
+          <ActionPill
+            tone="primary"
+            icon={<CheckCircle2 className="h-3.5 w-3.5" />}
+            label="Confirm"
+            onClick={() => onMoveStage("confirmed")}
+          />
+          <ActionPill
+            icon={<Phone className="h-3.5 w-3.5" />}
+            label="No Ans"
+            onClick={() => onMoveStage("call_not_received")}
+          />
+          <ActionPill
+            icon={<PauseCircle className="h-3.5 w-3.5" />}
+            label="Hold"
+            onClick={() => onMoveStage("on_hold")}
+          />
+          <ActionPill
+            icon={<Wallet className="h-3.5 w-3.5" />}
+            label="Advance"
+            onClick={() => onMoveStage("advance_payment")}
+          />
+          <ActionPill
+            icon={<Truck className="h-3.5 w-3.5" />}
+            label="Ship"
+            onClick={() => onMoveStage("shipped")}
+          />
+          <ActionPill
+            icon={<PackageCheck className="h-3.5 w-3.5" />}
+            label="Delivered"
+            onClick={() => onMoveStage("delivered")}
+          />
+          <ActionPill
+            icon={<Undo2 className="h-3.5 w-3.5" />}
+            label="Return"
+            onClick={() => onMoveStage("returned")}
+          />
+          <ActionPill
+            tone="danger"
+            icon={<XCircle className="h-3.5 w-3.5" />}
+            label="Cancel"
+            onClick={() => onMoveStage("cancelled")}
+          />
+          <ActionPill
+            icon={<Printer className="h-3.5 w-3.5" />}
+            label="Invoice"
+            onClick={onPreviewInvoice}
+          />
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
           {/* CUSTOMER */}
           <PanelCard title="Customer" icon={<User className="h-3 w-3" />}>
-            <Row label="Name" value={form.shipping_name ?? ""} onChange={(v) => setField("shipping_name", v)} />
-            <Row label="Phone" value={form.shipping_phone ?? ""} onChange={(v) => setField("shipping_phone", v)} mono />
-            <Row label="Alt phone" value={form.alternate_phone ?? ""} onChange={(v) => setField("alternate_phone", v)} mono placeholder="—" />
-            <Row label="Address" value={form.shipping_address ?? ""} onChange={(v) => setField("shipping_address", v)} />
-            <Row label="City" value={form.shipping_city ?? ""} onChange={(v) => setField("shipping_city", v)} />
-            <Row label="Thana" value={form.shipping_thana ?? ""} onChange={(v) => setField("shipping_thana", v)} />
+            <Row
+              label="Name"
+              value={form.shipping_name ?? ""}
+              onChange={(v) => setField("shipping_name", v)}
+            />
+            <Row
+              label="Phone"
+              value={form.shipping_phone ?? ""}
+              onChange={(v) => setField("shipping_phone", v)}
+              mono
+            />
+            <Row
+              label="Alt phone"
+              value={form.alternate_phone ?? ""}
+              onChange={(v) => setField("alternate_phone", v)}
+              mono
+              placeholder="—"
+            />
+            <Row
+              label="Address"
+              value={form.shipping_address ?? ""}
+              onChange={(v) => setField("shipping_address", v)}
+            />
+            <Row
+              label="City"
+              value={form.shipping_city ?? ""}
+              onChange={(v) => setField("shipping_city", v)}
+            />
+            <Row
+              label="Thana"
+              value={form.shipping_thana ?? ""}
+              onChange={(v) => setField("shipping_thana", v)}
+            />
           </PanelCard>
 
           {/* PAYMENT */}
           <PanelCard title="Payment" icon={<CreditCard className="h-3 w-3" />}>
             <RowStatic label="Subtotal" value={fmtBDT(subtotal)} />
-            <Row label="Shipping" value={form.shipping_fee ?? "0"} onChange={(v) => setField("shipping_fee", v)} type="number" align="right" />
-            <Row label="Discount" value={form.discount_amount ?? "0"} onChange={(v) => setField("discount_amount", v)} type="number" align="right" />
-            <Row label="Advance" value={form.advance_amount ?? "0"} onChange={(v) => setField("advance_amount", v)} type="number" align="right" />
+            <Row
+              label="Shipping"
+              value={form.shipping_fee ?? "0"}
+              onChange={(v) => setField("shipping_fee", v)}
+              type="number"
+              align="right"
+            />
+            <Row
+              label="Discount"
+              value={form.discount_amount ?? "0"}
+              onChange={(v) => setField("discount_amount", v)}
+              type="number"
+              align="right"
+            />
+            <Row
+              label="Advance"
+              value={form.advance_amount ?? "0"}
+              onChange={(v) => setField("advance_amount", v)}
+              type="number"
+              align="right"
+            />
             <div className="flex items-center justify-between border-t border-dashed border-border/70 px-1 pt-2">
               <span className="text-xs font-semibold text-foreground">Total</span>
-              <span className="text-base font-bold text-[#1D9E75] tabular-nums">{fmtBDT(liveTotal)}</span>
+              <span className="text-base font-bold text-[#1D9E75] tabular-nums">
+                {fmtBDT(liveTotal)}
+              </span>
             </div>
             <RowSelect
               label="Method"
@@ -883,7 +999,11 @@ function OrderDetailModalBody({
               {detailItems.map((it) => (
                 <li key={it.id} className="flex items-center gap-3 px-1 py-2">
                   {it.image ? (
-                    <img src={it.image} alt="" className="h-9 w-9 rounded-md border border-border object-cover" />
+                    <img
+                      src={it.image}
+                      alt=""
+                      className="h-9 w-9 rounded-md border border-border object-cover"
+                    />
                   ) : (
                     <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/40">
                       <Package className="h-4 w-4 text-muted-foreground" />
@@ -945,7 +1065,6 @@ function OrderDetailModalBody({
             )}
           </PanelCard>
         </div>
-
       </div>
 
       {/* Sticky save bar */}
@@ -1106,7 +1225,6 @@ function RowSelect({
     </div>
   );
 }
-
 
 function KpiPill({
   label,

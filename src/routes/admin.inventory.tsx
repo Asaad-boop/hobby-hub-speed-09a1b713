@@ -83,12 +83,7 @@ function InventoryPage() {
             icon={<AlertTriangle className="h-4 w-4" />}
           />
           <MetricCard label="Low Stock" value={stats.low} hint="≤ 5 units" />
-          <MetricCard
-            label="Stock Value"
-            value={fmtBDT(stats.value)}
-            accent
-            hint="At sell price"
-          />
+          <MetricCard label="Stock Value" value={fmtBDT(stats.value)} accent hint="At sell price" />
         </div>
 
         <Card className="mt-6">
