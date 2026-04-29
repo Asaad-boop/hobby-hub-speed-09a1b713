@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AdminErrorPanel } from "@/components/admin/AdminErrorPanel";
 import { useQuery } from "@tanstack/react-query";
 import {
   ShoppingBag,
@@ -25,6 +26,7 @@ import { deriveStage, fmtBDT, fmtDateShort, shortId } from "@/lib/oms";
 
 export const Route = createFileRoute("/admin/dashboard")({
   component: DashboardPage,
+  errorComponent: AdminErrorPanel,
 });
 
 function DashboardPage() {

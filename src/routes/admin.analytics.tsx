@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminErrorPanel } from "@/components/admin/AdminErrorPanel";
 import { useQuery } from "@tanstack/react-query";
 import {
   Bar,
@@ -19,6 +20,7 @@ import { fmtBDT } from "@/lib/oms";
 
 export const Route = createFileRoute("/admin/analytics")({
   component: AnalyticsPage,
+  errorComponent: AdminErrorPanel,
 });
 
 const COLORS = ["#94a3b8", "#10b981", "#0ea5e9", "#22c55e", "#f43f5e", "#a1a1aa"];

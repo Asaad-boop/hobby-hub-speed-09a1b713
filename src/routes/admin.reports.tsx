@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminErrorPanel } from "@/components/admin/AdminErrorPanel";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getSalesReport } from "@/server/oms.functions";
@@ -7,6 +8,7 @@ import { fmtBDT } from "@/lib/oms";
 
 export const Route = createFileRoute("/admin/reports")({
   component: ReportsPage,
+  errorComponent: AdminErrorPanel,
 });
 
 function ReportsPage() {

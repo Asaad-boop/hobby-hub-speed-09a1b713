@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminErrorPanel } from "@/components/admin/AdminErrorPanel";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search, Flag } from "lucide-react";
@@ -8,6 +9,7 @@ import { fmtBDT, fmtDateShort } from "@/lib/oms";
 
 export const Route = createFileRoute("/admin/customers")({
   component: CustomersPage,
+  errorComponent: AdminErrorPanel,
 });
 
 function CustomersPage() {

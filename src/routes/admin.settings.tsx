@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminErrorPanel } from "@/components/admin/AdminErrorPanel";
 import { useEffect, useState } from "react";
 import { Save, CheckCircle2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
@@ -12,6 +13,7 @@ import {
 
 export const Route = createFileRoute("/admin/settings")({
   component: SettingsPage,
+  errorComponent: AdminErrorPanel,
 });
 
 function SettingsPage() {
