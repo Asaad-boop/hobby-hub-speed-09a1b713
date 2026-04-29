@@ -259,40 +259,40 @@ function OrdersPage() {
       />
 
       {/* KPI strip */}
-      <div className="grid grid-cols-2 gap-2 border-b border-border bg-gradient-to-b from-muted/30 to-transparent px-6 py-3 sm:grid-cols-4 lg:grid-cols-5">
-        <KpiPill
-          label="Total"
-          value={stageCounts.all}
-          icon={<ListFilter className="h-3.5 w-3.5" />}
-        />
-        <KpiPill label="Processing" value={stageCounts.processing ?? 0} tone="amber" />
-        <KpiPill label="Confirmed" value={stageCounts.confirmed ?? 0} tone="emerald" />
-        <KpiPill label="Shipped" value={stageCounts.shipped ?? 0} tone="sky" />
-        <KpiPill label="Delivered" value={stageCounts.delivered ?? 0} tone="teal" />
+      <div className="grid grid-cols-2 gap-3 border-b border-border bg-gradient-to-b from-[#1D9E75]/[0.04] to-transparent px-6 py-4 sm:grid-cols-3 lg:grid-cols-6">
+        <KpiPill label="Total" value={stageCounts.all} tone="slate" icon={<ListFilter className="h-3.5 w-3.5" />} />
+        <KpiPill label="Processing" value={stageCounts.processing ?? 0} tone="amber" icon={<Inbox className="h-3.5 w-3.5" />} />
+        <KpiPill label="On Hold" value={stageCounts.on_hold ?? 0} tone="orange" icon={<PauseCircle className="h-3.5 w-3.5" />} />
+        <KpiPill label="Confirmed" value={stageCounts.confirmed ?? 0} tone="emerald" icon={<CheckCircle2 className="h-3.5 w-3.5" />} />
+        <KpiPill label="Shipped" value={stageCounts.shipped ?? 0} tone="sky" icon={<Truck className="h-3.5 w-3.5" />} />
+        <KpiPill label="Delivered" value={stageCounts.delivered ?? 0} tone="teal" icon={<PackageCheck className="h-3.5 w-3.5" />} />
       </div>
 
       {/* Stage tabs */}
-      <div className="flex flex-wrap items-center gap-1.5 border-b border-border bg-white px-6 py-2.5">
+      <div className="flex flex-wrap items-center gap-1.5 border-b border-border bg-white px-6 py-3">
         {(["all", ...WORKFLOW_STAGES] as const).map((s) => {
           const active = stageFilter === s;
+          const count = stageCounts[s] ?? 0;
           return (
             <button
               key={s}
               onClick={() => setStageFilter(s as never)}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+              className={`group inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                 active
-                  ? "border-[#1D9E75] bg-[#1D9E75] text-white shadow-sm"
-                  : "border-transparent bg-muted text-muted-foreground hover:border-border hover:bg-white"
+                  ? "border-[#1D9E75] bg-[#1D9E75] text-white shadow-sm shadow-[#1D9E75]/20"
+                  : "border-border bg-white text-muted-foreground hover:border-[#1D9E75]/40 hover:text-foreground"
               }`}
             >
               {s !== "all" && STAGE_ICON[s as WorkflowStage]}
-              {s === "all" ? "All" : STAGE_LABEL[s as WorkflowStage]}
+              <span>{s === "all" ? "All Orders" : STAGE_LABEL[s as WorkflowStage]}</span>
               <span
-                className={`ml-0.5 rounded-full px-1.5 text-[10px] ${
-                  active ? "bg-white/20 text-white" : "bg-white text-foreground"
+                className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums ${
+                  active
+                    ? "bg-white/25 text-white"
+                    : "bg-muted text-foreground group-hover:bg-[#1D9E75]/10 group-hover:text-[#1D9E75]"
                 }`}
               >
-                {stageCounts[s] ?? 0}
+                {count}
               </span>
             </button>
           );
