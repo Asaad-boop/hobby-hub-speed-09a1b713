@@ -444,7 +444,7 @@ function OrdersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/70">
-                  {orders.map((o, idx) => {
+                  {orders.map((o) => {
                     if (!o || !o.id) return null;
                     const stage = deriveStage({
                       status: o.status,
