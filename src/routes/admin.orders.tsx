@@ -438,7 +438,8 @@ function OrdersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/70">
-                  {orders.map((o) => {
+                  {orders.map((o, idx) => {
+                    if (!o || !o.id) return null;
                     const stage = deriveStage({
                       status: o.status,
                       confirmation_status: o.confirmation_status,
@@ -450,9 +451,13 @@ function OrdersPage() {
                     const isOpen = openOrderId === o.id;
                     const name = o.shipping_name ?? o.guest_name ?? "—";
                     const phone = o.shipping_phone ?? o.guest_phone ?? "—";
-                    const ageHrs = (Date.now() - new Date(o.created_at).getTime()) / 3600_000;
+                    const createdAtMs = o.created_at ? new Date(o.created_at).getTime() : NaN;
+                    const ageHrs = Number.isFinite(createdAtMs)
+                      ? (Date.now() - createdAtMs) / 3600_000
+                      : 0;
                     const isUrgent =
                       ageHrs > 24 && (stage === "processing" || stage === "call_not_received");
+                    void idx;
                     return (
                       <tr
                         key={o.id}
