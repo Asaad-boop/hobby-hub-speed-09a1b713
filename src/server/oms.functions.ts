@@ -223,7 +223,9 @@ export const addOrderNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => addNoteInput.parse(input))
   .handler(async ({ context, data }) => {
-    const { supabase, userId } = context;
+    const { userId } = context;
+    await requireAdmin(userId);
+    const supabase = supabaseAdmin;
     const { error } = await supabase.from("activity_logs").insert({
       order_id: data.orderId,
       user_id: userId,
@@ -238,7 +240,8 @@ export const addOrderNote = createServerFn({ method: "POST" })
 export const listProducts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase } = context;
+    await requireAdmin(context.userId);
+    const supabase = supabaseAdmin;
     const { data, error } = await supabase
       .from("products")
       .select("id,title,slug,price,stock,image,is_active,category_id,updated_at")
