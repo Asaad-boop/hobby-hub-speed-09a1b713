@@ -1,253 +1,249 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
+  TrendingUp, TrendingDown, ShoppingCart, DollarSign,
+  Package, AlertTriangle, ShoppingBag, ArrowRight,
+} from "lucide-react";
+import {
+  LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip,
+  BarChart, Bar, CartesianGrid,
 } from "recharts";
-import { TrendingUp, ShoppingBag, Users, Percent, ArrowRight } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { PageHeader, Card, Loading, fmtBDT, Badge } from "@/components/admin/ui";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { StatusPill } from "@/components/admin/StatusPill";
+import {
+  getDashboardKpis, getSalesTrend, getTopProducts, getActivityFeed,
+} from "@/server/dashboard.functions";
 
 export const Route = createFileRoute("/admin/")({
-  component: Dashboard,
+  component: DashboardPage,
 });
 
-function Dashboard() {
-  const { data, isLoading } = useQuery({
-    queryKey: ["admin", "dashboard"],
-    queryFn: async () => {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const since14 = new Date(Date.now() - 13 * 86400_000).toISOString();
+const taka = (n: number) =>
+  new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT", maximumFractionDigits: 0 }).format(n);
 
-      const [pending, todayOrders, lowStock, customers, recent, last14] = await Promise.all([
-        supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "new"),
-        supabase.from("orders").select("total,status").gte("created_at", today.toISOString()),
-        supabase.from("products").select("id,title,stock").lte("stock", 5).eq("is_active", true).order("stock").limit(6),
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase
-          .from("orders")
-          .select("id,total,status,shipping_name,guest_name,created_at")
-          .order("created_at", { ascending: false })
-          .limit(6),
-        supabase.from("orders").select("total,status,created_at").gte("created_at", since14).limit(2000),
-      ]);
+function KpiCard({
+  label, value, delta, icon: Icon, gradient, sub,
+}: {
+  label: string; value: string; delta?: number; icon: React.ComponentType<{ className?: string }>;
+  gradient: string; sub?: string;
+}) {
+  const positive = (delta ?? 0) >= 0;
+  return (
+    <Card className="relative overflow-hidden border-border/50 p-5 transition hover:shadow-md">
+      <div className={`absolute -right-8 -top-8 h-32 w-32 rounded-full opacity-20 blur-2xl ${gradient}`} />
+      <div className="relative">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</span>
+          <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${gradient} text-white`}>
+            <Icon className="h-4 w-4" />
+          </div>
+        </div>
+        <div className="mt-3 text-2xl font-bold tabular-nums">{value}</div>
+        <div className="mt-1 flex items-center gap-2 text-xs">
+          {delta !== undefined && (
+            <span className={`inline-flex items-center gap-0.5 font-medium ${positive ? "text-success" : "text-destructive"}`}>
+              {positive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+              {Math.abs(delta).toFixed(1)}%
+            </span>
+          )}
+          {sub && <span className="text-muted-foreground">{sub}</span>}
+        </div>
+      </div>
+    </Card>
+  );
+}
 
-      const todayRevenue = (todayOrders.data ?? [])
-        .filter((o) => o.status === "delivered")
-        .reduce((s, o) => s + Number(o.total), 0);
-
-      const totalRevenue14 = (last14.data ?? [])
-        .filter((o) => o.status === "delivered")
-        .reduce((s, o) => s + Number(o.total), 0);
-      const total14 = last14.data?.length ?? 0;
-      const delivered14 = (last14.data ?? []).filter((o) => o.status === "delivered").length;
-      const conversion = total14 > 0 ? (delivered14 / total14) * 100 : 0;
-
-      // Build 14-day series
-      const days: Record<string, { date: string; revenue: number; orders: number }> = {};
-      for (let i = 13; i >= 0; i--) {
-        const d = new Date(Date.now() - i * 86400_000).toISOString().slice(0, 10);
-        days[d] = { date: d.slice(5), revenue: 0, orders: 0 };
-      }
-      for (const o of last14.data ?? []) {
-        const d = o.created_at.slice(0, 10);
-        if (d in days) {
-          days[d].orders += 1;
-          if (o.status === "delivered") days[d].revenue += Number(o.total);
-        }
-      }
-
-      return {
-        pendingCount: pending.count ?? 0,
-        todayCount: todayOrders.data?.length ?? 0,
-        todayRevenue,
-        revenue14: totalRevenue14,
-        orders14: total14,
-        customers: customers.count ?? 0,
-        conversion,
-        lowStock: lowStock.data ?? [],
-        recent: recent.data ?? [],
-        series: Object.values(days),
-      };
-    },
-  });
-
-  if (isLoading || !data) return (<><PageHeader title="Dashboard" /><Loading /></>);
+function DashboardPage() {
+  const kpis = useQuery({ queryKey: ["admin", "kpis"], queryFn: () => getDashboardKpis() });
+  const trend = useQuery({ queryKey: ["admin", "trend"], queryFn: () => getSalesTrend() });
+  const top = useQuery({ queryKey: ["admin", "top"], queryFn: () => getTopProducts() });
+  const feed = useQuery({ queryKey: ["admin", "feed"], queryFn: () => getActivityFeed() });
 
   return (
-    <div>
-      <PageHeader title="Dashboard" description="Overview of store performance — last 14 days" />
-
-      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard
-          label="Revenue (14d)"
-          value={fmtBDT(data.revenue14)}
-          sub={`Today ${fmtBDT(data.todayRevenue)}`}
-          icon={TrendingUp}
-          tone="emerald"
-        />
-        <KpiCard
-          label="Orders (14d)"
-          value={String(data.orders14)}
-          sub={`${data.pendingCount} new · ${data.todayCount} today`}
-          icon={ShoppingBag}
-          tone="violet"
-        />
-        <KpiCard
-          label="Customers"
-          value={String(data.customers)}
-          sub="Total registered"
-          icon={Users}
-          tone="sky"
-        />
-        <KpiCard
-          label="Conversion"
-          value={data.conversion.toFixed(1) + "%"}
-          sub="Delivered / total"
-          icon={Percent}
-          tone="amber"
-        />
+    <div className="mx-auto max-w-[1400px] space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">Real-time overview of your store performance</p>
       </div>
 
-      <div className="mb-5 grid gap-3 lg:grid-cols-3">
+      {/* KPI Strip */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {kpis.isLoading || !kpis.data ? (
+          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)
+        ) : (
+          <>
+            <KpiCard
+              label="Today's Revenue"
+              value={taka(kpis.data.todayRevenue)}
+              delta={kpis.data.revenueDelta}
+              icon={DollarSign}
+              gradient="bg-gradient-to-br from-emerald-500 to-teal-600"
+              sub="vs yesterday"
+            />
+            <KpiCard
+              label="Today's Orders"
+              value={String(kpis.data.todayOrders)}
+              icon={ShoppingCart}
+              gradient="bg-gradient-to-br from-blue-500 to-indigo-600"
+              sub={`${kpis.data.pendingConfirm} pending`}
+            />
+            <KpiCard
+              label="Avg Order Value"
+              value={taka(kpis.data.aov7)}
+              icon={ShoppingBag}
+              gradient="bg-gradient-to-br from-purple-500 to-pink-600"
+              sub="last 7 days"
+            />
+            <KpiCard
+              label="Delivery Rate"
+              value={`${kpis.data.successRate.toFixed(1)}%`}
+              icon={Package}
+              gradient="bg-gradient-to-br from-orange-500 to-red-600"
+              sub="last 30 days"
+            />
+          </>
+        )}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="flex flex-wrap gap-2">
+        <Button asChild variant="outline" size="sm" className="gap-2">
+          <Link to="/admin/orders" search={{ status: "new" }}>
+            <AlertTriangle className="h-3.5 w-3.5" />
+            Pending confirmations
+            {kpis.data && kpis.data.pendingConfirm > 0 && (
+              <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                {kpis.data.pendingConfirm}
+              </span>
+            )}
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="sm" className="gap-2">
+          <Link to="/admin/orders" search={{ status: "ready_to_ship" }}>
+            <Package className="h-3.5 w-3.5" />
+            Ready to ship
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="sm" className="gap-2">
+          <Link to="/admin/orders" search={{ status: "shipped" }}>
+            Today's deliveries
+          </Link>
+        </Button>
+      </div>
+
+      {/* Charts */}
+      <div className="grid gap-6 lg:grid-cols-3">
         <Card className="p-5 lg:col-span-2">
-          <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm font-semibold">Sales overview</div>
-              <div className="text-xs text-muted-foreground">Daily revenue & orders, last 14 days</div>
+              <h3 className="text-sm font-semibold">Sales Trend</h3>
+              <p className="text-xs text-muted-foreground">Last 30 days</p>
             </div>
           </div>
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data.series} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.585 0.245 27.5)" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="oklch(0.585 0.245 27.5)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0 0)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 11, fill: "oklch(0.45 0 0)" }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: "oklch(0.45 0 0)" }} tickLine={false} axisLine={false} />
-                <Tooltip
-                  contentStyle={{
-                    background: "white",
-                    border: "1px solid oklch(0.92 0 0)",
-                    borderRadius: 8,
-                    fontSize: 12,
-                  }}
-                  formatter={(v: any, k) => (k === "revenue" ? [fmtBDT(Number(v)), "Revenue"] : [v, "Orders"])}
-                />
-                <Area type="monotone" dataKey="revenue" stroke="oklch(0.585 0.245 27.5)" strokeWidth={2} fill="url(#rev)" />
-              </AreaChart>
-            </ResponsiveContainer>
+          <div className="mt-4 h-64">
+            {trend.isLoading || !trend.data ? (
+              <Skeleton className="h-full w-full" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={trend.data}>
+                  <defs>
+                    <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.4} />
+                      <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                  <XAxis
+                    dataKey="date"
+                    tickFormatter={(v) => new Date(v).toLocaleDateString("en", { month: "short", day: "numeric" })}
+                    fontSize={11}
+                    stroke="var(--muted-foreground)"
+                  />
+                  <YAxis fontSize={11} stroke="var(--muted-foreground)" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--popover)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                    formatter={(v: number) => taka(v)}
+                  />
+                  <Line type="monotone" dataKey="revenue" stroke="var(--primary)" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </Card>
 
         <Card className="p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="text-sm font-semibold">Low stock</div>
-            <Link to="/admin/inventory" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
-              View all <ArrowRight className="h-3 w-3" />
-            </Link>
+          <h3 className="text-sm font-semibold">Top Products</h3>
+          <p className="text-xs text-muted-foreground">By revenue · 30d</p>
+          <div className="mt-4 h-64">
+            {top.isLoading || !top.data ? (
+              <Skeleton className="h-full w-full" />
+            ) : top.data.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">No sales yet</div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={top.data} layout="vertical" margin={{ left: 0, right: 8 }}>
+                  <XAxis type="number" hide />
+                  <YAxis type="category" dataKey="name" width={100} fontSize={10} stroke="var(--muted-foreground)" tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
+                    formatter={(v: number) => taka(v)}
+                  />
+                  <Bar dataKey="revenue" fill="var(--primary)" radius={[0, 6, 6, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
-          {data.lowStock.length === 0 ? (
-            <div className="text-sm text-muted-foreground">All products well stocked ✨</div>
-          ) : (
-            <ul className="divide-y divide-border/60 text-sm">
-              {data.lowStock.map((p) => (
-                <li key={p.id} className="flex items-center justify-between py-2">
-                  <span className="truncate pr-2">{p.title}</span>
-                  <Badge tone={p.stock === 0 ? "red" : "yellow"}>{p.stock} left</Badge>
-                </li>
-              ))}
-            </ul>
-          )}
         </Card>
       </div>
 
+      {/* Activity feed */}
       <Card className="p-5">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="text-sm font-semibold">Recent orders</div>
-          <Link to="/admin/web-orders" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
-            View all <ArrowRight className="h-3 w-3" />
-          </Link>
-        </div>
-        {data.recent.length === 0 ? (
-          <div className="text-sm text-muted-foreground">No orders yet</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
-                  <th className="py-2 font-medium">Order</th>
-                  <th className="py-2 font-medium">Customer</th>
-                  <th className="py-2 font-medium">Status</th>
-                  <th className="py-2 font-medium text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.recent.map((o: any) => (
-                  <tr key={o.id} className="border-b border-border/60">
-                    <td className="py-2 font-mono text-xs">#{o.id.slice(0, 8)}</td>
-                    <td className="py-2">{o.shipping_name || o.guest_name || "—"}</td>
-                    <td className="py-2"><Badge tone={statusTone(o.status)}>{o.status}</Badge></td>
-                    <td className="py-2 text-right font-medium">{fmtBDT(o.total)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold">Recent Orders</h3>
+            <p className="text-xs text-muted-foreground">Latest activity</p>
           </div>
-        )}
+          <Button asChild variant="ghost" size="sm" className="gap-1">
+            <Link to="/admin/orders">View all <ArrowRight className="h-3 w-3" /></Link>
+          </Button>
+        </div>
+        <div className="mt-4 divide-y divide-border">
+          {feed.isLoading || !feed.data ? (
+            Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="my-2 h-12 w-full" />)
+          ) : feed.data.recent.length === 0 ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">No recent orders</div>
+          ) : (
+            feed.data.recent.map((o) => (
+              <Link
+                key={o.id}
+                to="/admin/orders"
+                search={{ orderId: o.id }}
+                className="flex items-center gap-4 py-3 hover:bg-muted/50 -mx-2 px-2 rounded-md transition"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm truncate">{o.shipping_name ?? "Guest"}</span>
+                    <span className="text-xs text-muted-foreground">·</span>
+                    <span className="text-xs text-muted-foreground truncate">{o.shipping_phone ?? ""}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground tabular-nums">
+                    #{o.id.slice(0, 8)} · {new Date(o.created_at).toLocaleString("en", { dateStyle: "short", timeStyle: "short" })}
+                  </div>
+                </div>
+                <div className="text-sm font-semibold tabular-nums">{taka(Number(o.total ?? 0))}</div>
+                <StatusPill status={o.status} />
+              </Link>
+            ))
+          )}
+        </div>
       </Card>
-    </div>
-  );
-}
-
-function statusTone(s: string): "green" | "yellow" | "red" | "blue" | "gray" {
-  if (s === "delivered") return "green";
-  if (s === "new") return "blue";
-  if (s === "cancelled" || s === "fake" || s === "returned") return "red";
-  return "yellow";
-}
-
-function KpiCard({
-  label,
-  value,
-  sub,
-  icon: Icon,
-  tone,
-}: {
-  label: string;
-  value: string;
-  sub?: string;
-  icon: typeof TrendingUp;
-  tone: "emerald" | "violet" | "sky" | "amber";
-}) {
-  const tones: Record<string, string> = {
-    emerald: "from-emerald-500/15 to-transparent border-emerald-200/50 text-emerald-700",
-    violet: "from-violet-500/15 to-transparent border-violet-200/50 text-violet-700",
-    sky: "from-sky-500/15 to-transparent border-sky-200/50 text-sky-700",
-    amber: "from-amber-500/15 to-transparent border-amber-200/50 text-amber-700",
-  };
-  return (
-    <div className={`rounded-xl border bg-gradient-to-br p-4 ${tones[tone]}`}>
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
-          <div className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground">{value}</div>
-          {sub && <div className="mt-1 text-xs text-muted-foreground">{sub}</div>}
-        </div>
-        <div className="rounded-lg bg-white/60 p-2 shadow-sm">
-          <Icon className="h-4 w-4" />
-        </div>
-      </div>
     </div>
   );
 }

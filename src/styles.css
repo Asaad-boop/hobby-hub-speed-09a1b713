@@ -59,6 +59,20 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-status-new: var(--status-new);
+  --color-status-confirmed: var(--status-confirmed);
+  --color-status-packaging: var(--status-packaging);
+  --color-status-shipped: var(--status-shipped);
+  --color-status-delivered: var(--status-delivered);
+  --color-status-returned: var(--status-returned);
+  --color-status-cancelled: var(--status-cancelled);
+  --color-status-hold: var(--status-hold);
 }
 
 :root {
@@ -104,6 +118,20 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+  --success: oklch(0.62 0.17 150);
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.78 0.16 80);
+  --warning-foreground: oklch(0.18 0 0);
+  --info: oklch(0.62 0.18 245);
+  --info-foreground: oklch(1 0 0);
+  --status-new: oklch(0.62 0.18 245);
+  --status-confirmed: oklch(0.62 0.16 200);
+  --status-packaging: oklch(0.72 0.17 80);
+  --status-shipped: oklch(0.62 0.20 290);
+  --status-delivered: oklch(0.62 0.17 150);
+  --status-returned: oklch(0.65 0.13 35);
+  --status-cancelled: oklch(0.60 0.20 27);
+  --status-hold: oklch(0.55 0.04 260);
 }
 
 .dark {
@@ -139,6 +167,20 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+  --success: oklch(0.68 0.16 150);
+  --success-foreground: oklch(0.12 0 0);
+  --warning: oklch(0.82 0.16 80);
+  --warning-foreground: oklch(0.18 0 0);
+  --info: oklch(0.68 0.16 245);
+  --info-foreground: oklch(0.12 0 0);
+  --status-new: oklch(0.68 0.16 245);
+  --status-confirmed: oklch(0.68 0.15 200);
+  --status-packaging: oklch(0.78 0.16 80);
+  --status-shipped: oklch(0.70 0.18 290);
+  --status-delivered: oklch(0.70 0.16 150);
+  --status-returned: oklch(0.72 0.13 35);
+  --status-cancelled: oklch(0.68 0.18 27);
+  --status-hold: oklch(0.65 0.04 260);
 }
 
 @layer base {

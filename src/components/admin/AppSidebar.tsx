@@ -1,109 +1,83 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  LayoutDashboard,
-  PhoneCall,
-  Package,
-  Tags,
-  UserCircle,
-  Boxes,
-  BarChart3,
-  Settings,
-  Star,
-  CreditCard,
-  Ticket,
-  Sparkles,
-  ShoppingCart,
+  LayoutDashboard, ShoppingCart, Package, Users,
+  Tag, BarChart3, Settings, Truck, Star,
 } from "lucide-react";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
+  SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
+  SidebarHeader, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 
 type NavItem = { title: string; url: string; icon: typeof LayoutDashboard; exact?: boolean };
-
 type NavGroup = { label: string; items: NavItem[] };
 
-const GROUPS: NavGroup[] = [
+const NAV: NavGroup[] = [
   {
     label: "Overview",
-    items: [{ title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true }],
+    items: [
+      { title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true },
+    ],
   },
   {
-    label: "Sales",
+    label: "Operations",
     items: [
       { title: "Orders", url: "/admin/orders", icon: ShoppingCart },
-      { title: "Web Orders", url: "/admin/web-orders", icon: PhoneCall },
-      { title: "Payments", url: "/admin/payments", icon: CreditCard },
+      { title: "Shipments", url: "/admin/shipments", icon: Truck },
     ],
   },
   {
     label: "Catalog",
     items: [
       { title: "Products", url: "/admin/products", icon: Package },
-      { title: "Categories", url: "/admin/categories", icon: Tags },
-      { title: "Inventory", url: "/admin/inventory", icon: Boxes },
-    ],
-  },
-  {
-    label: "Customers",
-    items: [
-      { title: "Customers", url: "/admin/customers", icon: UserCircle },
+      { title: "Discounts", url: "/admin/discounts", icon: Tag },
       { title: "Reviews", url: "/admin/reviews", icon: Star },
     ],
   },
   {
-    label: "Marketing",
-    items: [{ title: "Discounts", url: "/admin/discounts", icon: Ticket }],
-  },
-  {
     label: "Insights",
-    items: [{ title: "Reports", url: "/admin/reports", icon: BarChart3 }],
+    items: [
+      { title: "Customers", url: "/admin/customers", icon: Users },
+      { title: "Reports", url: "/admin/reports", icon: BarChart3 },
+    ],
   },
   {
     label: "System",
-    items: [{ title: "Settings", url: "/admin/settings", icon: Settings }],
+    items: [
+      { title: "Settings", url: "/admin/settings", icon: Settings },
+    ],
   },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const path = useRouterState({ select: (r) => r.location.pathname });
 
   const isActive = (url: string, exact?: boolean) =>
-    exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
+    exact ? path === url : path === url || path.startsWith(url + "/");
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center gap-2 px-2 py-2">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-            <Sparkles className="h-4 w-4" />
+      <SidebarHeader className="px-3 py-4">
+        <Link to="/admin" className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-sm">
+            <span className="text-sm font-bold">H</span>
           </div>
           {!collapsed && (
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold leading-tight">HobbyShop</span>
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Admin Console
-              </span>
+            <div className="flex flex-col leading-tight">
+              <span className="text-sm font-semibold">HobbyHub</span>
+              <span className="text-[10px] text-muted-foreground">Admin Console</span>
             </div>
           )}
-        </div>
+        </Link>
       </SidebarHeader>
 
-      <SidebarContent>
-        {GROUPS.map((group) => (
+      <SidebarContent className="px-2">
+        {NAV.map((group) => (
           <SidebarGroup key={group.label}>
             {!collapsed && (
-              <SidebarGroupLabel className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+              <SidebarGroupLabel className="px-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 {group.label}
               </SidebarGroupLabel>
             )}
@@ -117,11 +91,11 @@ export function AppSidebar() {
                         asChild
                         isActive={active}
                         tooltip={item.title}
-                        className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium hover:bg-sidebar-accent transition-colors"
+                        className="h-9"
                       >
-                        <Link to={item.url} className="flex items-center gap-2.5">
+                        <Link to={item.url} className="flex items-center gap-3">
                           <item.icon className="h-4 w-4 shrink-0" />
-                          <span>{item.title}</span>
+                          {!collapsed && <span className="text-sm">{item.title}</span>}
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -132,17 +106,14 @@ export function AppSidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
+
+      <SidebarFooter className="border-t border-sidebar-border p-3">
+        {!collapsed && (
+          <div className="text-[10px] text-muted-foreground">
+            v2.0 · {new Date().getFullYear()}
+          </div>
+        )}
+      </SidebarFooter>
     </Sidebar>
   );
-}
-
-export function getCurrentTitle(pathname: string): string {
-  for (const g of GROUPS) {
-    for (const it of g.items) {
-      if (it.exact ? pathname === it.url : pathname === it.url || pathname.startsWith(it.url + "/")) {
-        return it.title;
-      }
-    }
-  }
-  return "Admin";
 }

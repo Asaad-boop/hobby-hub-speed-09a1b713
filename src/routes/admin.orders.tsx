@@ -1,619 +1,607 @@
-import { useState, useMemo } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { z } from "zod";
 import {
-  listOrders,
-  getOrderDetail,
-  transitionOrderStatus,
-  bulkTransitionStatus,
-  updateOrder,
-  addOrderNote,
-  getOrderCounts,
-} from "@/server/orders.functions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
-import {
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  Phone,
-  MapPin,
-  Package,
-  Clock,
-  AlertCircle,
-  Trash2,
-  StickyNote,
+  Search, Filter, ChevronLeft, ChevronRight, MoreHorizontal,
+  Phone, MessageCircle, Flag, Loader2, X, ArrowLeft,
 } from "lucide-react";
-import { format } from "date-fns";
+import { toast } from "sonner";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { StatusPill, ORDER_STATUS_LABELS } from "@/components/admin/StatusPill";
+import {
+  listOrders, getOrderDetail, transitionOrderStatus,
+  bulkTransitionStatus, addOrderNote, updateOrder, getOrderCounts,
+} from "@/server/orders.functions";
+
+const TABS: { key: string; label: string; statuses: string[] }[] = [
+  { key: "all", label: "All", statuses: [] },
+  { key: "new", label: "New", statuses: ["new"] },
+  { key: "active", label: "Active", statuses: ["confirmed", "packaging", "packed", "ready_to_ship"] },
+  { key: "shipped", label: "Shipped", statuses: ["shipped", "in_transit"] },
+  { key: "delivered", label: "Delivered", statuses: ["delivered", "partial_delivered"] },
+  { key: "returns", label: "Returns", statuses: ["returned", "exchanged", "damaged", "pending_return", "paid_return", "unpaid_return", "partial_return"] },
+  { key: "cancelled", label: "Cancelled", statuses: ["cancelled", "fake"] },
+  { key: "hold", label: "On Hold", statuses: ["on_hold", "advance_payment_pending", "incomplete"] },
+];
+
+const NEXT_STATUS_OPTIONS: { value: string; label: string }[] = [
+  { value: "confirmed", label: "Confirm" },
+  { value: "packaging", label: "Mark Packaging" },
+  { value: "packed", label: "Mark Packed" },
+  { value: "ready_to_ship", label: "Ready to Ship" },
+  { value: "shipped", label: "Mark Shipped" },
+  { value: "delivered", label: "Mark Delivered" },
+  { value: "on_hold", label: "Put on Hold" },
+  { value: "cancelled", label: "Cancel" },
+  { value: "fake", label: "Mark Fake" },
+];
+
+const searchSchema = z.object({
+  tab: z.string().optional(),
+  status: z.string().optional(),
+  q: z.string().optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  orderId: z.string().uuid().optional(),
+});
 
 export const Route = createFileRoute("/admin/orders")({
+  validateSearch: (s) => searchSchema.parse(s),
   component: OrdersPage,
 });
 
-const STATUS_TABS = [
-  { value: "all", label: "All", statuses: [] as string[] },
-  { value: "new", label: "New", statuses: ["new"] },
-  { value: "active", label: "Active", statuses: ["confirmed", "packaging", "packed", "ready_to_ship"] },
-  { value: "shipped", label: "Shipped", statuses: ["shipped", "in_transit"] },
-  { value: "delivered", label: "Delivered", statuses: ["delivered", "partial_delivered"] },
-  { value: "issues", label: "Issues", statuses: ["on_hold", "returned", "damaged", "cancelled", "fake"] },
-];
+const taka = (n: number) =>
+  new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT", maximumFractionDigits: 0 }).format(n);
 
-const ALL_STATUSES = [
-  "new", "confirmed", "packaging", "packed", "ready_to_ship",
-  "shipped", "in_transit", "delivered", "partial_delivered",
-  "returned", "exchanged", "damaged", "cancelled", "fake",
-  "on_hold",
-];
-
-const STATUS_COLORS: Record<string, string> = {
-  new: "bg-blue-500/10 text-blue-700 border-blue-500/20",
-  confirmed: "bg-purple-500/10 text-purple-700 border-purple-500/20",
-  packaging: "bg-amber-500/10 text-amber-700 border-amber-500/20",
-  packed: "bg-amber-500/10 text-amber-700 border-amber-500/20",
-  ready_to_ship: "bg-orange-500/10 text-orange-700 border-orange-500/20",
-  shipped: "bg-indigo-500/10 text-indigo-700 border-indigo-500/20",
-  in_transit: "bg-indigo-500/10 text-indigo-700 border-indigo-500/20",
-  delivered: "bg-green-500/10 text-green-700 border-green-500/20",
-  partial_delivered: "bg-green-500/10 text-green-700 border-green-500/20",
-  returned: "bg-red-500/10 text-red-700 border-red-500/20",
-  cancelled: "bg-gray-500/10 text-gray-700 border-gray-500/20",
-  fake: "bg-rose-500/10 text-rose-700 border-rose-500/20",
-  on_hold: "bg-yellow-500/10 text-yellow-700 border-yellow-500/20",
-};
-
-const PRIORITY_COLORS: Record<string, string> = {
-  low: "bg-gray-500/10 text-gray-600",
-  normal: "bg-blue-500/10 text-blue-600",
-  high: "bg-orange-500/10 text-orange-600",
-  urgent: "bg-red-500/10 text-red-600",
-};
-
-function StatusBadge({ status }: { status: string }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[status] ?? "bg-muted text-muted-foreground border-border"}`}
-    >
-      {status.replace(/_/g, " ")}
-    </span>
-  );
+function timeAgo(iso: string) {
+  const ms = Date.now() - new Date(iso).getTime();
+  const h = Math.floor(ms / 3600000);
+  if (h < 1) return `${Math.max(1, Math.floor(ms / 60000))}m`;
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
 }
 
 function OrdersPage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const qc = useQueryClient();
-  const list = useServerFn(listOrders);
-  const counts = useServerFn(getOrderCounts);
 
-  const [tab, setTab] = useState("all");
-  const [search, setSearch] = useState("");
-  const [searchInput, setSearchInput] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize] = useState(50);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [openOrderId, setOpenOrderId] = useState<string | null>(null);
+  const tab = search.tab ?? "all";
+  const q = search.q ?? "";
+  const page = search.page ?? 1;
+  const drawerOrderId = search.orderId;
 
-  const activeStatuses = useMemo(
-    () => STATUS_TABS.find((t) => t.value === tab)?.statuses ?? [],
-    [tab],
-  );
+  const [searchInput, setSearchInput] = useState(q);
+  useEffect(() => setSearchInput(q), [q]);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (searchInput !== q) {
+        navigate({ search: (s) => ({ ...s, q: searchInput || undefined, page: 1 }), replace: true });
+      }
+    }, 300);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchInput]);
 
-  const { data: countsData } = useQuery({
-    queryKey: ["admin-order-counts"],
-    queryFn: () => counts(),
+  const activeStatuses = useMemo(() => {
+    if (search.status) return [search.status];
+    return TABS.find((t) => t.key === tab)?.statuses ?? [];
+  }, [tab, search.status]);
+
+  const counts = useQuery({
+    queryKey: ["orders", "counts"],
+    queryFn: () => getOrderCounts(),
     staleTime: 30_000,
   });
 
-  const { data: ordersData, isLoading } = useQuery({
-    queryKey: ["admin-orders", { tab, search, page, pageSize }],
+  const orders = useQuery({
+    queryKey: ["orders", "list", { tab, statuses: activeStatuses, q, page }],
     queryFn: () =>
-      list({
+      listOrders({
         data: {
-          search: search || undefined,
+          search: q || undefined,
           status: activeStatuses.length ? activeStatuses : undefined,
           page,
-          page_size: pageSize,
+          page_size: 25,
           sort_by: "created_at",
           sort_dir: "desc",
         },
       }),
-    placeholderData: (prev) => prev,
   });
 
-  const tabCounts = useMemo(() => {
-    const m = countsData?.counts ?? {};
-    const totalAll = countsData?.total ?? 0;
-    return {
-      all: totalAll,
-      new: m.new ?? 0,
-      active: ["confirmed", "packaging", "packed", "ready_to_ship"].reduce((s, k) => s + (m[k] ?? 0), 0),
-      shipped: ["shipped", "in_transit"].reduce((s, k) => s + (m[k] ?? 0), 0),
-      delivered: ["delivered", "partial_delivered"].reduce((s, k) => s + (m[k] ?? 0), 0),
-      issues: ["on_hold", "returned", "damaged", "cancelled", "fake"].reduce((s, k) => s + (m[k] ?? 0), 0),
-    } as Record<string, number>;
-  }, [countsData]);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  useEffect(() => setSelected(new Set()), [tab, q, page]);
 
-  const rows = ordersData?.rows ?? [];
-  const total = ordersData?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-
-  const allSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
-  const toggleAll = () => {
-    if (allSelected) setSelected(new Set());
-    else setSelected(new Set(rows.map((r) => r.id)));
-  };
-  const toggleOne = (id: string) => {
-    const next = new Set(selected);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setSelected(next);
-  };
-
-  const bulkFn = useServerFn(bulkTransitionStatus);
-  const bulkMutation = useMutation({
-    mutationFn: async (newStatus: string) =>
-      bulkFn({ data: { order_ids: Array.from(selected), new_status: newStatus } }),
-    onSuccess: (res) => {
-      toast.success(`Updated ${res.ok} orders${res.failed ? `, ${res.failed} failed` : ""}`);
+  const bulkMut = useMutation({
+    mutationFn: (newStatus: string) =>
+      bulkTransitionStatus({ data: { order_ids: Array.from(selected), new_status: newStatus } }),
+    onSuccess: (r) => {
+      toast.success(`Updated ${r.ok} orders${r.failed ? `, ${r.failed} failed` : ""}`);
       setSelected(new Set());
-      qc.invalidateQueries({ queryKey: ["admin-orders"] });
-      qc.invalidateQueries({ queryKey: ["admin-order-counts"] });
+      qc.invalidateQueries({ queryKey: ["orders"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const onSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearch(searchInput.trim());
-    setPage(1);
+  const tabCount = (statuses: string[]) => {
+    if (!counts.data) return null;
+    if (statuses.length === 0) return counts.data.total;
+    return statuses.reduce((s, st) => s + (counts.data!.counts[st] ?? 0), 0);
+  };
+
+  const rows = orders.data?.rows ?? [];
+  const total = orders.data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / 25));
+
+  const allChecked = rows.length > 0 && rows.every((r) => selected.has(r.id));
+  const toggleAll = () => {
+    if (allChecked) setSelected(new Set());
+    else setSelected(new Set(rows.map((r) => r.id)));
   };
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto max-w-[1500px] space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Orders</h1>
-          <p className="text-sm text-muted-foreground">
-            {total.toLocaleString()} total {selected.size > 0 && ` · ${selected.size} selected`}
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight">Orders</h1>
+          <p className="text-sm text-muted-foreground">Manage all your store orders</p>
         </div>
       </div>
 
-      <Tabs value={tab} onValueChange={(v) => { setTab(v); setPage(1); setSelected(new Set()); }}>
-        <TabsList className="grid grid-cols-3 sm:grid-cols-6 w-full sm:w-auto">
-          {STATUS_TABS.map((t) => (
-            <TabsTrigger key={t.value} value={t.value} className="gap-1.5 text-xs">
-              {t.label}
-              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">
-                {tabCounts[t.value] ?? 0}
-              </Badge>
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      {/* Tabs */}
+      <Card className="overflow-hidden">
+        <div className="flex flex-wrap gap-1 border-b border-border bg-muted/30 p-2">
+          {TABS.map((t) => {
+            const c = tabCount(t.statuses);
+            const active = (search.status ? false : tab === t.key);
+            return (
+              <button
+                key={t.key}
+                onClick={() => navigate({ search: () => ({ tab: t.key, page: 1 }) })}
+                className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                  active ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:bg-background/50"
+                }`}
+              >
+                {t.label}
+                {c !== null && c !== undefined && (
+                  <span className={`rounded-full px-1.5 text-[10px] tabular-nums ${
+                    active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  }`}>{c}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
 
-      <div className="flex flex-col sm:flex-row gap-2">
-        <form onSubmit={onSearch} className="flex-1 flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        {/* Search row */}
+        <div className="flex items-center gap-2 border-b border-border bg-background p-3">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
+              placeholder="Search by name, phone, or order ID..."
+              className="h-9 pl-8"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search by name, phone, or order ID…"
-              className="pl-9"
             />
           </div>
-          <Button type="submit" variant="secondary">Search</Button>
-          {search && (
-            <Button type="button" variant="ghost" onClick={() => { setSearch(""); setSearchInput(""); setPage(1); }}>
-              Clear
+          <Button variant="outline" size="sm" className="gap-2 h-9">
+            <Filter className="h-3.5 w-3.5" /> Filters
+          </Button>
+          <div className="ml-auto text-xs text-muted-foreground tabular-nums">
+            {orders.isLoading ? "..." : `${total} order${total === 1 ? "" : "s"}`}
+          </div>
+        </div>
+
+        {/* Bulk toolbar */}
+        {selected.size > 0 && (
+          <div className="flex items-center gap-3 border-b border-primary/30 bg-primary/5 px-4 py-2.5">
+            <span className="text-sm font-medium">{selected.size} selected</span>
+            <Separator orientation="vertical" className="h-4" />
+            <Select onValueChange={(v) => bulkMut.mutate(v)}>
+              <SelectTrigger className="h-8 w-[180px] text-xs">
+                <SelectValue placeholder="Change status to..." />
+              </SelectTrigger>
+              <SelectContent>
+                {NEXT_STATUS_OPTIONS.map((s) => (
+                  <SelectItem key={s.value} value={s.value} className="text-xs">{s.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {bulkMut.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+            <Button variant="ghost" size="sm" className="ml-auto h-8" onClick={() => setSelected(new Set())}>
+              <X className="h-3.5 w-3.5 mr-1" /> Clear
             </Button>
-          )}
-        </form>
-      </div>
+          </div>
+        )}
 
-      {selected.size > 0 && (
-        <div className="flex items-center gap-2 rounded-lg border bg-muted/40 p-3">
-          <span className="text-sm font-medium">{selected.size} selected</span>
-          <div className="flex-1" />
-          <Select onValueChange={(v) => bulkMutation.mutate(v)}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Change status to…" />
-            </SelectTrigger>
-            <SelectContent>
-              {ALL_STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button variant="ghost" onClick={() => setSelected(new Set())}>Cancel</Button>
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/20 text-xs uppercase text-muted-foreground">
+                <th className="w-10 px-4 py-2.5">
+                  <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
+                </th>
+                <th className="px-2 py-2.5 text-left font-medium">Order</th>
+                <th className="px-2 py-2.5 text-left font-medium">Customer</th>
+                <th className="px-2 py-2.5 text-left font-medium">Items</th>
+                <th className="px-2 py-2.5 text-right font-medium">Total</th>
+                <th className="px-2 py-2.5 text-left font-medium">Status</th>
+                <th className="px-2 py-2.5 text-left font-medium">Age</th>
+                <th className="w-10"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.isLoading ? (
+                Array.from({ length: 8 }).map((_, i) => (
+                  <tr key={i} className="border-b border-border">
+                    <td colSpan={8} className="px-4 py-2.5"><Skeleton className="h-8 w-full" /></td>
+                  </tr>
+                ))
+              ) : rows.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-16 text-center text-sm text-muted-foreground">
+                    No orders found
+                  </td>
+                </tr>
+              ) : (
+                rows.map((o) => {
+                  const checked = selected.has(o.id);
+                  const itemCount = (o.order_items as { id: string }[] | null)?.length ?? 0;
+                  return (
+                    <tr
+                      key={o.id}
+                      className="border-b border-border hover:bg-muted/40 cursor-pointer transition"
+                      onClick={() => navigate({ search: (s) => ({ ...s, orderId: o.id }) })}
+                    >
+                      <td className="px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={(v) => {
+                            const next = new Set(selected);
+                            if (v) next.add(o.id);
+                            else next.delete(o.id);
+                            setSelected(next);
+                          }}
+                        />
+                      </td>
+                      <td className="px-2 py-2.5 font-mono text-xs tabular-nums">#{o.id.slice(0, 8)}</td>
+                      <td className="px-2 py-2.5">
+                        <div className="font-medium">{o.shipping_name ?? "—"}</div>
+                        <div className="text-xs text-muted-foreground">{o.shipping_phone ?? ""}</div>
+                      </td>
+                      <td className="px-2 py-2.5 text-muted-foreground">{itemCount}</td>
+                      <td className="px-2 py-2.5 text-right font-semibold tabular-nums">{taka(Number(o.total ?? 0))}</td>
+                      <td className="px-2 py-2.5"><StatusPill status={o.status} /></td>
+                      <td className="px-2 py-2.5 text-xs text-muted-foreground tabular-nums">{timeAgo(o.created_at)}</td>
+                      <td className="px-2 py-2.5"><MoreHorizontal className="h-4 w-4 text-muted-foreground" /></td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
 
-      <div className="rounded-lg border bg-card overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-10">
-                <Checkbox checked={allSelected} onCheckedChange={toggleAll} />
-              </TableHead>
-              <TableHead>Order</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead>Items</TableHead>
-              <TableHead>Total</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Priority</TableHead>
-              <TableHead>Age</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading && rows.length === 0 ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell colSpan={8}><Skeleton className="h-8 w-full" /></TableCell>
-                </TableRow>
-              ))
-            ) : rows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
-                  No orders found
-                </TableCell>
-              </TableRow>
-            ) : (
-              rows.map((o) => {
-                const itemCount = (o.order_items ?? []).reduce((s, it) => s + (it.quantity ?? 0), 0);
-                return (
-                  <TableRow
-                    key={o.id}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => setOpenOrderId(o.id)}
-                  >
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Checkbox
-                        checked={selected.has(o.id)}
-                        onCheckedChange={() => toggleOne(o.id)}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-mono text-xs">#{o.id.slice(0, 8)}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {format(new Date(o.created_at), "MMM d, HH:mm")}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">{o.shipping_name ?? "—"}</div>
-                      <div className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Phone className="h-3 w-3" />
-                        {o.shipping_phone ?? "—"}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="inline-flex items-center gap-1 text-sm">
-                        <Package className="h-3.5 w-3.5 text-muted-foreground" />
-                        {itemCount}
-                      </span>
-                    </TableCell>
-                    <TableCell className="font-semibold">৳{Number(o.total).toLocaleString()}</TableCell>
-                    <TableCell><StatusBadge status={o.status} /></TableCell>
-                    <TableCell>
-                      <span className={`text-xs px-2 py-0.5 rounded ${PRIORITY_COLORS[o.priority ?? "normal"]}`}>
-                        {o.priority ?? "normal"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {Math.floor((Date.now() - new Date(o.created_at).getTime()) / 3600000)}h
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Page {page} of {totalPages}
-        </p>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
-            <ChevronLeft className="h-4 w-4" /> Previous
-          </Button>
-          <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
-            Next <ChevronRight className="h-4 w-4" />
-          </Button>
+        {/* Pagination */}
+        <div className="flex items-center justify-between border-t border-border bg-muted/20 px-4 py-2.5">
+          <div className="text-xs text-muted-foreground tabular-nums">
+            Page {page} of {totalPages}
+          </div>
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8"
+              disabled={page <= 1}
+              onClick={() => navigate({ search: (s) => ({ ...s, page: page - 1 }) })}
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8"
+              disabled={page >= totalPages}
+              onClick={() => navigate({ search: (s) => ({ ...s, page: page + 1 }) })}
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
-      </div>
+      </Card>
 
-      <OrderDetailDrawer
-        orderId={openOrderId}
-        onClose={() => setOpenOrderId(null)}
-        onChanged={() => {
-          qc.invalidateQueries({ queryKey: ["admin-orders"] });
-          qc.invalidateQueries({ queryKey: ["admin-order-counts"] });
-        }}
+      <OrderDrawer
+        orderId={drawerOrderId}
+        onClose={() => navigate({ search: (s) => ({ ...s, orderId: undefined }) })}
       />
     </div>
   );
 }
 
-// ============================================================
-// Order Detail Drawer
-// ============================================================
-
-function OrderDetailDrawer({
-  orderId,
-  onClose,
-  onChanged,
-}: {
-  orderId: string | null;
-  onClose: () => void;
-  onChanged: () => void;
-}) {
-  const detail = useServerFn(getOrderDetail);
-  const transition = useServerFn(transitionOrderStatus);
-  const update = useServerFn(updateOrder);
-  const noteFn = useServerFn(addOrderNote);
+function OrderDrawer({ orderId, onClose }: { orderId?: string; onClose: () => void }) {
+  const open = !!orderId;
   const qc = useQueryClient();
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["admin-order-detail", orderId],
-    queryFn: () => detail({ data: { id: orderId! } }),
-    enabled: !!orderId,
-  });
-
   const [note, setNote] = useState("");
 
-  const transitionMut = useMutation({
-    mutationFn: async (newStatus: string) =>
-      transition({ data: { order_id: orderId!, new_status: newStatus } }),
-    onSuccess: () => {
-      toast.success("Status updated");
-      qc.invalidateQueries({ queryKey: ["admin-order-detail", orderId] });
-      onChanged();
-    },
-    onError: (e: Error) => toast.error(e.message),
+  const detail = useQuery({
+    queryKey: ["order", orderId],
+    queryFn: () => getOrderDetail({ data: { id: orderId! } }),
+    enabled: open,
   });
 
-  const updateMut = useMutation({
-    mutationFn: async (patch: { id: string; priority?: "low" | "normal" | "high" | "urgent"; payment_status?: "unpaid" | "partial" | "paid" | "refunded" }) =>
-      update({ data: patch }),
+  const transition = useMutation({
+    mutationFn: (newStatus: string) =>
+      transitionOrderStatus({ data: { order_id: orderId!, new_status: newStatus } }),
     onSuccess: () => {
-      toast.success("Order updated");
-      qc.invalidateQueries({ queryKey: ["admin-order-detail", orderId] });
-      onChanged();
+      toast.success("Status updated");
+      qc.invalidateQueries({ queryKey: ["order", orderId] });
+      qc.invalidateQueries({ queryKey: ["orders"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const noteMut = useMutation({
-    mutationFn: async () =>
-      noteFn({ data: { order_id: orderId!, body: note.trim(), is_internal: true } }),
+    mutationFn: () => addOrderNote({ data: { order_id: orderId!, body: note, is_internal: true } }),
     onSuccess: () => {
       toast.success("Note added");
       setNote("");
-      qc.invalidateQueries({ queryKey: ["admin-order-detail", orderId] });
+      qc.invalidateQueries({ queryKey: ["order", orderId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const order = data?.order;
-  const items = data?.items ?? [];
-  const history = data?.history ?? [];
-  const notes = data?.notes ?? [];
+  const priorityMut = useMutation({
+    mutationFn: (priority: string) =>
+      updateOrder({ data: { id: orderId!, priority: priority as "low" | "normal" | "high" | "urgent" } }),
+    onSuccess: () => {
+      toast.success("Priority updated");
+      qc.invalidateQueries({ queryKey: ["order", orderId] });
+      qc.invalidateQueries({ queryKey: ["orders"] });
+    },
+  });
+
+  const o = detail.data?.order;
 
   return (
-    <Sheet open={!!orderId} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle className="flex items-center gap-2">
-            Order #{orderId?.slice(0, 8)}
-            {order && <StatusBadge status={order.status} />}
-          </SheetTitle>
-        </SheetHeader>
-
-        {isLoading || !order ? (
-          <div className="space-y-3 mt-6">
-            <Skeleton className="h-24 w-full" />
+    <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
+      <SheetContent className="w-full sm:max-w-2xl p-0 overflow-y-auto">
+        {detail.isLoading || !o ? (
+          <div className="p-6 space-y-4">
+            <Skeleton className="h-8 w-48" />
             <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-48 w-full" />
           </div>
         ) : (
-          <div className="space-y-6 mt-6">
-            {/* Quick actions */}
-            <section className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Quick actions
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                <Select onValueChange={(v) => transitionMut.mutate(v)}>
-                  <SelectTrigger className="w-[200px]"><SelectValue placeholder="Change status…" /></SelectTrigger>
-                  <SelectContent>
-                    {ALL_STATUSES.map((s) => (
-                      <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={order.priority ?? "normal"}
-                  onValueChange={(v) => updateMut.mutate({ id: order.id, priority: v as "low" | "normal" | "high" | "urgent" })}
-                >
-                  <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {["low", "normal", "high", "urgent"].map((p) => (
-                      <SelectItem key={p} value={p}>{p}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={order.payment_status ?? "unpaid"}
-                  onValueChange={(v) => updateMut.mutate({ id: order.id, payment_status: v as "unpaid" | "partial" | "paid" | "refunded" })}
-                >
-                  <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {["unpaid", "partial", "paid", "refunded"].map((p) => (
-                      <SelectItem key={p} value={p}>{p}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </section>
-
-            {/* Customer */}
-            <section className="rounded-lg border p-4 space-y-2">
-              <h3 className="font-semibold text-sm flex items-center gap-2">
-                <Phone className="h-4 w-4" /> Customer
-              </h3>
-              <div className="text-sm space-y-1">
-                <div><span className="text-muted-foreground">Name:</span> {order.shipping_name ?? "—"}</div>
-                <div>
-                  <span className="text-muted-foreground">Phone:</span>{" "}
-                  <a href={`tel:${order.shipping_phone}`} className="text-primary hover:underline">{order.shipping_phone}</a>
-                  {" · "}
-                  <a
-                    href={`https://wa.me/${(order.shipping_phone ?? "").replace(/\D/g, "")}`}
-                    target="_blank" rel="noreferrer"
-                    className="text-green-600 hover:underline"
-                  >WhatsApp</a>
-                </div>
-                {order.alternate_phone && <div><span className="text-muted-foreground">Alt:</span> {order.alternate_phone}</div>}
-                {order.guest_email && <div><span className="text-muted-foreground">Email:</span> {order.guest_email}</div>}
-              </div>
-            </section>
-
-            {/* Shipping */}
-            <section className="rounded-lg border p-4 space-y-2">
-              <h3 className="font-semibold text-sm flex items-center gap-2">
-                <MapPin className="h-4 w-4" /> Shipping
-              </h3>
-              <div className="text-sm space-y-1">
-                <div>{order.shipping_address}</div>
-                <div className="text-muted-foreground">
-                  {[order.shipping_thana, order.shipping_district, order.shipping_city].filter(Boolean).join(", ")}
-                </div>
-              </div>
-            </section>
-
-            {/* Items */}
-            <section className="rounded-lg border p-4 space-y-2">
-              <h3 className="font-semibold text-sm flex items-center gap-2">
-                <Package className="h-4 w-4" /> Items ({items.length})
-              </h3>
-              <div className="space-y-2">
-                {items.map((it) => (
-                  <div key={it.id} className="flex items-center gap-3 text-sm">
-                    {it.image && <img src={it.image} alt="" className="w-10 h-10 rounded object-cover" />}
-                    <div className="flex-1 min-w-0">
-                      <div className="truncate">{it.name}</div>
-                      {it.variant_label && <div className="text-xs text-muted-foreground">{it.variant_label}</div>}
-                    </div>
-                    <div className="text-muted-foreground">×{it.quantity}</div>
-                    <div className="font-medium">৳{Number(it.line_total ?? it.price ?? 0).toLocaleString()}</div>
+          <>
+            <SheetHeader className="sticky top-0 z-10 border-b border-border bg-background/90 backdrop-blur p-5">
+              <div className="flex items-center gap-3">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <div className="flex-1">
+                  <SheetTitle className="font-mono text-base">#{o.id.slice(0, 8)}</SheetTitle>
+                  <div className="text-xs text-muted-foreground">
+                    {new Date(o.created_at).toLocaleString()}
                   </div>
-                ))}
+                </div>
+                <StatusPill status={o.status} />
               </div>
-              <div className="border-t pt-2 mt-2 space-y-1 text-sm">
-                <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>৳{Number(order.subtotal ?? 0).toLocaleString()}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span>৳{Number(order.shipping_fee ?? 0).toLocaleString()}</span></div>
-                {Number(order.discount_amount ?? 0) > 0 && (
-                  <div className="flex justify-between text-green-600"><span>Discount</span><span>-৳{Number(order.discount_amount).toLocaleString()}</span></div>
-                )}
-                <div className="flex justify-between font-bold pt-1 border-t"><span>Total</span><span>৳{Number(order.total).toLocaleString()}</span></div>
-              </div>
-            </section>
+            </SheetHeader>
 
-            {/* Status timeline */}
-            <section className="rounded-lg border p-4 space-y-2">
-              <h3 className="font-semibold text-sm flex items-center gap-2">
-                <Clock className="h-4 w-4" /> Status timeline
-              </h3>
-              {history.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No history yet</p>
-              ) : (
-                <div className="space-y-2">
-                  {history.map((h) => (
-                    <div key={h.id} className="text-xs flex gap-2">
-                      <div className="text-muted-foreground whitespace-nowrap">
-                        {format(new Date(h.created_at), "MMM d HH:mm")}
+            <div className="p-5 space-y-5">
+              {/* Quick actions */}
+              <div className="flex flex-wrap gap-2">
+                <Select onValueChange={(v) => transition.mutate(v)}>
+                  <SelectTrigger className="h-8 flex-1 min-w-[180px] text-xs">
+                    <SelectValue placeholder="Change status..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NEXT_STATUS_OPTIONS.map((s) => (
+                      <SelectItem key={s.value} value={s.value} className="text-xs">{s.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={o.priority ?? "normal"} onValueChange={(v) => priorityMut.mutate(v)}>
+                  <SelectTrigger className="h-8 w-[120px] text-xs">
+                    <Flag className="h-3 w-3 mr-1" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low" className="text-xs">Low</SelectItem>
+                    <SelectItem value="normal" className="text-xs">Normal</SelectItem>
+                    <SelectItem value="high" className="text-xs">High</SelectItem>
+                    <SelectItem value="urgent" className="text-xs">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Tabs defaultValue="overview" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
+                  <TabsTrigger value="timeline" className="text-xs">
+                    Timeline ({detail.data?.history.length ?? 0})
+                  </TabsTrigger>
+                  <TabsTrigger value="notes" className="text-xs">
+                    Notes ({detail.data?.notes.length ?? 0})
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="overview" className="space-y-4 mt-4">
+                  {/* Customer */}
+                  <Card className="p-4">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                      Customer
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="font-medium">{o.shipping_name ?? "—"}</div>
+                      <div className="flex flex-wrap gap-2">
+                        {o.shipping_phone && (
+                          <>
+                            <Button asChild variant="outline" size="sm" className="h-7 gap-1 text-xs">
+                              <a href={`tel:${o.shipping_phone}`}>
+                                <Phone className="h-3 w-3" /> {o.shipping_phone}
+                              </a>
+                            </Button>
+                            <Button asChild variant="outline" size="sm" className="h-7 gap-1 text-xs">
+                              <a href={`https://wa.me/${o.shipping_phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer">
+                                <MessageCircle className="h-3 w-3" /> WhatsApp
+                              </a>
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground pt-2">
+                        {o.shipping_address}<br />
+                        {[o.shipping_thana, o.shipping_city, o.shipping_district].filter(Boolean).join(", ")}
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Items */}
+                  <Card className="p-4">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                      Items ({detail.data?.items.length ?? 0})
+                    </div>
+                    <div className="divide-y divide-border">
+                      {detail.data?.items.map((it) => (
+                        <div key={it.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                          {it.image && (
+                            <img src={it.image} alt="" className="h-10 w-10 rounded-md object-cover" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium truncate">{it.name}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {it.variant_label && <span>{it.variant_label} · </span>}
+                              Qty {it.quantity} × {taka(Number(it.unit_price ?? it.price ?? 0))}
+                            </div>
+                          </div>
+                          <div className="text-sm font-semibold tabular-nums">
+                            {taka(Number(it.line_total ?? Number(it.price) * it.quantity))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <Separator className="my-3" />
+                    <div className="space-y-1.5 text-sm">
+                      <div className="flex justify-between text-muted-foreground"><span>Subtotal</span><span className="tabular-nums">{taka(Number(o.subtotal ?? 0))}</span></div>
+                      <div className="flex justify-between text-muted-foreground"><span>Shipping</span><span className="tabular-nums">{taka(Number(o.shipping_fee ?? 0))}</span></div>
+                      {Number(o.discount_amount ?? 0) > 0 && (
+                        <div className="flex justify-between text-success"><span>Discount</span><span className="tabular-nums">−{taka(Number(o.discount_amount))}</span></div>
+                      )}
+                      <Separator />
+                      <div className="flex justify-between font-bold text-base"><span>Total</span><span className="tabular-nums">{taka(Number(o.total ?? 0))}</span></div>
+                    </div>
+                  </Card>
+
+                  {/* Payment */}
+                  <Card className="p-4">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                      Payment & Shipping
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <div className="text-xs text-muted-foreground">Method</div>
+                        <div className="font-medium">{o.payment_method ?? "COD"}</div>
                       </div>
                       <div>
-                        {h.from_status && <><span className="line-through text-muted-foreground">{h.from_status}</span> → </>}
-                        <span className="font-medium">{h.to_status}</span>
-                        {h.note && <div className="text-muted-foreground">{h.note}</div>}
+                        <div className="text-xs text-muted-foreground">Status</div>
+                        <div className="font-medium capitalize">{o.payment_status}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground">Courier</div>
+                        <div className="font-medium">{o.courier_name ?? "—"}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground">Tracking</div>
+                        <div className="font-medium font-mono text-xs">{o.tracking_number ?? "—"}</div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </section>
+                  </Card>
+                </TabsContent>
 
-            {/* Notes */}
-            <section className="rounded-lg border p-4 space-y-2">
-              <h3 className="font-semibold text-sm flex items-center gap-2">
-                <StickyNote className="h-4 w-4" /> Notes ({notes.length})
-              </h3>
-              <div className="space-y-2">
-                {notes.map((n) => (
-                  <div key={n.id} className="text-sm rounded bg-muted/50 p-2">
-                    <div className="text-xs text-muted-foreground mb-1">
-                      {format(new Date(n.created_at), "MMM d HH:mm")}
-                      {n.is_internal && <Badge variant="secondary" className="ml-2 text-[10px] h-4">internal</Badge>}
+                <TabsContent value="timeline" className="mt-4">
+                  <Card className="p-4">
+                    {(detail.data?.history.length ?? 0) === 0 ? (
+                      <div className="py-6 text-center text-sm text-muted-foreground">No status changes yet</div>
+                    ) : (
+                      <div className="space-y-3">
+                        {detail.data?.history.map((h) => (
+                          <div key={h.id} className="flex gap-3">
+                            <div className="flex flex-col items-center">
+                              <div className="h-2 w-2 rounded-full bg-primary mt-1.5" />
+                              <div className="w-px flex-1 bg-border" />
+                            </div>
+                            <div className="flex-1 pb-3">
+                              <div className="flex items-center gap-2 text-sm">
+                                <span className="text-muted-foreground">
+                                  {h.from_status ? ORDER_STATUS_LABELS[h.from_status] ?? h.from_status : "—"}
+                                </span>
+                                <span>→</span>
+                                <StatusPill status={h.to_status} />
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {new Date(h.created_at).toLocaleString()}
+                              </div>
+                              {h.note && <div className="text-xs mt-1.5 p-2 rounded bg-muted">{h.note}</div>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="notes" className="mt-4 space-y-4">
+                  <Card className="p-4">
+                    <Textarea
+                      placeholder="Add an internal note..."
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      className="resize-none text-sm"
+                      rows={3}
+                    />
+                    <div className="flex justify-end mt-2">
+                      <Button
+                        size="sm"
+                        disabled={!note.trim() || noteMut.isPending}
+                        onClick={() => noteMut.mutate()}
+                      >
+                        {noteMut.isPending && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
+                        Add Note
+                      </Button>
                     </div>
-                    <div>{n.body}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="space-y-2">
-                <Textarea
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Add an internal note…"
-                  rows={2}
-                />
-                <Button
-                  size="sm"
-                  disabled={!note.trim() || noteMut.isPending}
-                  onClick={() => noteMut.mutate()}
-                >
-                  Add note
-                </Button>
-              </div>
-            </section>
+                  </Card>
 
-            {order.risk_flag && (
-              <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-sm flex gap-2">
-                <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
-                <div>This order is flagged as risky.</div>
-              </div>
-            )}
-          </div>
+                  <div className="space-y-2">
+                    {(detail.data?.notes.length ?? 0) === 0 ? (
+                      <div className="py-6 text-center text-sm text-muted-foreground">No notes yet</div>
+                    ) : (
+                      detail.data?.notes.map((n) => (
+                        <Card key={n.id} className="p-3">
+                          <div className="text-sm whitespace-pre-wrap">{n.body}</div>
+                          <div className="text-[10px] text-muted-foreground mt-1.5">
+                            {new Date(n.created_at).toLocaleString()}
+                          </div>
+                        </Card>
+                      ))
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </>
         )}
       </SheetContent>
     </Sheet>
