@@ -403,7 +403,7 @@ function OrderDetailDrawer({
   });
 
   const updateMut = useMutation({
-    mutationFn: async (patch: Parameters<typeof update>[0]["data"]) =>
+    mutationFn: async (patch: { id: string; priority?: "low" | "normal" | "high" | "urgent"; payment_status?: "unpaid" | "partial" | "paid" | "refunded" }) =>
       update({ data: patch }),
     onSuccess: () => {
       toast.success("Order updated");
