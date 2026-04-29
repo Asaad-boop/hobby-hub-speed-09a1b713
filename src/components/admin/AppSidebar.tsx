@@ -12,6 +12,7 @@ import {
   CreditCard,
   Ticket,
   Sparkles,
+  ShoppingCart,
 } from "lucide-react";
 import {
   Sidebar,
