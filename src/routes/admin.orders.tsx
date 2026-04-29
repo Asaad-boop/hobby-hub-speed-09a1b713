@@ -870,9 +870,9 @@ function OrderDetailModalBody({
 
         {/* ITEMS */}
         <div className="mt-3">
-          <PanelCard title={`Items (${detail.data.items.length})`} icon={<Package className="h-3 w-3" />}>
+          <PanelCard title={`Items (${(detail.data.items ?? []).length})`} icon={<Package className="h-3 w-3" />}>
             <ul className="-mx-1 divide-y divide-border/70 text-xs">
-              {detail.data.items.map((it) => (
+              {(detail.data.items ?? []).map((it) => (
                 <li key={it.id} className="flex items-center gap-3 px-1 py-2">
                   {it.image ? (
                     <img src={it.image} alt="" className="h-9 w-9 rounded-md border border-border object-cover" />
