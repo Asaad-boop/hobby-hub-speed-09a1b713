@@ -45,6 +45,12 @@ import { generateInvoicePDF } from "@/lib/pdf/invoice";
 import { generatePickingListPDF } from "@/lib/pdf/picking-list";
 import { loadPathaoCreds, isPathaoConfigured } from "@/lib/pathao-settings";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/admin/orders")({
   component: OrdersPage,
@@ -339,194 +345,213 @@ function OrdersPage() {
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 overflow-auto px-6 py-4">
-          {ordersQ.isLoading ? (
-            <Loading />
-          ) : orders.length === 0 ? (
-            <Empty label="No orders found" />
-          ) : (
-            <Card className="overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="sticky top-0 z-[1] bg-gradient-to-b from-muted/80 to-muted/50 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground backdrop-blur">
-                    <tr className="border-b border-border">
-                      <th className="w-10 px-3 py-3">
-                        <Checkbox
-                          checked={allChecked}
-                          onCheckedChange={(v) =>
-                            setSelected(v ? orders.map((o) => o.id) : [])
-                          }
-                        />
-                      </th>
-                      <th className="px-3 py-3 text-left">Order</th>
-                      <th className="px-3 py-3 text-left">Customer</th>
-                      <th className="px-3 py-3 text-left">Location</th>
-                      <th className="px-3 py-3 text-right">Amount</th>
-                      <th className="px-3 py-3 text-left">Stage</th>
-                      <th className="px-3 py-3 text-left">Courier</th>
-                      <th className="px-3 py-3 text-left">Date</th>
-                      <th className="px-3 py-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/70">
-                    {orders.map((o) => {
-                      const stage = deriveStage({
-                        status: o.status,
-                        confirmation_status: o.confirmation_status,
-                        call_status: o.call_status,
-                        hold_until: o.hold_until,
-                        advance_amount: o.advance_amount,
-                      });
-                      const isSel = selected.includes(o.id);
-                      const isOpen = openOrderId === o.id;
-                      const name = o.shipping_name ?? o.guest_name ?? "—";
-                      const phone = o.shipping_phone ?? o.guest_phone ?? "—";
-                      const ageHrs = (Date.now() - new Date(o.created_at).getTime()) / 3600_000;
-                      const isUrgent = ageHrs > 24 && (stage === "processing" || stage === "call_not_received");
-                      return (
-                        <tr
-                          key={o.id}
-                          className={`group relative cursor-pointer transition-colors ${
-                            isSel
-                              ? "bg-[#1D9E75]/[0.06] hover:bg-[#1D9E75]/[0.10]"
-                              : isOpen
-                                ? "bg-muted/60"
-                                : "hover:bg-muted/30"
-                          }`}
-                          onClick={() => setOpenOrderId(o.id)}
-                        >
-                          <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
-                            <div className="relative">
-                              {isSel && (
-                                <span className="absolute -left-3 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-full bg-[#1D9E75]" />
-                              )}
-                              <Checkbox
-                                checked={isSel}
-                                onCheckedChange={(v) =>
-                                  setSelected((prev) =>
-                                    v ? [...prev, o.id] : prev.filter((x) => x !== o.id),
-                                  )
-                                }
-                              />
-                            </div>
-                          </td>
-                          <td className="px-3 py-3">
-                            <div className="font-mono text-xs font-semibold text-foreground">
-                              {shortId(o.id)}
-                            </div>
-                            <div className="mt-1 flex items-center gap-1">
-                              {o.is_guest_order && (
-                                <span className="inline-block rounded bg-amber-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-inset ring-amber-200">
-                                  Guest
-                                </span>
-                              )}
-                              {isUrgent && (
-                                <span className="inline-block rounded bg-rose-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-rose-700 ring-1 ring-inset ring-rose-200">
-                                  {Math.floor(ageHrs / 24)}d old
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-3 py-3">
-                            <div className="flex items-center gap-2.5">
-                              <div
-                                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ring-2 ring-white shadow-sm ${avatarColor(name)}`}
-                              >
-                                {initials(name)}
-                              </div>
-                              <div className="min-w-0">
-                                <div className="truncate font-medium text-foreground">{name}</div>
-                                <div className="truncate font-mono text-[11px] text-muted-foreground">
-                                  {phone}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-3 py-3">
-                            <div className="text-xs font-medium text-foreground">
-                              {o.shipping_city ?? "—"}
-                            </div>
-                            {o.shipping_district && (
-                              <div className="text-[11px] text-muted-foreground">
-                                {o.shipping_district}
-                              </div>
+      <div className="flex-1 overflow-auto px-6 py-4">
+        {ordersQ.isLoading ? (
+          <Loading />
+        ) : orders.length === 0 ? (
+          <Empty label="No orders found" />
+        ) : (
+          <Card className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 z-[1] bg-gradient-to-b from-muted/80 to-muted/50 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground backdrop-blur">
+                  <tr className="border-b border-border">
+                    <th className="w-10 px-3 py-3">
+                      <Checkbox
+                        checked={allChecked}
+                        onCheckedChange={(v) =>
+                          setSelected(v ? orders.map((o) => o.id) : [])
+                        }
+                      />
+                    </th>
+                    <th className="px-3 py-3 text-left">Order</th>
+                    <th className="px-3 py-3 text-left">Customer</th>
+                    <th className="px-3 py-3 text-left">Location</th>
+                    <th className="px-3 py-3 text-right">Amount</th>
+                    <th className="px-3 py-3 text-left">Stage</th>
+                    <th className="px-3 py-3 text-left">Courier</th>
+                    <th className="px-3 py-3 text-left">Date</th>
+                    <th className="px-3 py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/70">
+                  {orders.map((o) => {
+                    const stage = deriveStage({
+                      status: o.status,
+                      confirmation_status: o.confirmation_status,
+                      call_status: o.call_status,
+                      hold_until: o.hold_until,
+                      advance_amount: o.advance_amount,
+                    });
+                    const isSel = selected.includes(o.id);
+                    const isOpen = openOrderId === o.id;
+                    const name = o.shipping_name ?? o.guest_name ?? "—";
+                    const phone = o.shipping_phone ?? o.guest_phone ?? "—";
+                    const ageHrs = (Date.now() - new Date(o.created_at).getTime()) / 3600_000;
+                    const isUrgent = ageHrs > 24 && (stage === "processing" || stage === "call_not_received");
+                    return (
+                      <tr
+                        key={o.id}
+                        className={`group relative cursor-pointer transition-colors ${
+                          isSel
+                            ? "bg-[#1D9E75]/[0.06] hover:bg-[#1D9E75]/[0.10]"
+                            : isOpen
+                              ? "bg-muted/60"
+                              : "hover:bg-muted/30"
+                        }`}
+                        onClick={() => setOpenOrderId(o.id)}
+                      >
+                        <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                          <div className="relative">
+                            {isSel && (
+                              <span className="absolute -left-3 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-full bg-[#1D9E75]" />
                             )}
-                          </td>
-                          <td className="px-3 py-3 text-right">
-                            <div className="font-semibold tabular-nums text-foreground">
-                              {fmtBDT(Number(o.total))}
-                            </div>
-                            <div className="mt-0.5 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-600">
-                              {(o.payment_method ?? "COD").toUpperCase()}
-                            </div>
-                          </td>
-                          <td className="px-3 py-3">
-                            <StageBadge stage={stage} />
-                          </td>
-                          <td className="px-3 py-3">
-                            {o.courier_name ? (
-                              <>
-                                <div className="text-xs font-medium">{o.courier_name}</div>
-                                {o.tracking_number && (
-                                  <div className="font-mono text-[10px] text-muted-foreground">
-                                    {o.tracking_number}
-                                  </div>
-                                )}
-                              </>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">—</span>
+                            <Checkbox
+                              checked={isSel}
+                              onCheckedChange={(v) =>
+                                setSelected((prev) =>
+                                  v ? [...prev, o.id] : prev.filter((x) => x !== o.id),
+                                )
+                              }
+                            />
+                          </div>
+                        </td>
+                        <td className="px-3 py-3">
+                          <div className="font-mono text-xs font-semibold text-foreground">
+                            {shortId(o.id)}
+                          </div>
+                          <div className="mt-1 flex items-center gap-1">
+                            {o.is_guest_order && (
+                              <span className="inline-block rounded bg-amber-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-inset ring-amber-200">
+                                Guest
+                              </span>
                             )}
-                          </td>
-                          <td className="px-3 py-3 text-xs text-muted-foreground">
-                            {fmtDateShort(o.created_at)}
-                          </td>
-                          <td
-                            className="px-3 py-3 text-right"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Btn
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handlePrintInvoice(o.id)}
-                              title="Print invoice"
+                            {isUrgent && (
+                              <span className="inline-block rounded bg-rose-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-rose-700 ring-1 ring-inset ring-rose-200">
+                                {Math.floor(ageHrs / 24)}d old
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-3 py-3">
+                          <div className="flex items-center gap-2.5">
+                            <div
+                              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ring-2 ring-white shadow-sm ${avatarColor(name)}`}
                             >
-                              <Printer className="h-3.5 w-3.5" />
-                            </Btn>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
-
-          )}
-        </div>
-
-        {/* Detail drawer */}
-        {openOrderId && (
-          <OrderDetailDrawer
-            id={openOrderId}
-            onClose={() => setOpenOrderId(null)}
-            onMoveStage={(stage) => moveStage(openOrderId, stage)}
-            onPrintInvoice={() => handlePrintInvoice(openOrderId)}
-          />
+                              {initials(name)}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="truncate font-medium text-foreground">{name}</div>
+                              <div className="truncate font-mono text-[11px] text-muted-foreground">
+                                {phone}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 py-3">
+                          <div className="text-xs font-medium text-foreground">
+                            {o.shipping_city ?? "—"}
+                          </div>
+                          {o.shipping_district && (
+                            <div className="text-[11px] text-muted-foreground">
+                              {o.shipping_district}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-3 py-3 text-right">
+                          <div className="font-semibold tabular-nums text-foreground">
+                            {fmtBDT(Number(o.total))}
+                          </div>
+                          <div className="mt-0.5 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-600">
+                            {(o.payment_method ?? "COD").toUpperCase()}
+                          </div>
+                        </td>
+                        <td className="px-3 py-3">
+                          <StageBadge stage={stage} />
+                        </td>
+                        <td className="px-3 py-3">
+                          {o.courier_name ? (
+                            <>
+                              <div className="text-xs font-medium">{o.courier_name}</div>
+                              {o.tracking_number && (
+                                <div className="font-mono text-[10px] text-muted-foreground">
+                                  {o.tracking_number}
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="px-3 py-3 text-xs text-muted-foreground">
+                          {fmtDateShort(o.created_at)}
+                        </td>
+                        <td
+                          className="px-3 py-3 text-right"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Btn
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handlePrintInvoice(o.id)}
+                            title="Print invoice"
+                          >
+                            <Printer className="h-3.5 w-3.5" />
+                          </Btn>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </Card>
         )}
       </div>
+
+      {/* Detail modal */}
+      <OrderDetailModal
+        id={openOrderId}
+        onClose={() => setOpenOrderId(null)}
+        onMoveStage={(stage) => openOrderId && moveStage(openOrderId, stage)}
+        onPrintInvoice={() => openOrderId && handlePrintInvoice(openOrderId)}
+      />
     </div>
   );
 }
 
-function OrderDetailDrawer({
+function OrderDetailModal({
   id,
   onClose,
   onMoveStage,
   onPrintInvoice,
 }: {
-  id: string;
+  id: string | null;
   onClose: () => void;
+  onMoveStage: (stage: WorkflowStage) => void;
+  onPrintInvoice: () => void;
+}) {
+  return (
+    <Dialog open={!!id} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-hidden p-0 sm:rounded-xl">
+        {id && (
+          <OrderDetailModalBody
+            id={id}
+            onMoveStage={onMoveStage}
+            onPrintInvoice={onPrintInvoice}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function OrderDetailModalBody({
+  id,
+  onMoveStage,
+  onPrintInvoice,
+}: {
+  id: string;
   onMoveStage: (stage: WorkflowStage) => void;
   onPrintInvoice: () => void;
 }) {
@@ -548,45 +573,45 @@ function OrderDetailDrawer({
   });
 
   return (
-    <aside className="flex w-[420px] shrink-0 flex-col border-l border-border bg-white">
-      <div className="flex items-center justify-between border-b border-border px-4 py-3">
-        <div>
-          <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Order
+    <div className="flex max-h-[90vh] flex-col">
+      <DialogHeader className="border-b border-border bg-gradient-to-b from-[#1D9E75]/[0.06] to-transparent px-5 py-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1D9E75]/10 ring-1 ring-[#1D9E75]/20">
+            <Package className="h-5 w-5 text-[#1D9E75]" />
           </div>
-          <div className="font-mono text-sm font-semibold">{shortId(id)}</div>
+          <div className="min-w-0">
+            <DialogTitle className="font-mono text-base font-semibold">
+              {shortId(id)}
+            </DialogTitle>
+            {detail.data && (
+              <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
+                <span>{fmtDate(detail.data.order.created_at)}</span>
+                <span>•</span>
+                <StageBadge
+                  stage={deriveStage({
+                    status: detail.data.order.status,
+                    confirmation_status: detail.data.order.confirmation_status,
+                    call_status: detail.data.order.call_status,
+                    hold_until: detail.data.order.hold_until,
+                    advance_amount: detail.data.order.advance_amount,
+                  })}
+                />
+              </div>
+            )}
+          </div>
         </div>
-        <button
-          onClick={onClose}
-          className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-        >
-          <XCircle className="h-4 w-4" />
-        </button>
-      </div>
+      </DialogHeader>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto px-5 py-4">
         {detail.isLoading || !detail.data ? (
           <Loading />
         ) : (
           <>
-            {/* Stage */}
-            <div className="mb-4">
-              <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Current stage
-              </div>
-              <StageBadge
-                stage={deriveStage({
-                  status: detail.data.order.status,
-                  confirmation_status: detail.data.order.confirmation_status,
-                  call_status: detail.data.order.call_status,
-                  hold_until: detail.data.order.hold_until,
-                  advance_amount: detail.data.order.advance_amount,
-                })}
-              />
-            </div>
-
             {/* Quick actions */}
-            <div className="mb-4 grid grid-cols-3 gap-1.5">
+            <div className="mb-5 grid grid-cols-3 gap-1.5 sm:grid-cols-5">
+              <Btn variant="primary" size="sm" onClick={() => onMoveStage("confirmed")}>
+                <CheckCircle2 className="h-3 w-3" /> Confirm
+              </Btn>
               <Btn variant="secondary" size="sm" onClick={() => onMoveStage("call_not_received")}>
                 <Phone className="h-3 w-3" /> No Ans
               </Btn>
@@ -596,120 +621,123 @@ function OrderDetailDrawer({
               <Btn variant="secondary" size="sm" onClick={() => onMoveStage("advance_payment")}>
                 <Package className="h-3 w-3" /> Advance
               </Btn>
-              <Btn variant="primary" size="sm" onClick={() => onMoveStage("confirmed")}>
-                <CheckCircle2 className="h-3 w-3" /> Confirm
-              </Btn>
               <Btn variant="secondary" size="sm" onClick={() => onMoveStage("shipped")}>
                 <Truck className="h-3 w-3" /> Ship
               </Btn>
               <Btn variant="secondary" size="sm" onClick={() => onMoveStage("delivered")}>
                 <CheckCircle2 className="h-3 w-3" /> Delivered
               </Btn>
-              <Btn variant="danger" size="sm" onClick={() => onMoveStage("cancelled")}>
-                <XCircle className="h-3 w-3" /> Cancel
-              </Btn>
               <Btn variant="secondary" size="sm" onClick={() => onMoveStage("returned")}>
                 <RefreshCw className="h-3 w-3" /> Return
+              </Btn>
+              <Btn variant="danger" size="sm" onClick={() => onMoveStage("cancelled")}>
+                <XCircle className="h-3 w-3" /> Cancel
               </Btn>
               <Btn variant="ghost" size="sm" onClick={onPrintInvoice}>
                 <Printer className="h-3 w-3" /> Invoice
               </Btn>
             </div>
 
-            {/* Customer */}
-            <Section title="Customer">
-              <Field label="Name" value={detail.data.order.shipping_name ?? detail.data.order.guest_name} />
-              <Field label="Phone" value={detail.data.order.shipping_phone ?? detail.data.order.guest_phone} />
-              <Field
-                label="Address"
-                value={[
-                  detail.data.order.shipping_address,
-                  detail.data.order.shipping_city,
-                  detail.data.order.shipping_district,
-                ]
-                  .filter(Boolean)
-                  .join(", ")}
-              />
-            </Section>
+            <div className="grid gap-4 md:grid-cols-2">
+              {/* Customer */}
+              <Section title="Customer">
+                <Field label="Name" value={detail.data.order.shipping_name ?? detail.data.order.guest_name} />
+                <Field label="Phone" value={detail.data.order.shipping_phone ?? detail.data.order.guest_phone} />
+                <Field
+                  label="Address"
+                  value={[
+                    detail.data.order.shipping_address,
+                    detail.data.order.shipping_city,
+                    detail.data.order.shipping_district,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")}
+                />
+              </Section>
+
+              {/* Totals */}
+              <Section title="Payment">
+                <Field label="Subtotal" value={fmtBDT(Number(detail.data.order.subtotal))} />
+                <Field label="Shipping" value={fmtBDT(Number(detail.data.order.shipping_fee))} />
+                <Field label="Discount" value={fmtBDT(Number(detail.data.order.discount_amount))} />
+                <Field label="Advance" value={fmtBDT(Number(detail.data.order.advance_amount))} />
+                <Field
+                  label="Total"
+                  value={<span className="font-bold">{fmtBDT(Number(detail.data.order.total))}</span>}
+                />
+                <Field label="Method" value={(detail.data.order.payment_method ?? "COD").toUpperCase()} />
+                {detail.data.order.tracking_number && (
+                  <Field label="Tracking" value={detail.data.order.tracking_number} />
+                )}
+              </Section>
+            </div>
 
             {/* Items */}
-            <Section title={`Items (${detail.data.items.length})`}>
-              <ul className="divide-y divide-border text-xs">
-                {detail.data.items.map((it) => (
-                  <li key={it.id} className="flex items-center justify-between py-1.5">
-                    <div className="min-w-0 flex-1 pr-2">
-                      <div className="truncate font-medium">{it.name}</div>
-                      {it.variant_label && (
-                        <div className="text-muted-foreground">{it.variant_label}</div>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <div>{it.quantity} ×</div>
-                      <div className="font-semibold">{fmtBDT(Number(it.price))}</div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </Section>
-
-            {/* Totals */}
-            <Section title="Payment">
-              <Field label="Subtotal" value={fmtBDT(Number(detail.data.order.subtotal))} />
-              <Field label="Shipping" value={fmtBDT(Number(detail.data.order.shipping_fee))} />
-              <Field label="Discount" value={fmtBDT(Number(detail.data.order.discount_amount))} />
-              <Field label="Advance" value={fmtBDT(Number(detail.data.order.advance_amount))} />
-              <Field
-                label="Total"
-                value={<span className="font-bold">{fmtBDT(Number(detail.data.order.total))}</span>}
-              />
-              <Field label="Method" value={(detail.data.order.payment_method ?? "COD").toUpperCase()} />
-              {detail.data.order.tracking_number && (
-                <Field label="Tracking" value={detail.data.order.tracking_number} />
-              )}
-            </Section>
-
-            {/* Add note */}
-            <Section title="Add note">
-              <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                rows={2}
-                placeholder="Internal note…"
-                className="w-full resize-none rounded-md border border-border bg-white px-2 py-1.5 text-xs outline-none focus:border-[#1D9E75]"
-              />
-              <Btn
-                variant="primary"
-                size="sm"
-                className="mt-1.5 w-full"
-                disabled={!note.trim() || noteMut.isPending}
-                onClick={() => noteMut.mutate(note.trim())}
-              >
-                Add note
-              </Btn>
-            </Section>
-
-            {/* Activity */}
-            <Section title="Activity">
-              {detail.data.logs.length === 0 ? (
-                <div className="text-xs text-muted-foreground">No activity yet</div>
-              ) : (
-                <ul className="space-y-2 text-xs">
-                  {detail.data.logs.map((l) => (
-                    <li key={l.id} className="border-l-2 border-border pl-2">
-                      <div className="font-medium">{l.action}</div>
-                      {l.note && <div className="text-muted-foreground">{l.note}</div>}
-                      <div className="text-[10px] text-muted-foreground">
-                        {fmtDate(l.created_at)}
+            <div className="mt-4">
+              <Section title={`Items (${detail.data.items.length})`}>
+                <ul className="divide-y divide-border text-xs">
+                  {detail.data.items.map((it) => (
+                    <li key={it.id} className="flex items-center justify-between py-1.5">
+                      <div className="min-w-0 flex-1 pr-2">
+                        <div className="truncate font-medium">{it.name}</div>
+                        {it.variant_label && (
+                          <div className="text-muted-foreground">{it.variant_label}</div>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <div>{it.quantity} ×</div>
+                        <div className="font-semibold">{fmtBDT(Number(it.price))}</div>
                       </div>
                     </li>
                   ))}
                 </ul>
-              )}
-            </Section>
+              </Section>
+            </div>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              {/* Add note */}
+              <Section title="Add note">
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  rows={2}
+                  placeholder="Internal note…"
+                  className="w-full resize-none rounded-md border border-border bg-white px-2 py-1.5 text-xs outline-none focus:border-[#1D9E75]"
+                />
+                <Btn
+                  variant="primary"
+                  size="sm"
+                  className="mt-1.5 w-full"
+                  disabled={!note.trim() || noteMut.isPending}
+                  onClick={() => noteMut.mutate(note.trim())}
+                >
+                  Add note
+                </Btn>
+              </Section>
+
+              {/* Activity */}
+              <Section title="Activity">
+                {detail.data.logs.length === 0 ? (
+                  <div className="text-xs text-muted-foreground">No activity yet</div>
+                ) : (
+                  <ul className="space-y-2 text-xs">
+                    {detail.data.logs.map((l) => (
+                      <li key={l.id} className="border-l-2 border-border pl-2">
+                        <div className="font-medium">{l.action}</div>
+                        {l.note && <div className="text-muted-foreground">{l.note}</div>}
+                        <div className="text-[10px] text-muted-foreground">
+                          {fmtDate(l.created_at)}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Section>
+            </div>
           </>
         )}
       </div>
-    </aside>
+    </div>
   );
 }
 
