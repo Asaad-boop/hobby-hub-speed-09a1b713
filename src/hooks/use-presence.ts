@@ -33,16 +33,20 @@ export function usePresenceHeartbeat() {
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) await supabase.auth.signOut().catch(() => undefined);
         if (sessionError || !sessionData.session?.access_token) return;
-        await supabase.from("active_sessions").upsert(
-          {
-            session_id: sid,
-            path: window.location.pathname,
-            user_agent: navigator.userAgent,
-            referrer: document.referrer || null,
-            last_seen_at: new Date().toISOString(),
-          },
-          { onConflict: "session_id" },
-        );
+        await supabase
+          .schema("public")
+          .from("active_sessions")
+          .upsert(
+            {
+              session_id: sid,
+              path: window.location.pathname,
+              user_agent: navigator.userAgent,
+              referrer: document.referrer || null,
+              last_seen_at: new Date().toISOString(),
+            },
+            { onConflict: "session_id" },
+          )
+          .setHeader("x-session-id", sid);
       } catch {
         // ignore
       }
