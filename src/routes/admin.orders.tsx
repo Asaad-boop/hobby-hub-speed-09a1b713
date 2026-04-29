@@ -24,6 +24,9 @@ import {
   StickyNote,
   Save,
   Pencil,
+  Eye,
+  Download,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -102,6 +105,8 @@ function OrdersPage() {
   const [stageFilter, setStageFilter] = useState<WorkflowStage | "all">("all");
   const [selected, setSelected] = useState<string[]>([]);
   const [openOrderId, setOpenOrderId] = useState<string | null>(null);
+  const [invoicePreview, setInvoicePreview] = useState<{ url: string; filename: string; orderId: string } | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const ordersQ = useQuery({
     queryKey: ["oms", "orders", search],
@@ -235,6 +240,25 @@ function OrdersPage() {
     } catch (e) {
       toast.error("Invoice generate failed: " + (e as Error).message);
     }
+  };
+
+  const handlePreviewInvoice = async (id: string) => {
+    try {
+      setPreviewLoading(true);
+      // Revoke any prior URL
+      if (invoicePreview?.url) URL.revokeObjectURL(invoicePreview.url);
+      const res = await generateInvoicePDF(id, { mode: "blob" });
+      if (res) setInvoicePreview({ url: res.blobUrl, filename: res.filename, orderId: id });
+    } catch (e) {
+      toast.error("Preview failed: " + (e as Error).message);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const closeInvoicePreview = () => {
+    if (invoicePreview?.url) URL.revokeObjectURL(invoicePreview.url);
+    setInvoicePreview(null);
   };
 
   const handlePrintPicking = async () => {
@@ -495,14 +519,24 @@ function OrdersPage() {
                           className="px-3 py-3 text-right"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <Btn
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handlePrintInvoice(o.id)}
-                            title="Print invoice"
-                          >
-                            <Printer className="h-3.5 w-3.5" />
-                          </Btn>
+                          <div className="flex items-center justify-end gap-1">
+                            <Btn
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handlePreviewInvoice(o.id)}
+                              title="Preview invoice"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                            </Btn>
+                            <Btn
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handlePrintInvoice(o.id)}
+                              title="Download invoice"
+                            >
+                              <Printer className="h-3.5 w-3.5" />
+                            </Btn>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -520,8 +554,70 @@ function OrdersPage() {
         onClose={() => setOpenOrderId(null)}
         onMoveStage={(stage) => openOrderId && moveStage(openOrderId, stage)}
         onPrintInvoice={() => openOrderId && handlePrintInvoice(openOrderId)}
+        onPreviewInvoice={() => openOrderId && handlePreviewInvoice(openOrderId)}
+      />
+
+      {/* Invoice preview modal */}
+      <InvoicePreviewModal
+        preview={invoicePreview}
+        loading={previewLoading}
+        onClose={closeInvoicePreview}
+        onDownload={() => invoicePreview && handlePrintInvoice(invoicePreview.orderId)}
       />
     </div>
+  );
+}
+
+function InvoicePreviewModal({
+  preview,
+  loading,
+  onClose,
+  onDownload,
+}: {
+  preview: { url: string; filename: string; orderId: string } | null;
+  loading: boolean;
+  onClose: () => void;
+  onDownload: () => void;
+}) {
+  const open = !!preview || loading;
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-5xl w-[95vw] h-[92vh] p-0 gap-0 flex flex-col">
+        <DialogHeader className="flex flex-row items-center justify-between gap-3 border-b px-4 py-3 space-y-0">
+          <DialogTitle className="text-sm font-semibold">
+            Invoice Preview {preview?.filename ? `— ${preview.filename}` : ""}
+          </DialogTitle>
+          <div className="flex items-center gap-2">
+            <Btn
+              variant="primary"
+              size="sm"
+              onClick={onDownload}
+              disabled={!preview}
+            >
+              <Download className="h-3.5 w-3.5 mr-1.5" />
+              Download
+            </Btn>
+            <Btn variant="ghost" size="sm" onClick={onClose} title="Close">
+              <X className="h-4 w-4" />
+            </Btn>
+          </div>
+        </DialogHeader>
+        <div className="flex-1 bg-muted/30 overflow-hidden">
+          {loading || !preview ? (
+            <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+              <Loading />
+            </div>
+          ) : (
+            <iframe
+              key={preview.url}
+              src={preview.url}
+              title="Invoice preview"
+              className="w-full h-full border-0 bg-white"
+            />
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -530,11 +626,13 @@ function OrderDetailModal({
   onClose,
   onMoveStage,
   onPrintInvoice,
+  onPreviewInvoice,
 }: {
   id: string | null;
   onClose: () => void;
   onMoveStage: (stage: WorkflowStage) => void;
   onPrintInvoice: () => void;
+  onPreviewInvoice: () => void;
 }) {
   return (
     <Dialog open={!!id} onOpenChange={(o) => !o && onClose()}>
@@ -544,6 +642,7 @@ function OrderDetailModal({
             id={id}
             onMoveStage={onMoveStage}
             onPrintInvoice={onPrintInvoice}
+            onPreviewInvoice={onPreviewInvoice}
           />
         )}
       </DialogContent>
@@ -555,10 +654,12 @@ function OrderDetailModalBody({
   id,
   onMoveStage,
   onPrintInvoice,
+  onPreviewInvoice,
 }: {
   id: string;
   onMoveStage: (stage: WorkflowStage) => void;
   onPrintInvoice: () => void;
+  onPreviewInvoice: () => void;
 }) {
   const qc = useQueryClient();
   const [note, setNote] = useState("");
@@ -713,6 +814,7 @@ function OrderDetailModalBody({
           <ActionPill icon={<PackageCheck className="h-3.5 w-3.5" />} label="Delivered" onClick={() => onMoveStage("delivered")} />
           <ActionPill icon={<Undo2 className="h-3.5 w-3.5" />} label="Return" onClick={() => onMoveStage("returned")} />
           <ActionPill tone="danger" icon={<XCircle className="h-3.5 w-3.5" />} label="Cancel" onClick={() => onMoveStage("cancelled")} />
+          <ActionPill icon={<Eye className="h-3.5 w-3.5" />} label="Preview" onClick={onPreviewInvoice} />
           <ActionPill icon={<Printer className="h-3.5 w-3.5" />} label="Invoice" onClick={onPrintInvoice} />
         </div>
 
