@@ -2,7 +2,6 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   PhoneCall,
-  PackageCheck,
   Package,
   Tags,
   UserCircle,
@@ -40,7 +39,6 @@ const GROUPS: NavGroup[] = [
     label: "Sales",
     items: [
       { title: "Web Orders", url: "/admin/web-orders", icon: PhoneCall },
-      { title: "Orders Pipeline", url: "/admin/orders-pipeline", icon: PackageCheck },
       { title: "Payments", url: "/admin/payments", icon: CreditCard },
     ],
   },

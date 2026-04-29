@@ -25,12 +25,8 @@ function Dashboard() {
       today.setHours(0, 0, 0, 0);
       const since14 = new Date(Date.now() - 13 * 86400_000).toISOString();
 
-      const [pending, pipeline, todayOrders, lowStock, customers, recent, last14] = await Promise.all([
+      const [pending, todayOrders, lowStock, customers, recent, last14] = await Promise.all([
         supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "new"),
-        supabase
-          .from("orders")
-          .select("id", { count: "exact", head: true })
-          .in("status", ["confirmed", "ready_to_pack", "packed", "ready_to_ship", "courier_entry", "shipped", "in_transit"]),
         supabase.from("orders").select("total,status").gte("created_at", today.toISOString()),
         supabase.from("products").select("id,title,stock").lte("stock", 5).eq("is_active", true).order("stock").limit(6),
         supabase.from("profiles").select("id", { count: "exact", head: true }),
@@ -69,7 +65,6 @@ function Dashboard() {
 
       return {
         pendingCount: pending.count ?? 0,
-        pipelineCount: pipeline.count ?? 0,
         todayCount: todayOrders.data?.length ?? 0,
         todayRevenue,
         revenue14: totalRevenue14,
@@ -100,7 +95,7 @@ function Dashboard() {
         <KpiCard
           label="Orders (14d)"
           value={String(data.orders14)}
-          sub={`${data.pendingCount} new · ${data.pipelineCount} pipeline`}
+          sub={`${data.pendingCount} new · ${data.todayCount} today`}
           icon={ShoppingBag}
           tone="violet"
         />
