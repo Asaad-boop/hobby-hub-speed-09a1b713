@@ -34,7 +34,6 @@ export function usePresenceHeartbeat() {
         if (sessionError) await supabase.auth.signOut().catch(() => undefined);
         if (sessionError || !sessionData.session?.access_token) return;
         await supabase
-          .schema("public")
           .from("active_sessions")
           .upsert(
             {
