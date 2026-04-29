@@ -258,22 +258,45 @@ function OrdersPage() {
         }
       />
 
+      {/* KPI strip */}
+      <div className="grid grid-cols-2 gap-2 border-b border-border bg-gradient-to-b from-muted/30 to-transparent px-6 py-3 sm:grid-cols-4 lg:grid-cols-5">
+        <KpiPill
+          label="Total"
+          value={stageCounts.all}
+          icon={<ListFilter className="h-3.5 w-3.5" />}
+        />
+        <KpiPill label="Processing" value={stageCounts.processing ?? 0} tone="amber" />
+        <KpiPill label="Confirmed" value={stageCounts.confirmed ?? 0} tone="emerald" />
+        <KpiPill label="Shipped" value={stageCounts.shipped ?? 0} tone="sky" />
+        <KpiPill label="Delivered" value={stageCounts.delivered ?? 0} tone="teal" />
+      </div>
+
       {/* Stage tabs */}
       <div className="flex flex-wrap items-center gap-1.5 border-b border-border bg-white px-6 py-2.5">
-        {(["all", ...WORKFLOW_STAGES] as const).map((s) => (
-          <button
-            key={s}
-            onClick={() => setStageFilter(s as never)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              stageFilter === s
-                ? "bg-[#1D9E75] text-white"
-                : "bg-muted text-muted-foreground hover:bg-muted/70"
-            }`}
-          >
-            {s === "all" ? "All" : STAGE_LABEL[s as WorkflowStage]}
-            <span className="ml-1.5 opacity-70">{stageCounts[s] ?? 0}</span>
-          </button>
-        ))}
+        {(["all", ...WORKFLOW_STAGES] as const).map((s) => {
+          const active = stageFilter === s;
+          return (
+            <button
+              key={s}
+              onClick={() => setStageFilter(s as never)}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                active
+                  ? "border-[#1D9E75] bg-[#1D9E75] text-white shadow-sm"
+                  : "border-transparent bg-muted text-muted-foreground hover:border-border hover:bg-white"
+              }`}
+            >
+              {s !== "all" && STAGE_ICON[s as WorkflowStage]}
+              {s === "all" ? "All" : STAGE_LABEL[s as WorkflowStage]}
+              <span
+                className={`ml-0.5 rounded-full px-1.5 text-[10px] ${
+                  active ? "bg-white/20 text-white" : "bg-white text-foreground"
+                }`}
+              >
+                {stageCounts[s] ?? 0}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Search + bulk actions */}
@@ -284,13 +307,13 @@ function OrdersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name or phone…"
-            className="h-8 w-full rounded-md border border-border bg-white pl-8 pr-3 text-sm outline-none focus:border-[#1D9E75]"
+            className="h-9 w-full rounded-lg border border-border bg-white pl-8 pr-3 text-sm outline-none transition-colors focus:border-[#1D9E75] focus:ring-2 focus:ring-[#1D9E75]/15"
           />
         </div>
 
         {selected.length > 0 && (
-          <>
-            <span className="text-xs font-medium text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-[#1D9E75]/30 bg-[#1D9E75]/5 px-2 py-1">
+            <span className="rounded-md bg-[#1D9E75] px-2 py-0.5 text-[11px] font-semibold text-white">
               {selected.length} selected
             </span>
             <Btn variant="secondary" size="sm" onClick={() => bulkMove("confirmed")}>
@@ -303,7 +326,7 @@ function OrdersPage() {
               <XCircle className="h-3.5 w-3.5" /> Cancel
             </Btn>
             <Btn variant="secondary" size="sm" onClick={handlePrintPicking}>
-              <FileText className="h-3.5 w-3.5" /> Picking List
+              <FileText className="h-3.5 w-3.5" /> Picking
             </Btn>
             <Btn variant="primary" size="sm" onClick={handlePathao1Click}>
               <Truck className="h-3.5 w-3.5" /> 1-Click Pathao
@@ -311,7 +334,7 @@ function OrdersPage() {
             <Btn variant="ghost" size="sm" onClick={() => setSelected([])}>
               Clear
             </Btn>
-          </>
+          </div>
         )}
       </div>
 
