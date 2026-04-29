@@ -121,7 +121,7 @@ function OrdersPage() {
   const orderRows = useMemo(() => safeArray(ordersQ.data), [ordersQ.data]);
 
   const orders = useMemo(() => {
-    const list = orderRows;
+    const list = orderRows.filter((o): o is NonNullable<typeof o> => !!o && !!o.id);
     if (stageFilter === "all") return list;
     return list.filter(
       (o) =>
@@ -139,6 +139,7 @@ function OrdersPage() {
     const counts: Record<string, number> = { all: 0 };
     for (const s of WORKFLOW_STAGES) counts[s] = 0;
     for (const o of orderRows) {
+      if (!o) continue;
       counts.all++;
       const stg = deriveStage({
         status: o.status,
@@ -147,7 +148,7 @@ function OrdersPage() {
         hold_until: o.hold_until,
         advance_amount: o.advance_amount,
       });
-      counts[stg]++;
+      counts[stg] = (counts[stg] ?? 0) + 1;
     }
     return counts;
   }, [orderRows]);
