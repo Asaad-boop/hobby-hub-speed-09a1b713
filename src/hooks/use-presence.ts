@@ -30,8 +30,9 @@ export function usePresenceHeartbeat() {
     const ping = async () => {
       if (cancelled) return;
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (!sessionData.session?.access_token) return;
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) await supabase.auth.signOut().catch(() => undefined);
+        if (sessionError || !sessionData.session?.access_token) return;
         await supabase.from("active_sessions").upsert(
           {
             session_id: sid,
