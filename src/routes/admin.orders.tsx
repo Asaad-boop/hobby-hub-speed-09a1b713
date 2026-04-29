@@ -346,12 +346,12 @@ function OrdersPage() {
           ) : orders.length === 0 ? (
             <Empty label="No orders found" />
           ) : (
-            <Card>
+            <Card className="overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-muted/50 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <thead className="sticky top-0 z-[1] bg-muted/60 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground backdrop-blur">
                     <tr>
-                      <th className="w-10 px-3 py-2.5">
+                      <th className="w-10 px-3 py-3">
                         <Checkbox
                           checked={allChecked}
                           onCheckedChange={(v) =>
@@ -359,15 +359,14 @@ function OrdersPage() {
                           }
                         />
                       </th>
-                      <th className="px-3 py-2.5 text-left">Order</th>
-                      <th className="px-3 py-2.5 text-left">Customer</th>
-                      <th className="px-3 py-2.5 text-left">Phone</th>
-                      <th className="px-3 py-2.5 text-left">City</th>
-                      <th className="px-3 py-2.5 text-right">Amount</th>
-                      <th className="px-3 py-2.5 text-left">Stage</th>
-                      <th className="px-3 py-2.5 text-left">Courier</th>
-                      <th className="px-3 py-2.5 text-left">Date</th>
-                      <th className="px-3 py-2.5 text-right">Actions</th>
+                      <th className="px-3 py-3 text-left">Order</th>
+                      <th className="px-3 py-3 text-left">Customer</th>
+                      <th className="px-3 py-3 text-left">Location</th>
+                      <th className="px-3 py-3 text-right">Amount</th>
+                      <th className="px-3 py-3 text-left">Stage</th>
+                      <th className="px-3 py-3 text-left">Courier</th>
+                      <th className="px-3 py-3 text-left">Date</th>
+                      <th className="px-3 py-3 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -380,15 +379,22 @@ function OrdersPage() {
                         advance_amount: o.advance_amount,
                       });
                       const isSel = selected.includes(o.id);
+                      const isOpen = openOrderId === o.id;
+                      const name = o.shipping_name ?? o.guest_name ?? "—";
+                      const phone = o.shipping_phone ?? o.guest_phone ?? "—";
                       return (
                         <tr
                           key={o.id}
-                          className={`cursor-pointer transition-colors hover:bg-muted/40 ${
-                            isSel ? "bg-[#1D9E75]/5" : openOrderId === o.id ? "bg-muted" : ""
+                          className={`group cursor-pointer transition-colors ${
+                            isSel
+                              ? "bg-[#1D9E75]/5 hover:bg-[#1D9E75]/10"
+                              : isOpen
+                                ? "bg-muted"
+                                : "hover:bg-muted/40"
                           }`}
                           onClick={() => setOpenOrderId(o.id)}
                         >
-                          <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
+                          <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
                             <Checkbox
                               checked={isSel}
                               onCheckedChange={(v) =>
@@ -398,39 +404,76 @@ function OrdersPage() {
                               }
                             />
                           </td>
-                          <td className="px-3 py-2 font-mono text-xs">{shortId(o.id)}</td>
-                          <td className="px-3 py-2 font-medium">
-                            {o.shipping_name ?? o.guest_name ?? "—"}
-                          </td>
-                          <td className="px-3 py-2 text-muted-foreground">
-                            {o.shipping_phone ?? o.guest_phone ?? "—"}
-                          </td>
-                          <td className="px-3 py-2 text-muted-foreground">
-                            {o.shipping_city ?? "—"}
-                          </td>
-                          <td className="px-3 py-2 text-right font-semibold">
-                            {fmtBDT(Number(o.total))}
-                          </td>
-                          <td className="px-3 py-2">
-                            <StageBadge stage={stage} />
-                          </td>
-                          <td className="px-3 py-2 text-xs text-muted-foreground">
-                            {o.courier_name ?? "—"}
-                            {o.tracking_number && (
-                              <div className="font-mono text-[10px]">{o.tracking_number}</div>
+                          <td className="px-3 py-2.5">
+                            <div className="font-mono text-xs font-semibold text-foreground">
+                              #{shortId(o.id)}
+                            </div>
+                            {o.is_guest_order && (
+                              <div className="mt-0.5 inline-block rounded bg-amber-50 px-1 text-[9px] font-medium uppercase tracking-wider text-amber-700">
+                                Guest
+                              </div>
                             )}
                           </td>
-                          <td className="px-3 py-2 text-xs text-muted-foreground">
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${avatarColor(name)}`}
+                              >
+                                {initials(name)}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="truncate font-medium text-foreground">{name}</div>
+                                <div className="truncate text-[11px] text-muted-foreground">
+                                  {phone}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <div className="text-xs text-foreground">{o.shipping_city ?? "—"}</div>
+                            {o.shipping_district && (
+                              <div className="text-[11px] text-muted-foreground">
+                                {o.shipping_district}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-3 py-2.5 text-right">
+                            <div className="font-semibold tabular-nums text-foreground">
+                              {fmtBDT(Number(o.total))}
+                            </div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                              {(o.payment_method ?? "COD").toUpperCase()}
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <StageBadge stage={stage} />
+                          </td>
+                          <td className="px-3 py-2.5">
+                            {o.courier_name ? (
+                              <>
+                                <div className="text-xs font-medium">{o.courier_name}</div>
+                                {o.tracking_number && (
+                                  <div className="font-mono text-[10px] text-muted-foreground">
+                                    {o.tracking_number}
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2.5 text-xs text-muted-foreground">
                             {fmtDateShort(o.created_at)}
                           </td>
                           <td
-                            className="px-3 py-2 text-right"
+                            className="px-3 py-2.5 text-right"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <Btn
                               variant="ghost"
                               size="sm"
                               onClick={() => handlePrintInvoice(o.id)}
+                              title="Print invoice"
                             >
                               <Printer className="h-3.5 w-3.5" />
                             </Btn>
@@ -442,6 +485,7 @@ function OrdersPage() {
                 </table>
               </div>
             </Card>
+
           )}
         </div>
 
