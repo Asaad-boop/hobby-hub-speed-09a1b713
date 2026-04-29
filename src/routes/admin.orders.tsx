@@ -24,6 +24,7 @@ import {
   listOrders, getOrderDetail, transitionOrderStatus,
   bulkTransitionStatus, addOrderNote, updateOrder, getOrderCounts,
 } from "@/server/orders.functions";
+import { callWithSupabaseAuth } from "@/lib/server-fn-auth";
 
 const TABS: { key: string; label: string; statuses: string[] }[] = [
   { key: "all", label: "All", statuses: [] },
@@ -101,14 +102,15 @@ function OrdersPage() {
 
   const counts = useQuery({
     queryKey: ["orders", "counts"],
-    queryFn: () => getOrderCounts(),
+    queryFn: () => callWithSupabaseAuth(getOrderCounts),
+    retry: false,
     staleTime: 30_000,
   });
 
   const orders = useQuery({
     queryKey: ["orders", "list", { tab, statuses: activeStatuses, q, page }],
     queryFn: () =>
-      listOrders({
+      callWithSupabaseAuth(listOrders, {
         data: {
           search: q || undefined,
           status: activeStatuses.length ? activeStatuses : undefined,
@@ -118,6 +120,7 @@ function OrdersPage() {
           sort_dir: "desc",
         },
       }),
+    retry: false,
   });
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -125,7 +128,7 @@ function OrdersPage() {
 
   const bulkMut = useMutation({
     mutationFn: (newStatus: string) =>
-      bulkTransitionStatus({ data: { order_ids: Array.from(selected), new_status: newStatus } }),
+      callWithSupabaseAuth(bulkTransitionStatus, { data: { order_ids: Array.from(selected), new_status: newStatus } }),
     onSuccess: (r) => {
       toast.success(`Updated ${r.ok} orders${r.failed ? `, ${r.failed} failed` : ""}`);
       setSelected(new Set());
