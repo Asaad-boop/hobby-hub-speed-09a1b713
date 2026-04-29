@@ -5,7 +5,7 @@ import { Loading } from "./ui";
 export function AdminGuard({ children }: { children: React.ReactNode }) {
   const { loading, user, isAdmin } = useAdminAuth();
   const location = useLocation();
-  const redirectTo = location.href?.startsWith("/") ? location.href : "/admin/orders";
+  const redirectTo = location.pathname.startsWith("/admin") ? location.pathname : "/admin/orders";
 
   if (loading) {
     return (
