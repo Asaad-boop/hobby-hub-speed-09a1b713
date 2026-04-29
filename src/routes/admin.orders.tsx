@@ -783,16 +783,6 @@ function OrderDetailModalBody({
           </PanelCard>
         </div>
 
-        {/* COURIER */}
-        <div className="mt-3">
-          <PanelCard title="Courier & Tracking" icon={<Truck className="h-3 w-3" />}>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <Row label="Courier" value={form.courier_name ?? ""} onChange={(v) => setField("courier_name", v)} placeholder="Pathao / Steadfast…" />
-              <Row label="Tracking" value={form.tracking_number ?? ""} onChange={(v) => setField("tracking_number", v)} mono placeholder="—" />
-            </div>
-          </PanelCard>
-        </div>
-
         <div className="mt-3 grid gap-3 md:grid-cols-2">
           {/* ADD NOTE */}
           <PanelCard title="Add note" icon={<StickyNote className="h-3 w-3" />}>
