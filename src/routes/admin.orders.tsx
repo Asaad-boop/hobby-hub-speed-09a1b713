@@ -626,11 +626,13 @@ function OrderDetailModal({
   onClose,
   onMoveStage,
   onPrintInvoice,
+  onPreviewInvoice,
 }: {
   id: string | null;
   onClose: () => void;
   onMoveStage: (stage: WorkflowStage) => void;
   onPrintInvoice: () => void;
+  onPreviewInvoice: () => void;
 }) {
   return (
     <Dialog open={!!id} onOpenChange={(o) => !o && onClose()}>
@@ -640,6 +642,7 @@ function OrderDetailModal({
             id={id}
             onMoveStage={onMoveStage}
             onPrintInvoice={onPrintInvoice}
+            onPreviewInvoice={onPreviewInvoice}
           />
         )}
       </DialogContent>
@@ -651,10 +654,12 @@ function OrderDetailModalBody({
   id,
   onMoveStage,
   onPrintInvoice,
+  onPreviewInvoice,
 }: {
   id: string;
   onMoveStage: (stage: WorkflowStage) => void;
   onPrintInvoice: () => void;
+  onPreviewInvoice: () => void;
 }) {
   const qc = useQueryClient();
   const [note, setNote] = useState("");
@@ -809,6 +814,7 @@ function OrderDetailModalBody({
           <ActionPill icon={<PackageCheck className="h-3.5 w-3.5" />} label="Delivered" onClick={() => onMoveStage("delivered")} />
           <ActionPill icon={<Undo2 className="h-3.5 w-3.5" />} label="Return" onClick={() => onMoveStage("returned")} />
           <ActionPill tone="danger" icon={<XCircle className="h-3.5 w-3.5" />} label="Cancel" onClick={() => onMoveStage("cancelled")} />
+          <ActionPill icon={<Eye className="h-3.5 w-3.5" />} label="Preview" onClick={onPreviewInvoice} />
           <ActionPill icon={<Printer className="h-3.5 w-3.5" />} label="Invoice" onClick={onPrintInvoice} />
         </div>
 
