@@ -12,7 +12,7 @@ export default function AdminShell() {
             <div className="flex items-center gap-2">
               <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
               <div className="hidden h-5 w-px bg-gray-200 md:block" />
-              <h1 className="text-base font-semibold tracking-tight">HobbyShop OPS</h1>
+              <h1 className="text-base font-semibold tracking-tight">BrandOMS</h1>
             </div>
             <div className="flex items-center gap-2">
               <span className="hidden text-xs text-muted-foreground sm:block">
@@ -21,7 +21,7 @@ export default function AdminShell() {
               <div className="h-8 w-8 rounded-full bg-[#1D9E75]/10 ring-1 ring-[#1D9E75]/20" />
             </div>
           </header>
-          <main className="flex-1 px-4 pb-10 pt-6 md:px-8">
+          <main className="flex-1 overflow-hidden">
             <OrdersPlaceholder />
           </main>
         </SidebarInset>
