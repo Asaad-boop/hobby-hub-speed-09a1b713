@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, Printer, Truck, Plus, FileText, History, Send } from "lucide-react";
+import { toast } from "sonner";
 import { useOpsStore } from "@/lib/ops-store";
 import {
   COURIERS, DIVISIONS, formatBDT, formatDate,
@@ -26,9 +27,19 @@ export default function OrdersPage() {
   const [showNew, setShowNew] = useState(false);
   const [showPicking, setShowPicking] = useState(false);
   const [showCourier, setShowCourier] = useState(false);
-  const [invoiceFor, setInvoiceFor] = useState<Order | null>(null);
-  const [historyFor, setHistoryFor] = useState<Order | null>(null);
-  const [quickCourierFor, setQuickCourierFor] = useState<Order | null>(null);
+  // Track open modals by ID so they re-bind from the live store on every render.
+  const [invoiceId, setInvoiceId] = useState<string | null>(null);
+  const [historyId, setHistoryId] = useState<string | null>(null);
+  const [quickCourierId, setQuickCourierId] = useState<string | null>(null);
+
+  const invoiceFor = invoiceId ? orders.find((o) => o.id === invoiceId) ?? null : null;
+  const historyFor = historyId ? orders.find((o) => o.id === historyId) ?? null : null;
+  const quickCourierFor = quickCourierId ? orders.find((o) => o.id === quickCourierId) ?? null : null;
+
+  // Auto-close a modal if its order disappears (defensive).
+  useEffect(() => { if (invoiceId && !invoiceFor) setInvoiceId(null); }, [invoiceId, invoiceFor]);
+  useEffect(() => { if (historyId && !historyFor) setHistoryId(null); }, [historyId, historyFor]);
+  useEffect(() => { if (quickCourierId && !quickCourierFor) setQuickCourierId(null); }, [quickCourierId, quickCourierFor]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
