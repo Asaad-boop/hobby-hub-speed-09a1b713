@@ -178,8 +178,7 @@ function OrdersPage() {
 
   const handlePrintInvoice = async (id: string) => {
     try {
-      const doc = await generateInvoicePDF(id);
-      doc.save(`invoice-${shortId(id)}.pdf`);
+      await generateInvoicePDF(id);
     } catch (e) {
       toast.error("Invoice generate failed: " + (e as Error).message);
     }
