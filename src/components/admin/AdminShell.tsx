@@ -1,4 +1,5 @@
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 import { AppSidebar } from "./AppSidebar";
 import OrdersPlaceholder from "./OrdersPlaceholder";
 
