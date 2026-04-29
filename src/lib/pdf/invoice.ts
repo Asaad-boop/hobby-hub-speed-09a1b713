@@ -79,7 +79,10 @@ async function loadImageAsDataUrl(url: string): Promise<string | null> {
   }
 }
 
-export async function generateInvoicePDF(orderId: string) {
+export async function generateInvoicePDF(
+  orderId: string,
+  opts: { mode?: "save" | "blob" } = {},
+): Promise<{ blobUrl: string; filename: string } | void> {
   const [orderRes, itemsRes] = await Promise.all([
     supabase.from("orders").select("*").eq("id", orderId).single(),
     supabase.from("order_items").select("*").eq("order_id", orderId),
@@ -398,5 +401,11 @@ export async function generateInvoicePDF(orderId: string) {
   doc.setFont("helvetica", "normal");
   doc.text(`© ${new Date().getFullYear()} HobbyShop. All Rights Reserved`, W / 2, H - 3, { align: "center" });
 
-  doc.save(`invoice-${invId}.pdf`);
+  const filename = `invoice-${invId}.pdf`;
+  if (opts.mode === "blob") {
+    const blob = doc.output("blob");
+    const blobUrl = URL.createObjectURL(blob);
+    return { blobUrl, filename };
+  }
+  doc.save(filename);
 }
