@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link, useSearch } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,11 +10,6 @@ import { Loader2, Mail, Lock, User as UserIcon, Eye, EyeOff, Star, MapPin, Truck
 import logo from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    redirect: typeof search.redirect === "string" && search.redirect.startsWith("/")
-      ? search.redirect
-      : undefined,
-  }),
   head: () => ({
     meta: [
       { title: "Sign In or Create Account — HobbyShop" },
@@ -37,7 +32,8 @@ const signUpSchema = z.object({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const { redirect } = useSearch({ from: "/auth" });
+  const redirect =
+    typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("redirect") : null;
   const nextPath = redirect ?? "/account";
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [loading, setLoading] = useState(false);
