@@ -1072,13 +1072,17 @@ function OrderDetailModalBody({
               <div className="py-3 text-center text-xs text-muted-foreground">No activity yet</div>
             ) : (
               <ul className="space-y-2 text-xs">
-                {detailLogs.slice(0, 6).map((l) => (
-                  <li key={l.id} className="border-l-2 border-[#1D9E75]/40 pl-2">
-                    <div className="font-medium capitalize">{l.action.replace(/_/g, " ")}</div>
-                    {l.note && <div className="text-muted-foreground">{l.note}</div>}
-                    <div className="text-[10px] text-muted-foreground">{fmtDate(l.created_at)}</div>
-                  </li>
-                ))}
+                {detailLogs.slice(0, 6).map((l, idx) => {
+                  if (!l) return null;
+                  const action = typeof l.action === "string" ? l.action : "activity";
+                  return (
+                    <li key={l.id ?? `log-${idx}`} className="border-l-2 border-[#1D9E75]/40 pl-2">
+                      <div className="font-medium capitalize">{action.replace(/_/g, " ")}</div>
+                      {l.note && <div className="text-muted-foreground">{l.note}</div>}
+                      <div className="text-[10px] text-muted-foreground">{fmtDate(l.created_at)}</div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </PanelCard>
