@@ -128,10 +128,10 @@ function CustomersPage() {
                         {fmtBDT(Number(c.total_spent ?? 0))}
                       </td>
                       <td className="px-3 py-2 text-center text-muted-foreground">
-                        {c.cancellation_count}
+                        {c.cancellation_count ?? 0}
                       </td>
                       <td className="px-3 py-2 text-center text-muted-foreground">
-                        {c.fake_order_count}
+                        {c.fake_order_count ?? 0}
                       </td>
                       <td className="px-3 py-2 text-xs text-muted-foreground">
                         {fmtDateShort(c.created_at)}
