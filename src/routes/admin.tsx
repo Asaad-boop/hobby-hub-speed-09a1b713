@@ -3,6 +3,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { Toaster } from "@/components/ui/sonner";
 import { AdminSidebar } from "@/components/admin/Sidebar";
 import { AdminGuard } from "@/components/admin/AdminGuard";
+import { AdminErrorPanel } from "@/components/admin/AdminErrorPanel";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/admin")({
     ],
   }),
   component: AdminLayout,
+  errorComponent: AdminErrorPanel,
 });
 
 function AdminLayout() {
