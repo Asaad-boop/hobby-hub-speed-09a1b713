@@ -1,5 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import {
   TrendingUp, TrendingDown, ShoppingCart, DollarSign,
   Package, AlertTriangle, ShoppingBag, ArrowRight,
@@ -15,6 +16,7 @@ import { StatusPill } from "@/components/admin/StatusPill";
 import {
   getDashboardKpis, getSalesTrend, getTopProducts, getActivityFeed,
 } from "@/server/dashboard.functions";
+import { callWithSupabaseAuth } from "@/lib/server-fn-auth";
 
 export const Route = createFileRoute("/admin/")({
   component: DashboardPage,
@@ -56,10 +58,18 @@ function KpiCard({
 }
 
 function DashboardPage() {
-  const kpis = useQuery({ queryKey: ["admin", "kpis"], queryFn: () => getDashboardKpis() });
-  const trend = useQuery({ queryKey: ["admin", "trend"], queryFn: () => getSalesTrend() });
-  const top = useQuery({ queryKey: ["admin", "top"], queryFn: () => getTopProducts() });
-  const feed = useQuery({ queryKey: ["admin", "feed"], queryFn: () => getActivityFeed() });
+  const navigate = useNavigate();
+  const kpis = useQuery({ queryKey: ["admin", "kpis"], queryFn: () => callWithSupabaseAuth(getDashboardKpis), retry: false });
+  const trend = useQuery({ queryKey: ["admin", "trend"], queryFn: () => callWithSupabaseAuth(getSalesTrend), retry: false });
+  const top = useQuery({ queryKey: ["admin", "top"], queryFn: () => callWithSupabaseAuth(getTopProducts), retry: false });
+  const feed = useQuery({ queryKey: ["admin", "feed"], queryFn: () => callWithSupabaseAuth(getActivityFeed), retry: false });
+
+  useEffect(() => {
+    const errors = [kpis.error, trend.error, top.error, feed.error].filter(Boolean) as Error[];
+    if (errors.some((e) => e.message.toLowerCase().includes("session expired") || e.message.toLowerCase().includes("unauthorized"))) {
+      navigate({ to: "/auth" });
+    }
+  }, [feed.error, kpis.error, navigate, top.error, trend.error]);
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
