@@ -9,7 +9,10 @@ import {
   SidebarHeader, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 
-const NAV = [
+type NavItem = { title: string; url: string; icon: typeof LayoutDashboard; exact?: boolean };
+type NavGroup = { label: string; items: NavItem[] };
+
+const NAV: NavGroup[] = [
   {
     label: "Overview",
     items: [
