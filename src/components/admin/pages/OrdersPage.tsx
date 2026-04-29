@@ -623,9 +623,8 @@ function BulkCourierModal({
     </Modal>
   );
 }
-    </Modal>
-  );
-}
+
+
 
 // ---------------- Picking List ----------------
 function PickingListModal({
