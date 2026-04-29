@@ -29,14 +29,11 @@ import {
   Sparkles,
   ShieldCheck,
   CheckCircle2,
-  
   Star,
   Quote,
 } from "lucide-react";
 
 const PRODUCT_SLUGS = {
-  combo: "air-plane-car-combo-2design-combo-origami-paper-1",
-  plane: "air-plane-origami-paper-kit-for-kids",
   car: "car-origami-paper-kit-for-kids",
 } as const;
 const SHIPPING_INSIDE = 70;
@@ -45,44 +42,25 @@ const SHIPPING_OUTSIDE = 130;
 export const Route = createFileRoute("/lp/origami-combo")({
   head: () => ({
     meta: [
-      { title: "Plane + Car Kit Combo — Fold It. Build It. | HobbyShop" },
+      { title: "3D Car Origami Kit — Build It Yourself | HobbyShop" },
       {
         name: "description",
         content:
-          "A+ hard paper e ১২টি Plane design, hard cardboard e ১০টি 3D Car — step-by-step video instruction soho. Combo te ৳১০০ bachao. COD all over Bangladesh.",
+          "Hard cardboard e ১০টি 3D Car design — step-by-step video instruction soho. Combo nile ৳১০০ bachao. COD all over Bangladesh.",
       },
-      { property: "og:title", content: "Plane + Car Kit Combo — Fold It. Build It." },
+      { property: "og:title", content: "3D Car Origami Kit — Build It Yourself" },
       {
         property: "og:description",
-        content: "১২ Plane design + ১০ 3D Car design — combo te ৳১০০ bachao. Video instruction soho.",
+        content: "১০টি 3D Car design — combo nile ৳১০০ bachao. Video instruction soho.",
       },
     ],
   }),
   loader: async () => {
-    const [combo, plane, car] = await Promise.all([
-      fetchProductByIdOrSlug(PRODUCT_SLUGS.combo),
-      fetchProductByIdOrSlug(PRODUCT_SLUGS.plane),
-      fetchProductByIdOrSlug(PRODUCT_SLUGS.car),
-    ]);
-    return { combo, plane, car };
+    const car = await fetchProductByIdOrSlug(PRODUCT_SLUGS.car);
+    return { car };
   },
   component: LandingPage,
 });
-
-const PLANE_DESIGNS = [
-  { icon: "✈️", name: "Classic Dart" },
-  { icon: "🛩️", name: "Fighter Jet" },
-  { icon: "🛫", name: "Glider" },
-  { icon: "🚀", name: "Rocket Wing" },
-  { icon: "🦅", name: "Eagle Wing" },
-  { icon: "⭐", name: "Star Plane" },
-  { icon: "🌊", name: "Wave Glider" },
-  { icon: "🔥", name: "Turbo Dart" },
-  { icon: "🏹", name: "Arrow Jet" },
-  { icon: "🦋", name: "Butterfly" },
-  { icon: "💫", name: "Stunt Flyer" },
-  { icon: "🛸", name: "UFO Glider" },
-];
 
 const CAR_DESIGNS = [
   { icon: "🏎️", name: "Sports Car" },
@@ -98,13 +76,11 @@ const CAR_DESIGNS = [
 ];
 
 const INCLUDES = [
-  { text: "A+ Hard Paper — ১২ Plane design (প্রতিটি ৩টি)", qty: "৩৬ শিট" },
   { text: "Hard Cardboard — ১০ Car design (১টি করে)", qty: "১০ শিট" },
-  { text: "Step-by-step Video Instruction (QR code soho)", qty: "২২টি" },
-  { text: "প্রতিটি ডিজাইনের আলাদা ডিজাইন কার্ড", qty: "২২টি" },
+  { text: "Step-by-step Video Instruction (QR code soho)", qty: "১০টি" },
+  { text: "প্রতিটি ডিজাইনের আলাদা ডিজাইন কার্ড", qty: "১০টি" },
   { text: "Premium gift box packaging", qty: "১টি" },
 ];
-
 
 type Review = {
   name: string;
@@ -167,16 +143,16 @@ const FAQS = [
     a: "5 bochor theke 14 bochor — sob ages-e perfect. Choto bachcha-der jonno parents help korte hobe pratham.",
   },
   {
-    q: "Combo te ki ki thakbe?",
-    a: "Plane Kit (১২ design, ৩৬ shit A+ hard paper) + Car Kit (১০ design, ১০ shit hard cardboard) + step-by-step video instruction (QR code scan kore dekhben) + 22ti design card + premium gift box.",
+    q: "Kit-e ki ki thakbe?",
+    a: "Car Kit (১০ design, ১০ shit hard cardboard) + step-by-step video instruction (QR code scan kore dekhben) + 10ti design card + premium gift box. Combo nile 2 ti kit pawa jabe.",
   },
   {
     q: "Manual nai? Kivabe banabo?",
     a: "Protyek design er alada video instruction ache — QR code scan korle phone e direct video chole asbe. Bangla voice over soho, bachcha rao sohoje bujhte parbe.",
   },
   {
-    q: "Single nile Plane na Car — kun ta pabo?",
-    a: "Single nile order form e apni nije Plane ba Car select korte parben. Combo nile dutoi pawa jabe.",
+    q: "Combo nile ki paowa jabe?",
+    a: "Combo nile 2 ti Car Kit pawa jabe (mot 20 ti design) — ৳100 discount soho. Ekta nije, arekta gift kora jay!",
   },
   {
     q: "Delivery koto din-e pabo?",
@@ -189,15 +165,10 @@ const FAQS = [
 ];
 
 function LandingPage() {
-  const { combo, plane, car } = Route.useLoaderData() as {
-    combo: Product | null;
-    plane: Product | null;
-    car: Product | null;
-  };
+  const { car } = Route.useLoaderData() as { car: Product | null };
   const navigate = useNavigate();
 
   const [variant, setVariant] = useState<"single" | "combo">("combo");
-  const [singleKit, setSingleKit] = useState<"plane" | "car">("car");
   const [qty, setQty] = useState(1);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [submitting, setSubmitting] = useState(false);
@@ -209,14 +180,12 @@ function LandingPage() {
   const SINGLE_OLD = 795;
   const COMBO_OLD = 1390;
 
-  // Pick the active product based on variant + singleKit choice.
-  const activeProduct: Product | null =
-    variant === "combo" ? combo : singleKit === "plane" ? plane : car;
-  // For "no product found" gate — combo is the primary fallback.
-  const fallbackProduct = combo ?? plane ?? car;
+  const activeProduct: Product | null = car;
 
   const unitPrice = variant === "combo" ? COMBO_PRICE : SINGLE_PRICE;
   const oldPrice = variant === "combo" ? COMBO_OLD : SINGLE_OLD;
+  // Combo = 2x Car Kit
+  const productQty = variant === "combo" ? qty * 2 : qty;
 
   useEffect(() => {
     if (!activeProduct) return;
@@ -226,7 +195,7 @@ function LandingPage() {
       value: unitPrice,
       currency: META_CURRENCY,
     });
-    clarityTag("lp_campaign", "origami-combo");
+    clarityTag("lp_campaign", "origami-car");
     clarityTag("lp_variant_selected", variant);
   }, [activeProduct, unitPrice, variant]);
 
@@ -273,10 +242,8 @@ function LandingPage() {
       const attribution = getOrderAttributionPayload();
       const variantLabel =
         variant === "combo"
-          ? "Plane + Car Combo"
-          : singleKit === "plane"
-            ? "Single Kit — Plane (12 designs)"
-            : "Single Kit — Car (10 designs)";
+          ? "Car Combo (2x Car Kit)"
+          : "Single Car Kit (10 designs)";
 
       const baseOrder = {
         status: "new" as const,
@@ -319,6 +286,7 @@ function LandingPage() {
         return;
       }
 
+      // For combo: insert as a single line at combo price (qty = user qty), but log productQty in label.
       const { error: itemsErr } = await supabase.from("order_items").insert([
         {
           order_id: order.id,
@@ -341,8 +309,6 @@ function LandingPage() {
         return;
       }
 
-      // Purchase event fires on /order-success page (single source of truth, deduped per order)
-
       toast.success("Order place hoyeche! Confirm korar jonno call korbo.");
       navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
     } catch (err: any) {
@@ -352,7 +318,7 @@ function LandingPage() {
     }
   };
 
-  if (!fallbackProduct) {
+  if (!activeProduct) {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center">
         <h1 className="text-2xl font-bold text-foreground">Product paowa jay ni</h1>
@@ -367,7 +333,7 @@ function LandingPage() {
 
   return (
     <div className="bg-background text-foreground">
-      {/* HERO — bold brand gradient */}
+      {/* HERO */}
       <section
         className="relative overflow-hidden px-5 pt-12 pb-10 text-center"
         style={{ background: "var(--gradient-dark)" }}
@@ -384,25 +350,25 @@ function LandingPage() {
             <Sparkles className="h-3 w-3" /> Limited Combo Offer
           </span>
           <h1 className="mx-auto mt-5 max-w-xl text-balance text-3xl font-extrabold leading-tight text-white sm:text-4xl">
-            Fold It. Build It.
+            Build It Yourself.
             <br />
             <span className="bg-gradient-to-r from-primary to-[oklch(0.72_0.20_30)] bg-clip-text text-transparent">
-              Plane + 3D Car Combo
+              3D Car Origami Kit
             </span>
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/70">
-            A+ সাইজ হার্ড পেপারে ১২টি Plane ডিজাইন, হার্ড কার্ডবোর্ডে ১০টি 3D Car — প্রতিটি ডিজাইনের জন্য আলাদা ভিডিও ইনস্ট্রাকশন।
+            হার্ড কার্ডবোর্ডে ১০টি ইউনিক 3D Car ডিজাইন — প্রতিটি ডিজাইনের জন্য আলাদা ভিডিও ইনস্ট্রাকশন।
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
             <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/85 backdrop-blur">
-              ✈️ ১২ Plane
-            </span>
-            <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/85 backdrop-blur">
-              🚗 ১০ Car
+              🚗 ১০ Car Design
             </span>
             <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/85 backdrop-blur">
               🎬 Video Instruction
+            </span>
+            <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/85 backdrop-blur">
+              🎁 Combo Discount
             </span>
           </div>
 
@@ -428,29 +394,11 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* TWO KIT CARDS */}
-      <section className="-mt-6 grid grid-cols-2 gap-3.5 px-5">
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
-          <div className="flex min-h-[120px] items-center justify-center bg-muted p-6">
-            <svg viewBox="0 0 120 90" className="h-20 w-28">
-              <polygon points="10,60 60,20 110,60 60,50" fill="oklch(0.92 0 0)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
-              <polygon points="60,20 110,60 60,50" fill="oklch(0.82 0 0)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
-              <polygon points="60,50 110,60 90,75" fill="oklch(0.97 0 0)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
-              <polygon points="60,50 10,60 30,75" fill="oklch(0.92 0 0)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
-              <line x1="60" y1="20" x2="60" y2="70" stroke="oklch(0.18 0 0)" strokeWidth="0.8" strokeDasharray="3,2" />
-            </svg>
-          </div>
-          <div className="p-4">
-            <div className="text-sm font-semibold text-foreground">✈️ Paper Plane Kit</div>
-            <div className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              A+ হার্ড পেপার · ১২টি ডিজাইন · ৩৬ শিট
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
-          <div className="flex min-h-[120px] items-center justify-center bg-muted p-6">
-            <svg viewBox="0 0 120 90" className="h-20 w-28">
+      {/* CAR KIT CARD */}
+      <section className="-mt-6 px-5">
+        <div className="mx-auto max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+          <div className="flex min-h-[160px] items-center justify-center bg-muted p-6">
+            <svg viewBox="0 0 120 90" className="h-24 w-32">
               <rect x="20" y="35" width="80" height="30" rx="4" fill="oklch(0.585 0.245 27.5)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
               <rect x="30" y="22" width="55" height="20" rx="4" fill="oklch(0.95 0.05 27)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
               <circle cx="35" cy="67" r="9" fill="oklch(0.18 0 0)" stroke="oklch(0.10 0 0)" strokeWidth="1.5" />
@@ -463,10 +411,10 @@ function LandingPage() {
               <rect x="88" y="50" width="12" height="8" rx="1" fill="oklch(0.96 0.07 90)" stroke="oklch(0.18 0 0)" strokeWidth="1" />
             </svg>
           </div>
-          <div className="p-4">
-            <div className="text-sm font-semibold text-foreground">🚗 3D Car Kit</div>
-            <div className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              হার্ড কার্ডবোর্ড · ১০টি ডিজাইন · 3D শেপ
+          <div className="p-5 text-center">
+            <div className="text-base font-semibold text-foreground">🚗 3D Car Origami Kit</div>
+            <div className="mt-1 text-sm leading-relaxed text-muted-foreground">
+              হার্ড কার্ডবোর্ড · ১০টি ইউনিক ডিজাইন · 3D শেপ
             </div>
           </div>
         </div>
@@ -475,24 +423,13 @@ function LandingPage() {
       {/* SPECIFICATIONS */}
       <section className="px-5 py-10">
         <SectionHeading kicker="Specifications" title="কিটের স্পেসিফিকেশন" />
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <div>
-            <KitTag>✈️ Plane Kit</KitTag>
-            <div className="grid grid-cols-2 gap-2.5">
-              <SpecCard label="মোট শিট" value="৩৬টি" sub="প্রতি ডিজাইন ৩টি" />
-              <SpecCard label="ডিজাইন" value="১২টি" sub="ইউনিক" />
-              <SpecCard label="পেপার" value="A+ Hard" />
-              <SpecCard label="ইনস্ট্রাকশন" value="Video" sub="QR scan" />
-            </div>
-          </div>
-          <div>
-            <KitTag>🚗 Car Kit</KitTag>
-            <div className="grid grid-cols-2 gap-2.5">
-              <SpecCard label="মোট শিট" value="১০টি" sub="প্রতি ডিজাইন ১টি" />
-              <SpecCard label="ডিজাইন" value="১০টি" sub="ইউনিক" />
-              <SpecCard label="মেটেরিয়াল" value="Cardboard" />
-              <SpecCard label="শেপ" value="3D" />
-            </div>
+        <div className="mx-auto max-w-md">
+          <KitTag>🚗 Car Kit</KitTag>
+          <div className="grid grid-cols-2 gap-2.5">
+            <SpecCard label="মোট শিট" value="১০টি" sub="প্রতি ডিজাইন ১টি" />
+            <SpecCard label="ডিজাইন" value="১০টি" sub="ইউনিক" />
+            <SpecCard label="মেটেরিয়াল" value="Cardboard" sub="প্রিমিয়াম" />
+            <SpecCard label="শেপ" value="3D" sub="QR Video" />
           </div>
         </div>
       </section>
@@ -500,17 +437,7 @@ function LandingPage() {
       {/* DESIGNS */}
       <section id="designs" className="bg-muted/40 px-5 py-10">
         <SectionHeading kicker="Designs" title="কোন কোন ডিজাইন থাকছে?" />
-
-        <div className="mb-6">
-          <KitTag>✈️ Plane — ১২টি ডিজাইন</KitTag>
-          <div className="grid grid-cols-4 gap-2">
-            {PLANE_DESIGNS.map((d) => (
-              <DesignPill key={d.name} icon={d.icon} name={d.name} />
-            ))}
-          </div>
-        </div>
-
-        <div>
+        <div className="mx-auto max-w-2xl">
           <KitTag>🚗 Car — ১০টি ডিজাইন</KitTag>
           <div className="grid grid-cols-5 gap-2">
             {CAR_DESIGNS.map((d) => (
@@ -523,7 +450,7 @@ function LandingPage() {
       {/* INCLUDES */}
       <section className="px-5 py-10">
         <SectionHeading kicker="What's inside" title="কিটে কী কী থাকছে?" />
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
+        <div className="mx-auto max-w-md rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
           {INCLUDES.map((item, i) => (
             <div
               key={i}
@@ -570,7 +497,6 @@ function LandingPage() {
           </p>
         </div>
         <div className="mx-auto grid max-w-2xl grid-cols-1 gap-3">
-
           {REVIEWS.map((r) => (
             <div
               key={r.name}
@@ -637,7 +563,7 @@ function LandingPage() {
       {/* PRICING */}
       <section className="px-5 py-10">
         <SectionHeading kicker="Pricing" title="আপনার জন্য সেরা অফার" />
-        <div className="grid grid-cols-2 gap-3">
+        <div className="mx-auto grid max-w-2xl grid-cols-2 gap-3">
           {/* Single */}
           <button
             type="button"
@@ -656,11 +582,9 @@ function LandingPage() {
             <div className="mt-1 text-3xl font-extrabold text-foreground">৳ ৬৯৫</div>
             <div className="h-3" />
             <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
-              ১টি Plane Kit (১২ ডিজাইন)
+              ১টি Car Kit
               <br />
-              <strong className="text-foreground">অথবা</strong>
-              <br />
-              ১টি Car Kit (১০ ডিজাইন)
+              ১০টি ইউনিক ডিজাইন
               <br />
               <br />
               ভিডিও ইনস্ট্রাকশন সহ
@@ -670,7 +594,7 @@ function LandingPage() {
             </div>
           </button>
 
-          {/* Combo */}
+          {/* Combo = 2x Car Kit */}
           <button
             type="button"
             onClick={() => {
@@ -685,16 +609,16 @@ function LandingPage() {
             <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary px-3 py-0.5 text-[11px] font-bold uppercase tracking-wider text-primary-foreground">
               Best Value
             </span>
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-white/60">Plane + Car Combo</div>
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-white/60">Car Combo (2 Kit)</div>
             <div className="mt-2 text-xs text-white/50 line-through">৳ ১৩৯০</div>
             <div className="mt-1 text-3xl font-extrabold text-white">৳ ১২৯০</div>
             <div className="mt-1.5 inline-block rounded-full bg-primary/20 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
               ৳ {savings} বাঁচছেন!
             </div>
             <p className="mb-3 mt-2 text-xs leading-relaxed text-white/70">
-              Plane Kit (১২ ডিজাইন, ৩৬ শিট)
-              <br />+<br />
-              Car Kit (১০ ডিজাইন, ১০ শিট)
+              ২টি Car Kit
+              <br />
+              মোট ২০টি ডিজাইন
               <br />
               <br />
               ভিডিও ইনস্ট্রাকশন সহ
@@ -724,7 +648,7 @@ function LandingPage() {
         className="mx-5 my-6 overflow-hidden rounded-2xl px-6 py-10 text-center text-white shadow-[var(--shadow-brand)]"
         style={{ background: "var(--gradient-brand)" }}
       >
-        <h2 className="text-lg font-bold">Plane আর Car — দুটোই নিন, ৳ {savings} বাঁচান!</h2>
+        <h2 className="text-lg font-bold">২টি Car Kit একসাথে নিন — ৳ {savings} বাঁচান!</h2>
         <p className="mt-2 text-xs text-white/85">
           স্টক সীমিত। কম্বো অফার যেকোনো সময় শেষ হতে পারে।
         </p>
@@ -751,11 +675,7 @@ function LandingPage() {
             <div className="flex items-center gap-3 border-b border-border bg-muted/50 p-4">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-foreground">
-                  {variant === "combo"
-                    ? "Plane + Car Combo"
-                    : singleKit === "plane"
-                      ? "Single — Plane Kit"
-                      : "Single — Car Kit"}
+                  {variant === "combo" ? "Car Combo (2 Kit)" : "Single — Car Kit"}
                 </p>
                 <p className="mt-0.5 text-base font-extrabold text-primary">
                   ৳ {unitPrice.toLocaleString()}
@@ -785,45 +705,16 @@ function LandingPage() {
 
             <div className="space-y-4 p-5">
               <div>
-                <Label className="mb-2 block text-sm font-semibold">কোন কিট নিতে চান?</Label>
+                <Label className="mb-2 block text-sm font-semibold">কোনটা নিতে চান?</Label>
                 <RadioGroup
                   value={variant}
                   onValueChange={(v) => setVariant(v as "single" | "combo")}
                   className="grid grid-cols-2 gap-2.5"
                 >
-                  <VariantOption id="v-single" value="single" current={variant} title="Single — ৳৬৯৫" sub="Plane বা Car" />
-                  <VariantOption id="v-combo" value="combo" current={variant} title="Combo — ৳১২৯০" sub={`দুটোই + ৳${savings} off`} />
+                  <VariantOption id="v-single" value="single" current={variant} title="Single — ৳৬৯৫" sub="১টি Car Kit" />
+                  <VariantOption id="v-combo" value="combo" current={variant} title="Combo — ৳১২৯০" sub={`২টি Kit + ৳${savings} off`} />
                 </RadioGroup>
               </div>
-
-              {variant === "single" && (
-                <div className="rounded-xl border border-primary/30 bg-primary/5 p-3">
-                  <Label className="mb-2 block text-sm font-semibold text-foreground">
-                    🎯 কোনটা নিতে চান? (Single)
-                  </Label>
-                  <RadioGroup
-                    value={singleKit}
-                    onValueChange={(v) => setSingleKit(v as "plane" | "car")}
-                    className="grid grid-cols-2 gap-2.5"
-                  >
-                    <VariantOption
-                      id="kit-plane"
-                      value="plane"
-                      current={singleKit}
-                      title="✈️ Plane Kit"
-                      sub="১২ ডিজাইন · ৩৬ শিট"
-                    />
-                    <VariantOption
-                      id="kit-car"
-                      value="car"
-                      current={singleKit}
-                      title="🚗 Car Kit"
-                      sub="১০ ডিজাইন · ১০ শিট"
-                      badge="Best Seller"
-                    />
-                  </RadioGroup>
-                </div>
-              )}
 
               <FormField id="lp-name" label="আপনার নাম *" icon={<UserIcon className="h-3.5 w-3.5" />}>
                 <Input
@@ -897,6 +788,11 @@ function LandingPage() {
                   <span className="text-muted-foreground">Subtotal ({qty} × ৳{unitPrice})</span>
                   <span className="font-semibold text-foreground">৳ {subtotal.toLocaleString()}</span>
                 </div>
+                {variant === "combo" && (
+                  <div className="mt-1 text-[11px] text-muted-foreground">
+                    Combo includes {productQty} Car Kit{productQty > 1 ? "s" : ""}
+                  </div>
+                )}
                 <div className="mt-1.5 flex justify-between text-sm">
                   <span className="text-muted-foreground">ডেলিভারি চার্জ</span>
                   <span className="font-semibold text-foreground">৳ {shippingFee}</span>
@@ -959,9 +855,8 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Mobile sticky Order Now bar — updates with selected variant */}
+      {/* Mobile sticky bar */}
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[var(--shadow-elevated)] backdrop-blur-xl md:hidden">
-        {/* Quick-select pills */}
         <div className="mb-2 grid grid-cols-2 gap-1.5 rounded-full bg-muted p-1">
           <button
             type="button"
@@ -989,7 +884,7 @@ function LandingPage() {
         <div className="flex items-center gap-3">
           <div className="flex-1 min-w-0">
             <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              {variant === "combo" ? "Plane + Car Combo" : "Single Kit"}
+              {variant === "combo" ? "Car Combo (2 Kit)" : "Single Car Kit"}
             </p>
             <div className="flex items-baseline gap-1.5">
               <p className="text-lg font-extrabold leading-none text-primary">
