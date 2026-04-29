@@ -25,11 +25,11 @@ export type ReviewWithProfile = ReviewRow & {
 export type ReviewStatus = "pending" | "approved" | "rejected" | "all";
 
 export async function fetchProductReviews(productId: string): Promise<ReviewWithProfile[]> {
+  // Reads through the public view that omits guest_phone; only approved rows.
   const { data: reviews, error } = await supabase
-    .from("reviews")
+    .from("reviews_public" as never)
     .select("*")
     .eq("product_id", productId)
-    .eq("is_approved", true)
     .order("created_at", { ascending: false });
   if (error) throw error;
   const list = (reviews ?? []) as ReviewRow[];
