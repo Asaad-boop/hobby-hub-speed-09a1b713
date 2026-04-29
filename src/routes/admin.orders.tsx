@@ -105,6 +105,8 @@ function OrdersPage() {
   const [stageFilter, setStageFilter] = useState<WorkflowStage | "all">("all");
   const [selected, setSelected] = useState<string[]>([]);
   const [openOrderId, setOpenOrderId] = useState<string | null>(null);
+  const [invoicePreview, setInvoicePreview] = useState<{ url: string; filename: string; orderId: string } | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const ordersQ = useQuery({
     queryKey: ["oms", "orders", search],
@@ -238,6 +240,25 @@ function OrdersPage() {
     } catch (e) {
       toast.error("Invoice generate failed: " + (e as Error).message);
     }
+  };
+
+  const handlePreviewInvoice = async (id: string) => {
+    try {
+      setPreviewLoading(true);
+      // Revoke any prior URL
+      if (invoicePreview?.url) URL.revokeObjectURL(invoicePreview.url);
+      const res = await generateInvoicePDF(id, { mode: "blob" });
+      if (res) setInvoicePreview({ url: res.blobUrl, filename: res.filename, orderId: id });
+    } catch (e) {
+      toast.error("Preview failed: " + (e as Error).message);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const closeInvoicePreview = () => {
+    if (invoicePreview?.url) URL.revokeObjectURL(invoicePreview.url);
+    setInvoicePreview(null);
   };
 
   const handlePrintPicking = async () => {
