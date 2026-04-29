@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminErrorPanel } from "@/components/admin/AdminErrorPanel";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search, Plus, Minus, AlertTriangle, Package } from "lucide-react";
@@ -9,6 +10,7 @@ import { fmtBDT } from "@/lib/oms";
 
 export const Route = createFileRoute("/admin/inventory")({
   component: InventoryPage,
+  errorComponent: AdminErrorPanel,
 });
 
 function InventoryPage() {

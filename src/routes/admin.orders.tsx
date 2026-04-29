@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminErrorPanel } from "@/components/admin/AdminErrorPanel";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -62,6 +63,7 @@ import {
 
 export const Route = createFileRoute("/admin/orders")({
   component: OrdersPage,
+  errorComponent: AdminErrorPanel,
 });
 
 const STAGE_ICON: Record<WorkflowStage, React.ReactNode> = {
