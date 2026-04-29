@@ -169,7 +169,8 @@ export default function OrdersPage() {
         <BulkCourierModal
           orders={pendingSelected}
           onClose={() => setShowCourier(false)}
-          onAssign={(courier) => {
+          onOpenSettings={() => { setShowCourier(false); setActive("settings"); }}
+          onAssignMock={(courier) => {
             const ids = pendingSelected.map((o) => o.id);
             bulkAssignCourier(ids, courier);
             clearSel();
@@ -177,6 +178,19 @@ export default function OrdersPage() {
             toast.success(`${ids.length} order${ids.length === 1 ? "" : "s"} assigned to ${courier}`, {
               description: "Status updated to Shipped · tracking generated",
             });
+          }}
+          onPathaoResult={(results) => {
+            results.forEach((r) => {
+              if (r.ok) setOrderTracking(r.orderId, r.trackingNumber, "Pathao");
+            });
+            const success = results.filter((r) => r.ok).length;
+            const failed = results.length - success;
+            if (success) toast.success(`${success} Pathao consignment${success === 1 ? "" : "s"} created`);
+            if (failed) toast.error(`${failed} Pathao request${failed === 1 ? "" : "s"} failed`);
+            if (success && !failed) {
+              clearSel();
+              setShowCourier(false);
+            }
           }}
         />
       )}
