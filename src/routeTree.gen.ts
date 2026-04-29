@@ -35,7 +35,13 @@ import { Route as OrderSuccessOrderIdRouteImport } from './routes/order-success.
 import { Route as LpOrigamiComboRouteImport } from './routes/lp.origami-combo'
 import { Route as LpAuroraLampRouteImport } from './routes/lp.aurora-lamp'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -167,9 +173,39 @@ const CategorySlugRoute = CategorySlugRouteImport.update({
   path: '/category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInventoryRoute = AdminInventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCustomersRoute = AdminCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
 
@@ -192,7 +228,13 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/inventory': typeof AdminInventoryRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/category/$slug': typeof CategorySlugRoute
   '/lp/aurora-lamp': typeof LpAuroraLampRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
@@ -220,7 +262,13 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/inventory': typeof AdminInventoryRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/category/$slug': typeof CategorySlugRoute
   '/lp/aurora-lamp': typeof LpAuroraLampRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
@@ -250,7 +298,13 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/inventory': typeof AdminInventoryRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/category/$slug': typeof CategorySlugRoute
   '/lp/aurora-lamp': typeof LpAuroraLampRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
@@ -281,7 +335,13 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/wishlist'
+    | '/admin/analytics'
+    | '/admin/customers'
     | '/admin/dashboard'
+    | '/admin/inventory'
+    | '/admin/orders'
+    | '/admin/reports'
+    | '/admin/settings'
     | '/category/$slug'
     | '/lp/aurora-lamp'
     | '/lp/origami-combo'
@@ -309,7 +369,13 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/wishlist'
+    | '/admin/analytics'
+    | '/admin/customers'
     | '/admin/dashboard'
+    | '/admin/inventory'
+    | '/admin/orders'
+    | '/admin/reports'
+    | '/admin/settings'
     | '/category/$slug'
     | '/lp/aurora-lamp'
     | '/lp/origami-combo'
@@ -338,7 +404,13 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/wishlist'
+    | '/admin/analytics'
+    | '/admin/customers'
     | '/admin/dashboard'
+    | '/admin/inventory'
+    | '/admin/orders'
+    | '/admin/reports'
+    | '/admin/settings'
     | '/category/$slug'
     | '/lp/aurora-lamp'
     | '/lp/origami-combo'
@@ -561,6 +633,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/inventory': {
+      id: '/admin/inventory'
+      path: '/inventory'
+      fullPath: '/admin/inventory'
+      preLoaderRoute: typeof AdminInventoryRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/dashboard': {
       id: '/admin/dashboard'
       path: '/dashboard'
@@ -568,16 +668,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/customers': {
+      id: '/admin/customers'
+      path: '/customers'
+      fullPath: '/admin/customers'
+      preLoaderRoute: typeof AdminCustomersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminCustomersRoute: typeof AdminCustomersRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminInventoryRoute: typeof AdminInventoryRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminReportsRoute: typeof AdminReportsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminCustomersRoute: AdminCustomersRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminInventoryRoute: AdminInventoryRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
+  AdminReportsRoute: AdminReportsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
