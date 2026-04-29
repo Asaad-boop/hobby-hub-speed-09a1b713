@@ -1,55 +1,84 @@
-## Goal
-HobbyShop admin dashboard ke ekta modern, beautiful, professional design e redesign kori — sathe Payments + Discounts page add kori. Existing functionality ekdom intact thakbe.
 
-## Design Direction
-- **Sidebar**: shadcn `Sidebar` component, **collapsible** (icon mode), **light theme** with subtle premium feel — grouped nav (Overview / Catalog / Sales / Customers / Marketing / System), active route indicator, smooth collapse animation.
-- **Color system**: Existing dark `#111827` ke replace kori semantic tokens diye — soft white background, indigo/violet primary accent, glassy cards, subtle shadows, rounded-xl, gradient KPI cards.
-- **Typography**: Inter, tighter tracking on headers, clear hierarchy.
-- **All colors via `src/styles.css` design tokens** — no hardcoded hex in components.
+# Notun Order Management System (OMS)
 
-## Pages (sidebar order)
+Tomar existing Supabase database (orders, products, profiles, courier_shipments tables) use kore notun ekta clean, professional OMS banabo `/admin` route e. Mock data nai — sob real database theke ashbe.
 
-**Overview**
-1. Dashboard — KPI cards (Revenue, Orders, Customers, Conversion %), sales chart (recharts, 14-day), low stock list, recent orders.
+## Page structure (sidebar)
 
-**Sales**
-2. Web Orders — existing, redesigned header/filters.
-3. Orders Pipeline — existing, redesigned status tabs (new / processing / shipped / delivered / cancelled).
-4. **Payments (NEW)** — derived from `orders` table: Order ID, Customer, Method (bKash/Nagad/Card/COD badge), Amount, Status, Date. Filters by method + status. CSV export. *No new table — cleaner & no data duplication.*
+1. **Dashboard** — Today's orders, Confirmed orders, Total revenue, Pending count, status-wise pie chart, recent orders list
+2. **Orders** — Main order management with full status flow + actions
+3. **Inventory** — Product stock manage, low-stock alerts, stock adjustments
+4. **Customers** — Customer list with order history, flagged customers
+5. **Reports** — Sales report, courier performance, product performance, date-range filter
+6. **Analytics** — Daily/weekly/monthly trends, charts
+7. **Settings** — Pathao API credentials, store info, courier settings
 
-**Catalog**
-5. Products — existing, redesigned grid/list.
-6. Categories — existing.
-7. Inventory — existing low-stock view, polished.
+## Order status flow (jemon tumi cheyecho)
 
-**Customers**
-8. Customers — existing.
-9. Reviews — existing.
+`Processing → Call Not Received → On Hold → Advance Payment → Confirmed → Cancelled → Shipped → Delivered → Returned`
 
-**Marketing**
-10. **Discounts (NEW)** — UI on existing `coupons` table: list (code, type, value, used/limit, valid_until, status), create/edit/delete dialog, toggle active. *Uses existing table — no migration needed.*
+Database e ei field gula already ase:
+- `status` (order_status enum) — main lifecycle
+- `confirmation_status` — pending/confirmed/cancelled
+- `call_status` — not_called/answered/no_answer/etc.
+- `hold_until`, `hold_reason` — hold er jonno
+- `advance_amount` — advance payment er jonno
+- `cancel_reason`, `return_type`, `return_note`
 
-**Insights**
-11. Reports — sales summary table + **CSV export button**.
+Ami ekta unified "workflow stage" ber kore frontend e ei 9 ta stage e map korbo, ar action button click korle right field update hobe.
 
-**System**
-12. Settings — store name, currency, timezone (uses existing `site_settings`). Logo upload via existing `product-images` bucket or notun general bucket if needed.
+## Orders page — features
 
-## Technical Plan
-- New file: `src/components/admin/AppSidebar.tsx` (shadcn Sidebar, grouped, collapsible).
-- Rewrite: `src/components/admin/AdminShell.tsx` to use SidebarProvider + AppSidebar + topbar with SidebarTrigger.
-- Update: `src/styles.css` — add admin-specific tokens (sidebar bg, accent, KPI gradients).
-- New files:
-  - `src/routes/admin.payments.tsx` — derived transactions view.
-  - `src/routes/admin.discounts.tsx` — coupons CRUD.
-- Light polish on existing admin pages (header style, card style) — no logic changes.
-- Reports CSV export button — client-side CSV generation from existing query.
+- **List view**: filterable table (search, status filter, courier filter, date range)
+- **Detail panel**: order click korle right side e khulbe — items, customer info, address, payment, history log
+- **Action buttons** (single ba bulk):
+  - Move to next status (Processing → Call Not Received → ... → Delivered)
+  - **Print Invoice** (PDF download — `src/lib/pdf/invoice.ts` already ase, use korbo)
+  - **Print Picking List** (`src/lib/pdf/picking-list.ts` already ase)
+  - **1-Click Pathao Courier** — Pathao API call kore consignment create korbe, tracking number save korbe `tracking_number` + `courier_shipments` table e
+  - Cancel / Hold / Mark return
+  - Add internal note
+- **Bulk select**: multiple order ekshathe status update / courier assign
+- Live update — Supabase realtime subscription
 
-## Out of scope
-- No DB migration (Payments derived; Discounts uses existing `coupons`).
-- No changes to checkout, orders logic, products schema.
-- No customer-facing site changes.
+## Inventory page
 
-## Risks
-- Sidebar collapse + mobile bottom nav — mobile e shadcn Sidebar `offcanvas` mode use korbo, existing bottom nav remove korbo.
-- Touching 1 shared file (`AdminShell`) affects all admin pages — visual only, routing intact.
+- All products list with stock count
+- Color-coded: red (0), yellow (≤5), green (healthy)
+- Inline stock edit → `stock_movements` table e log hobe
+- Low stock filter, search, category filter
+- Quick add stock modal
+
+## Pathao integration
+
+- Existing `src/server/pathao.functions.ts` ase, ami eta upgrade korbo
+- Settings page e form: Client ID, Client Secret, Store ID, Sender info, Sandbox/Production toggle
+- Credentials Supabase secrets e store hobe (already `BD_COURIER_API_KEY` ase, Pathao er jonno notun secrets add korbo)
+- 1-click button click = server function call = Pathao OAuth → consignment create → tracking save
+
+## Technical approach
+
+- **Routes**: `/admin/dashboard`, `/admin/orders`, `/admin/inventory`, `/admin/customers`, `/admin/reports`, `/admin/analytics`, `/admin/settings` — separate route files
+- **Layout**: `/admin` route a layout with sidebar + outlet (existing `admin.tsx` ke layout banabo)
+- **Existing files delete**: mock OMS er files (AdminShell, OrdersPlaceholder, mock-data.ts, ops-store.ts, all `pages/*.tsx` under admin) — sorai diye notun banabo
+- **Existing real admin routes** (admin.web-orders, admin.products, etc.) — eitao sorabo karon tumi notun chao
+- **Data layer**: `createServerFn` + `requireSupabaseAuth` middleware, RLS respected
+- **Auth**: `/admin` ke admin role-protected korbo (existing `has_role` function ase)
+- **Realtime**: Supabase channel subscription for live order updates
+- **PDF**: existing `src/lib/pdf/*` files use korbo
+- **Charts**: recharts (already installed)
+
+## Pre-build steps
+
+1. Pathao API secrets add korbo (PATHAO_CLIENT_ID, PATHAO_CLIENT_SECRET, PATHAO_STORE_ID) — tumi Settings page theke o set korte parba, kintu server-side default secret hisebe rakhle better
+2. Onek admin route file ase (admin.products, admin.web-orders ityadi) — eigula delete korte hobe karon notun chao
+
+## Scope confirmation
+
+- Auth/login system already toiri — tomar admin role login lagbe `/admin` access er jonno
+- Database schema change lagbe na — sob field already ase
+- Customer-facing site (homepage, product pages, checkout) untouched thakbe — sudhu admin panel notun
+
+---
+
+**Confirm korle ami build start korchi.** Ekta question — Pathao credentials ki ekhon Settings UI theke set korbe (database e store), naki Lovable secrets e add korbe (more secure)?
