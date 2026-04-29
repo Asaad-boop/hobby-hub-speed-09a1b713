@@ -190,8 +190,7 @@ function OrdersPage() {
       return;
     }
     try {
-      const doc = await generatePickingListPDF(selected);
-      doc.save(`picking-list-${new Date().toISOString().slice(0, 10)}.pdf`);
+      await generatePickingListPDF(selected);
     } catch (e) {
       toast.error("Picking list failed: " + (e as Error).message);
     }
