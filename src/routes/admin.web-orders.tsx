@@ -254,6 +254,7 @@ function WebOrdersPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [tab, setTab] = useState<TabKey>("processing");
+  const [openOrder, setOpenOrder] = useState<OrderRow | null>(null);
   const [courierStats, setCourierStats] = useState<Record<string, CourierStat>>({});
   const fetchStatsFn = useServerFn(fetchCourierStats);
 
