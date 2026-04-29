@@ -12,6 +12,10 @@ export const Route = createFileRoute("/admin/customers")({
   errorComponent: AdminErrorPanel,
 });
 
+function safeArray<T>(value: T[] | null | undefined): T[] {
+  return Array.isArray(value) ? value : [];
+}
+
 function CustomersPage() {
   const [search, setSearch] = useState("");
   const q = useQuery({
@@ -19,22 +23,24 @@ function CustomersPage() {
     queryFn: () => listCustomers(),
   });
 
+  const customerRows = useMemo(() => safeArray(q.data), [q.data]);
+
   const customers = useMemo(() => {
-    const list = q.data ?? [];
+    const list = customerRows;
     if (!search) return list;
     const term = search.toLowerCase();
     return list.filter((c) => (c.display_name ?? "").toLowerCase().includes(term));
-  }, [q.data, search]);
+  }, [customerRows, search]);
 
   const stats = useMemo(() => {
-    const list = q.data ?? [];
+    const list = customerRows;
     return {
       total: list.length,
       flagged: list.filter((c) => c.is_flagged).length,
       vip: list.filter((c) => c.customer_segment === "vip").length,
       revenue: list.reduce((s, c) => s + Number(c.total_spent ?? 0), 0),
     };
-  }, [q.data]);
+  }, [customerRows]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
