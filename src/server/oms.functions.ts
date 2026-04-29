@@ -1,5 +1,5 @@
 // OMS server functions — orders, products, customers, dashboard stats.
-// All authenticated, RLS-respected.
+// Admin-authenticated; admin reads use the service client after role verification.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
