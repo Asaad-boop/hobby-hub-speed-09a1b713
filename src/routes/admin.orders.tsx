@@ -808,7 +808,7 @@ function OrderDetailModalBody({
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (detail.isLoading || !detail.data) {
+  if (detail.isLoading || !detail.data || !detail.data.order) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
         <Loading />
@@ -824,7 +824,7 @@ function OrderDetailModalBody({
     hold_until: o.hold_until,
     advance_amount: o.advance_amount,
   });
-  const name = form.shipping_name || "—";
+  void name;
   const subtotal = Number(o.subtotal ?? 0);
   const liveTotal =
     subtotal + (Number(form.shipping_fee) || 0) - (Number(form.discount_amount) || 0);
