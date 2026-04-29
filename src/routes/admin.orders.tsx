@@ -419,6 +419,13 @@ function OrdersPage() {
       <div className="flex-1 overflow-auto px-6 py-4">
         {ordersQ.isLoading ? (
           <Loading />
+        ) : ordersQ.isError ? (
+          <div className="flex h-40 flex-col items-center justify-center gap-3 text-center text-sm text-muted-foreground">
+            <p>Orders load failed: {(ordersQ.error as Error).message}</p>
+            <Btn variant="secondary" size="sm" onClick={() => ordersQ.refetch()}>
+              <RefreshCw className="h-3.5 w-3.5" /> Retry
+            </Btn>
+          </div>
         ) : orders.length === 0 ? (
           <Empty label="No orders found" />
         ) : (
