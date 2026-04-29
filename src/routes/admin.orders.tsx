@@ -668,202 +668,102 @@ function OrderDetailModalBody({
     subtotal + (Number(form.shipping_fee) || 0) - (Number(form.discount_amount) || 0);
 
   return (
-    <div className="flex max-h-[90vh] flex-col">
-      {/* Header */}
-      <DialogHeader className="shrink-0 border-b border-border bg-gradient-to-br from-[#1D9E75]/[0.08] via-white to-white px-5 py-4">
+    <div className="flex max-h-[94vh] flex-col overflow-hidden rounded-2xl bg-white">
+      {/* Header — mint pill style, matches screenshot */}
+      <DialogHeader className="shrink-0 border-b border-border/60 bg-gradient-to-r from-[#1D9E75]/[0.10] via-[#1D9E75]/[0.04] to-white px-5 py-3.5">
         <div className="flex items-center gap-3">
-          <div
-            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold ring-2 ring-white shadow-sm ${avatarColor(name)}`}
-          >
-            {initials(name)}
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1D9E75]/15 text-[#1D9E75] ring-1 ring-inset ring-[#1D9E75]/30">
+            <Package className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <DialogTitle className="flex items-center gap-2 text-base font-semibold">
-              <span className="truncate">{name}</span>
-              <span className="font-mono text-xs text-muted-foreground">{shortId(id)}</span>
-            </DialogTitle>
-            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+            <DialogTitle className="flex items-center gap-2 text-[15px] font-bold tracking-tight">
+              <span className="font-mono text-foreground">#{shortId(id).replace(/^#/, "")}</span>
               <StageBadge stage={stage} />
-              <span>•</span>
+            </DialogTitle>
+            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">
               <span>{fmtDate(o.created_at)}</span>
               {o.is_guest_order && (
                 <>
                   <span>•</span>
-                  <span className="rounded bg-amber-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-inset ring-amber-200">
-                    Guest
+                  <span className="font-semibold uppercase tracking-wider text-amber-600">Guest</span>
+                </>
+              )}
+              {dirty && (
+                <>
+                  <span>•</span>
+                  <span className="inline-flex items-center gap-1 font-semibold text-[#1D9E75]">
+                    <Pencil className="h-3 w-3" /> Unsaved
                   </span>
                 </>
               )}
-            </div>
-          </div>
-          <div className="hidden text-right md:block">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Total
-            </div>
-            <div className="text-xl font-bold text-[#1D9E75] tabular-nums">
-              {fmtBDT(liveTotal)}
             </div>
           </div>
         </div>
       </DialogHeader>
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto bg-muted/20 px-5 py-4">
-        {/* Quick stage actions */}
-        <Section title="Workflow" icon={<RefreshCw className="h-3 w-3" />}>
-          <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5">
-            <Btn variant="primary" size="sm" onClick={() => onMoveStage("confirmed")}>
-              <CheckCircle2 className="h-3 w-3" /> Confirm
-            </Btn>
-            <Btn variant="secondary" size="sm" onClick={() => onMoveStage("call_not_received")}>
-              <Phone className="h-3 w-3" /> No Ans
-            </Btn>
-            <Btn variant="secondary" size="sm" onClick={() => onMoveStage("on_hold")}>
-              <PauseCircle className="h-3 w-3" /> Hold
-            </Btn>
-            <Btn variant="secondary" size="sm" onClick={() => onMoveStage("advance_payment")}>
-              <Wallet className="h-3 w-3" /> Advance
-            </Btn>
-            <Btn variant="secondary" size="sm" onClick={() => onMoveStage("shipped")}>
-              <Truck className="h-3 w-3" /> Ship
-            </Btn>
-            <Btn variant="secondary" size="sm" onClick={() => onMoveStage("delivered")}>
-              <PackageCheck className="h-3 w-3" /> Delivered
-            </Btn>
-            <Btn variant="secondary" size="sm" onClick={() => onMoveStage("returned")}>
-              <Undo2 className="h-3 w-3" /> Return
-            </Btn>
-            <Btn variant="danger" size="sm" onClick={() => onMoveStage("cancelled")}>
-              <XCircle className="h-3 w-3" /> Cancel
-            </Btn>
-            <Btn variant="ghost" size="sm" onClick={onPrintInvoice}>
-              <Printer className="h-3 w-3" /> Invoice
-            </Btn>
-          </div>
-        </Section>
+      <div className="flex-1 overflow-y-auto bg-slate-50/60 px-5 py-4">
+        {/* Workflow actions — pill row like screenshot */}
+        <div className="mb-4 grid grid-cols-3 gap-1.5 sm:grid-cols-5 md:grid-cols-9">
+          <ActionPill tone="primary" icon={<CheckCircle2 className="h-3.5 w-3.5" />} label="Confirm" onClick={() => onMoveStage("confirmed")} />
+          <ActionPill icon={<Phone className="h-3.5 w-3.5" />} label="No Ans" onClick={() => onMoveStage("call_not_received")} />
+          <ActionPill icon={<PauseCircle className="h-3.5 w-3.5" />} label="Hold" onClick={() => onMoveStage("on_hold")} />
+          <ActionPill icon={<Wallet className="h-3.5 w-3.5" />} label="Advance" onClick={() => onMoveStage("advance_payment")} />
+          <ActionPill icon={<Truck className="h-3.5 w-3.5" />} label="Ship" onClick={() => onMoveStage("shipped")} />
+          <ActionPill icon={<PackageCheck className="h-3.5 w-3.5" />} label="Delivered" onClick={() => onMoveStage("delivered")} />
+          <ActionPill icon={<Undo2 className="h-3.5 w-3.5" />} label="Return" onClick={() => onMoveStage("returned")} />
+          <ActionPill tone="danger" icon={<XCircle className="h-3.5 w-3.5" />} label="Cancel" onClick={() => onMoveStage("cancelled")} />
+          <ActionPill icon={<Printer className="h-3.5 w-3.5" />} label="Invoice" onClick={onPrintInvoice} />
+        </div>
 
         <div className="grid gap-3 md:grid-cols-2">
-          {/* Customer (editable) */}
-          <Section title="Customer" icon={<User className="h-3 w-3" />}>
-            <div className="grid grid-cols-2 gap-2">
-              <Input label="Name" value={form.shipping_name ?? ""} onChange={(v) => setField("shipping_name", v)} />
-              <Input label="Phone" value={form.shipping_phone ?? ""} onChange={(v) => setField("shipping_phone", v)} />
-              <Input
-                label="Alt phone"
-                value={form.alternate_phone ?? ""}
-                onChange={(v) => setField("alternate_phone", v)}
-              />
-              <Select
-                label="Payment"
-                value={form.payment_method ?? "cod"}
-                onChange={(v) => setField("payment_method", v)}
-                options={[
-                  { value: "cod", label: "COD" },
-                  { value: "bkash", label: "bKash" },
-                  { value: "nagad", label: "Nagad" },
-                  { value: "rocket", label: "Rocket" },
-                  { value: "card", label: "Card" },
-                ]}
-              />
-            </div>
-          </Section>
+          {/* CUSTOMER */}
+          <PanelCard title="Customer" icon={<User className="h-3 w-3" />}>
+            <Row label="Name" value={form.shipping_name ?? ""} onChange={(v) => setField("shipping_name", v)} />
+            <Row label="Phone" value={form.shipping_phone ?? ""} onChange={(v) => setField("shipping_phone", v)} mono />
+            <Row label="Alt phone" value={form.alternate_phone ?? ""} onChange={(v) => setField("alternate_phone", v)} mono placeholder="—" />
+            <Row label="Address" value={form.shipping_address ?? ""} onChange={(v) => setField("shipping_address", v)} />
+            <Row label="City" value={form.shipping_city ?? ""} onChange={(v) => setField("shipping_city", v)} />
+            <Row label="Thana" value={form.shipping_thana ?? ""} onChange={(v) => setField("shipping_thana", v)} />
+          </PanelCard>
 
-          {/* Address (editable) */}
-          <Section title="Shipping Address" icon={<MapPin className="h-3 w-3" />}>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="col-span-2">
-                <Input
-                  label="Address"
-                  value={form.shipping_address ?? ""}
-                  onChange={(v) => setField("shipping_address", v)}
-                />
-              </div>
-              <Input label="City" value={form.shipping_city ?? ""} onChange={(v) => setField("shipping_city", v)} />
-              <Input
-                label="District"
-                value={form.shipping_district ?? ""}
-                onChange={(v) => setField("shipping_district", v)}
-              />
-              <Input
-                label="Thana"
-                value={form.shipping_thana ?? ""}
-                onChange={(v) => setField("shipping_thana", v)}
-              />
+          {/* PAYMENT */}
+          <PanelCard title="Payment" icon={<CreditCard className="h-3 w-3" />}>
+            <RowStatic label="Subtotal" value={fmtBDT(subtotal)} />
+            <Row label="Shipping" value={form.shipping_fee ?? "0"} onChange={(v) => setField("shipping_fee", v)} type="number" align="right" />
+            <Row label="Discount" value={form.discount_amount ?? "0"} onChange={(v) => setField("discount_amount", v)} type="number" align="right" />
+            <Row label="Advance" value={form.advance_amount ?? "0"} onChange={(v) => setField("advance_amount", v)} type="number" align="right" />
+            <div className="flex items-center justify-between border-t border-dashed border-border/70 px-1 pt-2">
+              <span className="text-xs font-semibold text-foreground">Total</span>
+              <span className="text-base font-bold text-[#1D9E75] tabular-nums">{fmtBDT(liveTotal)}</span>
             </div>
-          </Section>
-        </div>
-
-        <div className="mt-3 grid gap-3 md:grid-cols-2">
-          {/* Payment / amounts (editable) */}
-          <Section title="Payment & Charges" icon={<CreditCard className="h-3 w-3" />}>
-            <div className="grid grid-cols-2 gap-2">
-              <ReadOnly label="Subtotal" value={fmtBDT(subtotal)} />
-              <Input
-                label="Shipping fee"
-                type="number"
-                value={form.shipping_fee ?? "0"}
-                onChange={(v) => setField("shipping_fee", v)}
-              />
-              <Input
-                label="Discount"
-                type="number"
-                value={form.discount_amount ?? "0"}
-                onChange={(v) => setField("discount_amount", v)}
-              />
-              <Input
-                label="Advance"
-                type="number"
-                value={form.advance_amount ?? "0"}
-                onChange={(v) => setField("advance_amount", v)}
-              />
-            </div>
-            <div className="mt-2 flex items-center justify-between rounded-md border border-[#1D9E75]/20 bg-[#1D9E75]/5 px-2.5 py-1.5">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#1D9E75]">
-                Total
-              </span>
-              <span className="text-base font-bold text-[#1D9E75] tabular-nums">
-                {fmtBDT(liveTotal)}
-              </span>
-            </div>
-          </Section>
-
-          {/* Courier (editable) */}
-          <Section title="Courier" icon={<Truck className="h-3 w-3" />}>
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                label="Courier"
-                value={form.courier_name ?? ""}
-                onChange={(v) => setField("courier_name", v)}
-                placeholder="Pathao / Steadfast…"
-              />
-              <Input
-                label="Tracking #"
-                value={form.tracking_number ?? ""}
-                onChange={(v) => setField("tracking_number", v)}
-              />
-            </div>
-            <Textarea
-              label="Internal admin note"
-              value={form.admin_notes ?? ""}
-              onChange={(v) => setField("admin_notes", v)}
-              placeholder="Visible to staff only…"
-              rows={2}
+            <RowSelect
+              label="Method"
+              value={form.payment_method ?? "cod"}
+              onChange={(v) => setField("payment_method", v)}
+              options={[
+                { value: "cod", label: "COD" },
+                { value: "bkash", label: "bKash" },
+                { value: "nagad", label: "Nagad" },
+                { value: "rocket", label: "Rocket" },
+                { value: "card", label: "Card" },
+              ]}
             />
-          </Section>
+          </PanelCard>
         </div>
 
-        {/* Items */}
+        {/* ITEMS */}
         <div className="mt-3">
-          <Section title={`Items (${detail.data.items.length})`} icon={<Package className="h-3 w-3" />}>
-            <ul className="divide-y divide-border text-xs">
+          <PanelCard title={`Items (${detail.data.items.length})`} icon={<Package className="h-3 w-3" />}>
+            <ul className="-mx-1 divide-y divide-border/70 text-xs">
               {detail.data.items.map((it) => (
-                <li key={it.id} className="flex items-center gap-3 py-2">
-                  {it.image && (
-                    <img
-                      src={it.image}
-                      alt=""
-                      className="h-10 w-10 rounded-md border border-border object-cover"
-                    />
+                <li key={it.id} className="flex items-center gap-3 px-1 py-2">
+                  {it.image ? (
+                    <img src={it.image} alt="" className="h-9 w-9 rounded-md border border-border object-cover" />
+                  ) : (
+                    <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/40">
+                      <Package className="h-4 w-4 text-muted-foreground" />
+                    </div>
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-medium text-foreground">{it.name}</div>
@@ -871,45 +771,53 @@ function OrderDetailModalBody({
                       <div className="text-[11px] text-muted-foreground">{it.variant_label}</div>
                     )}
                   </div>
-                  <div className="text-right">
-                    <div className="text-[11px] text-muted-foreground">
-                      {it.quantity} × {fmtBDT(Number(it.price))}
-                    </div>
-                    <div className="font-semibold tabular-nums">
-                      {fmtBDT(Number(it.price) * Number(it.quantity))}
-                    </div>
+                  <div className="text-right text-[11px] text-muted-foreground">
+                    {it.quantity} × {fmtBDT(Number(it.price))}
+                  </div>
+                  <div className="w-20 text-right text-xs font-semibold tabular-nums">
+                    {fmtBDT(Number(it.price) * Number(it.quantity))}
                   </div>
                 </li>
               ))}
             </ul>
-          </Section>
+          </PanelCard>
+        </div>
+
+        {/* COURIER */}
+        <div className="mt-3">
+          <PanelCard title="Courier & Tracking" icon={<Truck className="h-3 w-3" />}>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Row label="Courier" value={form.courier_name ?? ""} onChange={(v) => setField("courier_name", v)} placeholder="Pathao / Steadfast…" />
+              <Row label="Tracking" value={form.tracking_number ?? ""} onChange={(v) => setField("tracking_number", v)} mono placeholder="—" />
+            </div>
+          </PanelCard>
         </div>
 
         <div className="mt-3 grid gap-3 md:grid-cols-2">
-          {/* Add note */}
-          <Section title="Add note" icon={<StickyNote className="h-3 w-3" />}>
+          {/* ADD NOTE */}
+          <PanelCard title="Add note" icon={<StickyNote className="h-3 w-3" />}>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              rows={2}
+              rows={3}
               placeholder="Internal note…"
-              className="w-full resize-none rounded-md border border-border bg-white px-2 py-1.5 text-xs outline-none transition focus:border-[#1D9E75] focus:ring-2 focus:ring-[#1D9E75]/15"
+              className="w-full resize-none rounded-md border border-border bg-white px-2.5 py-1.5 text-xs outline-none transition focus:border-[#1D9E75] focus:ring-2 focus:ring-[#1D9E75]/15"
             />
             <Btn
               variant="primary"
               size="sm"
-              className="mt-1.5 w-full"
+              className="mt-2 w-full"
               disabled={!note.trim() || noteMut.isPending}
               onClick={() => noteMut.mutate(note.trim())}
             >
               <StickyNote className="h-3 w-3" /> Add note
             </Btn>
-          </Section>
+          </PanelCard>
 
-          {/* Activity */}
-          <Section title="Activity" icon={<FileText className="h-3 w-3" />}>
+          {/* ACTIVITY */}
+          <PanelCard title="Activity" icon={<FileText className="h-3 w-3" />}>
             {detail.data.logs.length === 0 ? (
-              <div className="py-2 text-center text-xs text-muted-foreground">No activity yet</div>
+              <div className="py-3 text-center text-xs text-muted-foreground">No activity yet</div>
             ) : (
               <ul className="space-y-2 text-xs">
                 {detail.data.logs.slice(0, 6).map((l) => (
@@ -921,19 +829,30 @@ function OrderDetailModalBody({
                 ))}
               </ul>
             )}
-          </Section>
+          </PanelCard>
+        </div>
+
+        {/* Internal admin note (full width) */}
+        <div className="mt-3">
+          <PanelCard title="Internal admin note" icon={<Pencil className="h-3 w-3" />}>
+            <textarea
+              value={form.admin_notes ?? ""}
+              onChange={(e) => setField("admin_notes", e.target.value)}
+              rows={2}
+              placeholder="Visible to staff only…"
+              className="w-full resize-none rounded-md border border-border bg-white px-2.5 py-1.5 text-xs outline-none transition focus:border-[#1D9E75] focus:ring-2 focus:ring-[#1D9E75]/15"
+            />
+          </PanelCard>
         </div>
       </div>
 
       {/* Sticky save bar */}
       <div
         className={`flex shrink-0 items-center justify-between border-t px-5 py-3 transition-colors ${
-          dirty
-            ? "border-[#1D9E75]/30 bg-[#1D9E75]/5"
-            : "border-border bg-white"
+          dirty ? "border-[#1D9E75]/30 bg-[#1D9E75]/5" : "border-border bg-white"
         }`}
       >
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 text-xs">
           {dirty ? (
             <>
               <Pencil className="h-3.5 w-3.5 text-[#1D9E75]" />
@@ -942,20 +861,146 @@ function OrderDetailModalBody({
           ) : (
             <>
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-              <span>All changes saved</span>
+              <span className="text-muted-foreground">All changes saved</span>
             </>
           )}
         </div>
-        <Btn
-          variant="primary"
-          size="sm"
-          disabled={!dirty || saveMut.isPending}
-          onClick={() => saveMut.mutate()}
-        >
-          <Save className="h-3.5 w-3.5" />
-          {saveMut.isPending ? "Saving…" : "Save changes"}
-        </Btn>
+        <div className="flex items-center gap-2">
+          <span className="hidden text-[11px] text-muted-foreground sm:block">
+            Total <span className="font-bold text-[#1D9E75] tabular-nums">{fmtBDT(liveTotal)}</span>
+          </span>
+          <Btn
+            variant="primary"
+            size="sm"
+            disabled={!dirty || saveMut.isPending}
+            onClick={() => saveMut.mutate()}
+          >
+            <Save className="h-3.5 w-3.5" />
+            {saveMut.isPending ? "Saving…" : "Save changes"}
+          </Btn>
+        </div>
       </div>
+    </div>
+  );
+}
+
+// ====== Modal helpers ======
+
+function ActionPill({
+  label,
+  icon,
+  onClick,
+  tone = "default",
+}: {
+  label: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+  tone?: "default" | "primary" | "danger";
+}) {
+  const cls =
+    tone === "primary"
+      ? "bg-[#1D9E75] text-white border-[#1D9E75] hover:bg-[#168a64] shadow-sm"
+      : tone === "danger"
+        ? "bg-rose-500 text-white border-rose-500 hover:bg-rose-600 shadow-sm"
+        : "bg-white text-foreground border-border hover:border-[#1D9E75]/40 hover:text-[#1D9E75]";
+  return (
+    <button
+      onClick={onClick}
+      className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border px-2 text-[11px] font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0 ${cls}`}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
+  );
+}
+
+function PanelCard({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-white p-3 shadow-sm">
+      <div className="mb-2 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+        {icon && <span className="text-[#1D9E75]">{icon}</span>}
+        {title}
+      </div>
+      <div className="space-y-1">{children}</div>
+    </div>
+  );
+}
+
+function Row({
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder,
+  mono,
+  align = "right",
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  placeholder?: string;
+  mono?: boolean;
+  align?: "left" | "right";
+}) {
+  return (
+    <div className="group flex items-center gap-2 rounded-md px-1 py-1 transition-colors hover:bg-slate-50">
+      <span className="w-20 shrink-0 text-[11px] font-medium text-muted-foreground">{label}</span>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder ?? "—"}
+        className={`min-w-0 flex-1 rounded border border-transparent bg-transparent px-1.5 py-1 text-xs font-medium text-foreground outline-none transition focus:border-[#1D9E75] focus:bg-white focus:ring-2 focus:ring-[#1D9E75]/15 group-hover:border-border ${
+          align === "right" ? "text-right" : "text-left"
+        } ${mono ? "font-mono tracking-tight" : ""}`}
+      />
+    </div>
+  );
+}
+
+function RowStatic({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between px-1 py-1.5">
+      <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
+      <span className="text-xs font-semibold tabular-nums text-foreground">{value}</span>
+    </div>
+  );
+}
+
+function RowSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <div className="group flex items-center gap-2 rounded-md px-1 py-1 transition-colors hover:bg-slate-50">
+      <span className="w-20 shrink-0 text-[11px] font-medium text-muted-foreground">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="min-w-0 flex-1 rounded border border-transparent bg-transparent px-1.5 py-1 text-right text-xs font-semibold text-foreground outline-none transition focus:border-[#1D9E75] focus:bg-white focus:ring-2 focus:ring-[#1D9E75]/15 group-hover:border-border"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
