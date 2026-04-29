@@ -5,10 +5,10 @@ import OrdersPlaceholder from "./OrdersPlaceholder";
 export default function AdminShell() {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-gray-50 font-sans text-foreground">
+      <div className="flex h-screen w-full bg-gray-50 font-sans text-foreground">
         <AppSidebar />
-        <SidebarInset className="flex flex-col bg-gray-50">
-          <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-gray-200 bg-white/90 px-4 backdrop-blur-md md:px-6">
+        <SidebarInset className="flex h-screen flex-col bg-gray-50 print:h-auto">
+          <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white/90 px-4 backdrop-blur-md md:px-6 print:hidden">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
               <div className="hidden h-5 w-px bg-gray-200 md:block" />
