@@ -203,7 +203,7 @@ export const updateOrder = createServerFn({ method: "POST" })
     const patch: Record<string, unknown> = { ...rest, updated_at: new Date().toISOString() };
     if (tags !== undefined) patch.order_tags = tags;
 
-    const { error } = await supabaseAdmin.from("orders").update(patch).eq("id", id);
+    const { error } = await supabaseAdmin.from("orders").update(patch as never).eq("id", id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
