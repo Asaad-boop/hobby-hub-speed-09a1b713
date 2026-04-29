@@ -121,7 +121,7 @@ function OrdersPage() {
   const orderRows = useMemo(() => safeArray(ordersQ.data), [ordersQ.data]);
 
   const orders = useMemo(() => {
-    const list = orderRows;
+    const list = orderRows.filter((o): o is NonNullable<typeof o> => !!o && !!o.id);
     if (stageFilter === "all") return list;
     return list.filter(
       (o) =>
@@ -139,6 +139,7 @@ function OrdersPage() {
     const counts: Record<string, number> = { all: 0 };
     for (const s of WORKFLOW_STAGES) counts[s] = 0;
     for (const o of orderRows) {
+      if (!o) continue;
       counts.all++;
       const stg = deriveStage({
         status: o.status,
@@ -147,7 +148,7 @@ function OrdersPage() {
         hold_until: o.hold_until,
         advance_amount: o.advance_amount,
       });
-      counts[stg]++;
+      counts[stg] = (counts[stg] ?? 0) + 1;
     }
     return counts;
   }, [orderRows]);
@@ -196,20 +197,25 @@ function OrdersPage() {
     let success = 0;
     let failed = 0;
     for (const id of selected) {
-      const o = list.find((x) => x.id === id);
-      if (!o) continue;
+      const o = list.find((x) => x && x.id === id);
+      if (!o || !o.id) continue;
+      const totalNum = Number(o.total);
       const res = await createPathaoConsignment({
         data: {
           creds,
           order: {
-            merchantOrderId: o.id.slice(0, 12),
+            merchantOrderId: String(o.id).slice(0, 12),
             recipientName: o.shipping_name ?? o.guest_name ?? "Customer",
             recipientPhone: o.shipping_phone ?? o.guest_phone ?? "",
             recipientAddress: [o.shipping_address, o.shipping_city, o.shipping_district]
               .filter(Boolean)
               .join(", "),
             amountToCollect:
-              (o.payment_method ?? "cod").toLowerCase() === "cod" ? Number(o.total) : 0,
+              (o.payment_method ?? "cod").toLowerCase() === "cod"
+                ? Number.isFinite(totalNum)
+                  ? totalNum
+                  : 0
+                : 0,
             itemDescription: `Order ${shortId(o.id)}`,
             itemQuantity: 1,
             itemWeight: 0.5,
@@ -439,6 +445,7 @@ function OrdersPage() {
                 </thead>
                 <tbody className="divide-y divide-border/70">
                   {orders.map((o) => {
+                    if (!o || !o.id) return null;
                     const stage = deriveStage({
                       status: o.status,
                       confirmation_status: o.confirmation_status,
@@ -450,9 +457,13 @@ function OrdersPage() {
                     const isOpen = openOrderId === o.id;
                     const name = o.shipping_name ?? o.guest_name ?? "—";
                     const phone = o.shipping_phone ?? o.guest_phone ?? "—";
-                    const ageHrs = (Date.now() - new Date(o.created_at).getTime()) / 3600_000;
+                    const createdAtMs = o.created_at ? new Date(o.created_at).getTime() : NaN;
+                    const ageHrs = Number.isFinite(createdAtMs)
+                      ? (Date.now() - createdAtMs) / 3600_000
+                      : 0;
                     const isUrgent =
                       ageHrs > 24 && (stage === "processing" || stage === "call_not_received");
+                    
                     return (
                       <tr
                         key={o.id}
@@ -797,7 +808,7 @@ function OrderDetailModalBody({
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (detail.isLoading || !detail.data) {
+  if (detail.isLoading || !detail.data || !detail.data.order) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
         <Loading />
@@ -813,7 +824,7 @@ function OrderDetailModalBody({
     hold_until: o.hold_until,
     advance_amount: o.advance_amount,
   });
-  const name = form.shipping_name || "—";
+  
   const subtotal = Number(o.subtotal ?? 0);
   const liveTotal =
     subtotal + (Number(form.shipping_fee) || 0) - (Number(form.discount_amount) || 0);
@@ -996,33 +1007,40 @@ function OrderDetailModalBody({
         <div className="mt-3">
           <PanelCard title={`Items (${detailItems.length})`} icon={<Package className="h-3 w-3" />}>
             <ul className="-mx-1 divide-y divide-border/70 text-xs">
-              {detailItems.map((it) => (
-                <li key={it.id} className="flex items-center gap-3 px-1 py-2">
-                  {it.image ? (
-                    <img
-                      src={it.image}
-                      alt=""
-                      className="h-9 w-9 rounded-md border border-border object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/40">
-                      <Package className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate font-medium text-foreground">{it.name}</div>
-                    {it.variant_label && (
-                      <div className="text-[11px] text-muted-foreground">{it.variant_label}</div>
+              {detailItems.map((it, idx) => {
+                if (!it) return null;
+                const qty = Number(it.quantity);
+                const price = Number(it.price);
+                const safeQty = Number.isFinite(qty) ? qty : 0;
+                const safePrice = Number.isFinite(price) ? price : 0;
+                return (
+                  <li key={it.id ?? `item-${idx}`} className="flex items-center gap-3 px-1 py-2">
+                    {it.image ? (
+                      <img
+                        src={it.image}
+                        alt=""
+                        className="h-9 w-9 rounded-md border border-border object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/40">
+                        <Package className="h-4 w-4 text-muted-foreground" />
+                      </div>
                     )}
-                  </div>
-                  <div className="text-right text-[11px] text-muted-foreground">
-                    {it.quantity} × {fmtBDT(Number(it.price))}
-                  </div>
-                  <div className="w-20 text-right text-xs font-semibold tabular-nums">
-                    {fmtBDT(Number(it.price) * Number(it.quantity))}
-                  </div>
-                </li>
-              ))}
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-medium text-foreground">{it.name ?? "—"}</div>
+                      {it.variant_label && (
+                        <div className="text-[11px] text-muted-foreground">{it.variant_label}</div>
+                      )}
+                    </div>
+                    <div className="text-right text-[11px] text-muted-foreground">
+                      {safeQty} × {fmtBDT(safePrice)}
+                    </div>
+                    <div className="w-20 text-right text-xs font-semibold tabular-nums">
+                      {fmtBDT(safePrice * safeQty)}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </PanelCard>
         </div>
@@ -1054,13 +1072,17 @@ function OrderDetailModalBody({
               <div className="py-3 text-center text-xs text-muted-foreground">No activity yet</div>
             ) : (
               <ul className="space-y-2 text-xs">
-                {detailLogs.slice(0, 6).map((l) => (
-                  <li key={l.id} className="border-l-2 border-[#1D9E75]/40 pl-2">
-                    <div className="font-medium capitalize">{l.action.replace(/_/g, " ")}</div>
-                    {l.note && <div className="text-muted-foreground">{l.note}</div>}
-                    <div className="text-[10px] text-muted-foreground">{fmtDate(l.created_at)}</div>
-                  </li>
-                ))}
+                {detailLogs.slice(0, 6).map((l, idx) => {
+                  if (!l) return null;
+                  const action = typeof l.action === "string" ? l.action : "activity";
+                  return (
+                    <li key={l.id ?? `log-${idx}`} className="border-l-2 border-[#1D9E75]/40 pl-2">
+                      <div className="font-medium capitalize">{action.replace(/_/g, " ")}</div>
+                      {l.note && <div className="text-muted-foreground">{l.note}</div>}
+                      <div className="text-[10px] text-muted-foreground">{fmtDate(l.created_at)}</div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </PanelCard>
