@@ -520,14 +520,38 @@ function OrdersPage() {
   );
 }
 
-function OrderDetailDrawer({
+function OrderDetailModal({
   id,
   onClose,
   onMoveStage,
   onPrintInvoice,
 }: {
-  id: string;
+  id: string | null;
   onClose: () => void;
+  onMoveStage: (stage: WorkflowStage) => void;
+  onPrintInvoice: () => void;
+}) {
+  return (
+    <Dialog open={!!id} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-hidden p-0 sm:rounded-xl">
+        {id && (
+          <OrderDetailModalBody
+            id={id}
+            onMoveStage={onMoveStage}
+            onPrintInvoice={onPrintInvoice}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function OrderDetailModalBody({
+  id,
+  onMoveStage,
+  onPrintInvoice,
+}: {
+  id: string;
   onMoveStage: (stage: WorkflowStage) => void;
   onPrintInvoice: () => void;
 }) {
