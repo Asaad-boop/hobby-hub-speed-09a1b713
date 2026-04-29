@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, Printer, Truck, Plus, FileText, History, Send } from "lucide-react";
+import { toast } from "sonner";
 import { useOpsStore } from "@/lib/ops-store";
 import {
   COURIERS, DIVISIONS, formatBDT, formatDate,
@@ -26,9 +27,19 @@ export default function OrdersPage() {
   const [showNew, setShowNew] = useState(false);
   const [showPicking, setShowPicking] = useState(false);
   const [showCourier, setShowCourier] = useState(false);
-  const [invoiceFor, setInvoiceFor] = useState<Order | null>(null);
-  const [historyFor, setHistoryFor] = useState<Order | null>(null);
-  const [quickCourierFor, setQuickCourierFor] = useState<Order | null>(null);
+  // Track open modals by ID so they re-bind from the live store on every render.
+  const [invoiceId, setInvoiceId] = useState<string | null>(null);
+  const [historyId, setHistoryId] = useState<string | null>(null);
+  const [quickCourierId, setQuickCourierId] = useState<string | null>(null);
+
+  const invoiceFor = invoiceId ? orders.find((o) => o.id === invoiceId) ?? null : null;
+  const historyFor = historyId ? orders.find((o) => o.id === historyId) ?? null : null;
+  const quickCourierFor = quickCourierId ? orders.find((o) => o.id === quickCourierId) ?? null : null;
+
+  // Auto-close a modal if its order disappears (defensive).
+  useEffect(() => { if (invoiceId && !invoiceFor) setInvoiceId(null); }, [invoiceId, invoiceFor]);
+  useEffect(() => { if (historyId && !historyFor) setHistoryId(null); }, [historyId, historyFor]);
+  useEffect(() => { if (quickCourierId && !quickCourierFor) setQuickCourierId(null); }, [quickCourierId, quickCourierFor]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -119,9 +130,9 @@ export default function OrdersPage() {
                 <td className="px-3 py-2.5"><FraudBadge score={o.fraudScore} /></td>
                 <td className="px-3 py-2.5">
                   <div className="flex items-center gap-1">
-                    <Btn size="sm" onClick={() => setInvoiceFor(o)}><FileText className="h-3.5 w-3.5" />Invoice</Btn>
-                    <Btn size="sm" onClick={() => setHistoryFor(o)}><History className="h-3.5 w-3.5" />History</Btn>
-                    <Btn size="sm" onClick={() => setQuickCourierFor(o)}><Send className="h-3.5 w-3.5" />Quick Courier</Btn>
+                    <Btn size="sm" onClick={() => setInvoiceId(o.id)}><FileText className="h-3.5 w-3.5" />Invoice</Btn>
+                    <Btn size="sm" onClick={() => setHistoryId(o.id)}><History className="h-3.5 w-3.5" />History</Btn>
+                    <Btn size="sm" onClick={() => setQuickCourierId(o.id)}><Send className="h-3.5 w-3.5" />Quick Courier</Btn>
                   </div>
                 </td>
               </tr>
@@ -136,7 +147,11 @@ export default function OrdersPage() {
           onClose={() => setShowNew(false)}
           products={products}
           customers={customers}
-          onCreate={(o) => { addOrder(o); setShowNew(false); }}
+          onCreate={(o) => {
+            addOrder(o);
+            setShowNew(false);
+            toast.success(`Order ${o.id} created`, { description: `${o.customerName} · ${formatBDT(o.total)}` });
+          }}
         />
       )}
       {showPicking && (
@@ -150,16 +165,28 @@ export default function OrdersPage() {
         <BulkCourierModal
           orders={pendingSelected}
           onClose={() => setShowCourier(false)}
-          onAssign={(courier) => { bulkAssignCourier(pendingSelected.map((o) => o.id), courier); clearSel(); setShowCourier(false); }}
+          onAssign={(courier) => {
+            const ids = pendingSelected.map((o) => o.id);
+            bulkAssignCourier(ids, courier);
+            clearSel();
+            setShowCourier(false);
+            toast.success(`${ids.length} order${ids.length === 1 ? "" : "s"} assigned to ${courier}`, {
+              description: "Status updated to Shipped · tracking generated",
+            });
+          }}
         />
       )}
-      {invoiceFor && <InvoiceModal order={invoiceFor} onClose={() => setInvoiceFor(null)} />}
-      {historyFor && <HistoryModal order={historyFor} onClose={() => setHistoryFor(null)} />}
+      {invoiceFor && <InvoiceModal order={invoiceFor} onClose={() => setInvoiceId(null)} />}
+      {historyFor && <HistoryModal order={historyFor} onClose={() => setHistoryId(null)} />}
       {quickCourierFor && (
         <QuickCourierModal
           order={quickCourierFor}
-          onClose={() => setQuickCourierFor(null)}
-          onAssign={(courier) => { bulkAssignCourier([quickCourierFor.id], courier); setQuickCourierFor(null); }}
+          onClose={() => setQuickCourierId(null)}
+          onAssign={(courier) => {
+            bulkAssignCourier([quickCourierFor.id], courier);
+            setQuickCourierId(null);
+            toast.success(`${quickCourierFor.id} shipped via ${courier}`);
+          }}
         />
       )}
     </div>
