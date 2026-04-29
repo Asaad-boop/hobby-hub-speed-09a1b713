@@ -358,24 +358,35 @@ function OrdersWorkspace() {
                   </button>
                   <button
                     onClick={handleReject}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-md bg-rose-50 px-3 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200 transition hover:bg-rose-100"
+                    disabled={selected.status === "cancelled" || selected.status === "delivered"}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-md bg-rose-50 px-3 text-sm font-medium text-rose-700 ring-1 ring-inset ring-rose-200 transition hover:bg-rose-100 disabled:opacity-50"
                   >
                     <XCircle className="h-4 w-4" />
-                    Reject
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirm}
+                    disabled={selected.status !== "pending"}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-foreground shadow-sm transition hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    Confirm
                   </button>
                   <button
                     onClick={handleShip}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-foreground shadow-sm transition hover:bg-gray-50"
+                    disabled={selected.status !== "packed"}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-foreground shadow-sm transition hover:bg-gray-50 disabled:opacity-50"
                   >
                     <Truck className="h-4 w-4" />
                     Ship
                   </button>
                   <button
-                    onClick={handleConfirm}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[#1D9E75] px-3.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#178A65]"
+                    onClick={handleAdvance}
+                    disabled={!nextLabel}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[#1D9E75] px-3.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#178A65] disabled:opacity-50"
                   >
-                    <CheckCircle2 className="h-4 w-4" />
-                    Confirm Order
+                    Mark as {nextLabel ?? "Done"}
+                    <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
               </div>
