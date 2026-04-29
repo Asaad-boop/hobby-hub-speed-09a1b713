@@ -78,6 +78,10 @@ const STAGE_ICON: Record<WorkflowStage, React.ReactNode> = {
   returned: <Undo2 className="h-3.5 w-3.5" />,
 };
 
+function safeArray<T>(value: T[] | null | undefined): T[] {
+  return Array.isArray(value) ? value : [];
+}
+
 function initials(name?: string | null) {
   if (!name) return "?";
   const parts = name.trim().split(/\s+/).slice(0, 2);
@@ -116,8 +120,10 @@ function OrdersPage() {
     refetchInterval: 60_000,
   });
 
+  const orderRows = useMemo(() => safeArray(ordersQ.data), [ordersQ.data]);
+
   const orders = useMemo(() => {
-    const list = ordersQ.data ?? [];
+    const list = orderRows;
     if (stageFilter === "all") return list;
     return list.filter(
       (o) =>
@@ -129,12 +135,12 @@ function OrdersPage() {
           advance_amount: o.advance_amount,
         }) === stageFilter,
     );
-  }, [ordersQ.data, stageFilter]);
+  }, [orderRows, stageFilter]);
 
   const stageCounts = useMemo(() => {
     const counts: Record<string, number> = { all: 0 };
     for (const s of WORKFLOW_STAGES) counts[s] = 0;
-    for (const o of ordersQ.data ?? []) {
+    for (const o of orderRows) {
       counts.all++;
       const stg = deriveStage({
         status: o.status,
@@ -146,7 +152,7 @@ function OrdersPage() {
       counts[stg]++;
     }
     return counts;
-  }, [ordersQ.data]);
+  }, [orderRows]);
 
   const updateMut = useMutation({
     mutationFn: (input: { id: string; patch: Record<string, unknown> }) =>
@@ -188,7 +194,7 @@ function OrdersPage() {
       return;
     }
     toast.info(`Sending ${selected.length} order(s) to Pathao…`);
-    const list = ordersQ.data ?? [];
+    const list = orderRows;
     let success = 0;
     let failed = 0;
     for (const id of selected) {
