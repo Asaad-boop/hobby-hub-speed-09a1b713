@@ -19,10 +19,23 @@ function ReportsPage() {
     return { fromIso: from.toISOString(), toIso: to.toISOString() };
   }, [days]);
 
-  const q = useQuery({
+  const qRaw = useQuery({
     queryKey: ["oms", "report", days],
     queryFn: () => getSalesReport({ data: range }),
   });
+  const q = {
+    ...qRaw,
+    data: qRaw.data
+      ? {
+          totalOrders: qRaw.data.totalOrders ?? 0,
+          totalRevenue: qRaw.data.totalRevenue ?? 0,
+          delivered: qRaw.data.delivered ?? 0,
+          successRate: qRaw.data.successRate ?? 0,
+          byStatus: qRaw.data.byStatus ?? {},
+          byCourier: qRaw.data.byCourier ?? {},
+        }
+      : undefined,
+  };
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
