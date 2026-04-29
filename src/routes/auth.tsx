@@ -30,8 +30,15 @@ const signUpSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters").max(72),
 });
 
+function safeRedirect(raw: string | null) {
+  return raw?.startsWith("/") && !raw.startsWith("//") ? raw : "/account";
+}
+
 function AuthPage() {
   const navigate = useNavigate();
+  const redirect =
+    typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("redirect") : null;
+  const nextPath = safeRedirect(redirect);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -43,9 +50,9 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/account" });
+      if (data.session) navigate({ to: nextPath });
     });
-  }, [navigate]);
+  }, [navigate, nextPath]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +68,7 @@ function AuthPage() {
       setLoading(false);
       if (error) return toast.error(error.message);
       toast.success("Welcome back!");
-      navigate({ to: "/account" });
+      navigate({ to: nextPath });
     } else {
       const parsed = signUpSchema.safeParse({ name, email, password });
       if (!parsed.success) return toast.error(parsed.error.issues[0].message);
@@ -82,7 +89,7 @@ function AuthPage() {
         return;
       }
       toast.success("Account created!");
-      navigate({ to: "/account" });
+      navigate({ to: nextPath });
     }
   };
 

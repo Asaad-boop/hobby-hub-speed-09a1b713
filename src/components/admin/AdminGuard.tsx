@@ -1,9 +1,11 @@
-import { Navigate } from "@tanstack/react-router";
+import { Navigate, useLocation } from "@tanstack/react-router";
 import { useAdminAuth } from "@/lib/admin";
 import { Loading } from "./ui";
 
 export function AdminGuard({ children }: { children: React.ReactNode }) {
   const { loading, user, isAdmin } = useAdminAuth();
+  const location = useLocation();
+  const redirectTo = location.pathname.startsWith("/admin") ? location.pathname : "/admin/orders";
 
   if (loading) {
     return (
@@ -12,7 +14,7 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-  if (!user) return <Navigate to="/auth" />;
+  if (!user) return <Navigate to="/auth" search={{ redirect: redirectTo }} replace />;
   if (!isAdmin) {
     return (
       <div className="grid h-screen w-full place-items-center bg-gray-50 px-6 text-center">
