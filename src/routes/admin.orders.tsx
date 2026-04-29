@@ -178,8 +178,7 @@ function OrdersPage() {
 
   const handlePrintInvoice = async (id: string) => {
     try {
-      const doc = await generateInvoicePDF(id);
-      doc.save(`invoice-${shortId(id)}.pdf`);
+      await generateInvoicePDF(id);
     } catch (e) {
       toast.error("Invoice generate failed: " + (e as Error).message);
     }
@@ -191,8 +190,7 @@ function OrdersPage() {
       return;
     }
     try {
-      const doc = await generatePickingListPDF(selected);
-      doc.save(`picking-list-${new Date().toISOString().slice(0, 10)}.pdf`);
+      await generatePickingListPDF(selected);
     } catch (e) {
       toast.error("Picking list failed: " + (e as Error).message);
     }
