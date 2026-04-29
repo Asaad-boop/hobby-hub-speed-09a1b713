@@ -463,7 +463,7 @@ function OrdersPage() {
                       : 0;
                     const isUrgent =
                       ageHrs > 24 && (stage === "processing" || stage === "call_not_received");
-                    void idx;
+                    
                     return (
                       <tr
                         key={o.id}
