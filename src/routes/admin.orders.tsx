@@ -12,6 +12,13 @@ import {
   PauseCircle,
   Package,
   RefreshCw,
+  ListFilter,
+  Inbox,
+  Wallet,
+  PhoneOff,
+  PackageCheck,
+  PackageX,
+  Undo2,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -42,6 +49,41 @@ import { Checkbox } from "@/components/ui/checkbox";
 export const Route = createFileRoute("/admin/orders")({
   component: OrdersPage,
 });
+
+const STAGE_ICON: Record<WorkflowStage, React.ReactNode> = {
+  processing: <Inbox className="h-3.5 w-3.5" />,
+  call_not_received: <PhoneOff className="h-3.5 w-3.5" />,
+  on_hold: <PauseCircle className="h-3.5 w-3.5" />,
+  advance_payment: <Wallet className="h-3.5 w-3.5" />,
+  confirmed: <CheckCircle2 className="h-3.5 w-3.5" />,
+  cancelled: <XCircle className="h-3.5 w-3.5" />,
+  shipped: <Truck className="h-3.5 w-3.5" />,
+  delivered: <PackageCheck className="h-3.5 w-3.5" />,
+  returned: <Undo2 className="h-3.5 w-3.5" />,
+};
+
+function initials(name?: string | null) {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/).slice(0, 2);
+  return parts.map((p) => p[0]?.toUpperCase() ?? "").join("") || "?";
+}
+
+function avatarColor(seed: string) {
+  const palette = [
+    "bg-rose-100 text-rose-700",
+    "bg-amber-100 text-amber-700",
+    "bg-emerald-100 text-emerald-700",
+    "bg-sky-100 text-sky-700",
+    "bg-violet-100 text-violet-700",
+    "bg-pink-100 text-pink-700",
+    "bg-teal-100 text-teal-700",
+    "bg-indigo-100 text-indigo-700",
+  ];
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return palette[h % palette.length];
+}
+
 
 function OrdersPage() {
   const qc = useQueryClient();
