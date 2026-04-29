@@ -716,3 +716,38 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
     </div>
   );
 }
+
+function KpiPill({
+  label,
+  value,
+  tone = "slate",
+  icon,
+}: {
+  label: string;
+  value: number;
+  tone?: "slate" | "amber" | "emerald" | "sky" | "teal";
+  icon?: React.ReactNode;
+}) {
+  const tones: Record<string, string> = {
+    slate: "bg-slate-50 text-slate-700 ring-slate-200",
+    amber: "bg-amber-50 text-amber-700 ring-amber-200",
+    emerald: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    sky: "bg-sky-50 text-sky-700 ring-sky-200",
+    teal: "bg-teal-50 text-teal-700 ring-teal-200",
+  };
+  return (
+    <div className="flex items-center justify-between rounded-xl border border-border bg-white px-3 py-2 shadow-sm">
+      <div className="min-w-0">
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </div>
+        <div className="mt-0.5 text-lg font-semibold tabular-nums text-foreground">{value}</div>
+      </div>
+      <div
+        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset ${tones[tone]}`}
+      >
+        {icon ?? <span className="text-[10px] font-bold">{value > 0 ? "●" : "○"}</span>}
+      </div>
+    </div>
+  );
+}
