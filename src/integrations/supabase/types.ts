@@ -1673,6 +1673,72 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews_public: {
+        Row: {
+          admin_note: string | null
+          comment: string | null
+          created_at: string | null
+          guest_name: string | null
+          id: string | null
+          images: string[] | null
+          is_approved: boolean | null
+          order_id: string | null
+          product_id: string | null
+          rating: number | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+          videos: string[] | null
+        }
+        Insert: {
+          admin_note?: string | null
+          comment?: string | null
+          created_at?: string | null
+          guest_name?: string | null
+          id?: string | null
+          images?: string[] | null
+          is_approved?: boolean | null
+          order_id?: string | null
+          product_id?: string | null
+          rating?: number | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          videos?: string[] | null
+        }
+        Update: {
+          admin_note?: string | null
+          comment?: string | null
+          created_at?: string | null
+          guest_name?: string | null
+          id?: string | null
+          images?: string[] | null
+          is_approved?: boolean | null
+          order_id?: string | null
+          product_id?: string | null
+          rating?: number | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          videos?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       add_order_note: {
