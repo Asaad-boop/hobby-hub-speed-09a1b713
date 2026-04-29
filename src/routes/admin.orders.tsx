@@ -340,13 +340,14 @@ function OrderDrawer({ orderId, onClose }: { orderId?: string; onClose: () => vo
 
   const detail = useQuery({
     queryKey: ["order", orderId],
-    queryFn: () => getOrderDetail({ data: { id: orderId! } }),
+    queryFn: () => callWithSupabaseAuth(getOrderDetail, { data: { id: orderId! } }),
+    retry: false,
     enabled: open,
   });
 
   const transition = useMutation({
     mutationFn: (newStatus: string) =>
-      transitionOrderStatus({ data: { order_id: orderId!, new_status: newStatus } }),
+      callWithSupabaseAuth(transitionOrderStatus, { data: { order_id: orderId!, new_status: newStatus } }),
     onSuccess: () => {
       toast.success("Status updated");
       qc.invalidateQueries({ queryKey: ["order", orderId] });
@@ -356,7 +357,7 @@ function OrderDrawer({ orderId, onClose }: { orderId?: string; onClose: () => vo
   });
 
   const noteMut = useMutation({
-    mutationFn: () => addOrderNote({ data: { order_id: orderId!, body: note, is_internal: true } }),
+    mutationFn: () => callWithSupabaseAuth(addOrderNote, { data: { order_id: orderId!, body: note, is_internal: true } }),
     onSuccess: () => {
       toast.success("Note added");
       setNote("");
@@ -367,7 +368,7 @@ function OrderDrawer({ orderId, onClose }: { orderId?: string; onClose: () => vo
 
   const priorityMut = useMutation({
     mutationFn: (priority: string) =>
-      updateOrder({ data: { id: orderId!, priority: priority as "low" | "normal" | "high" | "urgent" } }),
+      callWithSupabaseAuth(updateOrder, { data: { id: orderId!, priority: priority as "low" | "normal" | "high" | "urgent" } }),
     onSuccess: () => {
       toast.success("Priority updated");
       qc.invalidateQueries({ queryKey: ["order", orderId] });
