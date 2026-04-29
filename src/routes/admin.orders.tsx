@@ -783,16 +783,6 @@ function OrderDetailModalBody({
           </PanelCard>
         </div>
 
-        {/* COURIER */}
-        <div className="mt-3">
-          <PanelCard title="Courier & Tracking" icon={<Truck className="h-3 w-3" />}>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <Row label="Courier" value={form.courier_name ?? ""} onChange={(v) => setField("courier_name", v)} placeholder="Pathao / Steadfast…" />
-              <Row label="Tracking" value={form.tracking_number ?? ""} onChange={(v) => setField("tracking_number", v)} mono placeholder="—" />
-            </div>
-          </PanelCard>
-        </div>
-
         <div className="mt-3 grid gap-3 md:grid-cols-2">
           {/* ADD NOTE */}
           <PanelCard title="Add note" icon={<StickyNote className="h-3 w-3" />}>
@@ -832,18 +822,6 @@ function OrderDetailModalBody({
           </PanelCard>
         </div>
 
-        {/* Internal admin note (full width) */}
-        <div className="mt-3">
-          <PanelCard title="Internal admin note" icon={<Pencil className="h-3 w-3" />}>
-            <textarea
-              value={form.admin_notes ?? ""}
-              onChange={(e) => setField("admin_notes", e.target.value)}
-              rows={2}
-              placeholder="Visible to staff only…"
-              className="w-full resize-none rounded-md border border-border bg-white px-2.5 py-1.5 text-xs outline-none transition focus:border-[#1D9E75] focus:ring-2 focus:ring-[#1D9E75]/15"
-            />
-          </PanelCard>
-        </div>
       </div>
 
       {/* Sticky save bar */}
