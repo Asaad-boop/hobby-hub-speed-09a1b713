@@ -30,11 +30,29 @@ export const Route = createFileRoute("/admin/dashboard")({
 });
 
 function DashboardPage() {
-  const { data, isLoading } = useQuery({
+  const { data: raw, isLoading } = useQuery({
     queryKey: ["oms", "dashboard"],
     queryFn: () => getDashboardStats(),
     refetchInterval: 30_000,
   });
+
+  // Defensive defaults so a partial server response never crashes the page.
+  const data = raw
+    ? {
+        todayOrders: raw.todayOrders ?? 0,
+        todayRevenue: raw.todayRevenue ?? 0,
+        pending: raw.pending ?? 0,
+        confirmed: raw.confirmed ?? 0,
+        shipped: raw.shipped ?? 0,
+        delivered: raw.delivered ?? 0,
+        cancelled: raw.cancelled ?? 0,
+        returned: raw.returned ?? 0,
+        successRate: raw.successRate ?? 0,
+        series: Array.isArray(raw.series) ? raw.series : [],
+        recent: Array.isArray(raw.recent) ? raw.recent : [],
+        lowStock: Array.isArray(raw.lowStock) ? raw.lowStock : [],
+      }
+    : null;
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
