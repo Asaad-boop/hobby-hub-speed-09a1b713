@@ -300,10 +300,14 @@ function WebOrdersPage() {
     const { data, error } = await supabase
       .from("orders")
       .select(
-        `id, created_at, auto_call_enabled, call_status, shipping_name, shipping_phone,
-         shipping_address, shipping_city, guest_name, guest_phone, latest_note, admin_notes,
-         updated_at, tags, order_tags, source_website, total, status,
-         order_items ( name, image, quantity, product_id )`,
+        `id, created_at, updated_at, auto_call_enabled, call_status, call_attempt_count,
+         shipping_name, shipping_phone, shipping_address, shipping_city, shipping_district,
+         shipping_thana, alternate_phone, guest_name, guest_phone, guest_email, is_guest_order,
+         latest_note, admin_notes, customer_note, internal_note, tags, order_tags,
+         source_website, source, total, subtotal, shipping_fee, discount_amount, advance_amount,
+         coupon_code, payment_method, delivery_method, courier_name, tracking_number,
+         status, confirmation_status, web_status,
+         order_items ( id, name, image, quantity, product_id, price, unit_price, variant_label, line_total )`,
       )
       .order("created_at", { ascending: false })
       .limit(200);
