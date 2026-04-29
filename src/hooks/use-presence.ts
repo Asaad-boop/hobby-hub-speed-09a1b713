@@ -32,7 +32,23 @@ export function usePresenceHeartbeat() {
       try {
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) await supabase.auth.signOut().catch(() => undefined);
-        if (sessionError || !sessionData.session?.access_token) return;
+        // Skip presence tracking for authenticated staff/admin users — they
+        // don't need to appear in the live visitor dashboard, and the RLS
+        // policy on active_sessions would 403 their writes anyway.
+        if (sessionData.session?.user?.id) {
+          const { data: roles } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", sessionData.session.user.id);
+          const roleSet = new Set((roles ?? []).map((r) => r.role as string));
+          if (
+            roleSet.has("admin") ||
+            roleSet.has("customer_service") ||
+            roleSet.has("operations")
+          ) {
+            return;
+          }
+        }
         await supabase
           .from("active_sessions")
           .upsert(
