@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,11 @@ import { Loader2, Mail, Lock, User as UserIcon, Eye, EyeOff, Star, MapPin, Truck
 import logo from "@/assets/logo.webp";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: typeof search.redirect === "string" && search.redirect.startsWith("/")
+      ? search.redirect
+      : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Sign In or Create Account — HobbyShop" },
@@ -32,6 +37,8 @@ const signUpSchema = z.object({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { redirect } = useSearch({ from: "/auth" });
+  const nextPath = redirect ?? "/account";
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -43,9 +50,9 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/account" });
+      if (data.session) navigate({ to: nextPath });
     });
-  }, [navigate]);
+  }, [navigate, nextPath]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +68,7 @@ function AuthPage() {
       setLoading(false);
       if (error) return toast.error(error.message);
       toast.success("Welcome back!");
-      navigate({ to: "/account" });
+      navigate({ to: nextPath });
     } else {
       const parsed = signUpSchema.safeParse({ name, email, password });
       if (!parsed.success) return toast.error(parsed.error.issues[0].message);
@@ -82,7 +89,7 @@ function AuthPage() {
         return;
       }
       toast.success("Account created!");
-      navigate({ to: "/account" });
+      navigate({ to: nextPath });
     }
   };
 
