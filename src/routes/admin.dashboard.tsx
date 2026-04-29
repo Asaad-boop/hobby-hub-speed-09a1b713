@@ -48,9 +48,9 @@ function DashboardPage() {
         cancelled: raw.cancelled ?? 0,
         returned: raw.returned ?? 0,
         successRate: raw.successRate ?? 0,
-        series: Array.isArray(raw.series) ? raw.series : [],
-        recent: Array.isArray(raw.recent) ? raw.recent : [],
-        lowStock: Array.isArray(raw.lowStock) ? raw.lowStock : [],
+        series: Array.isArray(raw.series) ? raw.series.filter(Boolean) : [],
+        recent: Array.isArray(raw.recent) ? raw.recent.filter((o): o is NonNullable<typeof o> => !!o && !!o.id) : [],
+        lowStock: Array.isArray(raw.lowStock) ? raw.lowStock.filter((p): p is NonNullable<typeof p> => !!p && !!p.id) : [],
       }
     : null;
 
