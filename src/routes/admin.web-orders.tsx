@@ -451,7 +451,6 @@ function WebOrdersPage() {
                   <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
                 </TableHead>
                 <TableHead>Created At</TableHead>
-                <TableHead>Auto Call</TableHead>
                 <TableHead>Customer</TableHead>
                 <TableHead>Note</TableHead>
                 <TableHead>Order Items</TableHead>
@@ -503,9 +502,6 @@ function WebOrdersPage() {
                         <div className="mt-1 text-[11px] text-muted-foreground font-mono">
                           #{o.id.slice(0, 8)}
                         </div>
-                      </TableCell>
-                      <TableCell className="pt-3">
-                        <AutoCallBadge enabled={o.auto_call_enabled} status={o.call_status} />
                       </TableCell>
                       <TableCell className="pt-3">
                         <div className="flex items-center gap-2">
