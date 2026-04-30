@@ -343,6 +343,14 @@ function Checkout() {
 
       // Telegram notification is sent automatically by the DB trigger (notify_telegram_on_new_order)
 
+      // Mark the abandoned cart as converted so it disappears from "Incomplete".
+      if (abandonedId) {
+        await supabase
+          .from("abandoned_carts")
+          .update({ is_converted: true, converted_order_id: order.id, updated_at: new Date().toISOString() })
+          .eq("id", abandonedId);
+      }
+
       clear();
       toast.success("Order placed! We'll call you to confirm soon.");
       navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
