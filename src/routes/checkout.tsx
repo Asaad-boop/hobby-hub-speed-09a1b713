@@ -111,7 +111,6 @@ function Checkout() {
 
     const timer = setTimeout(async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
         const sid = getClientSessionId();
         const cartItems = items.map((i) => ({
           product_id: i.product.id,
@@ -122,30 +121,21 @@ function Checkout() {
           variant_id: i.variantId ?? null,
           variant_label: i.variantLabel ?? null,
         }));
-        const payload = {
-          user_id: session?.user.id ?? null,
-          session_id: session ? null : sid,
-          customer_name: form.name.trim() || null,
-          customer_phone: form.phone.trim() || null,
-          shipping_address: form.address.trim() || null,
-          shipping_city: form.city.trim() || null,
-          shipping_district: form.district || null,
-          subtotal: total,
-          cart_items: cartItems,
-          last_step: "checkout",
-          is_converted: false,
-          updated_at: new Date().toISOString(),
-        };
-        if (abandonedId) {
-          await supabase.from("abandoned_carts").update(payload).eq("id", abandonedId);
-        } else {
-          const { data, error } = await supabase
-            .from("abandoned_carts")
-            .insert(payload)
-            .select("id")
-            .single();
-          if (!error && data) setAbandonedId(data.id);
-        }
+        const { data, error } = await supabase.rpc("upsert_abandoned_cart", {
+          _id: abandonedId,
+          _session_id: sid,
+          _customer_name: form.name.trim() || null,
+          _customer_phone: form.phone.trim() || null,
+          _customer_email: null,
+          _shipping_address: form.address.trim() || null,
+          _shipping_city: form.city.trim() || null,
+          _shipping_district: form.district || null,
+          _shipping_thana: null,
+          _subtotal: total,
+          _cart_items: cartItems,
+          _last_step: "checkout",
+        } as never);
+        if (!error && data && !abandonedId) setAbandonedId(data as string);
       } catch {
         // best-effort — never block checkout
       }
@@ -345,10 +335,10 @@ function Checkout() {
 
       // Mark the abandoned cart as converted so it disappears from "Incomplete".
       if (abandonedId) {
-        await supabase
-          .from("abandoned_carts")
-          .update({ is_converted: true, converted_order_id: order.id, updated_at: new Date().toISOString() })
-          .eq("id", abandonedId);
+        await supabase.rpc("mark_abandoned_cart_converted", {
+          _id: abandonedId,
+          _order_id: order.id,
+        } as never);
       }
 
       clear();
