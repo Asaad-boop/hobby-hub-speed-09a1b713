@@ -1148,19 +1148,36 @@ function OrderDetailModal({
       }
 
       for (const it of form.items) {
-        if (!it.id) continue;
         const qty = Number(it.quantity) || 0;
         const price = Number(it.unit_price) || 0;
-        const { error: upErr } = await supabase
-          .from("order_items")
-          .update({
-            quantity: qty,
-            unit_price: price,
-            price,
-            line_total: qty * price,
-          })
-          .eq("id", it.id);
-        if (upErr) throw new Error(upErr.message);
+        if (it.id) {
+          const { error: upErr } = await supabase
+            .from("order_items")
+            .update({
+              quantity: qty,
+              unit_price: price,
+              price,
+              line_total: qty * price,
+            })
+            .eq("id", it.id);
+          if (upErr) throw new Error(upErr.message);
+        } else {
+          // New item — insert
+          const { error: insErr } = await supabase
+            .from("order_items")
+            .insert({
+              order_id: order.id,
+              product_id: it.product_id,
+              name: it.name,
+              image: it.image,
+              variant_label: it.variant_label,
+              quantity: qty,
+              unit_price: price,
+              price,
+              line_total: qty * price,
+            } as never);
+          if (insErr) throw new Error(insErr.message);
+        }
       }
 
       toast.success("Order updated");
