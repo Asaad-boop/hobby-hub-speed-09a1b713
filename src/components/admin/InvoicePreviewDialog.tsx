@@ -49,6 +49,12 @@ function fmtDate(s: string) {
   return `${y}-${m}-${day}`;
 }
 
+function fmtMoney(n: number): string {
+  // 1299 -> "1,299.0"
+  const rounded = Math.round(n);
+  return rounded.toLocaleString("en-US") + ".0";
+}
+
 function numberToWords(n: number): string {
   if (!isFinite(n)) return "";
   n = Math.round(n);
