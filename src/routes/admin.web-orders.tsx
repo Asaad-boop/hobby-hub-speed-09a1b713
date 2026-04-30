@@ -19,6 +19,12 @@ import {
   Calendar,
   FileText,
   Tag,
+  Search,
+  Trash2,
+  Minus,
+  Hash,
+  Truck,
+  StickyNote,
 } from "lucide-react";
 import {
   Dialog,
