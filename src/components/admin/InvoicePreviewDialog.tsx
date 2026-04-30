@@ -312,71 +312,74 @@ export function InvoicePreviewDialog({
           ) : (
             <div
               ref={printRef}
-              className="mx-auto w-full max-w-[760px] bg-white p-8 text-[13px] text-black shadow-sm"
-              style={{ fontFamily: '-apple-system, "Segoe UI", "Noto Sans Bengali", Roboto, sans-serif' }}
+              style={{
+                width: "148mm",
+                minHeight: "210mm",
+                margin: "0 auto",
+                background: "#fff",
+                color: "#000",
+                padding: "8mm",
+                fontFamily:
+                  '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Bengali", "Hind Siliguri", Roboto, sans-serif',
+                fontSize: "10px",
+                lineHeight: 1.35,
+                boxShadow: "0 2px 12px rgba(0,0,0,.08)",
+              }}
             >
               {/* Header */}
-              <div className="flex items-start justify-between pb-3">
-                <div className="flex items-center gap-3">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", paddingBottom: 6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   {settings?.logo_url ? (
-                    <img
-                      src={settings.logo_url}
-                      alt="logo"
-                      className="h-12 w-12 object-contain"
-                    />
+                    <img src={settings.logo_url} alt="logo" style={{ width: 34, height: 34, objectFit: "contain" }} />
                   ) : (
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500 text-xl font-bold text-white">
+                    <div style={{ width: 34, height: 34, borderRadius: "50%", background: "#e11d48", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16 }}>
                       H
                     </div>
                   )}
                   <div>
-                    <div className="text-2xl font-extrabold leading-tight">
+                    <div style={{ fontSize: 16, fontWeight: 800, lineHeight: 1 }}>
                       {settings?.site_title ?? "HobbyShop"}
                     </div>
-                    <div className="text-xs italic text-gray-500">
+                    <div style={{ fontSize: 9, fontStyle: "italic", color: "#777" }}>
                       {settings?.site_tagline ?? "Touch Your Dream"}
                     </div>
                   </div>
                 </div>
-                <div className="text-right text-xs">
-                  <div className="font-bold">HQ</div>
-                  <div className="text-gray-600">{settings?.address ?? "Company Address"}</div>
-                  <div className="text-gray-600">
-                    Hotline: {settings?.contact_phone ?? "09638779900"}
-                  </div>
+                <div style={{ textAlign: "right", fontSize: 9 }}>
+                  <div style={{ fontWeight: 700 }}>HQ</div>
+                  <div style={{ color: "#666" }}>{settings?.address ?? "Company Address"}</div>
+                  <div style={{ color: "#666" }}>Hotline: {settings?.contact_phone ?? "09638779900"}</div>
                 </div>
               </div>
-              <div className="border-t-2 border-black" />
+              <div style={{ borderTop: "1.5px solid #000" }} />
 
               {/* Body header */}
-              <div className="grid grid-cols-2 gap-6 pt-4">
-                {/* Delivery address + barcode */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, paddingTop: 8 }}>
                 <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                  <div style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em", color: "#666" }}>
                     Delivery Address
                   </div>
-                  <div className="mt-1 text-xl font-bold uppercase">{name}</div>
-                  <div className="text-sm text-gray-700">{addr || "—"}</div>
-                  <div className="mt-1 text-base font-semibold tracking-wider">{phone}</div>
-                  <div className="mt-4">
+                  <div style={{ fontSize: 14, fontWeight: 800, textTransform: "uppercase", marginTop: 2 }}>{name}</div>
+                  <div style={{ fontSize: 10, color: "#444" }}>{addr || "—"}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: ".05em", marginTop: 2 }}>{phone}</div>
+                  <div style={{ marginTop: 8 }}>
                     <BarcodeStrip value={invoiceId} />
-                    <div className="mt-1 text-center text-[11px] tracking-widest">
+                    <div style={{ textAlign: "center", fontSize: 9, letterSpacing: ".15em", marginTop: 2 }}>
                       {invoiceId}
                     </div>
                   </div>
                 </div>
 
-                {/* Invoice meta */}
                 <div>
-                  <div className="text-3xl font-extrabold">Invoice</div>
-                  <div className="mt-3 space-y-1.5 text-sm">
+                  <div style={{ fontSize: 22, fontWeight: 800 }}>Invoice</div>
+                  <div style={{ marginTop: 6, display: "grid", rowGap: 3, fontSize: 10 }}>
                     <Row k="Invoice ID:" v={<b>{invoiceId}</b>} />
                     <Row k="Date:" v={<b>{fmtDate(order.created_at)}</b>} />
                     <Row k="Item Count:" v={<b>{itemCount}</b>} />
                     <Row k="Payment:" v={<b>{paymentLabel}</b>} />
                     <Row
                       k="Payable:"
-                      v={<span className="text-lg font-extrabold">BDT {total.toFixed(1)}</span>}
+                      v={<span style={{ fontSize: 13, fontWeight: 800 }}>BDT {total.toFixed(1)}</span>}
                     />
                     <Row k="Delivery Partner:" v={<span>{order.courier_name || "—"}</span>} />
                     <Row k="Tracking ID:" v={<span>{order.tracking_number || "—"}</span>} />
@@ -385,17 +388,17 @@ export function InvoicePreviewDialog({
               </div>
 
               {/* Items */}
-              <div className="mt-6 border-t-2 border-black">
-                <table className="w-full text-sm">
+              <div style={{ marginTop: 10, borderTop: "1.5px solid #000" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 10 }}>
                   <thead>
-                    <tr className="border-b border-black/30 text-left text-[11px] uppercase tracking-wide text-gray-600">
-                      <th className="py-2 w-8">#</th>
-                      <th className="py-2">Title</th>
-                      <th className="py-2 text-center w-16">Type</th>
-                      <th className="py-2 text-center w-16">Size</th>
-                      <th className="py-2 text-right w-20">Price</th>
-                      <th className="py-2 text-center w-12">Qty</th>
-                      <th className="py-2 text-right w-24">Total</th>
+                    <tr style={{ borderBottom: "1px solid rgba(0,0,0,.3)", color: "#555" }}>
+                      <th style={th(20)}>#</th>
+                      <th style={th()}>Title</th>
+                      <th style={{ ...th(40), textAlign: "center" }}>Type</th>
+                      <th style={{ ...th(40), textAlign: "center" }}>Size</th>
+                      <th style={{ ...th(50), textAlign: "right" }}>Price</th>
+                      <th style={{ ...th(30), textAlign: "center" }}>Qty</th>
+                      <th style={{ ...th(55), textAlign: "right" }}>Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -403,29 +406,25 @@ export function InvoicePreviewDialog({
                       const img = it.product_id ? productImages[it.product_id] : undefined;
                       const lineTotal = Number(it.price) * Number(it.quantity);
                       return (
-                        <tr key={it.id} className="border-b border-gray-100 align-middle">
-                          <td className="py-3">{i + 1}.</td>
-                          <td className="py-3 pr-3">
-                            <div className="flex items-center gap-2">
+                        <tr key={it.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
+                          <td style={td()}>{i + 1}.</td>
+                          <td style={{ ...td(), paddingRight: 6 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                               {img && (
-                                <img
-                                  src={img}
-                                  alt=""
-                                  className="h-10 w-10 rounded object-cover"
-                                />
+                                <img src={img} alt="" style={{ width: 24, height: 24, objectFit: "cover", borderRadius: 3 }} />
                               )}
                               <span>{it.name}</span>
                             </div>
                           </td>
-                          <td className="py-3 text-center text-gray-500">
-                            {it.variant_label ?? ""}
-                          </td>
-                          <td className="py-3 text-center text-gray-500"></td>
-                          <td className="py-3 text-right tabular-nums">
+                          <td style={{ ...td(), textAlign: "center", color: "#777" }}>{it.variant_label ?? ""}</td>
+                          <td style={{ ...td(), textAlign: "center", color: "#777" }}></td>
+                          <td style={{ ...td(), textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
                             {Number(it.price).toFixed(1)}
                           </td>
-                          <td className="py-3 text-center">{it.quantity}</td>
-                          <td className="py-3 text-right tabular-nums">{lineTotal.toFixed(1)}</td>
+                          <td style={{ ...td(), textAlign: "center" }}>{it.quantity}</td>
+                          <td style={{ ...td(), textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
+                            {lineTotal.toFixed(1)}
+                          </td>
                         </tr>
                       );
                     })}
@@ -434,108 +433,96 @@ export function InvoicePreviewDialog({
               </div>
 
               {/* Note + totals */}
-              <div className="mt-3 grid grid-cols-2 gap-6">
-                <div className="text-sm">
-                  <span className="mr-1">📝</span>
-                  <span className="font-semibold">Note: </span>
-                  <span>
-                    🛡️ মার্চেন্টের অনুমতি ছাড়া প্রোডাক্ট খোলা সম্পূর্ণ নিষিদ্ধ। খোলা পণ্য
-                    গ্রহণযোগ্য নয়।
-                  </span>
+              <div style={{ marginTop: 8, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                <div style={{ fontSize: 10 }}>
+                  <span style={{ marginRight: 3 }}>📝</span>
+                  <span style={{ fontWeight: 600 }}>Note: </span>
+                  <span>🛡️ মার্চেন্টের অনুমতি ছাড়া প্রোডাক্ট খোলা সম্পূর্ণ নিষিদ্ধ। খোলা পণ্য গ্রহণযোগ্য নয়।</span>
                 </div>
-                <div className="space-y-1 text-sm">
-                  <div className="flex justify-between">
+                <div style={{ fontSize: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "1px 0" }}>
                     <span>Sub Total:</span>
-                    <span className="tabular-nums">BDT {subtotal.toFixed(1)}</span>
+                    <span style={{ fontVariantNumeric: "tabular-nums" }}>BDT {subtotal.toFixed(1)}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "1px 0" }}>
                     <span>Shipping Fee(+):</span>
-                    <span className="tabular-nums">BDT {shipping.toFixed(1)}</span>
+                    <span style={{ fontVariantNumeric: "tabular-nums" }}>BDT {shipping.toFixed(1)}</span>
                   </div>
                   {discount > 0 && (
-                    <div className="flex justify-between">
+                    <div style={{ display: "flex", justifyContent: "space-between", padding: "1px 0" }}>
                       <span>Discount(-):</span>
-                      <span className="tabular-nums">BDT {discount.toFixed(1)}</span>
+                      <span style={{ fontVariantNumeric: "tabular-nums" }}>BDT {discount.toFixed(1)}</span>
                     </div>
                   )}
-                  <div className="border-t border-gray-300 pt-2" />
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-extrabold">Total:</span>
-                    <span className="text-lg font-extrabold tabular-nums">
-                      BDT {total.toFixed(1)}
-                    </span>
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    <span className="font-semibold">In Words: </span>
-                    {numberToWords(total)} Tk Only
+                  <div style={{ borderTop: "1px solid #d1d5db", marginTop: 4, paddingTop: 4 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: 14, fontWeight: 800 }}>Total:</span>
+                      <span style={{ fontSize: 14, fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>
+                        BDT {total.toFixed(1)}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 9, color: "#555", marginTop: 2 }}>
+                      <span style={{ fontWeight: 600 }}>In Words: </span>
+                      {numberToWords(total)} Tk Only
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Rider note */}
-              <div className="mt-5 rounded border border-dashed border-red-400 bg-red-50/40 p-3 text-sm">
-                <div className="font-semibold text-red-600">
+              <div style={{ marginTop: 10, border: "1px dashed #f87171", background: "rgba(254,242,242,.4)", padding: "6px 8px", borderRadius: 4, fontSize: 10 }}>
+                <div style={{ color: "#dc2626", fontWeight: 700 }}>
                   🚫 Note for Rider / রাইডারের জন্য নির্দেশনা:
                 </div>
-                <div className="mt-1 text-gray-800">
-                  মার্চেন্টের অনুমতি ছাড়া প্রোডাক্ট খোলা সম্পূর্ণ নিষিদ্ধ, খুলে দেখতে চাইলে আগে
-                  কল করুন: {settings?.contact_phone ?? "09638779900"}
+                <div style={{ color: "#222", marginTop: 2 }}>
+                  মার্চেন্টের অনুমতি ছাড়া প্রোডাক্ট খোলা সম্পূর্ণ নিষিদ্ধ, খুলে দেখতে চাইলে আগে কল করুন: {settings?.contact_phone ?? "09638779900"}
                 </div>
-                <div className="text-gray-800">
+                <div style={{ color: "#222" }}>
                   WhatsApp: +{settings?.whatsapp_number ?? "8801964437520"}
                 </div>
               </div>
 
-              {/* Feedback / social */}
-              <div className="mt-6 grid grid-cols-2 gap-4">
-                <div className="rounded border border-emerald-200 bg-emerald-50/30 p-3">
-                  <div className="text-base font-bold">আমাদের মতামত দিন</div>
-                  <div className="text-xs text-gray-600">
-                    আপনার মতামত আমাদের আরো ভালো করতে সাহায্য করে
-                  </div>
+              {/* Feedback */}
+              <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                <div style={{ border: "1px solid #a7f3d0", background: "rgba(236,253,245,.3)", borderRadius: 4, padding: "6px 8px" }}>
+                  <div style={{ fontWeight: 700, fontSize: 11 }}>আমাদের মতামত দিন</div>
+                  <div style={{ color: "#666", fontSize: 9 }}>আপনার মতামত আমাদের আরো ভালো করতে সাহায্য করে</div>
                 </div>
-                <div className="rounded border border-emerald-200 bg-emerald-50/30 p-3">
-                  <div className="text-base font-bold">আমাদের সাথে থাকুন</div>
-                  <div className="text-xs text-gray-600">
-                    আমাদের গ্রুপে যোগ দিন, পান এক্সক্লুসিভ অফার!
-                  </div>
+                <div style={{ border: "1px solid #a7f3d0", background: "rgba(236,253,245,.3)", borderRadius: 4, padding: "6px 8px" }}>
+                  <div style={{ fontWeight: 700, fontSize: 11 }}>আমাদের সাথে থাকুন</div>
+                  <div style={{ color: "#666", fontSize: 9 }}>আমাদের গ্রুপে যোগ দিন, পান এক্সক্লুসিভ অফার!</div>
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="mt-5 flex items-start justify-between text-xs">
-                <div className="font-bold">THANK YOU FOR CHOOSING US</div>
-                <div className="text-right">
+              <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "flex-start", fontSize: 9 }}>
+                <div style={{ fontWeight: 700 }}>THANK YOU FOR CHOOSING US</div>
+                <div style={{ textAlign: "right" }}>
                   <div>
                     VISIT:{" "}
-                    <span className="font-semibold">
+                    <span style={{ fontWeight: 600 }}>
                       https://{(settings?.site_title ?? "hobbyshop").toLowerCase()}bd.shop/
                     </span>
                   </div>
                   <div>
-                    SUPPORT: <span className="font-semibold">{settings?.contact_phone ?? "09638779900"}</span>
+                    SUPPORT: <span style={{ fontWeight: 600 }}>{settings?.contact_phone ?? "09638779900"}</span>
                   </div>
                 </div>
               </div>
 
-              <ol className="mt-3 list-decimal pl-5 text-[11px] leading-snug text-gray-700">
-                <li>
-                  If any defect is found (damaged/defective/wrong product) after opening the box,
-                  inform us immediately with picture/video proof.
-                </li>
+              <ol style={{ marginTop: 6, paddingLeft: 14, fontSize: 8.5, lineHeight: 1.35, color: "#444" }}>
+                <li>If any defect is found (damaged/defective/wrong product) after opening the box, inform us immediately with picture/video proof.</li>
                 <li>Return process must be initiated within 3 days of receiving the parcel.</li>
                 <li>Product must be in original condition with all tags and packaging.</li>
                 <li>Exchange delivery cost may be applicable.</li>
                 <li>Promotional offers are not applicable for returned products.</li>
               </ol>
 
-              <div className="mt-4 text-center text-[10px] italic text-gray-500">
-                This document &amp; any information transmitted with it are confidential &amp;
-                intended solely for the use of the individual or entity to whom they are addressed.
+              <div style={{ marginTop: 8, textAlign: "center", fontStyle: "italic", fontSize: 8, color: "#777" }}>
+                This document &amp; any information transmitted with it are confidential &amp; intended solely for the use of the individual or entity to whom they are addressed.
               </div>
-              <div className="text-center text-[10px] text-gray-500">
-                © {new Date().getFullYear()} {settings?.site_title ?? "HobbyShop"}. All Rights
-                Reserved
+              <div style={{ textAlign: "center", fontSize: 8, color: "#777" }}>
+                © {new Date().getFullYear()} {settings?.site_title ?? "HobbyShop"}. All Rights Reserved
               </div>
             </div>
           )}
@@ -545,11 +532,27 @@ export function InvoicePreviewDialog({
   );
 }
 
+function th(width?: number): React.CSSProperties {
+  return {
+    textAlign: "left",
+    fontSize: 9,
+    textTransform: "uppercase",
+    letterSpacing: ".05em",
+    padding: "5px 4px",
+    fontWeight: 600,
+    width: width ? width : undefined,
+  };
+}
+function td(): React.CSSProperties {
+  return { padding: "6px 4px", verticalAlign: "middle" };
+}
+
 function Row({ k, v }: { k: string; v: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-[140px_1fr] items-baseline gap-2">
-      <div className="text-gray-600">{k}</div>
+    <div style={{ display: "grid", gridTemplateColumns: "85px 1fr", alignItems: "baseline", columnGap: 6 }}>
+      <div style={{ color: "#555" }}>{k}</div>
       <div>{v}</div>
     </div>
   );
 }
+
