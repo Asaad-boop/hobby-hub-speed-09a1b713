@@ -336,15 +336,23 @@ export const testCourierConnection = createServerFn({ method: "POST" })
     z.object({
       phone: z.string().min(6).max(20).optional(),
       override_api_key: z.string().min(8).max(512).optional(),
-      override_base_url: z.string().url().optional(),
+      override_base_url: z
+        .string()
+        .url()
+        .refine(isAllowedUrl, { message: "URL host not allowed" })
+        .optional(),
     }).parse,
   )
-  .handler(async ({ data }): Promise<CourierConnectionTest> => {
+  .handler(async ({ data, context }): Promise<CourierConnectionTest> => {
+    await assertStaff((context as { userId: string }).userId);
     const cfg = await loadIntegration();
     const apiKey = (data.override_api_key?.trim() || cfg.apiKey || "").trim();
     const baseUrl = data.override_base_url?.trim() || cfg.baseUrl;
 
     if (!apiKey) return { ok: false, source: cfg.source, error: "No API key configured" };
+    if (!isAllowedUrl(baseUrl)) {
+      return { ok: false, source: cfg.source, error: "Base URL host not allowed" };
+    }
 
     const phone = normalizePhone(data.phone || "01700000000") || "01700000000";
     const res = await callBdCourier(phone, apiKey, baseUrl);
