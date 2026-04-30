@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Printer, Loader2, X } from "lucide-react";
+import JsBarcode from "jsbarcode";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/lib/site-settings";
 import { Button } from "@/components/ui/button";
+import logoImg from "@/assets/logo.webp";
 
 type Order = {
   id: string;
@@ -114,31 +116,26 @@ function numberToWords(n: number): string {
   return parts.join(", ");
 }
 
-// Simple Code128-ish barcode using CSS bars derived from the invoice id.
-// (Visual barcode — sufficient for printed invoice; not scannable spec.)
+// Real scannable Code128 barcode rendered as inline SVG (preserved through innerHTML clone).
 function BarcodeStrip({ value }: { value: string }) {
-  const bars = useMemo(() => {
-    const out: { w: number; black: boolean }[] = [];
-    let seed = 0;
-    for (let i = 0; i < value.length; i++) seed = (seed * 31 + value.charCodeAt(i)) >>> 0;
-    let x = seed;
-    for (let i = 0; i < 70; i++) {
-      x = (x * 1103515245 + 12345) >>> 0;
-      const w = 1 + (x % 4); // 1..4
-      out.push({ w, black: i % 2 === 0 });
+  const svgRef = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    if (!svgRef.current) return;
+    try {
+      JsBarcode(svgRef.current, value, {
+        format: "CODE128",
+        width: 1.4,
+        height: 44,
+        displayValue: false,
+        margin: 0,
+        background: "#ffffff",
+        lineColor: "#000000",
+      });
+    } catch {
+      // ignore invalid input
     }
-    return out;
   }, [value]);
-  return (
-    <div className="flex h-14 items-stretch gap-px">
-      {bars.map((b, i) => (
-        <div
-          key={i}
-          style={{ width: `${b.w * 2}px`, background: b.black ? "#000" : "transparent" }}
-        />
-      ))}
-    </div>
-  );
+  return <svg ref={svgRef} style={{ width: "100%", height: 44, display: "block" }} />;
 }
 
 export function InvoicePreviewDialog({
