@@ -35,6 +35,7 @@ import {
 
 const PRODUCT_SLUGS = {
   car: "car-origami-paper-kit-for-kids",
+  plane: "air-plane-origami-paper-kit-for-kids",
 } as const;
 const SHIPPING_INSIDE = 70;
 const SHIPPING_OUTSIDE = 130;
@@ -42,22 +43,25 @@ const SHIPPING_OUTSIDE = 130;
 export const Route = createFileRoute("/lp/origami-combo")({
   head: () => ({
     meta: [
-      { title: "3D Car Origami Kit — Build It Yourself | HobbyShop" },
+      { title: "3D Car + Plane Origami Combo — Build It Yourself | HobbyShop" },
       {
         name: "description",
         content:
-          "Hard cardboard e ১০টি 3D Car design — step-by-step video instruction soho. Combo nile ৳১০০ bachao. COD all over Bangladesh.",
+          "Hard cardboard e 3D Car + Air Plane combo — ১০টি Car ও ১০টি Plane design, step-by-step video instruction soho. Combo nile ৳১০০ bachao. COD all over Bangladesh.",
       },
-      { property: "og:title", content: "3D Car Origami Kit — Build It Yourself" },
+      { property: "og:title", content: "3D Car + Plane Origami Combo — Build It Yourself" },
       {
         property: "og:description",
-        content: "১০টি 3D Car design — combo nile ৳১০০ bachao. Video instruction soho.",
+        content: "Car + Plane Combo: ২০টি 3D design — combo nile ৳১০০ bachao. Video instruction soho.",
       },
     ],
   }),
   loader: async () => {
-    const car = await fetchProductByIdOrSlug(PRODUCT_SLUGS.car);
-    return { car };
+    const [car, plane] = await Promise.all([
+      fetchProductByIdOrSlug(PRODUCT_SLUGS.car),
+      fetchProductByIdOrSlug(PRODUCT_SLUGS.plane),
+    ]);
+    return { car, plane };
   },
   component: LandingPage,
 });
@@ -75,10 +79,31 @@ const CAR_DESIGNS = [
   { icon: "🚑", name: "Ambulance" },
 ];
 
-const INCLUDES = [
+const PLANE_DESIGNS = [
+  { icon: "✈️", name: "Passenger Jet" },
+  { icon: "🛩️", name: "Small Plane" },
+  { icon: "🛫", name: "Take-off Jet" },
+  { icon: "🛬", name: "Landing Jet" },
+  { icon: "🚁", name: "Helicopter" },
+  { icon: "🛸", name: "UFO Style" },
+  { icon: "🪂", name: "Glider" },
+  { icon: "🚀", name: "Rocket Plane" },
+  { icon: "🛰️", name: "Space Shuttle" },
+  { icon: "🦅", name: "Fighter Jet" },
+];
+
+const SINGLE_INCLUDES = [
   { text: "Hard Cardboard — ১০ Car design (১টি করে)", qty: "১০ শিট" },
   { text: "Step-by-step Video Instruction (QR code soho)", qty: "১০টি" },
   { text: "প্রতিটি ডিজাইনের আলাদা ডিজাইন কার্ড", qty: "১০টি" },
+  { text: "Premium gift box packaging", qty: "১টি" },
+];
+
+const COMBO_INCLUDES = [
+  { text: "Hard Cardboard — ১০ Car design (১টি করে)", qty: "১০ শিট" },
+  { text: "Hard Cardboard — ১০ Plane design (১টি করে)", qty: "১০ শিট" },
+  { text: "Step-by-step Video Instruction (QR code soho)", qty: "২০টি" },
+  { text: "প্রতিটি ডিজাইনের আলাদা ডিজাইন কার্ড", qty: "২০টি" },
   { text: "Premium gift box packaging", qty: "১টি" },
 ];
 
@@ -143,16 +168,16 @@ const FAQS = [
     a: "5 bochor theke 14 bochor — sob ages-e perfect. Choto bachcha-der jonno parents help korte hobe pratham.",
   },
   {
-    q: "Kit-e ki ki thakbe?",
-    a: "Car Kit (১০ design, ১০ shit hard cardboard) + step-by-step video instruction (QR code scan kore dekhben) + 10ti design card + premium gift box. Combo nile 2 ti kit pawa jabe.",
+    q: "Combo te ki ki thakbe?",
+    a: "Combo nile 1ti Car Kit (১০ design) + 1ti Plane Kit (১০ design) — total 20ti unique 3D design pawa jabe. Sathe protyek design er video instruction (QR code), design card, ar premium gift box thakbe.",
   },
   {
     q: "Manual nai? Kivabe banabo?",
     a: "Protyek design er alada video instruction ache — QR code scan korle phone e direct video chole asbe. Bangla voice over soho, bachcha rao sohoje bujhte parbe.",
   },
   {
-    q: "Combo nile ki paowa jabe?",
-    a: "Combo nile 2 ti Car Kit pawa jabe (mot 20 ti design) — ৳100 discount soho. Ekta nije, arekta gift kora jay!",
+    q: "Single nile ki paowa jabe?",
+    a: "Single Car Kit nile shudhu Car-er ১০ design pawa jabe ৳695 e. Combo nile Car + Plane (mot 20 design) ৳1290 — ৳100 discount soho.",
   },
   {
     q: "Delivery koto din-e pabo?",
@@ -165,7 +190,7 @@ const FAQS = [
 ];
 
 function LandingPage() {
-  const { car } = Route.useLoaderData() as { car: Product | null };
+  const { car, plane } = Route.useLoaderData() as { car: Product | null; plane: Product | null };
   const navigate = useNavigate();
 
   const [variant, setVariant] = useState<"single" | "combo">("combo");
@@ -184,20 +209,18 @@ function LandingPage() {
 
   const unitPrice = variant === "combo" ? COMBO_PRICE : SINGLE_PRICE;
   const oldPrice = variant === "combo" ? COMBO_OLD : SINGLE_OLD;
-  // Combo = 2x Car Kit
-  const productQty = variant === "combo" ? qty * 2 : qty;
 
   useEffect(() => {
     if (!activeProduct) return;
     fbTrack("ViewContent", {
-      content_ids: [activeProduct.id],
-      content_name: activeProduct.title,
+      content_ids: variant === "combo" && plane ? [activeProduct.id, plane.id] : [activeProduct.id],
+      content_name: variant === "combo" ? "Car + Plane Origami Combo" : activeProduct.title,
       value: unitPrice,
       currency: META_CURRENCY,
     });
-    clarityTag("lp_campaign", "origami-car");
+    clarityTag("lp_campaign", "origami-car-plane");
     clarityTag("lp_variant_selected", variant);
-  }, [activeProduct, unitPrice, variant]);
+  }, [activeProduct, plane, unitPrice, variant]);
 
   const subtotal = unitPrice * qty;
   const shippingFee = shipMethod === "inside" ? SHIPPING_INSIDE : SHIPPING_OUTSIDE;
@@ -211,6 +234,10 @@ function LandingPage() {
     e.preventDefault();
     if (!activeProduct) {
       toast.error("Product information missing — page reload korun.");
+      return;
+    }
+    if (variant === "combo" && !plane) {
+      toast.error("Plane kit ekhono load hoyni — page reload korun.");
       return;
     }
 
@@ -242,7 +269,7 @@ function LandingPage() {
       const attribution = getOrderAttributionPayload();
       const variantLabel =
         variant === "combo"
-          ? "Car Combo (2x Car Kit)"
+          ? "Car + Plane Combo (1x Car Kit + 1x Plane Kit)"
           : "Single Car Kit (10 designs)";
 
       const baseOrder = {
@@ -286,20 +313,50 @@ function LandingPage() {
         return;
       }
 
-      // For combo: insert as a single line at combo price (qty = user qty), but log productQty in label.
-      const { error: itemsErr } = await supabase.from("order_items").insert([
-        {
-          order_id: order.id,
-          user_id: isGuest ? null : session!.user.id,
-          product_id: activeProduct.id,
-          name: `${activeProduct.title} — ${variantLabel}`,
-          image: activeProduct.image,
-          price: unitPrice,
-          quantity: qty,
-          variant_id: null,
-          variant_label: variantLabel,
-        },
-      ]);
+      // Combo => 2 line items (Car + Plane), each at half-combo-price so total matches.
+      // Single => 1 line item (Car) at single price.
+      const userId = isGuest ? null : session!.user.id;
+      const items =
+        variant === "combo" && plane
+          ? [
+              {
+                order_id: order.id,
+                user_id: userId,
+                product_id: activeProduct.id,
+                name: `${activeProduct.title} — Combo (Car part)`,
+                image: activeProduct.image,
+                price: Math.round(COMBO_PRICE / 2),
+                quantity: qty,
+                variant_id: null,
+                variant_label: variantLabel,
+              },
+              {
+                order_id: order.id,
+                user_id: userId,
+                product_id: plane.id,
+                name: `${plane.title} — Combo (Plane part)`,
+                image: plane.image,
+                price: COMBO_PRICE - Math.round(COMBO_PRICE / 2),
+                quantity: qty,
+                variant_id: null,
+                variant_label: variantLabel,
+              },
+            ]
+          : [
+              {
+                order_id: order.id,
+                user_id: userId,
+                product_id: activeProduct.id,
+                name: `${activeProduct.title} — ${variantLabel}`,
+                image: activeProduct.image,
+                price: unitPrice,
+                quantity: qty,
+                variant_id: null,
+                variant_label: variantLabel,
+              },
+            ];
+
+      const { error: itemsErr } = await supabase.from("order_items").insert(items);
 
       if (itemsErr) {
         console.error("Order items insert failed:", itemsErr);
@@ -330,6 +387,7 @@ function LandingPage() {
   }
 
   const savings = COMBO_OLD - COMBO_PRICE;
+  const includes = variant === "combo" ? COMBO_INCLUDES : SINGLE_INCLUDES;
 
   return (
     <div className="bg-background text-foreground">
@@ -353,16 +411,19 @@ function LandingPage() {
             Build It Yourself.
             <br />
             <span className="bg-gradient-to-r from-primary to-[oklch(0.72_0.20_30)] bg-clip-text text-transparent">
-              3D Car Origami Kit
+              3D Car + Plane Origami Combo
             </span>
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/70">
-            হার্ড কার্ডবোর্ডে ১০টি ইউনিক 3D Car ডিজাইন — প্রতিটি ডিজাইনের জন্য আলাদা ভিডিও ইনস্ট্রাকশন।
+            হার্ড কার্ডবোর্ডে ১০টি 3D Car + ১০টি 3D Plane ডিজাইন — প্রতিটির জন্য আলাদা ভিডিও ইনস্ট্রাকশন।
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
             <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/85 backdrop-blur">
               🚗 ১০ Car Design
+            </span>
+            <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/85 backdrop-blur">
+              ✈️ ১০ Plane Design
             </span>
             <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/85 backdrop-blur">
               🎬 Video Instruction
@@ -394,27 +455,57 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* CAR KIT CARD */}
+      {/* KIT CARDS */}
       <section className="-mt-6 px-5">
-        <div className="mx-auto max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
-          <div className="flex min-h-[160px] items-center justify-center bg-muted p-6">
-            <svg viewBox="0 0 120 90" className="h-24 w-32">
-              <rect x="20" y="35" width="80" height="30" rx="4" fill="oklch(0.585 0.245 27.5)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
-              <rect x="30" y="22" width="55" height="20" rx="4" fill="oklch(0.95 0.05 27)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
-              <circle cx="35" cy="67" r="9" fill="oklch(0.18 0 0)" stroke="oklch(0.10 0 0)" strokeWidth="1.5" />
-              <circle cx="35" cy="67" r="5" fill="oklch(0.55 0 0)" />
-              <circle cx="85" cy="67" r="9" fill="oklch(0.18 0 0)" stroke="oklch(0.10 0 0)" strokeWidth="1.5" />
-              <circle cx="85" cy="67" r="5" fill="oklch(0.55 0 0)" />
-              <rect x="35" y="26" width="18" height="12" rx="2" fill="oklch(0.85 0 0)" stroke="oklch(0.18 0 0)" strokeWidth="1" />
-              <rect x="60" y="26" width="18" height="12" rx="2" fill="oklch(0.85 0 0)" stroke="oklch(0.18 0 0)" strokeWidth="1" />
-              <rect x="20" y="50" width="12" height="8" rx="1" fill="oklch(0.96 0.07 90)" stroke="oklch(0.18 0 0)" strokeWidth="1" />
-              <rect x="88" y="50" width="12" height="8" rx="1" fill="oklch(0.96 0.07 90)" stroke="oklch(0.18 0 0)" strokeWidth="1" />
-            </svg>
+        <div className="mx-auto grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
+          {/* Car */}
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+            <div className="flex min-h-[160px] items-center justify-center bg-muted p-6">
+              <svg viewBox="0 0 120 90" className="h-24 w-32">
+                <rect x="20" y="35" width="80" height="30" rx="4" fill="oklch(0.585 0.245 27.5)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
+                <rect x="30" y="22" width="55" height="20" rx="4" fill="oklch(0.95 0.05 27)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" />
+                <circle cx="35" cy="67" r="9" fill="oklch(0.18 0 0)" stroke="oklch(0.10 0 0)" strokeWidth="1.5" />
+                <circle cx="35" cy="67" r="5" fill="oklch(0.55 0 0)" />
+                <circle cx="85" cy="67" r="9" fill="oklch(0.18 0 0)" stroke="oklch(0.10 0 0)" strokeWidth="1.5" />
+                <circle cx="85" cy="67" r="5" fill="oklch(0.55 0 0)" />
+                <rect x="35" y="26" width="18" height="12" rx="2" fill="oklch(0.85 0 0)" stroke="oklch(0.18 0 0)" strokeWidth="1" />
+                <rect x="60" y="26" width="18" height="12" rx="2" fill="oklch(0.85 0 0)" stroke="oklch(0.18 0 0)" strokeWidth="1" />
+              </svg>
+            </div>
+            <div className="p-5 text-center">
+              <div className="text-base font-semibold text-foreground">🚗 3D Car Origami Kit</div>
+              <div className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                হার্ড কার্ডবোর্ড · ১০টি ইউনিক ডিজাইন · 3D শেপ
+              </div>
+            </div>
           </div>
-          <div className="p-5 text-center">
-            <div className="text-base font-semibold text-foreground">🚗 3D Car Origami Kit</div>
-            <div className="mt-1 text-sm leading-relaxed text-muted-foreground">
-              হার্ড কার্ডবোর্ড · ১০টি ইউনিক ডিজাইন · 3D শেপ
+
+          {/* Plane */}
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+            <div className="flex min-h-[160px] items-center justify-center bg-muted p-6">
+              <svg viewBox="0 0 120 90" className="h-24 w-32">
+                {/* Body */}
+                <path d="M15 50 L95 45 L100 50 L95 55 Z" fill="oklch(0.95 0.05 27)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" strokeLinejoin="round" />
+                {/* Wings */}
+                <path d="M45 50 L60 25 L70 25 L65 50 Z" fill="oklch(0.585 0.245 27.5)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" strokeLinejoin="round" />
+                <path d="M45 50 L60 75 L70 75 L65 50 Z" fill="oklch(0.585 0.245 27.5)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" strokeLinejoin="round" />
+                {/* Tail */}
+                <path d="M82 50 L92 35 L96 35 L90 50 Z" fill="oklch(0.585 0.245 27.5)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" strokeLinejoin="round" />
+                <path d="M82 50 L92 65 L96 65 L90 50 Z" fill="oklch(0.585 0.245 27.5)" stroke="oklch(0.18 0 0)" strokeWidth="1.5" strokeLinejoin="round" />
+                {/* Windows */}
+                <circle cx="40" cy="48" r="2" fill="oklch(0.18 0 0)" />
+                <circle cx="50" cy="48" r="2" fill="oklch(0.18 0 0)" />
+                <circle cx="60" cy="48" r="2" fill="oklch(0.18 0 0)" />
+                <circle cx="70" cy="48" r="2" fill="oklch(0.18 0 0)" />
+                {/* Nose */}
+                <circle cx="20" cy="50" r="3" fill="oklch(0.18 0 0)" />
+              </svg>
+            </div>
+            <div className="p-5 text-center">
+              <div className="text-base font-semibold text-foreground">✈️ 3D Plane Origami Kit</div>
+              <div className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                হার্ড কার্ডবোর্ড · ১০টি ইউনিক ডিজাইন · 3D শেপ
+              </div>
             </div>
           </div>
         </div>
@@ -423,13 +514,24 @@ function LandingPage() {
       {/* SPECIFICATIONS */}
       <section className="px-5 py-10">
         <SectionHeading kicker="Specifications" title="কিটের স্পেসিফিকেশন" />
-        <div className="mx-auto max-w-md">
-          <KitTag>🚗 Car Kit</KitTag>
-          <div className="grid grid-cols-2 gap-2.5">
-            <SpecCard label="মোট শিট" value="১০টি" sub="প্রতি ডিজাইন ১টি" />
-            <SpecCard label="ডিজাইন" value="১০টি" sub="ইউনিক" />
-            <SpecCard label="মেটেরিয়াল" value="Cardboard" sub="প্রিমিয়াম" />
-            <SpecCard label="শেপ" value="3D" sub="QR Video" />
+        <div className="mx-auto grid max-w-2xl gap-5 sm:grid-cols-2">
+          <div>
+            <KitTag>🚗 Car Kit</KitTag>
+            <div className="grid grid-cols-2 gap-2.5">
+              <SpecCard label="মোট শিট" value="১০টি" sub="প্রতি ডিজাইন ১টি" />
+              <SpecCard label="ডিজাইন" value="১০টি" sub="ইউনিক" />
+              <SpecCard label="মেটেরিয়াল" value="Cardboard" sub="প্রিমিয়াম" />
+              <SpecCard label="শেপ" value="3D" sub="QR Video" />
+            </div>
+          </div>
+          <div>
+            <KitTag>✈️ Plane Kit</KitTag>
+            <div className="grid grid-cols-2 gap-2.5">
+              <SpecCard label="মোট শিট" value="১০টি" sub="প্রতি ডিজাইন ১টি" />
+              <SpecCard label="ডিজাইন" value="১০টি" sub="ইউনিক" />
+              <SpecCard label="মেটেরিয়াল" value="Cardboard" sub="প্রিমিয়াম" />
+              <SpecCard label="শেপ" value="3D" sub="QR Video" />
+            </div>
           </div>
         </div>
       </section>
@@ -437,25 +539,38 @@ function LandingPage() {
       {/* DESIGNS */}
       <section id="designs" className="bg-muted/40 px-5 py-10">
         <SectionHeading kicker="Designs" title="কোন কোন ডিজাইন থাকছে?" />
-        <div className="mx-auto max-w-2xl">
-          <KitTag>🚗 Car — ১০টি ডিজাইন</KitTag>
-          <div className="grid grid-cols-5 gap-2">
-            {CAR_DESIGNS.map((d) => (
-              <DesignPill key={d.name} icon={d.icon} name={d.name} />
-            ))}
+        <div className="mx-auto max-w-2xl space-y-6">
+          <div>
+            <KitTag>🚗 Car — ১০টি ডিজাইন</KitTag>
+            <div className="grid grid-cols-5 gap-2">
+              {CAR_DESIGNS.map((d) => (
+                <DesignPill key={d.name} icon={d.icon} name={d.name} />
+              ))}
+            </div>
+          </div>
+          <div>
+            <KitTag>✈️ Plane — ১০টি ডিজাইন</KitTag>
+            <div className="grid grid-cols-5 gap-2">
+              {PLANE_DESIGNS.map((d) => (
+                <DesignPill key={d.name} icon={d.icon} name={d.name} />
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* INCLUDES */}
       <section className="px-5 py-10">
-        <SectionHeading kicker="What's inside" title="কিটে কী কী থাকছে?" />
+        <SectionHeading
+          kicker="What's inside"
+          title={variant === "combo" ? "কম্বোতে কী কী থাকছে?" : "কিটে কী কী থাকছে?"}
+        />
         <div className="mx-auto max-w-md rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
-          {INCLUDES.map((item, i) => (
+          {includes.map((item, i) => (
             <div
               key={i}
               className={`flex items-center gap-3 py-3 text-sm text-foreground ${
-                i < INCLUDES.length - 1 ? "border-b border-border" : ""
+                i < includes.length - 1 ? "border-b border-border" : ""
               }`}
             >
               <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-primary" />
@@ -594,7 +709,7 @@ function LandingPage() {
             </div>
           </button>
 
-          {/* Combo = 2x Car Kit */}
+          {/* Combo = Car + Plane */}
           <button
             type="button"
             onClick={() => {
@@ -609,14 +724,14 @@ function LandingPage() {
             <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary px-3 py-0.5 text-[11px] font-bold uppercase tracking-wider text-primary-foreground">
               Best Value
             </span>
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-white/60">Car Combo (2 Kit)</div>
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-white/60">Car + Plane Combo</div>
             <div className="mt-2 text-xs text-white/50 line-through">৳ ১৩৯০</div>
             <div className="mt-1 text-3xl font-extrabold text-white">৳ ১২৯০</div>
             <div className="mt-1.5 inline-block rounded-full bg-primary/20 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
               ৳ {savings} বাঁচছেন!
             </div>
             <p className="mb-3 mt-2 text-xs leading-relaxed text-white/70">
-              ২টি Car Kit
+              ১টি Car + ১টি Plane Kit
               <br />
               মোট ২০টি ডিজাইন
               <br />
@@ -648,7 +763,7 @@ function LandingPage() {
         className="mx-5 my-6 overflow-hidden rounded-2xl px-6 py-10 text-center text-white shadow-[var(--shadow-brand)]"
         style={{ background: "var(--gradient-brand)" }}
       >
-        <h2 className="text-lg font-bold">২টি Car Kit একসাথে নিন — ৳ {savings} বাঁচান!</h2>
+        <h2 className="text-lg font-bold">Car + Plane একসাথে নিন — ৳ {savings} বাঁচান!</h2>
         <p className="mt-2 text-xs text-white/85">
           স্টক সীমিত। কম্বো অফার যেকোনো সময় শেষ হতে পারে।
         </p>
@@ -675,7 +790,7 @@ function LandingPage() {
             <div className="flex items-center gap-3 border-b border-border bg-muted/50 p-4">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-foreground">
-                  {variant === "combo" ? "Car Combo (2 Kit)" : "Single — Car Kit"}
+                  {variant === "combo" ? "Car + Plane Combo" : "Single — Car Kit"}
                 </p>
                 <p className="mt-0.5 text-base font-extrabold text-primary">
                   ৳ {unitPrice.toLocaleString()}
@@ -712,7 +827,7 @@ function LandingPage() {
                   className="grid grid-cols-2 gap-2.5"
                 >
                   <VariantOption id="v-single" value="single" current={variant} title="Single — ৳৬৯৫" sub="১টি Car Kit" />
-                  <VariantOption id="v-combo" value="combo" current={variant} title="Combo — ৳১২৯০" sub={`২টি Kit + ৳${savings} off`} />
+                  <VariantOption id="v-combo" value="combo" current={variant} title="Combo — ৳১২৯০" sub={`Car + Plane · ৳${savings} off`} />
                 </RadioGroup>
               </div>
 
@@ -790,7 +905,7 @@ function LandingPage() {
                 </div>
                 {variant === "combo" && (
                   <div className="mt-1 text-[11px] text-muted-foreground">
-                    Combo includes {productQty} Car Kit{productQty > 1 ? "s" : ""}
+                    Combo includes {qty} × Car Kit + {qty} × Plane Kit
                   </div>
                 )}
                 <div className="mt-1.5 flex justify-between text-sm">
@@ -884,7 +999,7 @@ function LandingPage() {
         <div className="flex items-center gap-3">
           <div className="flex-1 min-w-0">
             <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              {variant === "combo" ? "Car Combo (2 Kit)" : "Single Car Kit"}
+              {variant === "combo" ? "Car + Plane Combo" : "Single Car Kit"}
             </p>
             <div className="flex items-baseline gap-1.5">
               <p className="text-lg font-extrabold leading-none text-primary">
