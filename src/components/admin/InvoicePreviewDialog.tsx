@@ -372,7 +372,7 @@ export function InvoicePreviewDialog({
                     <Row k="Payment:" v={<b>{paymentLabel}</b>} />
                     <Row
                       k="Payable:"
-                      v={<span style={{ fontSize: 13, fontWeight: 800 }}>BDT {total.toFixed(1)}</span>}
+                      v={<span style={{ fontSize: 13, fontWeight: 800 }}>BDT {fmtMoney(total)}</span>}
                     />
                     <Row k="Delivery Partner:" v={<span>{order.courier_name || "—"}</span>} />
                     <Row k="Tracking ID:" v={<span>{order.tracking_number || "—"}</span>} />
@@ -412,11 +412,11 @@ export function InvoicePreviewDialog({
                           <td style={{ ...td(), textAlign: "center", color: "#777" }}>{it.variant_label ?? ""}</td>
                           <td style={{ ...td(), textAlign: "center", color: "#777" }}></td>
                           <td style={{ ...td(), textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
-                            {Number(it.price).toFixed(1)}
+                            {fmtMoney(Number(it.price))}
                           </td>
                           <td style={{ ...td(), textAlign: "center" }}>{it.quantity}</td>
                           <td style={{ ...td(), textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
-                            {lineTotal.toFixed(1)}
+                            {fmtMoney(lineTotal)}
                           </td>
                         </tr>
                       );
@@ -435,23 +435,23 @@ export function InvoicePreviewDialog({
                 <div style={{ fontSize: 10 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", padding: "1px 0" }}>
                     <span>Sub Total:</span>
-                    <span style={{ fontVariantNumeric: "tabular-nums" }}>BDT {subtotal.toFixed(1)}</span>
+                    <span style={{ fontVariantNumeric: "tabular-nums" }}>BDT {subfmtMoney(total)}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", padding: "1px 0" }}>
                     <span>Shipping Fee(+):</span>
-                    <span style={{ fontVariantNumeric: "tabular-nums" }}>BDT {shipping.toFixed(1)}</span>
+                    <span style={{ fontVariantNumeric: "tabular-nums" }}>BDT {fmtMoney(shipping)}</span>
                   </div>
                   {discount > 0 && (
                     <div style={{ display: "flex", justifyContent: "space-between", padding: "1px 0" }}>
                       <span>Discount(-):</span>
-                      <span style={{ fontVariantNumeric: "tabular-nums" }}>BDT {discount.toFixed(1)}</span>
+                      <span style={{ fontVariantNumeric: "tabular-nums" }}>BDT {fmtMoney(discount)}</span>
                     </div>
                   )}
                   <div style={{ borderTop: "1px solid #d1d5db", marginTop: 4, paddingTop: 4 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: 14, fontWeight: 800 }}>Total:</span>
                       <span style={{ fontSize: 14, fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>
-                        BDT {total.toFixed(1)}
+                        BDT {fmtMoney(total)}
                       </span>
                     </div>
                     <div style={{ fontSize: 9, color: "#555", marginTop: 2 }}>
