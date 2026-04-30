@@ -900,13 +900,21 @@ const PAYMENT_METHOD_OPTIONS = [
 ];
 
 type EditableItem = {
-  id?: string;
+  id?: string; // existing row id; absent for newly added items
+  _isNew?: boolean;
   name: string;
   image: string | null;
   product_id: string;
   variant_label?: string | null;
   quantity: number;
   unit_price: number;
+};
+
+type ProductPick = {
+  id: string;
+  title: string;
+  price: number;
+  image: string | null;
 };
 
 type EditableForm = {
