@@ -19,6 +19,30 @@ const DEFAULT_BASE_URL = "https://bdcourier.com/api/courier/check";
 const DEFAULT_CACHE_HOURS = 168; // 7 days
 const FETCH_TIMEOUT_MS = 20_000;
 
+// SSRF guard — only allow calls to known BD Courier hosts.
+const ALLOWED_HOSTS = new Set<string>(["bdcourier.com", "www.bdcourier.com", "app.bdcourier.com"]);
+
+function isAllowedUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "https:") return false;
+    return ALLOWED_HOSTS.has(u.hostname.toLowerCase());
+  } catch {
+    return false;
+  }
+}
+
+async function assertStaff(userId: string): Promise<void> {
+  const { data, error } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId);
+  if (error) throw new Error("Authorization check failed");
+  const roles = (data ?? []).map((r) => r.role as string);
+  const ok = roles.some((r) => r === "admin" || r === "operations" || r === "customer_service");
+  if (!ok) throw new Error("Forbidden: staff role required");
+}
+
 type IntegrationConfig = {
   api_key?: string;
   base_url?: string;
