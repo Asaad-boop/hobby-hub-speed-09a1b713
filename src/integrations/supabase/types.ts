@@ -1762,6 +1762,10 @@ export type Database = {
         Args: { _entry: Json; _log_field: string; _order_id: string }
         Returns: undefined
       }
+      finalize_order_on_confirm: {
+        Args: { _order_id: string }
+        Returns: undefined
+      }
       get_customer_stats: { Args: { p_user_id: string }; Returns: Json }
       hard_delete_order: { Args: { _order_id: string }; Returns: undefined }
       has_permission: {
