@@ -248,8 +248,30 @@ function matchesTab(o: OrderRow, tab: TabKey): boolean {
   }
 }
 
+type AbandonedCart = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  customer_name: string | null;
+  customer_phone: string | null;
+  shipping_address: string | null;
+  shipping_city: string | null;
+  shipping_district: string | null;
+  subtotal: number;
+  cart_items: Array<{
+    product_id?: string;
+    name: string;
+    image?: string | null;
+    price?: number;
+    qty?: number;
+    quantity?: number;
+  }>;
+  is_converted: boolean;
+};
+
 function WebOrdersPage() {
   const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [abandoned, setAbandoned] = useState<AbandonedCart[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
@@ -299,26 +321,39 @@ function WebOrdersPage() {
 
   async function loadOrders() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("orders")
-      .select(
-        `id, created_at, updated_at, auto_call_enabled, call_status, call_attempt_count,
-         shipping_name, shipping_phone, shipping_address, shipping_city, shipping_district,
-         shipping_thana, alternate_phone, guest_name, guest_phone, guest_email, is_guest_order,
-         latest_note, admin_notes, customer_note, internal_note, tags, order_tags,
-         source_website, source, total, subtotal, shipping_fee, discount_amount, advance_amount,
-         coupon_code, payment_method, delivery_method, courier_name, tracking_number,
-         status, confirmation_status, web_status,
-         order_items ( id, name, image, quantity, product_id, price, unit_price, variant_label, line_total )`,
-      )
-      .order("created_at", { ascending: false })
-      .limit(200);
+    const [ordersRes, abandonedRes] = await Promise.all([
+      supabase
+        .from("orders")
+        .select(
+          `id, created_at, updated_at, auto_call_enabled, call_status, call_attempt_count,
+           shipping_name, shipping_phone, shipping_address, shipping_city, shipping_district,
+           shipping_thana, alternate_phone, guest_name, guest_phone, guest_email, is_guest_order,
+           latest_note, admin_notes, customer_note, internal_note, tags, order_tags,
+           source_website, source, total, subtotal, shipping_fee, discount_amount, advance_amount,
+           coupon_code, payment_method, delivery_method, courier_name, tracking_number,
+           status, confirmation_status, web_status,
+           order_items ( id, name, image, quantity, product_id, price, unit_price, variant_label, line_total )`,
+        )
+        .order("created_at", { ascending: false })
+        .limit(200),
+      supabase
+        .from("abandoned_carts")
+        .select(
+          "id, created_at, updated_at, customer_name, customer_phone, shipping_address, shipping_city, shipping_district, subtotal, cart_items, is_converted",
+        )
+        .eq("is_converted", false)
+        .order("updated_at", { ascending: false })
+        .limit(200),
+    ]);
 
-    if (error) {
-      toast.error("Failed to load orders: " + error.message);
+    if (ordersRes.error) {
+      toast.error("Failed to load orders: " + ordersRes.error.message);
       setOrders([]);
     } else {
-      setOrders((data ?? []) as unknown as OrderRow[]);
+      setOrders((ordersRes.data ?? []) as unknown as OrderRow[]);
+    }
+    if (!abandonedRes.error) {
+      setAbandoned((abandonedRes.data ?? []) as unknown as AbandonedCart[]);
     }
     setLoading(false);
   }
