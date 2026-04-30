@@ -189,15 +189,8 @@ function OrderListPage() {
     await changeStatus(id, "ready_to_ship");
   }
 
-  async function printInvoice(id: string) {
-    try {
-      setBusyId(id);
-      await generateInvoicePDF(id);
-    } catch (e) {
-      toast.error("Invoice failed: " + (e as Error).message);
-    } finally {
-      setBusyId(null);
-    }
+  function openInvoice(id: string) {
+    setInvoiceOrderId(id);
   }
 
   async function printPicking(ids: string[]) {
