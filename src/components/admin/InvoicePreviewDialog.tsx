@@ -435,7 +435,7 @@ export function InvoicePreviewDialog({
                 <div style={{ fontSize: 10 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", padding: "1px 0" }}>
                     <span>Sub Total:</span>
-                    <span style={{ fontVariantNumeric: "tabular-nums" }}>BDT {subfmtMoney(total)}</span>
+                    <span style={{ fontVariantNumeric: "tabular-nums" }}>BDT {fmtMoney(subtotal)}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", padding: "1px 0" }}>
                     <span>Shipping Fee(+):</span>
