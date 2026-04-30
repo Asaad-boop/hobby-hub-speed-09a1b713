@@ -1206,11 +1206,17 @@ function OrderDetailModal({
               <Hash className="h-4 w-4 text-muted-foreground" />
               <span className="font-mono text-sm tracking-tight">{order.id.slice(0, 8).toUpperCase()}</span>
               <StatusPill label={form.status.replace(/_/g, " ")} tone={statusTone(form.status)} />
-              {form.confirmation_status && form.confirmation_status !== "pending" && (
-                <StatusPill
-                  label={form.confirmation_status}
-                  tone={form.confirmation_status === "confirmed" ? "green" : "rose"}
-                />
+              {form.status !== "confirmed" && form.status !== "delivered" && form.status !== "cancelled" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    update("status", "confirmed");
+                    update("confirmation_status", "confirmed");
+                  }}
+                  className="ml-1 inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-semibold text-white shadow-sm hover:bg-emerald-700"
+                >
+                  ✓ Confirm Order
+                </button>
               )}
             </DialogTitle>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -1521,16 +1527,6 @@ function OrderDetailModal({
                     </SelectContent>
                   </Select>
                 </Field>
-                <Field label="Confirmation">
-                  <Select value={form.confirmation_status} onValueChange={(v) => update("confirmation_status", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {CONFIRMATION_STATUS_OPTIONS.map((s) => (
-                        <SelectItem key={s} value={s}>{s}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
                 <Field label="Call status">
                   <Select value={form.call_status} onValueChange={(v) => update("call_status", v)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
@@ -1538,18 +1534,6 @@ function OrderDetailModal({
                       {CALL_STATUS_OPTIONS.map((s) => (
                         <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
                       ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
-                <Field label="Auto-call">
-                  <Select
-                    value={form.auto_call_enabled ? "on" : "off"}
-                    onValueChange={(v) => update("auto_call_enabled", v === "on")}
-                  >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="on">On</SelectItem>
-                      <SelectItem value="off">Off</SelectItem>
                     </SelectContent>
                   </Select>
                 </Field>
