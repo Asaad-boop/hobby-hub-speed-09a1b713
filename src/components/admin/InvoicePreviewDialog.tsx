@@ -201,8 +201,23 @@ export function InvoicePreviewDialog({
     };
   }, [open, orderId]);
 
-  function handlePrint() {
+  async function handlePrint() {
     if (!printRef.current) return;
+    // Preload all images inside the invoice so print captures them
+    const imgs = Array.from(printRef.current.querySelectorAll("img"));
+    await Promise.all(
+      imgs.map(
+        (img) =>
+          new Promise<void>((resolve) => {
+            if ((img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0) {
+              resolve();
+            } else {
+              img.addEventListener("load", () => resolve(), { once: true });
+              img.addEventListener("error", () => resolve(), { once: true });
+            }
+          }),
+      ),
+    );
     const printContents = printRef.current.innerHTML;
     const html = `<!doctype html>
 <html><head><meta charset="utf-8"/>
