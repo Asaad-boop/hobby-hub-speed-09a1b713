@@ -840,165 +840,545 @@ function Section({ icon, title, children }: { icon: React.ReactNode; title: stri
   );
 }
 
-function Row({ label, value }: { label: string; value: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex justify-between gap-3 py-1 text-sm">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium text-foreground">{value ?? "—"}</span>
+    <div className="space-y-1">
+      <Label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
+      </Label>
+      {children}
     </div>
   );
 }
 
-function OrderDetailModal({ order, onClose }: { order: OrderRow | null; onClose: () => void }) {
-  if (!order) return null;
-  const phone = order.shipping_phone || order.guest_phone || "";
-  const name = order.shipping_name || order.guest_name || "—";
-  const email = order.guest_email;
-  const fullAddress = [
-    order.shipping_address,
-    order.shipping_thana,
-    order.shipping_city,
-    order.shipping_district,
-  ].filter(Boolean).join(", ");
-  const tags = [...(order.tags || []), ...(order.order_tags || [])];
+const ORDER_STATUS_OPTIONS = [
+  "new",
+  "confirmed",
+  "incomplete",
+  "on_hold",
+  "advance_payment_pending",
+  "ready_to_pack",
+  "packaging",
+  "packed",
+  "ready_to_ship",
+  "courier_entry",
+  "shipped",
+  "in_transit",
+  "delivered",
+  "partial_delivered",
+  "returned",
+  "cancelled",
+  "fake",
+];
+
+const CONFIRMATION_STATUS_OPTIONS = [
+  "pending",
+  "confirmed",
+  "rejected",
+];
+
+const CALL_STATUS_OPTIONS = [
+  "not_called",
+  "called",
+  "no_answer",
+  "busy",
+];
+
+const PAYMENT_METHOD_OPTIONS = [
+  "cod",
+  "bkash",
+  "nagad",
+  "rocket",
+  "card",
+  "bank_transfer",
+];
+
+type EditableItem = {
+  id?: string;
+  name: string;
+  image: string | null;
+  product_id: string;
+  variant_label?: string | null;
+  quantity: number;
+  unit_price: number;
+};
+
+type EditableForm = {
+  shipping_name: string;
+  shipping_phone: string;
+  alternate_phone: string;
+  guest_email: string;
+  shipping_address: string;
+  shipping_thana: string;
+  shipping_city: string;
+  shipping_district: string;
+  status: string;
+  confirmation_status: string;
+  call_status: string;
+  auto_call_enabled: boolean;
+  payment_method: string;
+  delivery_method: string;
+  courier_name: string;
+  tracking_number: string;
+  shipping_fee: number;
+  discount_amount: number;
+  advance_amount: number;
+  coupon_code: string;
+  customer_note: string;
+  admin_notes: string;
+  internal_note: string;
+  tags: string;
+  items: EditableItem[];
+};
+
+function OrderDetailModal({
+  order,
+  onClose,
+  onSaved,
+}: {
+  order: OrderRow | null;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [form, setForm] = useState<EditableForm | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!order) {
+      setForm(null);
+      return;
+    }
+    setForm({
+      shipping_name: order.shipping_name ?? order.guest_name ?? "",
+      shipping_phone: order.shipping_phone ?? order.guest_phone ?? "",
+      alternate_phone: order.alternate_phone ?? "",
+      guest_email: order.guest_email ?? "",
+      shipping_address: order.shipping_address ?? "",
+      shipping_thana: order.shipping_thana ?? "",
+      shipping_city: order.shipping_city ?? "",
+      shipping_district: order.shipping_district ?? "",
+      status: order.status ?? "new",
+      confirmation_status: order.confirmation_status ?? "pending",
+      call_status: order.call_status ?? "not_called",
+      auto_call_enabled: !!order.auto_call_enabled,
+      payment_method: order.payment_method ?? "cod",
+      delivery_method: order.delivery_method ?? "",
+      courier_name: order.courier_name ?? "",
+      tracking_number: order.tracking_number ?? "",
+      shipping_fee: Number(order.shipping_fee ?? 0),
+      discount_amount: Number(order.discount_amount ?? 0),
+      advance_amount: Number(order.advance_amount ?? 0),
+      coupon_code: order.coupon_code ?? "",
+      customer_note: order.customer_note ?? "",
+      admin_notes: order.admin_notes ?? "",
+      internal_note: order.internal_note ?? "",
+      tags: [...(order.tags ?? []), ...(order.order_tags ?? [])].join(", "),
+      items: (order.order_items ?? []).map((it) => ({
+        id: it.id,
+        name: it.name,
+        image: it.image,
+        product_id: it.product_id,
+        variant_label: it.variant_label ?? null,
+        quantity: it.quantity ?? 1,
+        unit_price: Number(it.unit_price ?? it.price ?? 0),
+      })),
+    });
+  }, [order]);
+
+  if (!order || !form) return null;
+
+  const update = <K extends keyof EditableForm>(key: K, value: EditableForm[K]) =>
+    setForm((f) => (f ? { ...f, [key]: value } : f));
+
+  const updateItem = (idx: number, patch: Partial<EditableItem>) =>
+    setForm((f) => {
+      if (!f) return f;
+      const items = [...f.items];
+      items[idx] = { ...items[idx], ...patch };
+      return { ...f, items };
+    });
+
+  const removeItem = (idx: number) =>
+    setForm((f) => {
+      if (!f) return f;
+      const items = f.items.filter((_, i) => i !== idx);
+      return { ...f, items };
+    });
+
+  const itemsSubtotal = form.items.reduce(
+    (sum, it) => sum + (Number(it.unit_price) || 0) * (Number(it.quantity) || 0),
+    0,
+  );
+  const computedTotal =
+    itemsSubtotal +
+    Number(form.shipping_fee || 0) -
+    Number(form.discount_amount || 0);
+
+  async function handleSave() {
+    if (!order || !form) return;
+    setSaving(true);
+    try {
+      const tagsArr = form.tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      const orderUpdate = {
+        shipping_name: form.shipping_name || null,
+        shipping_phone: form.shipping_phone || null,
+        alternate_phone: form.alternate_phone || null,
+        guest_email: form.guest_email || null,
+        shipping_address: form.shipping_address || null,
+        shipping_thana: form.shipping_thana || null,
+        shipping_city: form.shipping_city || null,
+        shipping_district: form.shipping_district || null,
+        status: form.status,
+        confirmation_status: form.confirmation_status,
+        call_status: form.call_status,
+        auto_call_enabled: form.auto_call_enabled,
+        payment_method: form.payment_method || null,
+        delivery_method: form.delivery_method || null,
+        courier_name: form.courier_name || null,
+        tracking_number: form.tracking_number || null,
+        shipping_fee: Number(form.shipping_fee) || 0,
+        discount_amount: Number(form.discount_amount) || 0,
+        advance_amount: Number(form.advance_amount) || 0,
+        coupon_code: form.coupon_code || null,
+        customer_note: form.customer_note || null,
+        admin_notes: form.admin_notes || null,
+        internal_note: form.internal_note || null,
+        order_tags: tagsArr,
+        subtotal: itemsSubtotal,
+        total: computedTotal,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error: orderErr } = await supabase
+        .from("orders")
+        .update(orderUpdate)
+        .eq("id", order.id);
+      if (orderErr) throw new Error(orderErr.message);
+
+      // Sync items: update existing, delete removed
+      const originalIds = new Set(
+        (order.order_items ?? [])
+          .map((i) => i.id)
+          .filter((id): id is string => !!id),
+      );
+      const keepIds = new Set(
+        form.items.map((i) => i.id).filter((id): id is string => !!id),
+      );
+      const toDelete = [...originalIds].filter((id) => !keepIds.has(id));
+      if (toDelete.length > 0) {
+        const { error: delErr } = await supabase
+          .from("order_items")
+          .delete()
+          .in("id", toDelete);
+        if (delErr) throw new Error(delErr.message);
+      }
+
+      for (const it of form.items) {
+        if (!it.id) continue;
+        const qty = Number(it.quantity) || 0;
+        const price = Number(it.unit_price) || 0;
+        const { error: upErr } = await supabase
+          .from("order_items")
+          .update({
+            quantity: qty,
+            unit_price: price,
+            price,
+            line_total: qty * price,
+          })
+          .eq("id", it.id);
+        if (upErr) throw new Error(upErr.message);
+      }
+
+      toast.success("Order updated");
+      onSaved();
+    } catch (e) {
+      toast.error("Save failed: " + (e as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <Dialog open={!!order} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex flex-wrap items-center gap-2">
             <span>Order #{order.id.slice(0, 8)}</span>
-            <StatusPill label={order.status.replace(/_/g, " ")} tone={statusTone(order.status)} />
-            {order.confirmation_status && (
-              <StatusPill label={`Confirm: ${order.confirmation_status}`} tone="slate" />
-            )}
-            {order.web_status && <StatusPill label={order.web_status} tone="blue" />}
+            <StatusPill label={form.status.replace(/_/g, " ")} tone={statusTone(form.status)} />
+            <span className="ml-auto text-xs font-normal text-muted-foreground">
+              Created {fmtFullDate(order.created_at)}
+            </span>
           </DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {/* Customer */}
           <Section icon={<User className="h-4 w-4" />} title="Customer">
-            <Row label="Name" value={name} />
-            <Row label="Phone" value={phone ? (
-              <span className="flex items-center justify-end gap-2">
-                {phone}
-                <a href={`tel:${phone}`} className="text-emerald-600"><Phone className="h-3.5 w-3.5" /></a>
-                <a href={`https://wa.me/88${phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="text-green-600">
-                  <MessageCircle className="h-3.5 w-3.5" />
-                </a>
-              </span>
-            ) : "—"} />
-            {order.alternate_phone && <Row label="Alt phone" value={order.alternate_phone} />}
-            {email && <Row label="Email" value={email} />}
-            <Row label="Type" value={order.is_guest_order ? "Guest" : "Registered"} />
-          </Section>
-
-          <Section icon={<MapPin className="h-4 w-4" />} title="Shipping address">
-            <div className="text-sm">{fullAddress || "—"}</div>
-          </Section>
-
-          <Section icon={<Package className="h-4 w-4" />} title={`Items (${order.order_items?.length ?? 0})`}>
-            <div className="space-y-2">
-              {(order.order_items ?? []).map((it, i) => (
-                <div key={i} className="flex items-center gap-3 rounded-md border border-border/60 p-2">
-                  <img
-                    src={it.image || "https://picsum.photos/seed/p/64"}
-                    alt={it.name}
-                    className="h-12 w-12 rounded-md border object-cover"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="line-clamp-2 text-xs font-medium">{it.name}</div>
-                    {it.variant_label && (
-                      <div className="text-[11px] text-muted-foreground">{it.variant_label}</div>
-                    )}
-                    <div className="text-[11px] text-muted-foreground">
-                      Qty: {it.quantity} × {fmtBDT(it.unit_price ?? it.price)}
-                    </div>
-                  </div>
-                  <div className="text-sm font-semibold">
-                    {fmtBDT(it.line_total ?? (it.price ?? 0) * it.quantity)}
-                  </div>
-                </div>
-              ))}
-              {(!order.order_items || order.order_items.length === 0) && (
-                <div className="text-xs text-muted-foreground">No items</div>
-              )}
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="Name">
+                <Input value={form.shipping_name} onChange={(e) => update("shipping_name", e.target.value)} />
+              </Field>
+              <Field label="Phone">
+                <Input value={form.shipping_phone} onChange={(e) => update("shipping_phone", e.target.value)} />
+              </Field>
+              <Field label="Alt phone">
+                <Input value={form.alternate_phone} onChange={(e) => update("alternate_phone", e.target.value)} />
+              </Field>
+              <Field label="Email">
+                <Input value={form.guest_email} onChange={(e) => update("guest_email", e.target.value)} />
+              </Field>
             </div>
           </Section>
 
-          <Section icon={<CreditCard className="h-4 w-4" />} title="Payment & totals">
-            <Row label="Subtotal" value={fmtBDT(order.subtotal)} />
-            <Row label="Shipping fee" value={fmtBDT(order.shipping_fee)} />
-            {order.discount_amount ? <Row label="Discount" value={`- ${fmtBDT(order.discount_amount)}`} /> : null}
-            {order.coupon_code && <Row label="Coupon" value={order.coupon_code} />}
-            {order.advance_amount ? <Row label="Advance paid" value={fmtBDT(order.advance_amount)} /> : null}
-            <div className="my-1 border-t border-border" />
-            <Row label="Total" value={<span className="text-base font-bold">{fmtBDT(order.total)}</span>} />
-            <Row label="Payment method" value={order.payment_method ?? "COD"} />
+          {/* Address */}
+          <Section icon={<MapPin className="h-4 w-4" />} title="Shipping address">
+            <div className="grid grid-cols-1 gap-2">
+              <Field label="Address">
+                <Textarea
+                  rows={2}
+                  value={form.shipping_address}
+                  onChange={(e) => update("shipping_address", e.target.value)}
+                />
+              </Field>
+              <div className="grid grid-cols-3 gap-2">
+                <Field label="Thana">
+                  <Input value={form.shipping_thana} onChange={(e) => update("shipping_thana", e.target.value)} />
+                </Field>
+                <Field label="City">
+                  <Input value={form.shipping_city} onChange={(e) => update("shipping_city", e.target.value)} />
+                </Field>
+                <Field label="District">
+                  <Input value={form.shipping_district} onChange={(e) => update("shipping_district", e.target.value)} />
+                </Field>
+              </div>
+            </div>
           </Section>
 
-          <Section icon={<Package className="h-4 w-4" />} title="Delivery & courier">
-            <Row label="Delivery method" value={order.delivery_method} />
-            <Row label="Courier" value={order.courier_name} />
-            <Row label="Tracking #" value={order.tracking_number} />
-          </Section>
-
-          <Section icon={<Calendar className="h-4 w-4" />} title="Activity">
-            <Row label="Created" value={fmtFullDate(order.created_at)} />
-            <Row label="Updated" value={fmtFullDate(order.updated_at)} />
-            <Row label="Source" value={order.source ?? order.source_website ?? "website"} />
-            <Row label="Auto-call" value={order.auto_call_enabled ? "On" : "Off"} />
-            <Row label="Call status" value={order.call_status ?? "—"} />
-            <Row label="Call attempts" value={order.call_attempt_count ?? 0} />
-          </Section>
-
-          {(order.customer_note || order.latest_note || order.admin_notes || order.internal_note) && (
-            <Section icon={<FileText className="h-4 w-4" />} title="Notes">
-              {order.customer_note && (
-                <div className="mb-2">
-                  <div className="text-[11px] font-medium uppercase text-muted-foreground">Customer</div>
-                  <div className="text-sm">{order.customer_note}</div>
-                </div>
-              )}
-              {order.latest_note && (
-                <div className="mb-2">
-                  <div className="text-[11px] font-medium uppercase text-muted-foreground">Latest</div>
-                  <div className="text-sm">{order.latest_note}</div>
-                </div>
-              )}
-              {order.admin_notes && (
-                <div className="mb-2">
-                  <div className="text-[11px] font-medium uppercase text-muted-foreground">Admin</div>
-                  <div className="text-sm whitespace-pre-wrap">{order.admin_notes}</div>
-                </div>
-              )}
-              {order.internal_note && (
-                <div>
-                  <div className="text-[11px] font-medium uppercase text-muted-foreground">Internal</div>
-                  <div className="text-sm whitespace-pre-wrap">{order.internal_note}</div>
-                </div>
-              )}
-            </Section>
-          )}
-
-          {tags.length > 0 && (
-            <Section icon={<Tag className="h-4 w-4" />} title="Tags">
-              <div className="flex flex-wrap gap-1">
-                {tags.map((t) => (
-                  <Badge key={t} variant="secondary" className="rounded-full text-[10px]">{t}</Badge>
-                ))}
+          {/* Items */}
+          <div className="md:col-span-2">
+            <Section icon={<Package className="h-4 w-4" />} title={`Items (${form.items.length})`}>
+              <div className="space-y-2">
+                {form.items.map((it, i) => {
+                  const lineTotal = (Number(it.unit_price) || 0) * (Number(it.quantity) || 0);
+                  return (
+                    <div key={it.id ?? i} className="flex items-center gap-3 rounded-md border border-border/60 p-2">
+                      <img
+                        src={it.image || "https://picsum.photos/seed/p/64"}
+                        alt={it.name}
+                        className="h-12 w-12 rounded-md border object-cover"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="line-clamp-2 text-xs font-medium">{it.name}</div>
+                        {it.variant_label && (
+                          <div className="text-[11px] text-muted-foreground">{it.variant_label}</div>
+                        )}
+                      </div>
+                      <div className="w-20">
+                        <Label className="text-[10px] uppercase text-muted-foreground">Qty</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={it.quantity}
+                          onChange={(e) => updateItem(i, { quantity: Number(e.target.value) })}
+                        />
+                      </div>
+                      <div className="w-28">
+                        <Label className="text-[10px] uppercase text-muted-foreground">Unit ৳</Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          value={it.unit_price}
+                          onChange={(e) => updateItem(i, { unit_price: Number(e.target.value) })}
+                        />
+                      </div>
+                      <div className="w-24 text-right text-sm font-semibold">{fmtBDT(lineTotal)}</div>
+                      <button
+                        type="button"
+                        onClick={() => removeItem(i)}
+                        className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                        aria-label="Remove item"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  );
+                })}
+                {form.items.length === 0 && (
+                  <div className="text-xs text-muted-foreground">No items</div>
+                )}
               </div>
             </Section>
-          )}
+          </div>
+
+          {/* Payment & totals */}
+          <Section icon={<CreditCard className="h-4 w-4" />} title="Payment & totals">
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="Payment method">
+                <Select value={form.payment_method} onValueChange={(v) => update("payment_method", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {PAYMENT_METHOD_OPTIONS.map((p) => (
+                      <SelectItem key={p} value={p}>{p.toUpperCase()}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Coupon code">
+                <Input value={form.coupon_code} onChange={(e) => update("coupon_code", e.target.value)} />
+              </Field>
+              <Field label="Shipping fee ৳">
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.shipping_fee}
+                  onChange={(e) => update("shipping_fee", Number(e.target.value))}
+                />
+              </Field>
+              <Field label="Discount ৳">
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.discount_amount}
+                  onChange={(e) => update("discount_amount", Number(e.target.value))}
+                />
+              </Field>
+              <Field label="Advance paid ৳">
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.advance_amount}
+                  onChange={(e) => update("advance_amount", Number(e.target.value))}
+                />
+              </Field>
+            </div>
+            <div className="mt-3 space-y-1 border-t border-border pt-2 text-sm">
+              <div className="flex justify-between text-muted-foreground">
+                <span>Items subtotal</span>
+                <span>{fmtBDT(itemsSubtotal)}</span>
+              </div>
+              <div className="flex justify-between font-semibold">
+                <span>Total</span>
+                <span className="text-base">{fmtBDT(computedTotal)}</span>
+              </div>
+            </div>
+          </Section>
+
+          {/* Status & call */}
+          <Section icon={<Tag className="h-4 w-4" />} title="Status">
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="Order status">
+                <Select value={form.status} onValueChange={(v) => update("status", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {ORDER_STATUS_OPTIONS.map((s) => (
+                      <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Confirmation">
+                <Select value={form.confirmation_status} onValueChange={(v) => update("confirmation_status", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {CONFIRMATION_STATUS_OPTIONS.map((s) => (
+                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Call status">
+                <Select value={form.call_status} onValueChange={(v) => update("call_status", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {CALL_STATUS_OPTIONS.map((s) => (
+                      <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Auto-call">
+                <Select
+                  value={form.auto_call_enabled ? "on" : "off"}
+                  onValueChange={(v) => update("auto_call_enabled", v === "on")}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="on">On</SelectItem>
+                    <SelectItem value="off">Off</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+            </div>
+          </Section>
+
+          {/* Courier */}
+          <Section icon={<Package className="h-4 w-4" />} title="Delivery & courier">
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="Delivery method">
+                <Input value={form.delivery_method} onChange={(e) => update("delivery_method", e.target.value)} />
+              </Field>
+              <Field label="Courier name">
+                <Input value={form.courier_name} onChange={(e) => update("courier_name", e.target.value)} />
+              </Field>
+              <div className="col-span-2">
+                <Field label="Tracking number">
+                  <Input value={form.tracking_number} onChange={(e) => update("tracking_number", e.target.value)} />
+                </Field>
+              </div>
+            </div>
+          </Section>
+
+          {/* Tags */}
+          <Section icon={<Tag className="h-4 w-4" />} title="Tags">
+            <Field label="Comma separated">
+              <Input value={form.tags} onChange={(e) => update("tags", e.target.value)} placeholder="vip, bulk, repeat" />
+            </Field>
+          </Section>
+
+          {/* Notes */}
+          <div className="md:col-span-2">
+            <Section icon={<FileText className="h-4 w-4" />} title="Notes">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+                <Field label="Customer note">
+                  <Textarea rows={3} value={form.customer_note} onChange={(e) => update("customer_note", e.target.value)} />
+                </Field>
+                <Field label="Admin notes">
+                  <Textarea rows={3} value={form.admin_notes} onChange={(e) => update("admin_notes", e.target.value)} />
+                </Field>
+                <Field label="Internal note">
+                  <Textarea rows={3} value={form.internal_note} onChange={(e) => update("internal_note", e.target.value)} />
+                </Field>
+              </div>
+            </Section>
+          </div>
         </div>
 
-        <div className="mt-3 flex justify-end">
-          <Button variant="outline" size="sm" onClick={onClose}>
-            <X className="h-3.5 w-3.5 mr-1" /> Close
+        <div className="mt-4 flex items-center justify-end gap-2 border-t border-border pt-3">
+          <Button variant="outline" size="sm" onClick={onClose} disabled={saving}>
+            Cancel
+          </Button>
+          <Button size="sm" onClick={handleSave} disabled={saving}>
+            {saving ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+            Save changes
           </Button>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+
 
