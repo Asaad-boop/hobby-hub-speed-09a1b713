@@ -114,6 +114,7 @@ function OrderListPage() {
   const [filter, setFilter] = useState<StatusValue | "all">("all");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [invoiceOrderId, setInvoiceOrderId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["order-list-confirmed"],
