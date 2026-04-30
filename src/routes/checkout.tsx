@@ -154,6 +154,8 @@ function Checkout() {
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.name, form.phone, form.address, form.city, form.district, items, total]);
+
+  const bumpItem = allProducts[1] ?? allProducts[0];
   const bumpPrice = 199;
   const defaultShippingFee = shipMethod === "inside" ? 60 : 130;
   const perItemFees = items.map((i) => {
