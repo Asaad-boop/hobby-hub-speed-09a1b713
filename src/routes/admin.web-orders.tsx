@@ -19,6 +19,12 @@ import {
   Calendar,
   FileText,
   Tag,
+  Search,
+  Trash2,
+  Minus,
+  Hash,
+  Truck,
+  StickyNote,
 } from "lucide-react";
 import {
   Dialog,
@@ -900,13 +906,21 @@ const PAYMENT_METHOD_OPTIONS = [
 ];
 
 type EditableItem = {
-  id?: string;
+  id?: string; // existing row id; absent for newly added items
+  _isNew?: boolean;
   name: string;
   image: string | null;
   product_id: string;
   variant_label?: string | null;
   quantity: number;
   unit_price: number;
+};
+
+type ProductPick = {
+  id: string;
+  title: string;
+  price: number;
+  image: string | null;
 };
 
 type EditableForm = {
@@ -948,6 +962,10 @@ function OrderDetailModal({
 }) {
   const [form, setForm] = useState<EditableForm | null>(null);
   const [saving, setSaving] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerQuery, setPickerQuery] = useState("");
+  const [pickerResults, setPickerResults] = useState<ProductPick[]>([]);
+  const [pickerLoading, setPickerLoading] = useState(false);
 
   useEffect(() => {
     if (!order) {
@@ -991,6 +1009,28 @@ function OrderDetailModal({
     });
   }, [order]);
 
+  // Product search for "Add item"
+  useEffect(() => {
+    if (!pickerOpen) return;
+    let cancelled = false;
+    setPickerLoading(true);
+    const t = setTimeout(async () => {
+      let q = supabase
+        .from("products")
+        .select("id, title, price, image")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (pickerQuery.trim()) q = q.ilike("title", `%${pickerQuery.trim()}%`);
+      const { data } = await q;
+      if (!cancelled) {
+        setPickerResults((data ?? []) as ProductPick[]);
+        setPickerLoading(false);
+      }
+    }, 200);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [pickerOpen, pickerQuery]);
+
   if (!order || !form) return null;
 
   const update = <K extends keyof EditableForm>(key: K, value: EditableForm[K]) =>
@@ -1010,6 +1050,36 @@ function OrderDetailModal({
       const items = f.items.filter((_, i) => i !== idx);
       return { ...f, items };
     });
+
+  const addItem = (p: ProductPick) => {
+    setForm((f) => {
+      if (!f) return f;
+      // If product already in list, just bump qty
+      const existingIdx = f.items.findIndex((it) => it.product_id === p.id && !it.variant_label);
+      if (existingIdx >= 0) {
+        const items = [...f.items];
+        items[existingIdx] = { ...items[existingIdx], quantity: items[existingIdx].quantity + 1 };
+        return { ...f, items };
+      }
+      return {
+        ...f,
+        items: [
+          ...f.items,
+          {
+            _isNew: true,
+            name: p.title,
+            image: p.image,
+            product_id: p.id,
+            variant_label: null,
+            quantity: 1,
+            unit_price: Number(p.price) || 0,
+          },
+        ],
+      };
+    });
+    setPickerOpen(false);
+    setPickerQuery("");
+  };
 
   const itemsSubtotal = form.items.reduce(
     (sum, it) => sum + (Number(it.unit_price) || 0) * (Number(it.quantity) || 0),
@@ -1084,19 +1154,36 @@ function OrderDetailModal({
       }
 
       for (const it of form.items) {
-        if (!it.id) continue;
         const qty = Number(it.quantity) || 0;
         const price = Number(it.unit_price) || 0;
-        const { error: upErr } = await supabase
-          .from("order_items")
-          .update({
-            quantity: qty,
-            unit_price: price,
-            price,
-            line_total: qty * price,
-          })
-          .eq("id", it.id);
-        if (upErr) throw new Error(upErr.message);
+        if (it.id) {
+          const { error: upErr } = await supabase
+            .from("order_items")
+            .update({
+              quantity: qty,
+              unit_price: price,
+              price,
+              line_total: qty * price,
+            })
+            .eq("id", it.id);
+          if (upErr) throw new Error(upErr.message);
+        } else {
+          // New item — insert
+          const { error: insErr } = await supabase
+            .from("order_items")
+            .insert({
+              order_id: order.id,
+              product_id: it.product_id,
+              name: it.name,
+              image: it.image,
+              variant_label: it.variant_label,
+              quantity: qty,
+              unit_price: price,
+              price,
+              line_total: qty * price,
+            } as never);
+          if (insErr) throw new Error(insErr.message);
+        }
       }
 
       toast.success("Order updated");
@@ -1110,271 +1197,424 @@ function OrderDetailModal({
 
   return (
     <Dialog open={!!order} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex flex-wrap items-center gap-2">
-            <span>Order #{order.id.slice(0, 8)}</span>
-            <StatusPill label={form.status.replace(/_/g, " ")} tone={statusTone(form.status)} />
-            <span className="ml-auto text-xs font-normal text-muted-foreground">
-              Created {fmtFullDate(order.created_at)}
-            </span>
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {/* Customer */}
-          <Section icon={<User className="h-4 w-4" />} title="Customer">
-            <div className="grid grid-cols-2 gap-2">
-              <Field label="Name">
-                <Input value={form.shipping_name} onChange={(e) => update("shipping_name", e.target.value)} />
-              </Field>
-              <Field label="Phone">
-                <Input value={form.shipping_phone} onChange={(e) => update("shipping_phone", e.target.value)} />
-              </Field>
-              <Field label="Alt phone">
-                <Input value={form.alternate_phone} onChange={(e) => update("alternate_phone", e.target.value)} />
-              </Field>
-              <Field label="Email">
-                <Input value={form.guest_email} onChange={(e) => update("guest_email", e.target.value)} />
-              </Field>
-            </div>
-          </Section>
-
-          {/* Address */}
-          <Section icon={<MapPin className="h-4 w-4" />} title="Shipping address">
-            <div className="grid grid-cols-1 gap-2">
-              <Field label="Address">
-                <Textarea
-                  rows={2}
-                  value={form.shipping_address}
-                  onChange={(e) => update("shipping_address", e.target.value)}
+      <DialogContent className="max-w-5xl max-h-[94vh] gap-0 overflow-hidden p-0">
+        {/* Hero header */}
+        <div className="relative overflow-hidden border-b border-border bg-gradient-to-br from-primary/10 via-primary/5 to-background px-6 py-5">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+          <DialogHeader className="space-y-2">
+            <DialogTitle className="flex flex-wrap items-center gap-2 text-base">
+              <Hash className="h-4 w-4 text-muted-foreground" />
+              <span className="font-mono text-sm tracking-tight">{order.id.slice(0, 8).toUpperCase()}</span>
+              <StatusPill label={form.status.replace(/_/g, " ")} tone={statusTone(form.status)} />
+              {form.confirmation_status && form.confirmation_status !== "pending" && (
+                <StatusPill
+                  label={form.confirmation_status}
+                  tone={form.confirmation_status === "confirmed" ? "green" : "rose"}
                 />
-              </Field>
-              <div className="grid grid-cols-3 gap-2">
-                <Field label="Thana">
-                  <Input value={form.shipping_thana} onChange={(e) => update("shipping_thana", e.target.value)} />
+              )}
+            </DialogTitle>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                {fmtFullDate(order.created_at)}
+              </span>
+              {form.shipping_phone && (
+                <span className="inline-flex items-center gap-1">
+                  <Phone className="h-3 w-3" />
+                  {form.shipping_phone}
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1">
+                <Package className="h-3 w-3" />
+                {form.items.length} {form.items.length === 1 ? "item" : "items"}
+              </span>
+              <span className="ml-auto text-foreground">
+                <span className="text-muted-foreground">Total: </span>
+                <span className="text-base font-bold tabular-nums">{fmtBDT(computedTotal)}</span>
+              </span>
+            </div>
+          </DialogHeader>
+        </div>
+
+        {/* Body */}
+        <div className="max-h-[calc(94vh-180px)] overflow-y-auto bg-muted/30 px-6 py-5">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {/* Customer */}
+            <Section icon={<User className="h-4 w-4" />} title="Customer">
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Name">
+                  <Input value={form.shipping_name} onChange={(e) => update("shipping_name", e.target.value)} />
                 </Field>
-                <Field label="City">
-                  <Input value={form.shipping_city} onChange={(e) => update("shipping_city", e.target.value)} />
+                <Field label="Phone">
+                  <Input value={form.shipping_phone} onChange={(e) => update("shipping_phone", e.target.value)} />
                 </Field>
-                <Field label="District">
-                  <Input value={form.shipping_district} onChange={(e) => update("shipping_district", e.target.value)} />
+                <Field label="Alt phone">
+                  <Input value={form.alternate_phone} onChange={(e) => update("alternate_phone", e.target.value)} />
+                </Field>
+                <Field label="Email">
+                  <Input value={form.guest_email} onChange={(e) => update("guest_email", e.target.value)} />
                 </Field>
               </div>
-            </div>
-          </Section>
+            </Section>
 
-          {/* Items */}
-          <div className="md:col-span-2">
-            <Section icon={<Package className="h-4 w-4" />} title={`Items (${form.items.length})`}>
-              <div className="space-y-2">
-                {form.items.map((it, i) => {
-                  const lineTotal = (Number(it.unit_price) || 0) * (Number(it.quantity) || 0);
-                  return (
-                    <div key={it.id ?? i} className="flex items-center gap-3 rounded-md border border-border/60 p-2">
-                      <img
-                        src={it.image || "https://picsum.photos/seed/p/64"}
-                        alt={it.name}
-                        className="h-12 w-12 rounded-md border object-cover"
+            {/* Address */}
+            <Section icon={<MapPin className="h-4 w-4" />} title="Shipping address">
+              <div className="grid grid-cols-1 gap-2">
+                <Field label="Address">
+                  <Textarea
+                    rows={2}
+                    value={form.shipping_address}
+                    onChange={(e) => update("shipping_address", e.target.value)}
+                  />
+                </Field>
+                <div className="grid grid-cols-3 gap-2">
+                  <Field label="Thana">
+                    <Input value={form.shipping_thana} onChange={(e) => update("shipping_thana", e.target.value)} />
+                  </Field>
+                  <Field label="City">
+                    <Input value={form.shipping_city} onChange={(e) => update("shipping_city", e.target.value)} />
+                  </Field>
+                  <Field label="District">
+                    <Input value={form.shipping_district} onChange={(e) => update("shipping_district", e.target.value)} />
+                  </Field>
+                </div>
+              </div>
+            </Section>
+
+            {/* Items */}
+            <div className="md:col-span-2">
+              <div className="rounded-lg border border-border bg-card p-4">
+                <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                  <Package className="h-4 w-4 text-muted-foreground" />
+                  Items
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                    {form.items.length}
+                  </span>
+                  <div className="ml-auto">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setPickerOpen((v) => !v)}
+                    >
+                      <Plus className="mr-1 h-3.5 w-3.5" />
+                      Add item
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Add item picker */}
+                {pickerOpen && (
+                  <div className="mb-3 rounded-md border border-primary/30 bg-primary/5 p-3">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        autoFocus
+                        placeholder="Search products by name…"
+                        className="pl-8"
+                        value={pickerQuery}
+                        onChange={(e) => setPickerQuery(e.target.value)}
                       />
-                      <div className="min-w-0 flex-1">
-                        <div className="line-clamp-2 text-xs font-medium">{it.name}</div>
-                        {it.variant_label && (
-                          <div className="text-[11px] text-muted-foreground">{it.variant_label}</div>
-                        )}
-                      </div>
-                      <div className="w-20">
-                        <Label className="text-[10px] uppercase text-muted-foreground">Qty</Label>
-                        <Input
-                          type="number"
-                          min={1}
-                          value={it.quantity}
-                          onChange={(e) => updateItem(i, { quantity: Number(e.target.value) })}
-                        />
-                      </div>
-                      <div className="w-28">
-                        <Label className="text-[10px] uppercase text-muted-foreground">Unit ৳</Label>
-                        <Input
-                          type="number"
-                          min={0}
-                          step="0.01"
-                          value={it.unit_price}
-                          onChange={(e) => updateItem(i, { unit_price: Number(e.target.value) })}
-                        />
-                      </div>
-                      <div className="w-24 text-right text-sm font-semibold">{fmtBDT(lineTotal)}</div>
-                      <button
-                        type="button"
-                        onClick={() => removeItem(i)}
-                        className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                        aria-label="Remove item"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
                     </div>
-                  );
-                })}
-                {form.items.length === 0 && (
-                  <div className="text-xs text-muted-foreground">No items</div>
+                    <div className="mt-2 max-h-56 overflow-y-auto rounded-md border border-border bg-background">
+                      {pickerLoading ? (
+                        <div className="flex items-center justify-center py-6 text-xs text-muted-foreground">
+                          <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> Searching…
+                        </div>
+                      ) : pickerResults.length === 0 ? (
+                        <div className="py-6 text-center text-xs text-muted-foreground">No products found</div>
+                      ) : (
+                        pickerResults.map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => addItem(p)}
+                            className="flex w-full items-center gap-3 border-b border-border px-3 py-2 text-left last:border-0 hover:bg-muted/50"
+                          >
+                            <img
+                              src={p.image || "https://picsum.photos/seed/p/64"}
+                              alt={p.title}
+                              className="h-9 w-9 rounded border object-cover"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <div className="truncate text-xs font-medium">{p.title}</div>
+                              <div className="text-[11px] text-muted-foreground">{fmtBDT(p.price)}</div>
+                            </div>
+                            <Plus className="h-4 w-4 text-primary" />
+                          </button>
+                        ))
+                      )}
+                    </div>
+                    <div className="mt-2 flex justify-end">
+                      <Button type="button" size="sm" variant="ghost" onClick={() => setPickerOpen(false)}>
+                        Close
+                      </Button>
+                    </div>
+                  </div>
                 )}
+
+                <div className="space-y-2">
+                  {form.items.map((it, i) => {
+                    const lineTotal = (Number(it.unit_price) || 0) * (Number(it.quantity) || 0);
+                    return (
+                      <div
+                        key={it.id ?? `new-${i}`}
+                        className={`group flex items-center gap-3 rounded-lg border bg-background p-2.5 transition-colors hover:border-primary/40 ${
+                          it._isNew ? "border-primary/40 bg-primary/5" : "border-border/60"
+                        }`}
+                      >
+                        <img
+                          src={it.image || "https://picsum.photos/seed/p/64"}
+                          alt={it.name}
+                          className="h-14 w-14 rounded-md border object-cover"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
+                            <div className="line-clamp-1 text-sm font-medium">{it.name}</div>
+                            {it._isNew && (
+                              <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-primary">
+                                New
+                              </span>
+                            )}
+                          </div>
+                          {it.variant_label && (
+                            <div className="text-[11px] text-muted-foreground">{it.variant_label}</div>
+                          )}
+                          <div className="mt-0.5 text-[11px] text-muted-foreground">
+                            {fmtBDT(it.unit_price)} × {it.quantity}
+                          </div>
+                        </div>
+
+                        {/* Qty stepper */}
+                        <div className="flex items-center rounded-md border border-border">
+                          <button
+                            type="button"
+                            onClick={() => updateItem(i, { quantity: Math.max(1, (Number(it.quantity) || 1) - 1) })}
+                            className="flex h-8 w-8 items-center justify-center text-muted-foreground hover:bg-muted"
+                          >
+                            <Minus className="h-3 w-3" />
+                          </button>
+                          <input
+                            type="number"
+                            min={1}
+                            value={it.quantity}
+                            onChange={(e) => updateItem(i, { quantity: Math.max(1, Number(e.target.value) || 1) })}
+                            className="h-8 w-12 border-x border-border bg-transparent text-center text-sm tabular-nums focus:outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => updateItem(i, { quantity: (Number(it.quantity) || 0) + 1 })}
+                            className="flex h-8 w-8 items-center justify-center text-muted-foreground hover:bg-muted"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </button>
+                        </div>
+
+                        {/* Unit price */}
+                        <div className="w-24">
+                          <Input
+                            type="number"
+                            min={0}
+                            step="0.01"
+                            value={it.unit_price}
+                            onChange={(e) => updateItem(i, { unit_price: Number(e.target.value) })}
+                            className="h-8 text-right tabular-nums"
+                          />
+                        </div>
+
+                        <div className="w-24 text-right text-sm font-semibold tabular-nums">{fmtBDT(lineTotal)}</div>
+
+                        <button
+                          type="button"
+                          onClick={() => removeItem(i)}
+                          className="rounded-md p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+                          aria-label="Remove item"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                  {form.items.length === 0 && (
+                    <div className="rounded-md border border-dashed border-border py-8 text-center text-xs text-muted-foreground">
+                      No items yet — click <span className="font-medium">Add item</span> to insert one.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Payment & totals */}
+            <Section icon={<CreditCard className="h-4 w-4" />} title="Payment & totals">
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Payment method">
+                  <Select value={form.payment_method} onValueChange={(v) => update("payment_method", v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {PAYMENT_METHOD_OPTIONS.map((p) => (
+                        <SelectItem key={p} value={p}>{p.toUpperCase()}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field label="Coupon code">
+                  <Input value={form.coupon_code} onChange={(e) => update("coupon_code", e.target.value)} />
+                </Field>
+                <Field label="Shipping fee ৳">
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={form.shipping_fee}
+                    onChange={(e) => update("shipping_fee", Number(e.target.value))}
+                  />
+                </Field>
+                <Field label="Discount ৳">
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={form.discount_amount}
+                    onChange={(e) => update("discount_amount", Number(e.target.value))}
+                  />
+                </Field>
+                <Field label="Advance paid ৳">
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={form.advance_amount}
+                    onChange={(e) => update("advance_amount", Number(e.target.value))}
+                  />
+                </Field>
+              </div>
+              <div className="mt-3 space-y-1 rounded-md bg-muted/50 p-3 text-sm">
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Items subtotal</span>
+                  <span className="tabular-nums">{fmtBDT(itemsSubtotal)}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Shipping</span>
+                  <span className="tabular-nums">+ {fmtBDT(form.shipping_fee)}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Discount</span>
+                  <span className="tabular-nums">− {fmtBDT(form.discount_amount)}</span>
+                </div>
+                <div className="mt-1 flex justify-between border-t border-border pt-2 font-semibold">
+                  <span>Total</span>
+                  <span className="text-base tabular-nums">{fmtBDT(computedTotal)}</span>
+                </div>
               </div>
             </Section>
-          </div>
 
-          {/* Payment & totals */}
-          <Section icon={<CreditCard className="h-4 w-4" />} title="Payment & totals">
-            <div className="grid grid-cols-2 gap-2">
-              <Field label="Payment method">
-                <Select value={form.payment_method} onValueChange={(v) => update("payment_method", v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {PAYMENT_METHOD_OPTIONS.map((p) => (
-                      <SelectItem key={p} value={p}>{p.toUpperCase()}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field label="Coupon code">
-                <Input value={form.coupon_code} onChange={(e) => update("coupon_code", e.target.value)} />
-              </Field>
-              <Field label="Shipping fee ৳">
-                <Input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  value={form.shipping_fee}
-                  onChange={(e) => update("shipping_fee", Number(e.target.value))}
-                />
-              </Field>
-              <Field label="Discount ৳">
-                <Input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  value={form.discount_amount}
-                  onChange={(e) => update("discount_amount", Number(e.target.value))}
-                />
-              </Field>
-              <Field label="Advance paid ৳">
-                <Input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  value={form.advance_amount}
-                  onChange={(e) => update("advance_amount", Number(e.target.value))}
-                />
-              </Field>
-            </div>
-            <div className="mt-3 space-y-1 border-t border-border pt-2 text-sm">
-              <div className="flex justify-between text-muted-foreground">
-                <span>Items subtotal</span>
-                <span>{fmtBDT(itemsSubtotal)}</span>
-              </div>
-              <div className="flex justify-between font-semibold">
-                <span>Total</span>
-                <span className="text-base">{fmtBDT(computedTotal)}</span>
-              </div>
-            </div>
-          </Section>
-
-          {/* Status & call */}
-          <Section icon={<Tag className="h-4 w-4" />} title="Status">
-            <div className="grid grid-cols-2 gap-2">
-              <Field label="Order status">
-                <Select value={form.status} onValueChange={(v) => update("status", v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {ORDER_STATUS_OPTIONS.map((s) => (
-                      <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field label="Confirmation">
-                <Select value={form.confirmation_status} onValueChange={(v) => update("confirmation_status", v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {CONFIRMATION_STATUS_OPTIONS.map((s) => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field label="Call status">
-                <Select value={form.call_status} onValueChange={(v) => update("call_status", v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {CALL_STATUS_OPTIONS.map((s) => (
-                      <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field label="Auto-call">
-                <Select
-                  value={form.auto_call_enabled ? "on" : "off"}
-                  onValueChange={(v) => update("auto_call_enabled", v === "on")}
-                >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="on">On</SelectItem>
-                    <SelectItem value="off">Off</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Field>
-            </div>
-          </Section>
-
-          {/* Courier */}
-          <Section icon={<Package className="h-4 w-4" />} title="Delivery & courier">
-            <div className="grid grid-cols-2 gap-2">
-              <Field label="Delivery method">
-                <Input value={form.delivery_method} onChange={(e) => update("delivery_method", e.target.value)} />
-              </Field>
-              <Field label="Courier name">
-                <Input value={form.courier_name} onChange={(e) => update("courier_name", e.target.value)} />
-              </Field>
-              <div className="col-span-2">
-                <Field label="Tracking number">
-                  <Input value={form.tracking_number} onChange={(e) => update("tracking_number", e.target.value)} />
+            {/* Status & call */}
+            <Section icon={<Tag className="h-4 w-4" />} title="Status">
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Order status">
+                  <Select value={form.status} onValueChange={(v) => update("status", v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {ORDER_STATUS_OPTIONS.map((s) => (
+                        <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </Field>
-              </div>
-            </div>
-          </Section>
-
-          {/* Tags */}
-          <Section icon={<Tag className="h-4 w-4" />} title="Tags">
-            <Field label="Comma separated">
-              <Input value={form.tags} onChange={(e) => update("tags", e.target.value)} placeholder="vip, bulk, repeat" />
-            </Field>
-          </Section>
-
-          {/* Notes */}
-          <div className="md:col-span-2">
-            <Section icon={<FileText className="h-4 w-4" />} title="Notes">
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-                <Field label="Customer note">
-                  <Textarea rows={3} value={form.customer_note} onChange={(e) => update("customer_note", e.target.value)} />
+                <Field label="Confirmation">
+                  <Select value={form.confirmation_status} onValueChange={(v) => update("confirmation_status", v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {CONFIRMATION_STATUS_OPTIONS.map((s) => (
+                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </Field>
-                <Field label="Admin notes">
-                  <Textarea rows={3} value={form.admin_notes} onChange={(e) => update("admin_notes", e.target.value)} />
+                <Field label="Call status">
+                  <Select value={form.call_status} onValueChange={(v) => update("call_status", v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {CALL_STATUS_OPTIONS.map((s) => (
+                        <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </Field>
-                <Field label="Internal note">
-                  <Textarea rows={3} value={form.internal_note} onChange={(e) => update("internal_note", e.target.value)} />
+                <Field label="Auto-call">
+                  <Select
+                    value={form.auto_call_enabled ? "on" : "off"}
+                    onValueChange={(v) => update("auto_call_enabled", v === "on")}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="on">On</SelectItem>
+                      <SelectItem value="off">Off</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </Field>
               </div>
             </Section>
+
+            {/* Courier */}
+            <Section icon={<Truck className="h-4 w-4" />} title="Delivery & courier">
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Delivery method">
+                  <Input value={form.delivery_method} onChange={(e) => update("delivery_method", e.target.value)} />
+                </Field>
+                <Field label="Courier name">
+                  <Input value={form.courier_name} onChange={(e) => update("courier_name", e.target.value)} />
+                </Field>
+                <div className="col-span-2">
+                  <Field label="Tracking number">
+                    <Input value={form.tracking_number} onChange={(e) => update("tracking_number", e.target.value)} />
+                  </Field>
+                </div>
+              </div>
+            </Section>
+
+            {/* Tags */}
+            <Section icon={<Tag className="h-4 w-4" />} title="Tags">
+              <Field label="Comma separated">
+                <Input value={form.tags} onChange={(e) => update("tags", e.target.value)} placeholder="vip, bulk, repeat" />
+              </Field>
+            </Section>
+
+            {/* Notes */}
+            <div className="md:col-span-2">
+              <Section icon={<StickyNote className="h-4 w-4" />} title="Notes">
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+                  <Field label="Customer note">
+                    <Textarea rows={3} value={form.customer_note} onChange={(e) => update("customer_note", e.target.value)} />
+                  </Field>
+                  <Field label="Admin notes">
+                    <Textarea rows={3} value={form.admin_notes} onChange={(e) => update("admin_notes", e.target.value)} />
+                  </Field>
+                  <Field label="Internal note">
+                    <Textarea rows={3} value={form.internal_note} onChange={(e) => update("internal_note", e.target.value)} />
+                  </Field>
+                </div>
+              </Section>
+            </div>
           </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-end gap-2 border-t border-border pt-3">
-          <Button variant="outline" size="sm" onClick={onClose} disabled={saving}>
-            Cancel
-          </Button>
-          <Button size="sm" onClick={handleSave} disabled={saving}>
-            {saving ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
-            Save changes
-          </Button>
+        {/* Sticky footer */}
+        <div className="flex items-center justify-between gap-3 border-t border-border bg-background px-6 py-3">
+          <div className="text-xs text-muted-foreground">
+            <span className="font-medium text-foreground tabular-nums">{fmtBDT(computedTotal)}</span>
+            <span className="mx-2">•</span>
+            {form.items.length} {form.items.length === 1 ? "item" : "items"}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={onClose} disabled={saving}>
+              Cancel
+            </Button>
+            <Button size="sm" onClick={handleSave} disabled={saving}>
+              {saving ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+              Save changes
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
