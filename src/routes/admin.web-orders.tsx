@@ -956,6 +956,10 @@ function OrderDetailModal({
 }) {
   const [form, setForm] = useState<EditableForm | null>(null);
   const [saving, setSaving] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerQuery, setPickerQuery] = useState("");
+  const [pickerResults, setPickerResults] = useState<ProductPick[]>([]);
+  const [pickerLoading, setPickerLoading] = useState(false);
 
   useEffect(() => {
     if (!order) {
@@ -998,6 +1002,28 @@ function OrderDetailModal({
       })),
     });
   }, [order]);
+
+  // Product search for "Add item"
+  useEffect(() => {
+    if (!pickerOpen) return;
+    let cancelled = false;
+    setPickerLoading(true);
+    const t = setTimeout(async () => {
+      let q = supabase
+        .from("products")
+        .select("id, title, price, image")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (pickerQuery.trim()) q = q.ilike("title", `%${pickerQuery.trim()}%`);
+      const { data } = await q;
+      if (!cancelled) {
+        setPickerResults((data ?? []) as ProductPick[]);
+        setPickerLoading(false);
+      }
+    }, 200);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [pickerOpen, pickerQuery]);
 
   if (!order || !form) return null;
 
