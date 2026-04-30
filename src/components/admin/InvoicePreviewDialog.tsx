@@ -316,13 +316,13 @@ export function InvoicePreviewDialog({
               {/* Header */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", paddingBottom: 6 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  {settings?.logo_url ? (
-                    <img src={settings.logo_url} alt="logo" style={{ width: 34, height: 34, objectFit: "contain" }} />
-                  ) : (
-                    <div style={{ width: 34, height: 34, borderRadius: "50%", background: "#e11d48", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16 }}>
-                      H
-                    </div>
-                  )}
+                  <img
+                    src={settings?.logo_url || logoImg}
+                    alt="logo"
+                    style={{ width: 44, height: 44, objectFit: "contain" }}
+                    crossOrigin="anonymous"
+                  />
+
                   <div>
                     <div style={{ fontSize: 16, fontWeight: 800, lineHeight: 1 }}>
                       {settings?.site_title ?? "HobbyShop"}
