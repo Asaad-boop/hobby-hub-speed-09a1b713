@@ -1209,7 +1209,10 @@ function OrderDetailModal({
               {form.status !== "confirmed" && form.status !== "delivered" && form.status !== "cancelled" && (
                 <button
                   type="button"
-                  onClick={() => update("status", "confirmed")}
+                  onClick={() => {
+                    update("status", "confirmed");
+                    update("confirmation_status", "confirmed");
+                  }}
                   className="ml-1 inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-semibold text-white shadow-sm hover:bg-emerald-700"
                 >
                   ✓ Confirm Order
