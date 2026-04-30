@@ -12,6 +12,7 @@ import {
   CreditCard,
   Ticket,
   Sparkles,
+  ClipboardList,
 } from "lucide-react";
 import {
   Sidebar,
@@ -39,6 +40,7 @@ const GROUPS: NavGroup[] = [
     label: "Sales",
     items: [
       { title: "Web Orders", url: "/admin/web-orders", icon: PhoneCall },
+      { title: "Order List", url: "/admin/order-list", icon: ClipboardList },
       { title: "Payments", url: "/admin/payments", icon: CreditCard },
     ],
   },
