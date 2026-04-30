@@ -176,12 +176,13 @@ export function InvoicePreviewDialog({
         if (pids.length) {
           const { data: prods } = await supabase
             .from("products")
-            .select("id,image_url")
+            .select("id,images")
             .in("id", pids);
           if (!cancelled && prods) {
             const map: Record<string, string> = {};
-            for (const p of prods as { id: string; image_url: string | null }[]) {
-              if (p.image_url) map[p.id] = p.image_url;
+            for (const p of prods as unknown as { id: string; images: string[] | null }[]) {
+              const first = p.images?.[0];
+              if (first) map[p.id] = first;
             }
             setProductImages(map);
           }
