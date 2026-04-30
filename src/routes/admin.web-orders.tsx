@@ -217,14 +217,6 @@ const TABS: { key: TabKey; label: string }[] = [
 
 const PROCESSING_STATUSES = new Set([
   "new",
-  "confirmed",
-  "packaging",
-  "packed",
-  "ready_to_pack",
-  "ready_to_ship",
-  "courier_entry",
-  "shipped",
-  "in_transit",
 ]);
 
 function matchesTab(o: OrderRow, tab: TabKey): boolean {
