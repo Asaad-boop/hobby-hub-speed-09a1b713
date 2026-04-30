@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Printer, Loader2, X } from "lucide-react";
 import JsBarcode from "jsbarcode";
 import { supabase } from "@/integrations/supabase/client";
