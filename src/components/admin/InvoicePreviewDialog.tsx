@@ -201,71 +201,61 @@ export function InvoicePreviewDialog({
   function handlePrint() {
     if (!printRef.current) return;
     const printContents = printRef.current.innerHTML;
-    const w = window.open("", "_blank", "width=720,height=1000");
-    if (!w) return;
-    w.document.write(`<!doctype html>
+    const html = `<!doctype html>
 <html><head><meta charset="utf-8"/>
 <title>Invoice ${order ? shortInvoiceId(order.id) : ""}</title>
 <style>
-  @page { size: A5; margin: 8mm; }
-  * { box-sizing: border-box; }
-  html, body { margin:0; padding:0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Bengali", "Hind Siliguri", Roboto, sans-serif; color:#111; font-size: 10px; line-height: 1.35; }
-  .invoice { width: 100%; }
+  @page { size: A5; margin: 6mm; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html, body { margin:0; padding:0; background:#fff; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Bengali", "Hind Siliguri", Roboto, sans-serif; color:#111; font-size: 9.5px; line-height: 1.35; }
+  /* Force the invoice to fit exactly within A5 printable area (148mm - 12mm margins = 136mm) */
+  .invoice-print { width: 100%; max-width: 136mm; margin: 0 auto; padding: 0; box-shadow: none !important; }
+  .invoice-print > div:first-child { padding: 0 !important; }
   img { max-width: 100%; }
   table { width: 100%; border-collapse: collapse; }
-  .row-flex { display:flex; }
-  .row-between { display:flex; justify-content:space-between; align-items:flex-start; }
-  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-  .grid-meta { display:grid; grid-template-columns:90px 1fr; gap:4px 8px; }
-  .border-top-bold { border-top:1.5px solid #000; }
-  .border-top { border-top:1px solid #000; }
-  .border-b-soft { border-bottom:1px solid #eee; }
-  .muted { color:#666; }
-  .uppercase { text-transform:uppercase; letter-spacing:.05em; }
-  .title-invoice { font-size:22px; font-weight:800; margin:0; }
-  .brand-name { font-size:16px; font-weight:800; line-height:1; }
-  .brand-tag { font-size:9px; font-style:italic; color:#777; }
-  .logo-circle { width:34px; height:34px; border-radius:50%; background:#e11d48; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; }
-  .logo-img { width:34px; height:34px; object-fit:contain; }
-  .name-big { font-size:14px; font-weight:800; text-transform:uppercase; margin-top:2px; }
-  .phone-big { font-size:12px; font-weight:600; letter-spacing:.05em; margin-top:2px; }
-  .barcode-strip { display:flex; height:42px; align-items:stretch; gap:1px; }
-  .barcode-strip > div { display:inline-block; }
-  .barcode-label { text-align:center; font-size:9px; letter-spacing:.15em; margin-top:2px; }
-  .meta-k { color:#555; }
-  .b { font-weight:700; }
-  .payable { font-size:13px; font-weight:800; }
-  thead th { text-align:left; font-size:9px; text-transform:uppercase; letter-spacing:.05em; color:#555; padding:5px 4px; border-bottom:1px solid rgba(0,0,0,.3); }
-  tbody td { padding:6px 4px; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
-  td.center, th.center { text-align:center; }
-  td.right, th.right { text-align:right; }
-  .item-img { width:24px; height:24px; object-fit:cover; border-radius:3px; margin-right:6px; vertical-align:middle; }
-  .totals { font-size:10px; }
-  .totals .line { display:flex; justify-content:space-between; padding:1px 0; }
-  .totals .total-line { display:flex; justify-content:space-between; align-items:center; padding-top:4px; }
-  .totals .grand { font-size:14px; font-weight:800; }
-  .rider-box { margin-top:10px; border:1px dashed #f87171; background:#fef2f230; padding:6px 8px; border-radius:4px; }
-  .rider-title { color:#dc2626; font-weight:700; font-size:10px; }
-  .feedback-grid { margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-  .feedback-card { border:1px solid #a7f3d0; background:#ecfdf520; border-radius:4px; padding:6px 8px; }
-  .feedback-card .h { font-weight:700; font-size:11px; }
-  .feedback-card .s { color:#666; font-size:9px; }
-  .footer-row { margin-top:10px; display:flex; justify-content:space-between; align-items:flex-start; font-size:9px; }
-  .terms { margin-top:6px; padding-left:14px; font-size:8.5px; line-height:1.35; color:#444; }
-  .conf { margin-top:8px; text-align:center; font-style:italic; font-size:8px; color:#777; }
-  .copyright { text-align:center; font-size:8px; color:#777; }
-  .note-row { margin-top:6px; display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:flex-start; font-size:10px; }
-  .pad-top { padding-top:8px; }
-  .gap-3 { gap:8px; }
-  .items-center { align-items:center; }
-  .tabular { font-variant-numeric: tabular-nums; }
-  /* hide on-screen-only utility classes from React (none expected, but be safe) */
+  /* Hide screen padding/shadow on the inner wrapper */
 </style>
-</head><body><div class="invoice">${printContents}</div>
-<script>window.onload=()=>{window.focus();window.print();setTimeout(()=>window.close(),300);}</script>
-</body></html>`);
-    w.document.close();
+</head><body>
+<div class="invoice-print">${printContents}</div>
+</body></html>`;
+
+    // Use a hidden iframe so styles load reliably and we don't depend on window.onload races.
+    const existing = document.getElementById("__invoice_print_iframe");
+    if (existing) existing.remove();
+    const iframe = document.createElement("iframe");
+    iframe.id = "__invoice_print_iframe";
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    iframe.style.visibility = "hidden";
+    iframe.srcdoc = html;
+    document.body.appendChild(iframe);
+    iframe.onload = () => {
+      // Override inline padding on the cloned root so print uses page margins
+      try {
+        const root = iframe.contentDocument?.querySelector(
+          ".invoice-print > div",
+        ) as HTMLElement | null;
+        if (root) {
+          root.style.padding = "0";
+          root.style.width = "100%";
+          root.style.minHeight = "0";
+          root.style.boxShadow = "none";
+        }
+      } catch {
+        // ignore
+      }
+      setTimeout(() => {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+        // Cleanup after a delay so print dialog has time to attach
+        setTimeout(() => iframe.remove(), 1000);
+      }, 100);
+    };
   }
 
   if (!open) return null;
