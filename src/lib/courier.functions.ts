@@ -219,11 +219,15 @@ export const fetchCourierStats = createServerFn({ method: "POST" })
       force_refresh: z.boolean().optional(),
     }).parse,
   )
-  .handler(async ({ data }): Promise<CourierStatsResult> => {
+  .handler(async ({ data, context }): Promise<CourierStatsResult> => {
+    await assertStaff((context as { userId: string }).userId);
     const phone = normalizePhone(data.phone);
     if (!phone) return { ok: false, cached: false, stale: false, source: "error", error: "Invalid BD phone number" };
 
     const { apiKey, baseUrl, cacheHours, swr, enabled } = await loadIntegration();
+    if (!isAllowedUrl(baseUrl)) {
+      return { ok: false, cached: false, stale: false, source: "error", error: "BD Courier base URL not allowed" };
+    }
 
     if (!enabled) return { ok: false, cached: false, stale: false, source: "error", error: "BD Courier integration is disabled" };
 
