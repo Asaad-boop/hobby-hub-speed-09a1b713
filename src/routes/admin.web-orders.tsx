@@ -1209,11 +1209,31 @@ function OrderDetailModal({
               {form.status !== "confirmed" && form.status !== "delivered" && form.status !== "cancelled" && (
                 <button
                   type="button"
-                  onClick={() => {
-                    update("status", "confirmed");
-                    update("confirmation_status", "confirmed");
+                  disabled={saving}
+                  onClick={async () => {
+                    try {
+                      setSaving(true);
+                      const { error } = await supabase
+                        .from("orders")
+                        .update({
+                          status: "confirmed",
+                          confirmation_status: "confirmed",
+                          confirmed_at: new Date().toISOString(),
+                          updated_at: new Date().toISOString(),
+                        } as never)
+                        .eq("id", order.id);
+                      if (error) throw error;
+                      update("status", "confirmed");
+                      update("confirmation_status", "confirmed");
+                      toast.success("Order confirmed");
+                      onSaved();
+                    } catch (e) {
+                      toast.error("Confirm failed: " + (e as Error).message);
+                    } finally {
+                      setSaving(false);
+                    }
                   }}
-                  className="ml-1 inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-semibold text-white shadow-sm hover:bg-emerald-700"
+                  className="ml-1 inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-60"
                 >
                   ✓ Confirm Order
                 </button>
