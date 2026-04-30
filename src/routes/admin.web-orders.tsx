@@ -1524,16 +1524,6 @@ function OrderDetailModal({
                     </SelectContent>
                   </Select>
                 </Field>
-                <Field label="Confirmation">
-                  <Select value={form.confirmation_status} onValueChange={(v) => update("confirmation_status", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {CONFIRMATION_STATUS_OPTIONS.map((s) => (
-                        <SelectItem key={s} value={s}>{s}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
                 <Field label="Call status">
                   <Select value={form.call_status} onValueChange={(v) => update("call_status", v)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
@@ -1541,18 +1531,6 @@ function OrderDetailModal({
                       {CALL_STATUS_OPTIONS.map((s) => (
                         <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>
                       ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
-                <Field label="Auto-call">
-                  <Select
-                    value={form.auto_call_enabled ? "on" : "off"}
-                    onValueChange={(v) => update("auto_call_enabled", v === "on")}
-                  >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="on">On</SelectItem>
-                      <SelectItem value="off">Off</SelectItem>
                     </SelectContent>
                   </Select>
                 </Field>
