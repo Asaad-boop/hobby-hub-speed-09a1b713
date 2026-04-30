@@ -201,8 +201,23 @@ export function InvoicePreviewDialog({
     };
   }, [open, orderId]);
 
-  function handlePrint() {
+  async function handlePrint() {
     if (!printRef.current) return;
+    // Preload all images inside the invoice so print captures them
+    const imgs = Array.from(printRef.current.querySelectorAll("img"));
+    await Promise.all(
+      imgs.map(
+        (img) =>
+          new Promise<void>((resolve) => {
+            if ((img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0) {
+              resolve();
+            } else {
+              img.addEventListener("load", () => resolve(), { once: true });
+              img.addEventListener("error", () => resolve(), { once: true });
+            }
+          }),
+      ),
+    );
     const printContents = printRef.current.innerHTML;
     const html = `<!doctype html>
 <html><head><meta charset="utf-8"/>
@@ -320,20 +335,19 @@ export function InvoicePreviewDialog({
               }}
             >
               {/* Header */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", paddingBottom: 6 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <img
                     src={settings?.logo_url || logoImg}
-                    alt="logo"
-                    style={{ width: 44, height: 44, objectFit: "contain" }}
+                    alt="HobbyShop"
+                    style={{ width: 52, height: 52, objectFit: "contain" }}
                     crossOrigin="anonymous"
                   />
-
-                  <div>
-                    <div style={{ fontSize: 16, fontWeight: 800, lineHeight: 1 }}>
+                  <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                    <div style={{ fontSize: 22, fontWeight: 900, lineHeight: 1, letterSpacing: "-0.02em", color: "#000" }}>
                       {settings?.site_title ?? "HobbyShop"}
                     </div>
-                    <div style={{ fontSize: 9, fontStyle: "italic", color: "#777" }}>
+                    <div style={{ fontSize: 10, fontStyle: "italic", color: "#777", marginTop: 3 }}>
                       {settings?.site_tagline ?? "Touch Your Dream"}
                     </div>
                   </div>
@@ -402,11 +416,33 @@ export function InvoicePreviewDialog({
                         <tr key={it.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
                           <td style={td()}>{i + 1}.</td>
                           <td style={{ ...td(), paddingRight: 6 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                              {img && (
-                                <img src={img} alt="" style={{ width: 24, height: 24, objectFit: "cover", borderRadius: 3 }} />
-                              )}
-                              <span>{it.name}</span>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              <div
+                                style={{
+                                  width: 32,
+                                  height: 32,
+                                  flexShrink: 0,
+                                  borderRadius: 4,
+                                  border: "1px solid #e5e7eb",
+                                  background: "#f9fafb",
+                                  overflow: "hidden",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                {img ? (
+                                  <img
+                                    src={img}
+                                    alt=""
+                                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                    crossOrigin="anonymous"
+                                  />
+                                ) : (
+                                  <span style={{ fontSize: 8, color: "#bbb" }}>—</span>
+                                )}
+                              </div>
+                              <span style={{ lineHeight: 1.25 }}>{it.name}</span>
                             </div>
                           </td>
                           <td style={{ ...td(), textAlign: "center", color: "#777" }}>{it.variant_label ?? ""}</td>
