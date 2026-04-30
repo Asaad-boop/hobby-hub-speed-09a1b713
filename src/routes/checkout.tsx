@@ -134,7 +134,7 @@ function Checkout() {
           _subtotal: total,
           _cart_items: cartItems,
           _last_step: "checkout",
-        });
+        } as never);
         if (!error && data && !abandonedId) setAbandonedId(data as string);
       } catch {
         // best-effort — never block checkout
