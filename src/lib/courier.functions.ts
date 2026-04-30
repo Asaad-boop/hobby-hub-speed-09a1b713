@@ -19,6 +19,30 @@ const DEFAULT_BASE_URL = "https://bdcourier.com/api/courier/check";
 const DEFAULT_CACHE_HOURS = 168; // 7 days
 const FETCH_TIMEOUT_MS = 20_000;
 
+// SSRF guard — only allow calls to known BD Courier hosts.
+const ALLOWED_HOSTS = new Set<string>(["bdcourier.com", "www.bdcourier.com", "app.bdcourier.com"]);
+
+function isAllowedUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "https:") return false;
+    return ALLOWED_HOSTS.has(u.hostname.toLowerCase());
+  } catch {
+    return false;
+  }
+}
+
+async function assertStaff(userId: string): Promise<void> {
+  const { data, error } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId);
+  if (error) throw new Error("Authorization check failed");
+  const roles = (data ?? []).map((r) => r.role as string);
+  const ok = roles.some((r) => r === "admin" || r === "operations" || r === "customer_service");
+  if (!ok) throw new Error("Forbidden: staff role required");
+}
+
 type IntegrationConfig = {
   api_key?: string;
   base_url?: string;
@@ -195,11 +219,15 @@ export const fetchCourierStats = createServerFn({ method: "POST" })
       force_refresh: z.boolean().optional(),
     }).parse,
   )
-  .handler(async ({ data }): Promise<CourierStatsResult> => {
+  .handler(async ({ data, context }): Promise<CourierStatsResult> => {
+    await assertStaff((context as { userId: string }).userId);
     const phone = normalizePhone(data.phone);
     if (!phone) return { ok: false, cached: false, stale: false, source: "error", error: "Invalid BD phone number" };
 
     const { apiKey, baseUrl, cacheHours, swr, enabled } = await loadIntegration();
+    if (!isAllowedUrl(baseUrl)) {
+      return { ok: false, cached: false, stale: false, source: "error", error: "BD Courier base URL not allowed" };
+    }
 
     if (!enabled) return { ok: false, cached: false, stale: false, source: "error", error: "BD Courier integration is disabled" };
 
@@ -308,15 +336,23 @@ export const testCourierConnection = createServerFn({ method: "POST" })
     z.object({
       phone: z.string().min(6).max(20).optional(),
       override_api_key: z.string().min(8).max(512).optional(),
-      override_base_url: z.string().url().optional(),
+      override_base_url: z
+        .string()
+        .url()
+        .refine(isAllowedUrl, { message: "URL host not allowed" })
+        .optional(),
     }).parse,
   )
-  .handler(async ({ data }): Promise<CourierConnectionTest> => {
+  .handler(async ({ data, context }): Promise<CourierConnectionTest> => {
+    await assertStaff((context as { userId: string }).userId);
     const cfg = await loadIntegration();
     const apiKey = (data.override_api_key?.trim() || cfg.apiKey || "").trim();
     const baseUrl = data.override_base_url?.trim() || cfg.baseUrl;
 
     if (!apiKey) return { ok: false, source: cfg.source, error: "No API key configured" };
+    if (!isAllowedUrl(baseUrl)) {
+      return { ok: false, source: cfg.source, error: "Base URL host not allowed" };
+    }
 
     const phone = normalizePhone(data.phone || "01700000000") || "01700000000";
     const res = await callBdCourier(phone, apiKey, baseUrl);
