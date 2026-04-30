@@ -1,0 +1,1 @@
+GRANT SELECT, INSERT, UPDATE ON public.abandoned_carts TO anon, authenticated;
