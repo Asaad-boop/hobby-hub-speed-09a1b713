@@ -31,9 +31,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { generateInvoicePDF } from "@/lib/pdf/invoice";
 import { generatePickingListPDF } from "@/lib/pdf/picking-list";
 import { generatePackingListPDF } from "@/lib/pdf/packing-list";
+import { InvoicePreviewDialog } from "@/components/admin/InvoicePreviewDialog";
 
 export const Route = createFileRoute("/admin/order-list")({
   component: OrderListPage,
@@ -114,6 +114,7 @@ function OrderListPage() {
   const [filter, setFilter] = useState<StatusValue | "all">("all");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [invoiceOrderId, setInvoiceOrderId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["order-list-confirmed"],
@@ -189,15 +190,8 @@ function OrderListPage() {
     await changeStatus(id, "ready_to_ship");
   }
 
-  async function printInvoice(id: string) {
-    try {
-      setBusyId(id);
-      await generateInvoicePDF(id);
-    } catch (e) {
-      toast.error("Invoice failed: " + (e as Error).message);
-    } finally {
-      setBusyId(null);
-    }
+  function openInvoice(id: string) {
+    setInvoiceOrderId(id);
   }
 
   async function printPicking(ids: string[]) {
@@ -396,7 +390,7 @@ function OrderListPage() {
                             size="sm"
                             variant="outline"
                             className="h-7 px-2 text-[11px]"
-                            onClick={() => printInvoice(o.id)}
+                            onClick={() => openInvoice(o.id)}
                             disabled={busyId === o.id}
                           >
                             <FileText className="h-3 w-3" />
@@ -432,6 +426,11 @@ function OrderListPage() {
           </div>
         )}
       </Card>
+      <InvoicePreviewDialog
+        orderId={invoiceOrderId}
+        open={!!invoiceOrderId}
+        onClose={() => setInvoiceOrderId(null)}
+      />
     </div>
   );
 }
