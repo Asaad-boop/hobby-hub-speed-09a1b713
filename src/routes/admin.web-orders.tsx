@@ -1206,38 +1206,6 @@ function OrderDetailModal({
               <Hash className="h-4 w-4 text-muted-foreground" />
               <span className="font-mono text-sm tracking-tight">{order.id.slice(0, 8).toUpperCase()}</span>
               <StatusPill label={form.status.replace(/_/g, " ")} tone={statusTone(form.status)} />
-              {form.status !== "confirmed" && form.status !== "delivered" && form.status !== "cancelled" && (
-                <button
-                  type="button"
-                  disabled={saving}
-                  onClick={async () => {
-                    try {
-                      setSaving(true);
-                      const { error } = await supabase
-                        .from("orders")
-                        .update({
-                          status: "confirmed",
-                          confirmation_status: "confirmed",
-                          confirmed_at: new Date().toISOString(),
-                          updated_at: new Date().toISOString(),
-                        } as never)
-                        .eq("id", order.id);
-                      if (error) throw error;
-                      update("status", "confirmed");
-                      update("confirmation_status", "confirmed");
-                      toast.success("Order confirmed");
-                      onSaved();
-                    } catch (e) {
-                      toast.error("Confirm failed: " + (e as Error).message);
-                    } finally {
-                      setSaving(false);
-                    }
-                  }}
-                  className="ml-1 inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-60"
-                >
-                  ✓ Confirm Order
-                </button>
-              )}
             </DialogTitle>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1">
@@ -1614,6 +1582,38 @@ function OrderDetailModal({
             <Button variant="outline" size="sm" onClick={onClose} disabled={saving}>
               Cancel
             </Button>
+            {form.status !== "confirmed" && form.status !== "delivered" && form.status !== "cancelled" && (
+              <Button
+                size="sm"
+                disabled={saving}
+                className="bg-emerald-600 text-white hover:bg-emerald-700"
+                onClick={async () => {
+                  try {
+                    setSaving(true);
+                    const { error } = await supabase
+                      .from("orders")
+                      .update({
+                        status: "confirmed",
+                        confirmation_status: "confirmed",
+                        confirmed_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString(),
+                      } as never)
+                      .eq("id", order.id);
+                    if (error) throw error;
+                    update("status", "confirmed");
+                    update("confirmation_status", "confirmed");
+                    toast.success("Order confirmed");
+                    onSaved();
+                  } catch (e) {
+                    toast.error("Confirm failed: " + (e as Error).message);
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+              >
+                ✓ Confirm Order
+              </Button>
+            )}
             <Button size="sm" onClick={handleSave} disabled={saving}>
               {saving ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
               Save changes
