@@ -390,7 +390,7 @@ function OrderListPage() {
                             size="sm"
                             variant="outline"
                             className="h-7 px-2 text-[11px]"
-                            onClick={() => printInvoice(o.id)}
+                            onClick={() => openInvoice(o.id)}
                             disabled={busyId === o.id}
                           >
                             <FileText className="h-3 w-3" />
@@ -426,6 +426,11 @@ function OrderListPage() {
           </div>
         )}
       </Card>
+      <InvoicePreviewDialog
+        orderId={invoiceOrderId}
+        open={!!invoiceOrderId}
+        onClose={() => setInvoiceOrderId(null)}
+      />
     </div>
   );
 }
