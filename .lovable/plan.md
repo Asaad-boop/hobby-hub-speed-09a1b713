@@ -1,130 +1,55 @@
-# Full Admin Rebuild — Dashboard + Order Management
+## Goal
+HobbyShop admin dashboard ke ekta modern, beautiful, professional design e redesign kori — sathe Payments + Discounts page add kori. Existing functionality ekdom intact thakbe.
 
-Clean slate theke notun admin banabo. DB tables/server functions ja ache shob thakbe (already solid), shudhu UI/UX layer notun + ekta awesome polished feel debo.
+## Design Direction
+- **Sidebar**: shadcn `Sidebar` component, **collapsible** (icon mode), **light theme** with subtle premium feel — grouped nav (Overview / Catalog / Sales / Customers / Marketing / System), active route indicator, smooth collapse animation.
+- **Color system**: Existing dark `#111827` ke replace kori semantic tokens diye — soft white background, indigo/violet primary accent, glassy cards, subtle shadows, rounded-xl, gradient KPI cards.
+- **Typography**: Inter, tighter tracking on headers, clear hierarchy.
+- **All colors via `src/styles.css` design tokens** — no hardcoded hex in components.
 
-## 1. Cleanup (purano shob bad)
+## Pages (sidebar order)
 
-Delete korbo:
-- `src/routes/admin.*` — shob current admin route files
-- `src/components/admin/*` — old shell, sidebar, integration components
-- Related orphan components (order list, drawers, web-orders) ja shudhu admin e use hocche
+**Overview**
+1. Dashboard — KPI cards (Revenue, Orders, Customers, Conversion %), sales chart (recharts, 14-day), low stock list, recent orders.
 
-Rakhbo:
-- `src/server/orders.functions.ts`, `customers.functions.ts`, `inventory.functions.ts` (already built — verify + extend if needed)
-- All DB tables, RLS policies, triggers
-- `BDCourierIntegration` logic (move into new structure)
+**Sales**
+2. Web Orders — existing, redesigned header/filters.
+3. Orders Pipeline — existing, redesigned status tabs (new / processing / shipped / delivered / cancelled).
+4. **Payments (NEW)** — derived from `orders` table: Order ID, Customer, Method (bKash/Nagad/Card/COD badge), Amount, Status, Date. Filters by method + status. CSV export. *No new table — cleaner & no data duplication.*
 
-## 2. New Admin Shell
+**Catalog**
+5. Products — existing, redesigned grid/list.
+6. Categories — existing.
+7. Inventory — existing low-stock view, polished.
 
-```text
-/admin                    -> Dashboard home
-/admin/orders             -> Order management (list + drawer)
-/admin/orders/$id         -> Full order page (deep link)
-/admin/products           -> Coming-soon stub
-/admin/customers          -> Coming-soon stub
-/admin/settings           -> Coming-soon stub
-```
+**Customers**
+8. Customers — existing.
+9. Reviews — existing.
 
-**Shell features:**
-- Collapsible sidebar with icons + labels, active state, role-based visibility
-- Top bar: global search, notification bell (low stock + new orders count), user menu
-- Command palette (⌘K) for quick navigation
-- Dark mode toggle
-- Toast system for all mutations
+**Marketing**
+10. **Discounts (NEW)** — UI on existing `coupons` table: list (code, type, value, used/limit, valid_until, status), create/edit/delete dialog, toggle active. *Uses existing table — no migration needed.*
 
-## 3. Dashboard (`/admin`)
+**Insights**
+11. Reports — sales summary table + **CSV export button**.
 
-**KPI strip (4 cards):**
-- Today's revenue + % vs yesterday (sparkline)
-- Today's orders + pending confirmations badge
-- AOV (avg order value) — 7d
-- Delivery success rate — 30d
+**System**
+12. Settings — store name, currency, timezone (uses existing `site_settings`). Logo upload via existing `product-images` bucket or notun general bucket if needed.
 
-**Charts row:**
-- Sales trend (line, last 30 days, switch 7d/30d/90d)
-- Top 5 products (horizontal bar)
+## Technical Plan
+- New file: `src/components/admin/AppSidebar.tsx` (shadcn Sidebar, grouped, collapsible).
+- Rewrite: `src/components/admin/AdminShell.tsx` to use SidebarProvider + AppSidebar + topbar with SidebarTrigger.
+- Update: `src/styles.css` — add admin-specific tokens (sidebar bg, accent, KPI gradients).
+- New files:
+  - `src/routes/admin.payments.tsx` — derived transactions view.
+  - `src/routes/admin.discounts.tsx` — coupons CRUD.
+- Light polish on existing admin pages (header style, card style) — no logic changes.
+- Reports CSV export button — client-side CSV generation from existing query.
 
-**Live activity feed (right rail):**
-- Recent orders (last 10, click → drawer)
-- Low stock alerts
-- Pending call queue count
-- Abandoned carts count
+## Out of scope
+- No DB migration (Payments derived; Discounts uses existing `coupons`).
+- No changes to checkout, orders logic, products schema.
+- No customer-facing site changes.
 
-**Quick actions (sticky top):**
-- Pending confirmations (count badge)
-- Ready to ship
-- Today's deliveries
-
-## 4. Order Management (`/admin/orders`)
-
-**Filter bar:**
-- Status tabs with live counts: All / New / Confirmed / Packaging / Shipped / Delivered / Returned / Cancelled
-- Search: phone / name / order ID / tracking
-- Date range, courier, priority, payment status filters
-- Saved views (My pending, Today's deliveries, etc.)
-
-**Table:**
-- Checkbox select, order ID, customer (name + phone), items count + total, status pill, courier, age (hours), priority flag, assigned-to avatar
-- Pagination (server-side, 25/50/100)
-- Row click → drawer; ID click → full page
-
-**Bulk action toolbar (appears on selection):**
-- Bulk status transition (with confirmation)
-- Bulk assign to staff
-- Bulk courier book (Pathao/Steadfast/Redx)
-- Bulk export CSV
-- Bulk print invoices
-
-**Slide-in drawer (Sheet, right side, 720px):**
-- Header: order ID, status pill, priority, quick close
-- Tabs:
-  - **Overview** — items list, totals, customer info (click-to-call, WhatsApp), shipping address, payment
-  - **Timeline** — full status history + activity log (who did what, when)
-  - **Notes** — internal notes thread, add new note inline
-  - **Courier** — book/track, BDCourier fraud check stats, tracking ID
-- Footer action bar: status transition buttons (only valid next states), priority toggle, payment status, assign
-
-**Full order page** (`/admin/orders/$id`) — same content, wider 2-column layout for power users.
-
-## 5. Courier Integration
-
-In drawer "Courier" tab:
-- Show BDCourier fraud risk before booking (cached 7 days)
-- One-click book to Pathao / Steadfast / Redx (creates `courier_shipments` row)
-- Live tracking status pull
-- Auto-update `tracking_number`, `courier_name`, `shipped_at` on success
-
-Phase 1 will ship UI + booking call shape; actual provider HTTP calls wired via existing `BD_COURIER_API_KEY` and stub providers ready for keys.
-
-## 6. Design Direction
-
-"Just awesome" interpretation:
-- **Aesthetic:** modern SaaS — soft shadows, rounded-xl, generous spacing, gradient accents on KPI cards
-- **Color:** semantic tokens in `src/styles.css` — define a fresh primary (deep indigo), success/warning/danger, status-specific tokens (new, confirmed, shipped, delivered, returned, cancelled)
-- **Motion:** subtle — drawer slide, fade-in tables, smooth tab transitions (framer-motion already in project)
-- **Density:** comfortable on dashboard, compact toggle on orders table
-- **Typography:** clear hierarchy, tabular nums for money/counts
-- **Empty states:** illustrated, with CTA
-- **Loading:** skeleton everywhere, never spinners on full page
-
-## 7. Build Order
-
-1. Define new design tokens + status color system in `styles.css`
-2. New admin shell (`AdminShell`, `AppSidebar`, `TopBar`, `CommandPalette`)
-3. Dashboard page (KPIs + charts + activity feed) — needs new `dashboard.functions.ts`
-4. Orders list page + drawer + full page
-5. Courier tab inside drawer
-6. Coming-soon stubs for products/customers/settings
-7. Polish: animations, empty states, loading skeletons, error boundaries
-
-## Technical Details
-
-- **Routes:** TanStack file-based, `admin.tsx` as layout with `<Outlet />`, child routes flat-dot named
-- **Data:** TanStack Query + `ensureQueryData` in loaders, `useSuspenseQuery` in components
-- **Server fns:** new `src/server/dashboard.functions.ts` for KPIs + activity; reuse existing orders/customers/inventory
-- **Auth gate:** `admin.tsx` layout checks `has_role(admin|customer_service|operations)` server-side, redirects unauthenticated to `/login`
-- **State:** URL params for filters/pagination (shareable), Query for cache, optimistic updates on status mutations
-- **Charts:** `recharts` (already standard)
-- **Tables:** custom built on shadcn `Table` with sticky header, virtualization later if needed
-
-Approve korle shuru kori — step 1 (cleanup + tokens + shell) diye start, then dashboard, then orders. Each step e preview e dekhabo.
+## Risks
+- Sidebar collapse + mobile bottom nav — mobile e shadcn Sidebar `offcanvas` mode use korbo, existing bottom nav remove korbo.
+- Touching 1 shared file (`AdminShell`) affects all admin pages — visual only, routing intact.
