@@ -1781,6 +1781,10 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       log_order_view: { Args: { p_order_id: string }; Returns: undefined }
+      mark_abandoned_cart_converted: {
+        Args: { _id: string; _order_id: string }
+        Returns: undefined
+      }
       recalc_product_rating: {
         Args: { _product_id: string }
         Returns: undefined
@@ -1795,6 +1799,23 @@ export type Database = {
           _reason?: string
         }
         Returns: undefined
+      }
+      upsert_abandoned_cart: {
+        Args: {
+          _cart_items: Json
+          _customer_email: string
+          _customer_name: string
+          _customer_phone: string
+          _id: string
+          _last_step: string
+          _session_id: string
+          _shipping_address: string
+          _shipping_city: string
+          _shipping_district: string
+          _shipping_thana: string
+          _subtotal: number
+        }
+        Returns: string
       }
     }
     Enums: {
