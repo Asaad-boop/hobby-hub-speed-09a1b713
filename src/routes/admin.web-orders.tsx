@@ -502,14 +502,120 @@ function WebOrdersPage() {
                   </TableCell>
                 </TableRow>
               )}
-              {!loading && rows.length === 0 && (
+              {!loading && !isIncompleteTab && rows.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={9} className="py-12 text-center text-sm text-muted-foreground">
                     No orders yet.
                   </TableCell>
                 </TableRow>
               )}
-              {!loading &&
+              {!loading && isIncompleteTab && abandonedRows.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={9} className="py-12 text-center text-sm text-muted-foreground">
+                    No incomplete checkouts.
+                  </TableCell>
+                </TableRow>
+              )}
+              {!loading && isIncompleteTab &&
+                abandonedRows.map((c) => {
+                  const dt = formatDateTime(c.updated_at || c.created_at);
+                  const phone = c.customer_phone || "";
+                  const name = c.customer_name || "—";
+                  const address = [c.shipping_address, c.shipping_city, c.shipping_district]
+                    .filter(Boolean)
+                    .join(", ");
+                  const cartItems = Array.isArray(c.cart_items) ? c.cart_items : [];
+                  return (
+                    <TableRow key={c.id} className="align-top">
+                      <TableCell className="pt-4">
+                        <Checkbox
+                          checked={selected.has(c.id)}
+                          onCheckedChange={() => toggleOne(c.id)}
+                        />
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <div className="text-sm font-medium text-foreground">{dt.date}</div>
+                        <div className="text-xs text-muted-foreground">{dt.time}</div>
+                        <div className="mt-1 text-[11px] text-muted-foreground font-mono">
+                          #{c.id.slice(0, 8)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">{phone || "—"}</span>
+                          {phone && /^01[3-9]\d{8}$/.test(phone.replace(/[^0-9]/g, "").slice(-11)) && (
+                            <>
+                              <a
+                                href={`tel:${phone}`}
+                                className="rounded-md p-1 text-emerald-600 hover:bg-emerald-50"
+                                aria-label="Call"
+                              >
+                                <Phone className="h-3.5 w-3.5" />
+                              </a>
+                              <a
+                                href={`https://wa.me/88${phone.replace(/[^0-9]/g, "")}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="rounded-md p-1 text-green-600 hover:bg-green-50"
+                                aria-label="WhatsApp"
+                              >
+                                <MessageCircle className="h-3.5 w-3.5" />
+                              </a>
+                            </>
+                          )}
+                        </div>
+                        <div className="mt-0.5 text-sm text-foreground">{name}</div>
+                        <div className="text-xs text-muted-foreground line-clamp-2 max-w-[220px]">
+                          {address || "—"}
+                        </div>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <span className="text-xs text-amber-700">
+                          Customer didn't finish checkout
+                        </span>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <div className="space-y-1.5">
+                          {cartItems.length === 0 && (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                          {cartItems.map((it, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                              <img
+                                src={it.image || "https://picsum.photos/seed/p/64"}
+                                alt={it.name}
+                                className="h-9 w-9 rounded-md border object-cover"
+                              />
+                              <div className="min-w-0 max-w-[160px]">
+                                <div className="text-[11px] text-muted-foreground line-clamp-1">
+                                  {it.name}
+                                </div>
+                                <div className="text-xs">Qty: {it.qty ?? it.quantity ?? 1}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <Badge variant="secondary" className="rounded-full text-[10px]">
+                          Incomplete
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Globe className="h-3.5 w-3.5" />
+                          main
+                        </div>
+                      </TableCell>
+                      <TableCell className="pt-3 text-right">
+                        <span className="text-xs font-medium tabular-nums">
+                          ৳{Number(c.subtotal ?? 0).toLocaleString("en-BD")}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              {!loading && !isIncompleteTab &&
                 rows.map((o) => {
                   const dt = formatDateTime(o.created_at);
                   const phone = o.shipping_phone || o.guest_phone || "";
