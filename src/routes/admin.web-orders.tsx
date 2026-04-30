@@ -776,7 +776,14 @@ function WebOrdersPage() {
         </div>
       </div>
 
-      <OrderDetailModal order={openOrder} onClose={() => setOpenOrder(null)} />
+      <OrderDetailModal
+        order={openOrder}
+        onClose={() => setOpenOrder(null)}
+        onSaved={() => {
+          setOpenOrder(null);
+          loadOrders();
+        }}
+      />
     </div>
   );
 }
