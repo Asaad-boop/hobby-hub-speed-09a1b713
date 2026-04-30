@@ -335,10 +335,10 @@ function Checkout() {
 
       // Mark the abandoned cart as converted so it disappears from "Incomplete".
       if (abandonedId) {
-        await supabase
-          .from("abandoned_carts")
-          .update({ is_converted: true, converted_order_id: order.id, updated_at: new Date().toISOString() })
-          .eq("id", abandonedId);
+        await supabase.rpc("mark_abandoned_cart_converted", {
+          _id: abandonedId,
+          _order_id: order.id,
+        } as never);
       }
 
       clear();
