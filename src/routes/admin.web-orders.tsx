@@ -1045,6 +1045,36 @@ function OrderDetailModal({
       return { ...f, items };
     });
 
+  const addItem = (p: ProductPick) => {
+    setForm((f) => {
+      if (!f) return f;
+      // If product already in list, just bump qty
+      const existingIdx = f.items.findIndex((it) => it.product_id === p.id && !it.variant_label);
+      if (existingIdx >= 0) {
+        const items = [...f.items];
+        items[existingIdx] = { ...items[existingIdx], quantity: items[existingIdx].quantity + 1 };
+        return { ...f, items };
+      }
+      return {
+        ...f,
+        items: [
+          ...f.items,
+          {
+            _isNew: true,
+            name: p.title,
+            image: p.image,
+            product_id: p.id,
+            variant_label: null,
+            quantity: 1,
+            unit_price: Number(p.price) || 0,
+          },
+        ],
+      };
+    });
+    setPickerOpen(false);
+    setPickerQuery("");
+  };
+
   const itemsSubtotal = form.items.reduce(
     (sum, it) => sum + (Number(it.unit_price) || 0) * (Number(it.quantity) || 0),
     0,
