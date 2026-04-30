@@ -366,7 +366,7 @@ function WebOrdersPage() {
   const tabCounts = useMemo(() => {
     const counts: Record<TabKey, number> = {
       processing: 0,
-      incomplete: 0,
+      incomplete: abandoned.length,
       good_no_response: 0,
       no_response: 0,
       advance_payment: 0,
@@ -377,25 +377,31 @@ function WebOrdersPage() {
     };
     for (const o of orders) {
       for (const t of TABS) {
-        if (t.key === "all") continue;
+        if (t.key === "all" || t.key === "incomplete") continue;
         if (matchesTab(o, t.key)) counts[t.key]++;
       }
     }
     return counts;
-  }, [orders]);
+  }, [orders, abandoned]);
+
+  const isIncompleteTab = tab === "incomplete";
 
   // Apply tab filter
   const filteredOrders = useMemo(
-    () => orders.filter((o) => matchesTab(o, tab)),
-    [orders, tab],
+    () => (isIncompleteTab ? [] : orders.filter((o) => matchesTab(o, tab))),
+    [orders, tab, isIncompleteTab],
   );
 
-  const total = filteredOrders.length;
+  const total = isIncompleteTab ? abandoned.length : filteredOrders.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const rows = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filteredOrders.slice(start, start + pageSize);
   }, [page, pageSize, filteredOrders]);
+  const abandonedRows = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return abandoned.slice(start, start + pageSize);
+  }, [page, pageSize, abandoned]);
 
   // BD Courier auto-fetch disabled — will be re-enabled later when API is configured.
 
