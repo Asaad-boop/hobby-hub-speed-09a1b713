@@ -31,9 +31,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { generateInvoicePDF } from "@/lib/pdf/invoice";
 import { generatePickingListPDF } from "@/lib/pdf/picking-list";
 import { generatePackingListPDF } from "@/lib/pdf/packing-list";
+import { InvoicePreviewDialog } from "@/components/admin/InvoicePreviewDialog";
 
 export const Route = createFileRoute("/admin/order-list")({
   component: OrderListPage,
