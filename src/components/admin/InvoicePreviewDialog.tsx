@@ -416,11 +416,33 @@ export function InvoicePreviewDialog({
                         <tr key={it.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
                           <td style={td()}>{i + 1}.</td>
                           <td style={{ ...td(), paddingRight: 6 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                              {img && (
-                                <img src={img} alt="" style={{ width: 24, height: 24, objectFit: "cover", borderRadius: 3 }} />
-                              )}
-                              <span>{it.name}</span>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              <div
+                                style={{
+                                  width: 32,
+                                  height: 32,
+                                  flexShrink: 0,
+                                  borderRadius: 4,
+                                  border: "1px solid #e5e7eb",
+                                  background: "#f9fafb",
+                                  overflow: "hidden",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                {img ? (
+                                  <img
+                                    src={img}
+                                    alt=""
+                                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                    crossOrigin="anonymous"
+                                  />
+                                ) : (
+                                  <span style={{ fontSize: 8, color: "#bbb" }}>—</span>
+                                )}
+                              </div>
+                              <span style={{ lineHeight: 1.25 }}>{it.name}</span>
                             </div>
                           </td>
                           <td style={{ ...td(), textAlign: "center", color: "#777" }}>{it.variant_label ?? ""}</td>
