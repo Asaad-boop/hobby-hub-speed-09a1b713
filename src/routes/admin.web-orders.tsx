@@ -1061,7 +1061,7 @@ function OrderDetailModal({
 
       const { error: orderErr } = await supabase
         .from("orders")
-        .update(orderUpdate)
+        .update(orderUpdate as never)
         .eq("id", order.id);
       if (orderErr) throw new Error(orderErr.message);
 
