@@ -370,64 +370,7 @@ function WebOrdersPage() {
     return filteredOrders.slice(start, start + pageSize);
   }, [page, pageSize, filteredOrders]);
 
-  // Auto-fetch courier stats for visible rows (cache-first, server-side)
-  useEffect(() => {
-    const phones = Array.from(
-      new Set(
-        rows
-          .map((r) => cleanPhone(r.shipping_phone || r.guest_phone))
-          .filter((p): p is string => !!p),
-      ),
-    ).filter((p) => courierStats[p] === undefined);
-    if (phones.length === 0) return;
-    let cancelled = false;
-    const queue = [...phones];
-    const CONCURRENCY = 3;
-    setCourierStats((prev) => {
-      const next = { ...prev };
-      phones.forEach((p) => {
-        next[p] = { total: 0, success: 0, rate: 0, loading: true };
-      });
-      return next;
-    });
-    const worker = async () => {
-      while (!cancelled) {
-        const phone = queue.shift();
-        if (!phone) return;
-        try {
-          const res = await fetchStatsFn({ data: { phone } });
-          if (cancelled) return;
-          if (res.ok && res.data) {
-            setCourierStats((prev) => ({
-              ...prev,
-              [phone]: {
-                total: res.data!.overall_total,
-                success: res.data!.overall_success,
-                rate: Number(res.data!.overall_success_rate),
-                loading: false,
-                stale: res.stale,
-                error: res.stale ? res.error : undefined,
-              },
-            }));
-          } else {
-            setCourierStats((prev) => ({
-              ...prev,
-              [phone]: { total: 0, success: 0, rate: 0, loading: false, error: res.error },
-            }));
-          }
-        } catch (e) {
-          if (cancelled) return;
-          setCourierStats((prev) => ({
-            ...prev,
-            [phone]: { total: 0, success: 0, rate: 0, loading: false, error: (e as Error).message },
-          }));
-        }
-      }
-    };
-    Array.from({ length: Math.min(CONCURRENCY, phones.length) }).forEach(() => void worker());
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows]);
+  // BD Courier auto-fetch disabled — will be re-enabled later when API is configured.
 
   const allChecked = rows.length > 0 && rows.every((r) => selected.has(r.id));
   const toggleAll = () => {
@@ -512,7 +455,6 @@ function WebOrdersPage() {
                 <TableHead>Customer</TableHead>
                 <TableHead>Note</TableHead>
                 <TableHead>Order Items</TableHead>
-                <TableHead>Success Rate</TableHead>
                 
                 <TableHead>Tags</TableHead>
                 <TableHead>Site</TableHead>
@@ -522,7 +464,7 @@ function WebOrdersPage() {
             <TableBody>
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={10} className="py-12 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={9} className="py-12 text-center text-sm text-muted-foreground">
                     <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />
                     Loading orders…
                   </TableCell>
@@ -530,7 +472,7 @@ function WebOrdersPage() {
               )}
               {!loading && rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={10} className="py-12 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={9} className="py-12 text-center text-sm text-muted-foreground">
                     No orders yet.
                   </TableCell>
                 </TableRow>
@@ -624,76 +566,6 @@ function WebOrdersPage() {
                             </div>
                           ))}
                         </div>
-                      </TableCell>
-                      <TableCell className="pt-3">
-                        {(() => {
-                          const phoneKey = cleanPhone(o.shipping_phone || o.guest_phone);
-                          const stat = phoneKey ? courierStats[phoneKey] : undefined;
-                          if (!phoneKey) return <span className="text-xs text-muted-foreground">No phone</span>;
-                          if (!stat || stat.loading)
-                            return (
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Checking…
-                              </div>
-                            );
-                          if (stat.error && stat.total === 0)
-                            return (
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-destructive" title={stat.error}>
-                                  {/limit|quota|429/i.test(stat.error) ? "API limit" : "API error"}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => refreshCourierStat(phoneKey, true)}
-                                  className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                                  title={stat.error}
-                                >
-                                  <RefreshCw className="h-3 w-3" />
-                                </button>
-                              </div>
-                            );
-                          if (stat.total === 0)
-                            return (
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground">No history</span>
-                                <button
-                                  type="button"
-                                  onClick={() => refreshCourierStat(phoneKey, true)}
-                                  className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                                >
-                                  <RefreshCw className="h-3 w-3" />
-                                </button>
-                              </div>
-                            );
-                          return (
-                            <div className="flex items-center gap-2">
-                              <div className="relative flex h-10 w-10 items-center justify-center">
-                                <CircularProgress percent={stat.rate} />
-                                <span className="absolute text-[10px] font-semibold">
-                                  {Math.round(stat.rate)}%
-                                </span>
-                              </div>
-                              <div className="leading-tight">
-                                <div className="text-xs text-muted-foreground">{stat.total} orders</div>
-                                <div className="flex items-center gap-0.5 text-xs">
-                                  <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                                  {stat.success}/{stat.total}
-                                </div>
-                                {stat.stale && (
-                                  <div className="text-[10px] text-amber-600" title={stat.error}>cached</div>
-                                )}
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => refreshCourierStat(phoneKey, true)}
-                                className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                                title="Force refresh from BD Courier"
-                              >
-                                <RefreshCw className="h-3 w-3" />
-                              </button>
-                            </div>
-                          );
-                        })()}
                       </TableCell>
                       <TableCell className="pt-3">
                         <div className="flex flex-wrap items-center gap-1">
