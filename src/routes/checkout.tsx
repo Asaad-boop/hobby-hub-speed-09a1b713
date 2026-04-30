@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useProducts } from "@/lib/products";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, getClientSessionId } from "@/integrations/supabase/client";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { validateCoupon, type Coupon } from "@/lib/coupons";
 import { getOrderAttributionPayload } from "@/lib/session-tracking";
@@ -98,6 +98,62 @@ function Checkout() {
       }
     })();
   }, []);
+
+  // Persist partial checkout info as an "abandoned cart" so admins can
+  // recover incomplete orders. Debounced — only fires when the customer has
+  // typed at least a name or phone.
+  const [abandonedId, setAbandonedId] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (items.length === 0) return;
+    const hasInfo = form.name.trim() || form.phone.trim() || form.address.trim();
+    if (!hasInfo) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const sid = getClientSessionId();
+        const cartItems = items.map((i) => ({
+          product_id: i.product.id,
+          name: i.product.title,
+          image: i.product.image,
+          price: i.product.price,
+          qty: i.qty,
+          variant_id: i.variantId ?? null,
+          variant_label: i.variantLabel ?? null,
+        }));
+        const payload = {
+          user_id: session?.user.id ?? null,
+          session_id: session ? null : sid,
+          customer_name: form.name.trim() || null,
+          customer_phone: form.phone.trim() || null,
+          shipping_address: form.address.trim() || null,
+          shipping_city: form.city.trim() || null,
+          shipping_district: form.district || null,
+          subtotal: total,
+          cart_items: cartItems,
+          last_step: "checkout",
+          is_converted: false,
+          updated_at: new Date().toISOString(),
+        };
+        if (abandonedId) {
+          await supabase.from("abandoned_carts").update(payload).eq("id", abandonedId);
+        } else {
+          const { data, error } = await supabase
+            .from("abandoned_carts")
+            .insert(payload)
+            .select("id")
+            .single();
+          if (!error && data) setAbandonedId(data.id);
+        }
+      } catch {
+        // best-effort — never block checkout
+      }
+    }, 1200);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.name, form.phone, form.address, form.city, form.district, items, total]);
 
   const bumpItem = allProducts[1] ?? allProducts[0];
   const bumpPrice = 199;
@@ -286,6 +342,14 @@ function Checkout() {
       }
 
       // Telegram notification is sent automatically by the DB trigger (notify_telegram_on_new_order)
+
+      // Mark the abandoned cart as converted so it disappears from "Incomplete".
+      if (abandonedId) {
+        await supabase
+          .from("abandoned_carts")
+          .update({ is_converted: true, converted_order_id: order.id, updated_at: new Date().toISOString() })
+          .eq("id", abandonedId);
+      }
 
       clear();
       toast.success("Order placed! We'll call you to confirm soon.");

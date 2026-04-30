@@ -248,8 +248,30 @@ function matchesTab(o: OrderRow, tab: TabKey): boolean {
   }
 }
 
+type AbandonedCart = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  customer_name: string | null;
+  customer_phone: string | null;
+  shipping_address: string | null;
+  shipping_city: string | null;
+  shipping_district: string | null;
+  subtotal: number;
+  cart_items: Array<{
+    product_id?: string;
+    name: string;
+    image?: string | null;
+    price?: number;
+    qty?: number;
+    quantity?: number;
+  }>;
+  is_converted: boolean;
+};
+
 function WebOrdersPage() {
   const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [abandoned, setAbandoned] = useState<AbandonedCart[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
@@ -299,26 +321,39 @@ function WebOrdersPage() {
 
   async function loadOrders() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("orders")
-      .select(
-        `id, created_at, updated_at, auto_call_enabled, call_status, call_attempt_count,
-         shipping_name, shipping_phone, shipping_address, shipping_city, shipping_district,
-         shipping_thana, alternate_phone, guest_name, guest_phone, guest_email, is_guest_order,
-         latest_note, admin_notes, customer_note, internal_note, tags, order_tags,
-         source_website, source, total, subtotal, shipping_fee, discount_amount, advance_amount,
-         coupon_code, payment_method, delivery_method, courier_name, tracking_number,
-         status, confirmation_status, web_status,
-         order_items ( id, name, image, quantity, product_id, price, unit_price, variant_label, line_total )`,
-      )
-      .order("created_at", { ascending: false })
-      .limit(200);
+    const [ordersRes, abandonedRes] = await Promise.all([
+      supabase
+        .from("orders")
+        .select(
+          `id, created_at, updated_at, auto_call_enabled, call_status, call_attempt_count,
+           shipping_name, shipping_phone, shipping_address, shipping_city, shipping_district,
+           shipping_thana, alternate_phone, guest_name, guest_phone, guest_email, is_guest_order,
+           latest_note, admin_notes, customer_note, internal_note, tags, order_tags,
+           source_website, source, total, subtotal, shipping_fee, discount_amount, advance_amount,
+           coupon_code, payment_method, delivery_method, courier_name, tracking_number,
+           status, confirmation_status, web_status,
+           order_items ( id, name, image, quantity, product_id, price, unit_price, variant_label, line_total )`,
+        )
+        .order("created_at", { ascending: false })
+        .limit(200),
+      supabase
+        .from("abandoned_carts")
+        .select(
+          "id, created_at, updated_at, customer_name, customer_phone, shipping_address, shipping_city, shipping_district, subtotal, cart_items, is_converted",
+        )
+        .eq("is_converted", false)
+        .order("updated_at", { ascending: false })
+        .limit(200),
+    ]);
 
-    if (error) {
-      toast.error("Failed to load orders: " + error.message);
+    if (ordersRes.error) {
+      toast.error("Failed to load orders: " + ordersRes.error.message);
       setOrders([]);
     } else {
-      setOrders((data ?? []) as unknown as OrderRow[]);
+      setOrders((ordersRes.data ?? []) as unknown as OrderRow[]);
+    }
+    if (!abandonedRes.error) {
+      setAbandoned((abandonedRes.data ?? []) as unknown as AbandonedCart[]);
     }
     setLoading(false);
   }
@@ -331,7 +366,7 @@ function WebOrdersPage() {
   const tabCounts = useMemo(() => {
     const counts: Record<TabKey, number> = {
       processing: 0,
-      incomplete: 0,
+      incomplete: abandoned.length,
       good_no_response: 0,
       no_response: 0,
       advance_payment: 0,
@@ -342,25 +377,31 @@ function WebOrdersPage() {
     };
     for (const o of orders) {
       for (const t of TABS) {
-        if (t.key === "all") continue;
+        if (t.key === "all" || t.key === "incomplete") continue;
         if (matchesTab(o, t.key)) counts[t.key]++;
       }
     }
     return counts;
-  }, [orders]);
+  }, [orders, abandoned]);
+
+  const isIncompleteTab = tab === "incomplete";
 
   // Apply tab filter
   const filteredOrders = useMemo(
-    () => orders.filter((o) => matchesTab(o, tab)),
-    [orders, tab],
+    () => (isIncompleteTab ? [] : orders.filter((o) => matchesTab(o, tab))),
+    [orders, tab, isIncompleteTab],
   );
 
-  const total = filteredOrders.length;
+  const total = isIncompleteTab ? abandoned.length : filteredOrders.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const rows = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filteredOrders.slice(start, start + pageSize);
   }, [page, pageSize, filteredOrders]);
+  const abandonedRows = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return abandoned.slice(start, start + pageSize);
+  }, [page, pageSize, abandoned]);
 
   // BD Courier auto-fetch disabled — will be re-enabled later when API is configured.
 
@@ -461,14 +502,120 @@ function WebOrdersPage() {
                   </TableCell>
                 </TableRow>
               )}
-              {!loading && rows.length === 0 && (
+              {!loading && !isIncompleteTab && rows.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={9} className="py-12 text-center text-sm text-muted-foreground">
                     No orders yet.
                   </TableCell>
                 </TableRow>
               )}
-              {!loading &&
+              {!loading && isIncompleteTab && abandonedRows.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={9} className="py-12 text-center text-sm text-muted-foreground">
+                    No incomplete checkouts.
+                  </TableCell>
+                </TableRow>
+              )}
+              {!loading && isIncompleteTab &&
+                abandonedRows.map((c) => {
+                  const dt = formatDateTime(c.updated_at || c.created_at);
+                  const phone = c.customer_phone || "";
+                  const name = c.customer_name || "—";
+                  const address = [c.shipping_address, c.shipping_city, c.shipping_district]
+                    .filter(Boolean)
+                    .join(", ");
+                  const cartItems = Array.isArray(c.cart_items) ? c.cart_items : [];
+                  return (
+                    <TableRow key={c.id} className="align-top">
+                      <TableCell className="pt-4">
+                        <Checkbox
+                          checked={selected.has(c.id)}
+                          onCheckedChange={() => toggleOne(c.id)}
+                        />
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <div className="text-sm font-medium text-foreground">{dt.date}</div>
+                        <div className="text-xs text-muted-foreground">{dt.time}</div>
+                        <div className="mt-1 text-[11px] text-muted-foreground font-mono">
+                          #{c.id.slice(0, 8)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">{phone || "—"}</span>
+                          {phone && /^01[3-9]\d{8}$/.test(phone.replace(/[^0-9]/g, "").slice(-11)) && (
+                            <>
+                              <a
+                                href={`tel:${phone}`}
+                                className="rounded-md p-1 text-emerald-600 hover:bg-emerald-50"
+                                aria-label="Call"
+                              >
+                                <Phone className="h-3.5 w-3.5" />
+                              </a>
+                              <a
+                                href={`https://wa.me/88${phone.replace(/[^0-9]/g, "")}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="rounded-md p-1 text-green-600 hover:bg-green-50"
+                                aria-label="WhatsApp"
+                              >
+                                <MessageCircle className="h-3.5 w-3.5" />
+                              </a>
+                            </>
+                          )}
+                        </div>
+                        <div className="mt-0.5 text-sm text-foreground">{name}</div>
+                        <div className="text-xs text-muted-foreground line-clamp-2 max-w-[220px]">
+                          {address || "—"}
+                        </div>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <span className="text-xs text-amber-700">
+                          Customer didn't finish checkout
+                        </span>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <div className="space-y-1.5">
+                          {cartItems.length === 0 && (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                          {cartItems.map((it, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                              <img
+                                src={it.image || "https://picsum.photos/seed/p/64"}
+                                alt={it.name}
+                                className="h-9 w-9 rounded-md border object-cover"
+                              />
+                              <div className="min-w-0 max-w-[160px]">
+                                <div className="text-[11px] text-muted-foreground line-clamp-1">
+                                  {it.name}
+                                </div>
+                                <div className="text-xs">Qty: {it.qty ?? it.quantity ?? 1}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <Badge variant="secondary" className="rounded-full text-[10px]">
+                          Incomplete
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="pt-3">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Globe className="h-3.5 w-3.5" />
+                          main
+                        </div>
+                      </TableCell>
+                      <TableCell className="pt-3 text-right">
+                        <span className="text-xs font-medium tabular-nums">
+                          ৳{Number(c.subtotal ?? 0).toLocaleString("en-BD")}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              {!loading && !isIncompleteTab &&
                 rows.map((o) => {
                   const dt = formatDateTime(o.created_at);
                   const phone = o.shipping_phone || o.guest_phone || "";

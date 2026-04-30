@@ -5,6 +5,24 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://bgsspipkjeuceftuatue.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnc3NwaXBramV1Y2VmdHVhdHVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNDcyMzIsImV4cCI6MjA5MTgyMzIzMn0.h6aRTBUhTvEvKCx8M-lvyA2BCBQbhvWMWKgn8dIyilc";
 
+const SESSION_KEY = "hs_presence_sid";
+
+function getOrCreateSessionId(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    let sid = sessionStorage.getItem(SESSION_KEY);
+    if (!sid) {
+      sid = crypto.randomUUID();
+      sessionStorage.setItem(SESSION_KEY, sid);
+    }
+    return sid;
+  } catch {
+    return null;
+  }
+}
+
+const sessionId = getOrCreateSessionId();
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
@@ -13,5 +31,10 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: typeof window !== "undefined" ? window.localStorage : undefined,
     persistSession: typeof window !== "undefined",
     autoRefreshToken: typeof window !== "undefined",
-  }
+  },
+  global: sessionId ? { headers: { "x-session-id": sessionId } } : undefined,
 });
+
+export function getClientSessionId(): string | null {
+  return sessionId;
+}
