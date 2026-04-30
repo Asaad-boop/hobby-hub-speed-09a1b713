@@ -464,7 +464,7 @@ function WebOrdersPage() {
             <TableBody>
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={10} className="py-12 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={9} className="py-12 text-center text-sm text-muted-foreground">
                     <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />
                     Loading orders…
                   </TableCell>
@@ -472,7 +472,7 @@ function WebOrdersPage() {
               )}
               {!loading && rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={10} className="py-12 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={9} className="py-12 text-center text-sm text-muted-foreground">
                     No orders yet.
                   </TableCell>
                 </TableRow>
