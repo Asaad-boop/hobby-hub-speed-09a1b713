@@ -370,64 +370,7 @@ function WebOrdersPage() {
     return filteredOrders.slice(start, start + pageSize);
   }, [page, pageSize, filteredOrders]);
 
-  // Auto-fetch courier stats for visible rows (cache-first, server-side)
-  useEffect(() => {
-    const phones = Array.from(
-      new Set(
-        rows
-          .map((r) => cleanPhone(r.shipping_phone || r.guest_phone))
-          .filter((p): p is string => !!p),
-      ),
-    ).filter((p) => courierStats[p] === undefined);
-    if (phones.length === 0) return;
-    let cancelled = false;
-    const queue = [...phones];
-    const CONCURRENCY = 3;
-    setCourierStats((prev) => {
-      const next = { ...prev };
-      phones.forEach((p) => {
-        next[p] = { total: 0, success: 0, rate: 0, loading: true };
-      });
-      return next;
-    });
-    const worker = async () => {
-      while (!cancelled) {
-        const phone = queue.shift();
-        if (!phone) return;
-        try {
-          const res = await fetchStatsFn({ data: { phone } });
-          if (cancelled) return;
-          if (res.ok && res.data) {
-            setCourierStats((prev) => ({
-              ...prev,
-              [phone]: {
-                total: res.data!.overall_total,
-                success: res.data!.overall_success,
-                rate: Number(res.data!.overall_success_rate),
-                loading: false,
-                stale: res.stale,
-                error: res.stale ? res.error : undefined,
-              },
-            }));
-          } else {
-            setCourierStats((prev) => ({
-              ...prev,
-              [phone]: { total: 0, success: 0, rate: 0, loading: false, error: res.error },
-            }));
-          }
-        } catch (e) {
-          if (cancelled) return;
-          setCourierStats((prev) => ({
-            ...prev,
-            [phone]: { total: 0, success: 0, rate: 0, loading: false, error: (e as Error).message },
-          }));
-        }
-      }
-    };
-    Array.from({ length: Math.min(CONCURRENCY, phones.length) }).forEach(() => void worker());
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows]);
+  // BD Courier auto-fetch disabled — will be re-enabled later when API is configured.
 
   const allChecked = rows.length > 0 && rows.every((r) => selected.has(r.id));
   const toggleAll = () => {
