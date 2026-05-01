@@ -629,7 +629,7 @@ function OrderListPage() {
                           <div className="min-w-0">
                             <div className="flex items-center gap-1 truncate text-sm font-medium">
                               <User className="h-3 w-3 shrink-0 text-muted-foreground" />
-                              <span className="truncate">{o.shipping_name ?? "—"}</span>
+                              <span className="truncate"><Highlight text={o.shipping_name} query={debouncedSearch} /></span>
                             </div>
                             <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground">
                               <span className="inline-flex items-center gap-0.5">
