@@ -338,21 +338,13 @@ export function InvoicePreviewDialog({
             >
               {/* Header */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 6 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ display: "flex", alignItems: "center" }}>
                   <img
                     src={settings?.logo_url || logoImg}
                     alt="HobbyShop"
-                    style={{ width: 52, height: 52, objectFit: "contain" }}
+                    style={{ height: 56, width: "auto", objectFit: "contain", display: "block" }}
                     crossOrigin="anonymous"
                   />
-                  <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                    <div style={{ fontSize: 22, fontWeight: 900, lineHeight: 1, letterSpacing: "-0.02em", color: "#000" }}>
-                      {settings?.site_title ?? "HobbyShop"}
-                    </div>
-                    <div style={{ fontSize: 10, fontStyle: "italic", color: "#777", marginTop: 3 }}>
-                      {settings?.site_tagline ?? "Touch Your Dream"}
-                    </div>
-                  </div>
                 </div>
                 <div style={{ textAlign: "right", fontSize: 9 }}>
                   <div style={{ fontWeight: 700 }}>HQ</div>
