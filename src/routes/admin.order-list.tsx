@@ -821,16 +821,16 @@ function OrderListPage() {
               Sync
             </Button>
 
-            {/* Label print */}
+            {/* Packing slips PDF (combined) */}
             <Button
               size="sm"
               variant="outline"
               className="h-8 gap-1.5"
-              onClick={() => printPackingBulk([...selected])}
-              title="Print packing labels"
+              onClick={() => printPackingSlips([...selected])}
+              title="Export packing slips PDF (address, COD, items)"
             >
               <Printer className="h-3.5 w-3.5" />
-              Labels
+              Slips
             </Button>
 
             <Button
