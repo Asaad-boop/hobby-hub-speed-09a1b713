@@ -148,19 +148,21 @@ function LiveBar() {
       const since30m = new Date(Date.now() - 30 * 60_000).toISOString();
 
       const [activeVisitors, activeCarts, activeCheckouts, recentPurchases, productViews] = await Promise.all([
+        // active_sessions PK is session_id, so each row is already one unique
+        // visitor — no extra dedupe needed here.
         supabase
           .from("active_sessions")
-          .select("session_id,path", { count: "exact" })
+          .select("session_id,path")
           .gte("last_seen_at", since60),
         supabase
           .from("abandoned_carts")
-          .select("id", { count: "exact", head: true })
+          .select("session_id,user_id,id")
           .gte("updated_at", since30m)
           .eq("is_converted", false)
           .or("last_step.is.null,last_step.neq.checkout"),
         supabase
           .from("abandoned_carts")
-          .select("id", { count: "exact", head: true })
+          .select("session_id,user_id,id")
           .gte("updated_at", since30m)
           .eq("is_converted", false)
           .eq("last_step", "checkout"),
@@ -168,24 +170,40 @@ function LiveBar() {
           .from("orders")
           .select("id", { count: "exact", head: true })
           .gte("created_at", since30m),
+        // Pull session_id so we can count *distinct* viewers, not raw rows.
         supabase
           .from("page_views")
-          .select("id", { count: "exact", head: true })
+          .select("session_id")
           .gte("created_at", since30m)
-          .eq("page_type", "product"),
+          .eq("page_type", "product")
+          .limit(5000),
       ]);
 
-      const visitors = activeVisitors.data ?? [];
+      const visitorRows = activeVisitors.data ?? [];
+      // Defensive: dedupe by session_id even though PK should guarantee it.
+      const uniqVisitors = new Map<string, { path: string | null }>();
+      for (const v of visitorRows) {
+        if (!uniqVisitors.has(v.session_id)) {
+          uniqVisitors.set(v.session_id, { path: v.path ?? null });
+        }
+      }
+      const visitors = Array.from(uniqVisitors.values());
       const onProduct = visitors.filter((v) => v.path?.startsWith("/product/")).length;
       const onCheckout = visitors.filter((v) => v.path?.startsWith("/checkout")).length;
       const onHome = visitors.filter((v) => v.path === "/").length;
 
+      const dedupeKey = (r: { session_id: string | null; user_id: string | null; id: string }) =>
+        r.user_id || r.session_id || r.id;
+      const cartSet = new Set((activeCarts.data ?? []).map(dedupeKey));
+      const checkoutSet = new Set((activeCheckouts.data ?? []).map(dedupeKey));
+      const productViewSessions = new Set((productViews.data ?? []).map((r) => r.session_id));
+
       return {
         live: visitors.length,
-        carts: activeCarts.count ?? 0,
-        checkouts: activeCheckouts.count ?? 0,
+        carts: cartSet.size,
+        checkouts: checkoutSet.size,
         purchases30m: recentPurchases.count ?? 0,
-        productViews30m: productViews.count ?? 0,
+        productViews30m: productViewSessions.size,
         onProduct,
         onCheckout,
         onHome,
@@ -457,7 +475,7 @@ function ActivityChart({ range }: { range: Range }) {
     refetchInterval: range === "live" ? 10_000 : 60_000,
     queryFn: async () => {
       const [views, orders] = await Promise.all([
-        supabase.from("page_views").select("created_at").gte("created_at", from.toISOString()).lte("created_at", to.toISOString()).limit(5000),
+        supabase.from("page_views").select("session_id,created_at").gte("created_at", from.toISOString()).lte("created_at", to.toISOString()).limit(10000),
         supabase.from("orders").select("created_at,total").gte("created_at", from.toISOString()).lte("created_at", to.toISOString()).limit(2000),
       ]);
 
@@ -468,10 +486,16 @@ function ActivityChart({ range }: { range: Range }) {
         const t = from.getTime() + i * step;
         return { time: t, label: formatBucket(new Date(t), range), visitors: 0, orders: 0 };
       });
+      // Distinct sessions per bucket so refresh storms / StrictMode dupes
+      // don't inflate the visitor line.
+      const seenPerBucket: Array<Set<string>> = Array.from({ length: buckets }, () => new Set());
 
       for (const v of views.data ?? []) {
         const idx = Math.min(buckets - 1, Math.floor((new Date(v.created_at).getTime() - from.getTime()) / step));
-        if (idx >= 0) out[idx].visitors += 1;
+        if (idx >= 0 && v.session_id && !seenPerBucket[idx].has(v.session_id)) {
+          seenPerBucket[idx].add(v.session_id);
+          out[idx].visitors += 1;
+        }
       }
       for (const o of orders.data ?? []) {
         const idx = Math.min(buckets - 1, Math.floor((new Date(o.created_at).getTime() - from.getTime()) / step));
@@ -529,12 +553,17 @@ function DeviceBreakdown({ range }: { range: Range }) {
     queryFn: async () => {
       const { data: rows } = await supabase
         .from("page_views")
-        .select("device_type")
+        .select("session_id,device_type")
         .gte("created_at", from.toISOString())
         .lte("created_at", to.toISOString())
-        .limit(5000);
+        .limit(10000);
+      // Count one device per session (first seen wins) so repeat page views
+      // from the same visitor don't skew the device split.
       const counts: Record<string, number> = { mobile: 0, desktop: 0, tablet: 0 };
+      const seen = new Set<string>();
       for (const r of rows ?? []) {
+        if (!r.session_id || seen.has(r.session_id)) continue;
+        seen.add(r.session_id);
         const k = (r.device_type as string) || "desktop";
         counts[k] = (counts[k] ?? 0) + 1;
       }
@@ -601,15 +630,24 @@ function TopProducts({ range }: { range: Range }) {
     queryFn: async () => {
       const { data: views } = await supabase
         .from("page_views")
-        .select("product_id")
+        .select("session_id,product_id")
         .eq("page_type", "product")
         .not("product_id", "is", null)
         .gte("created_at", from.toISOString())
         .lte("created_at", to.toISOString())
-        .limit(5000);
+        .limit(10000);
 
+      // Count distinct sessions per product so a visitor reloading the same
+      // PDP 5 times doesn't push it to the top of the list.
       const tally: Record<string, number> = {};
-      for (const v of views ?? []) if (v.product_id) tally[v.product_id] = (tally[v.product_id] ?? 0) + 1;
+      const seen = new Set<string>();
+      for (const v of views ?? []) {
+        if (!v.product_id || !v.session_id) continue;
+        const key = `${v.session_id}|${v.product_id}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        tally[v.product_id] = (tally[v.product_id] ?? 0) + 1;
+      }
 
       const top = Object.entries(tally)
         .sort((a, b) => b[1] - a[1])
