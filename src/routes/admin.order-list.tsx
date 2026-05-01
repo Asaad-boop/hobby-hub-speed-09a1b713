@@ -436,14 +436,18 @@ function OrderListPage() {
                         <div className="flex flex-wrap items-center justify-end gap-1">
                           <Button
                             size="sm"
-                            variant="outline"
+                            variant="default"
                             className="h-7 px-2 text-[11px]"
-                            onClick={() => bookCourier(o.id)}
-                            disabled={busyId === o.id}
-                            title="Send to courier (mark Ready to ship)"
+                            onClick={() => sendToPathao(o.id)}
+                            disabled={busyId === o.id || !!o.tracking_number}
+                            title={
+                              o.tracking_number
+                                ? `Already booked: ${o.tracking_number}`
+                                : "Send to Pathao courier"
+                            }
                           >
                             <Truck className="h-3 w-3" />
-                            Courier
+                            {o.tracking_number ? "Booked" : "Pathao"}
                           </Button>
                           <Button
                             size="sm"
