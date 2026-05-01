@@ -578,21 +578,22 @@ function ProductPage() {
             const variantOpts = selectedVariant
               ? { variantId: selectedVariant.id, variantLabel: variantSelectionLabel }
               : undefined;
+            // Add the product to cart at its ORIGINAL price. The bundle
+            // (qty-based) discount is applied as a separate line at checkout
+            // so it appears as a real "Discount" in the order/billing.
             const handleAdd = () => {
               if (variantBlocksAddToCart) {
                 toast.error(hasVariants && !allTypesSelected ? "Select all options first" : "Out of stock");
                 return;
               }
-              const discounted: typeof product = { ...product, price: unitPrice };
-              add(discounted, qty, variantOpts);
+              add(product, qty, variantOpts);
             };
             const handleBuy = () => {
               if (variantBlocksAddToCart) {
                 toast.error(hasVariants && !allTypesSelected ? "Select all options first" : "Out of stock");
                 return;
               }
-              const discounted: typeof product = { ...product, price: unitPrice };
-              add(discounted, qty, { silent: true, ...(variantOpts ?? {}) });
+              add(product, qty, { silent: true, ...(variantOpts ?? {}) });
               navigate({ to: "/checkout" });
             };
             return (
