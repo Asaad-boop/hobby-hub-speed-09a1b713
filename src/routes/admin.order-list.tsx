@@ -16,7 +16,6 @@ import {
   Phone,
   MapPin,
   User,
-  TrendingUp,
   Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
