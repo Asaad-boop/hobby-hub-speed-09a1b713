@@ -14,6 +14,7 @@ import {
   Sparkles,
   ClipboardList,
   Activity,
+  Users,
 } from "lucide-react";
 import {
   Sidebar,
@@ -73,7 +74,10 @@ const GROUPS: NavGroup[] = [
   },
   {
     label: "System",
-    items: [{ title: "Settings", url: "/admin/settings", icon: Settings }],
+    items: [
+      { title: "Staff & Permissions", url: "/admin/staff", icon: Users },
+      { title: "Settings", url: "/admin/settings", icon: Settings },
+    ],
   },
 ];
 
