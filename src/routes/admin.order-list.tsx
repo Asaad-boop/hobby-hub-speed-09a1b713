@@ -487,7 +487,9 @@ function OrderListPage() {
                   return (
                     <TableRow
                       key={o.id}
-                      className={`group border-b transition-colors ${isSelected ? "bg-primary/5" : ""}`}
+                      className={`group border-b transition-colors ${
+                        isSelected ? "bg-primary/5" : "odd:bg-muted/20 hover:bg-accent/40"
+                      }`}
                     >
                       <TableCell className="pl-4">
                         <input
@@ -499,8 +501,8 @@ function OrderListPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-violet-500/10 ring-1 ring-primary/20">
-                            <ShoppingBag className="h-3.5 w-3.5 text-primary" />
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-violet-500/15 ring-1 ring-primary/20 shadow-sm transition-transform group-hover:scale-105">
+                            <ShoppingBag className="h-4 w-4 text-primary" />
                           </div>
                           <div>
                             <div className="font-mono text-xs font-bold tracking-tight">#{shortId(o.id)}</div>
@@ -509,19 +511,26 @@ function OrderListPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1 text-sm font-medium">
-                          <User className="h-3 w-3 text-muted-foreground" />
-                          {o.shipping_name ?? "—"}
-                        </div>
-                        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground">
-                          <span className="inline-flex items-center gap-0.5">
-                            <Phone className="h-2.5 w-2.5" />
-                            {o.shipping_phone ?? "—"}
-                          </span>
-                          <span className="inline-flex items-center gap-0.5">
-                            <MapPin className="h-2.5 w-2.5" />
-                            {o.shipping_city ?? o.shipping_district ?? "—"}
-                          </span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/20 to-pink-500/20 text-[10px] font-bold uppercase text-foreground ring-1 ring-border">
+                            {(o.shipping_name ?? "?").trim().slice(0, 2)}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1 truncate text-sm font-medium">
+                              <User className="h-3 w-3 shrink-0 text-muted-foreground" />
+                              <span className="truncate">{o.shipping_name ?? "—"}</span>
+                            </div>
+                            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground">
+                              <span className="inline-flex items-center gap-0.5">
+                                <Phone className="h-2.5 w-2.5" />
+                                {o.shipping_phone ?? "—"}
+                              </span>
+                              <span className="inline-flex items-center gap-0.5">
+                                <MapPin className="h-2.5 w-2.5" />
+                                {o.shipping_city ?? o.shipping_district ?? "—"}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
