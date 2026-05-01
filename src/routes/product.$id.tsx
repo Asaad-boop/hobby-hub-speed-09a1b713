@@ -7,6 +7,7 @@ import { fetchProductReviews, submitReview, fetchEligibleOrderId, uploadReviewIm
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
+import { trackViewItem } from "@/lib/analytics-events";
 import ProductCard from "@/components/ProductCard";
 import ReviewModal, { type NewReview } from "@/components/ReviewModal";
 import ReviewsList from "@/components/ReviewsList";
@@ -168,6 +169,7 @@ function ProductPage() {
       value: product.price,
       currency: META_CURRENCY,
     });
+    trackViewItem({ id: product.id, title: product.title, price: product.price });
   }, [product.id, product.title, product.price]);
 
   // ---- Variants ----

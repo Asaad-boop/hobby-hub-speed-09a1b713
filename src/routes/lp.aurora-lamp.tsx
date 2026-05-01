@@ -5,6 +5,7 @@ import { fetchProductByIdOrSlug, type Product } from "@/lib/products";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { getOrderAttributionPayload } from "@/lib/session-tracking";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
+import { trackViewItem } from "@/lib/analytics-events";
 import { clarityTag } from "@/lib/clarity";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -315,6 +316,7 @@ function AuroraLampLanding() {
     });
     clarityTag("lp_campaign", "aurora-lamp");
     clarityTag("lp_pack_selected", pack);
+    trackViewItem({ id: product.id, title: product.title, price: activePack.price });
   }, [product, activePack.price, pack]);
 
   const subtotal = activePack.price * qty;

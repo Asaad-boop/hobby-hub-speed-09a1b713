@@ -1,22 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
-import { getSessionAttribution } from "@/lib/session-tracking";
-
-const SESSION_KEY = "hs_presence_sid";
-
-function getSessionId(): string {
-  try {
-    let sid = sessionStorage.getItem(SESSION_KEY);
-    if (!sid) {
-      sid = crypto.randomUUID();
-      sessionStorage.setItem(SESSION_KEY, sid);
-    }
-    return sid;
-  } catch {
-    return crypto.randomUUID();
-  }
-}
+import { trackPageView } from "@/lib/analytics-events";
 
 function classifyPage(pathname: string): { page_type: string; product_id: string | null } {
   if (pathname.startsWith("/admin")) return { page_type: "admin", product_id: null };
@@ -33,8 +17,9 @@ function classifyPage(pathname: string): { page_type: string; product_id: string
 }
 
 /**
- * Logs every SPA route change into public.page_views so the admin live
- * analytics dashboard can compute funnel + top pages. Skips admin routes.
+ * Logs every SPA route change as a GA4-style `page_view` event.
+ * Skips admin routes — staff browsing the back office shouldn't pollute
+ * customer behavioral analytics.
  */
 export function usePageViewTracking() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -47,18 +32,6 @@ export function usePageViewTracking() {
     lastPath.current = pathname;
 
     const { page_type, product_id } = classifyPage(pathname);
-    // Only attempt UUID insert when product id is a valid uuid.
-    const isUuid = product_id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(product_id);
-    const attr = getSessionAttribution();
-
-    void supabase.from("page_views").insert({
-      session_id: getSessionId(),
-      path: pathname,
-      page_type,
-      product_id: isUuid ? product_id : null,
-      referrer: attr?.referrer_url ?? document.referrer ?? null,
-      utm_source: attr?.utm_source ?? null,
-      device_type: attr?.device_type ?? null,
-    });
+    trackPageView({ path: pathname, page_type, product_id });
   }, [pathname]);
 }

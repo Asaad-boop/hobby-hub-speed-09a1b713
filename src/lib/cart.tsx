@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, ReactNode, useMemo } 
 import type { Product } from "./products";
 import { fbTrack, META_CURRENCY } from "./meta-pixel";
 import { clarityEvent, clarityTag, clarityUpgrade } from "./clarity";
+import { trackAddToCart } from "./analytics-events";
 
 export type CartItem = {
   product: Product;
@@ -71,6 +72,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     clarityTag("has_cart", "true");
     clarityTag("last_added_product", p.title);
     clarityUpgrade("add_to_cart");
+    // GA4-style server log for funnel + traffic-source attribution.
+    trackAddToCart({
+      id: p.id,
+      title: p.title,
+      price: p.price,
+      quantity: qty,
+      variant: variantLabel,
+    });
   }, []);
 
   const remove = useCallback((lineKey: string) => {

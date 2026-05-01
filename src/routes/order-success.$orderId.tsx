@@ -7,6 +7,7 @@ import { Check, Package, Truck, Copy, Home, ShoppingBag, MapPin, Loader2, PartyP
 import { toast } from "sonner";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
 import { clarityEvent, clarityTag, clarityUpgrade } from "@/lib/clarity";
+import { trackPurchase } from "@/lib/analytics-events";
 
 export const Route = createFileRoute("/order-success/$orderId")({
   head: ({ params }) => ({
@@ -68,6 +69,18 @@ function OrderSuccessPage() {
             order_id: o.id,
           });
           sessionStorage.setItem(key, "1");
+          // GA4-style purchase event — gates by the same dedupe key so we
+          // never double-log on a refresh of the success page.
+          trackPurchase({
+            order_id: o.id,
+            value: Number(o.total),
+            items: o.order_items.map((it) => ({
+              item_id: it.id,
+              item_name: it.name,
+              price: Number(it.price),
+              quantity: it.quantity,
+            })),
+          });
         }
         // Clarity: mark this session as a converter — top priority retention.
         clarityEvent("purchase");
