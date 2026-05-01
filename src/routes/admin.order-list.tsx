@@ -306,88 +306,144 @@ function OrderListPage() {
     }
   }
 
+  // Stats for hero cards
+  const stats = useMemo(() => {
+    const rows = data ?? [];
+    const pending = rows.filter((r) => r.status === "confirmed").length;
+    const inFulfillment = rows.filter((r) =>
+      ["ready_to_pack", "packaging", "packed", "ready_to_ship"].includes(r.status),
+    ).length;
+    const inTransit = rows.filter((r) => ["shipped", "in_transit"].includes(r.status)).length;
+    const revenue = rows.reduce((s, r) => s + Number(r.total ?? 0), 0);
+    return { total: rows.length, pending, inFulfillment, inTransit, revenue };
+  }, [data]);
+
   return (
-    <div className="space-y-4">
-      <PageHeader
-        title="Order List"
-        description="Confirmed orders — fulfillment pipeline & courier"
-        actions={
-          <>
-            <Btn
-              variant="default"
+    <div className="space-y-5">
+      {/* Hero header with gradient */}
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-background to-violet-500/10 p-5 shadow-sm">
+        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -bottom-20 -left-10 h-48 w-48 rounded-full bg-violet-500/10 blur-3xl" />
+        <div className="relative flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-violet-600 text-primary-foreground shadow-md">
+                <ShoppingBag className="h-4 w-4" />
+              </span>
+              <div>
+                <h2 className="text-xl font-bold tracking-tight text-foreground">Order List</h2>
+                <p className="text-xs text-muted-foreground">
+                  Confirmed orders — fulfillment pipeline & courier
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 gap-1.5"
               onClick={() => printPicking([...selected])}
               disabled={selected.size === 0}
             >
               <ClipboardList className="h-3.5 w-3.5" />
-              Picking list ({selected.size})
-            </Btn>
-            <Btn variant="default" onClick={runSyncPathao} disabled={syncing}>
+              Picking ({selected.size})
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 gap-1.5"
+              onClick={runSyncPathao}
+              disabled={syncing}
+            >
               <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
               Sync Pathao
-            </Btn>
+            </Button>
             {selected.size > 0 && (
               <>
-                <Btn
-                  variant="default"
+                <Button
+                  size="sm"
+                  className="h-8 gap-1.5 bg-gradient-to-r from-primary to-violet-600 text-primary-foreground hover:opacity-90"
                   onClick={() => sendBulkToPathao([...selected])}
                 >
                   <Truck className="h-3.5 w-3.5" />
-                  Send to Pathao ({selected.size})
-                </Btn>
-                <Btn
-                  variant="default"
+                  Send ({selected.size})
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="h-8 gap-1.5"
                   onClick={() => hardDelete([...selected])}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   Delete ({selected.size})
-                </Btn>
+                </Button>
               </>
             )}
-          </>
-        }
-      />
+          </div>
+        </div>
 
-      {/* Filter pills */}
-      <div className="flex flex-wrap gap-1.5">
-        <button
-          type="button"
-          onClick={() => setFilter("all")}
-          className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-            filter === "all"
-              ? "border-primary bg-primary text-primary-foreground"
-              : "border-border bg-background hover:bg-accent"
-          }`}
-        >
-          All ({counts.all ?? 0})
-        </button>
-        {PIPELINE_STATUSES.map((s) => (
-          <button
-            key={s.value}
-            type="button"
-            onClick={() => setFilter(s.value)}
-            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-              filter === s.value
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-background hover:bg-accent"
-            }`}
-          >
-            {s.label} ({counts[s.value] ?? 0})
-          </button>
-        ))}
+        {/* Stats grid */}
+        <div className="relative mt-5 grid grid-cols-2 gap-2.5 md:grid-cols-4">
+          <StatCard
+            icon={<ShoppingBag className="h-3.5 w-3.5" />}
+            label="Total"
+            value={stats.total.toString()}
+            tone="from-blue-500 to-indigo-600"
+          />
+          <StatCard
+            icon={<Clock className="h-3.5 w-3.5" />}
+            label="Pending"
+            value={stats.pending.toString()}
+            tone="from-amber-500 to-orange-600"
+          />
+          <StatCard
+            icon={<Package className="h-3.5 w-3.5" />}
+            label="Fulfillment"
+            value={stats.inFulfillment.toString()}
+            tone="from-violet-500 to-purple-600"
+          />
+          <StatCard
+            icon={<Truck className="h-3.5 w-3.5" />}
+            label="In transit"
+            value={stats.inTransit.toString()}
+            tone="from-emerald-500 to-teal-600"
+          />
+        </div>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search id, name, phone, tracking…"
-          className="pl-8"
-        />
+      {/* Filter pills + search row */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-1.5">
+          <FilterPill
+            active={filter === "all"}
+            onClick={() => setFilter("all")}
+            label="All"
+            count={counts.all ?? 0}
+          />
+          {PIPELINE_STATUSES.map((s) => (
+            <FilterPill
+              key={s.value}
+              active={filter === s.value}
+              onClick={() => setFilter(s.value)}
+              label={s.label}
+              count={counts[s.value] ?? 0}
+            />
+          ))}
+        </div>
+        <div className="relative w-full max-w-xs">
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search id, name, phone, tracking…"
+            className="pl-9 shadow-sm"
+          />
+        </div>
       </div>
 
-      <Card>
+      {/* Orders table */}
+      <Card className="overflow-hidden">
         {isLoading ? (
           <Loading label="Loading orders…" />
         ) : filtered.length === 0 ? (
@@ -396,21 +452,22 @@ function OrderListPage() {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="w-8">
+                <TableRow className="border-b bg-muted/40 hover:bg-muted/40">
+                  <TableHead className="w-10 pl-4">
                     <input
                       type="checkbox"
+                      className="h-3.5 w-3.5 rounded border-gray-300 accent-primary"
                       checked={selected.size > 0 && selected.size === filtered.length}
                       onChange={toggleAll}
                     />
                   </TableHead>
-                  <TableHead>Order</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Items</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Courier</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Order</TableHead>
+                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Customer</TableHead>
+                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Items</TableHead>
+                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Total</TableHead>
+                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Courier</TableHead>
+                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Status</TableHead>
+                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -419,35 +476,65 @@ function OrderListPage() {
                     (s, it) => s + (it.quantity || 0),
                     0,
                   );
+                  const isSelected = selected.has(o.id);
                   return (
-                    <TableRow key={o.id}>
-                      <TableCell>
+                    <TableRow
+                      key={o.id}
+                      className={`group border-b transition-colors ${isSelected ? "bg-primary/5" : ""}`}
+                    >
+                      <TableCell className="pl-4">
                         <input
                           type="checkbox"
-                          checked={selected.has(o.id)}
+                          className="h-3.5 w-3.5 rounded border-gray-300 accent-primary"
+                          checked={isSelected}
                           onChange={() => toggleSel(o.id)}
                         />
                       </TableCell>
                       <TableCell>
-                        <div className="font-mono text-xs font-semibold">{shortId(o.id)}</div>
-                        <div className="text-[11px] text-muted-foreground">{fmtDate(o.created_at)}</div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm font-medium">{o.shipping_name ?? "—"}</div>
-                        <div className="text-[11px] text-muted-foreground">
-                          {o.shipping_phone ?? "—"} · {o.shipping_city ?? o.shipping_district ?? "—"}
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-violet-500/10 ring-1 ring-primary/20">
+                            <ShoppingBag className="h-3.5 w-3.5 text-primary" />
+                          </div>
+                          <div>
+                            <div className="font-mono text-xs font-bold tracking-tight">#{shortId(o.id)}</div>
+                            <div className="text-[10px] text-muted-foreground">{fmtDate(o.created_at)}</div>
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <UIBadge variant="secondary">{itemCount} pcs</UIBadge>
+                        <div className="flex items-center gap-1 text-sm font-medium">
+                          <User className="h-3 w-3 text-muted-foreground" />
+                          {o.shipping_name ?? "—"}
+                        </div>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground">
+                          <span className="inline-flex items-center gap-0.5">
+                            <Phone className="h-2.5 w-2.5" />
+                            {o.shipping_phone ?? "—"}
+                          </span>
+                          <span className="inline-flex items-center gap-0.5">
+                            <MapPin className="h-2.5 w-2.5" />
+                            {o.shipping_city ?? o.shipping_district ?? "—"}
+                          </span>
+                        </div>
                       </TableCell>
-                      <TableCell className="font-medium tabular-nums">{fmtBDT(o.total)}</TableCell>
                       <TableCell>
-                        <div className="text-xs">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-0.5 text-[11px] font-semibold">
+                          <Package className="h-3 w-3" />
+                          {itemCount}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-bold tabular-nums text-foreground">{fmtBDT(o.total)}</div>
+                        <div className="text-[10px] capitalize text-muted-foreground">
+                          {o.payment_method ?? "—"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-xs font-medium capitalize">
                           {o.courier_name || o.delivery_method || "—"}
                         </div>
-                        {o.tracking_number && (
-                          <div className="font-mono text-[10px] text-muted-foreground">
+                        {o.tracking_number && !o.tracking_number.startsWith("PENDING_") && (
+                          <div className="font-mono text-[10px] text-emerald-600">
                             {o.tracking_number}
                           </div>
                         )}
@@ -458,8 +545,10 @@ function OrderListPage() {
                           onValueChange={(v) => changeStatus(o.id, v as StatusValue)}
                           disabled={busyId === o.id}
                         >
-                          <SelectTrigger className="h-8 w-[150px] text-xs">
-                            <SelectValue />
+                          <SelectTrigger className="h-8 w-[140px] text-xs">
+                            <SelectValue>
+                              <StatusBadge status={o.status} />
+                            </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
                             {PIPELINE_STATUSES.map((s) => (
@@ -471,11 +560,14 @@ function OrderListPage() {
                         </Select>
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-wrap items-center justify-end gap-1">
+                        <div className="flex flex-wrap items-center justify-end gap-1 opacity-80 transition-opacity group-hover:opacity-100">
                           <Button
                             size="sm"
-                            variant="default"
-                            className="h-7 px-2 text-[11px]"
+                            className={`h-7 px-2 text-[11px] ${
+                              o.tracking_number
+                                ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
+                                : "bg-gradient-to-r from-primary to-violet-600 text-primary-foreground hover:opacity-90"
+                            }`}
                             onClick={() => sendToPathao(o.id)}
                             disabled={busyId === o.id || !!o.tracking_number}
                             title={
@@ -484,7 +576,11 @@ function OrderListPage() {
                                 : "Send to Pathao courier"
                             }
                           >
-                            <Truck className="h-3 w-3" />
+                            {o.tracking_number ? (
+                              <CheckCircle2 className="h-3 w-3" />
+                            ) : (
+                              <Truck className="h-3 w-3" />
+                            )}
                             {o.tracking_number ? "Booked" : "Pathao"}
                           </Button>
                           <Button
@@ -505,7 +601,7 @@ function OrderListPage() {
                             disabled={busyId === o.id}
                           >
                             <Package className="h-3 w-3" />
-                            Packing
+                            Pack
                           </Button>
                           <Button
                             size="sm"
@@ -515,12 +611,12 @@ function OrderListPage() {
                             disabled={busyId === o.id}
                           >
                             <Printer className="h-3 w-3" />
-                            Picking
+                            Pick
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-7 px-2 text-[11px] text-destructive hover:bg-destructive/10"
+                            className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                             onClick={() => hardDelete([o.id])}
                             disabled={busyId === o.id}
                             title="Hard delete order"
@@ -543,5 +639,68 @@ function OrderListPage() {
         onClose={() => setInvoiceOrderId(null)}
       />
     </div>
+  );
+}
+
+function StatCard({
+  icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  tone: string;
+}) {
+  return (
+    <div className="group relative overflow-hidden rounded-xl border border-border/60 bg-background/80 p-3 shadow-sm backdrop-blur transition-all hover:shadow-md">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </span>
+        <span
+          className={`inline-flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br ${tone} text-white shadow-sm`}
+        >
+          {icon}
+        </span>
+      </div>
+      <div className="mt-1.5 text-2xl font-bold tracking-tight text-foreground tabular-nums">
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function FilterPill({
+  active,
+  onClick,
+  label,
+  count,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  count: number;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+        active
+          ? "border-transparent bg-gradient-to-r from-primary to-violet-600 text-primary-foreground shadow-md shadow-primary/20"
+          : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-accent"
+      }`}
+    >
+      {label}
+      <span
+        className={`inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-bold ${
+          active ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
+        }`}
+      >
+        {count}
+      </span>
+    </button>
   );
 }
