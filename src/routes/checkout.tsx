@@ -729,6 +729,9 @@ function Checkout() {
               <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>৳{total}</span></div>
               {bump && <div className="flex justify-between"><span className="text-muted-foreground">Bonus item</span><span>৳{bumpPrice}</span></div>}
               <div className="flex justify-between"><span className="text-muted-foreground">Delivery</span><span>৳{shippingFee}</span></div>
+              {bundleDiscount > 0 && (
+                <div className="flex justify-between text-primary"><span>Bundle discount</span><span>-৳{bundleDiscount}</span></div>
+              )}
               {appliedCoupon && couponDiscount > 0 && (
                 <div className="flex justify-between text-primary"><span>Discount ({appliedCoupon.code})</span><span>-৳{couponDiscount}</span></div>
               )}
