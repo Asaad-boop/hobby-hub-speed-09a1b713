@@ -141,6 +141,29 @@ export const sendOrderToPathao = createServerFn({ method: "POST" })
       throw new Error(`Already booked: ${order.tracking_number}`);
     }
 
+    // Atomically claim this order so concurrent clicks/bulk runs can't double-book.
+    // We write a temporary sentinel into tracking_number; the unique partial index
+    // on orders.tracking_number guarantees only one caller wins.
+    const claimToken = `PENDING_PATHAO_${order.id.slice(0, 8)}_${Date.now()}`;
+    const { data: claimed, error: claimErr } = await supabaseAdmin
+      .from("orders")
+      .update({
+        tracking_number: claimToken,
+        courier_name: "pathao",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", order.id)
+      .is("tracking_number", null)
+      .select("id")
+      .maybeSingle();
+    if (claimErr) {
+      // Unique-violation or similar — another booking already in flight
+      throw new Error("Order is already being booked. Please refresh.");
+    }
+    if (!claimed) {
+      throw new Error("Already booked or booking in progress");
+    }
+
     const phone = (order.shipping_phone ?? "").replace(/\D/g, "").slice(-11);
     if (!/^01[3-9]\d{8}$/.test(phone)) {
       throw new Error("Invalid recipient phone");
