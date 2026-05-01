@@ -565,7 +565,14 @@ function OrderListPage() {
         {isLoading ? (
           <Loading label="Loading orders…" />
         ) : filtered.length === 0 ? (
-          <Empty title="No orders" description="No confirmed orders match your filter." />
+          <Empty
+            title={debouncedSearch ? "No matches found" : "No orders"}
+            description={
+              debouncedSearch
+                ? `Nothing matches "${debouncedSearch}" — try an order ID, phone, tracking, or name.`
+                : "No confirmed orders match your filter."
+            }
+          />
         ) : (
           <div className="overflow-x-auto">
             <Table>
