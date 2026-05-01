@@ -119,6 +119,41 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+/**
+ * Highlights all case-insensitive occurrences of `query` inside `text`.
+ * Returns the original text untouched when query is empty.
+ */
+function Highlight({
+  text,
+  query,
+}: {
+  text: string | null | undefined;
+  query: string;
+}) {
+  const value = text ?? "";
+  const q = query.trim();
+  if (!q) return <>{value || "—"}</>;
+  if (!value) return <>—</>;
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = value.split(new RegExp(`(${escaped})`, "ig"));
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === q.toLowerCase() ? (
+          <mark
+            key={i}
+            className="rounded-sm bg-yellow-200/70 px-0.5 font-semibold text-foreground dark:bg-yellow-500/30"
+          >
+            {part}
+          </mark>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </>
+  );
+}
+
 function OrderListPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
