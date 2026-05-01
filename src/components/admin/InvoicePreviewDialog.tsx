@@ -506,7 +506,7 @@ export function InvoicePreviewDialog({
               </div>
 
               {/* Feedback */}
-              <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <div style={{ marginTop: 40, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                 <div style={{ border: "1px solid #a7f3d0", background: "rgba(236,253,245,.3)", borderRadius: 4, padding: "6px 8px" }}>
                   <div style={{ fontWeight: 700, fontSize: 11 }}>আমাদের মতামত দিন</div>
                   <div style={{ color: "#666", fontSize: 9 }}>আপনার মতামত আমাদের আরো ভালো করতে সাহায্য করে</div>
