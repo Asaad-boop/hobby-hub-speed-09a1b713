@@ -11,6 +11,7 @@
  */
 
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { getSessionAttribution } from "./session-tracking";
 
 export type AnalyticsEventName =
@@ -117,7 +118,7 @@ export function trackEvent(payload: AnalyticsEventPayload): void {
     fb_browser_pixel: attr?.fb_browser_pixel ?? null,
     device_type: attr?.device_type ?? null,
     user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
-    params,
+    params: params as Json,
   };
 
   void supabase
