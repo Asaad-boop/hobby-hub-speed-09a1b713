@@ -630,15 +630,24 @@ function TopProducts({ range }: { range: Range }) {
     queryFn: async () => {
       const { data: views } = await supabase
         .from("page_views")
-        .select("product_id")
+        .select("session_id,product_id")
         .eq("page_type", "product")
         .not("product_id", "is", null)
         .gte("created_at", from.toISOString())
         .lte("created_at", to.toISOString())
-        .limit(5000);
+        .limit(10000);
 
+      // Count distinct sessions per product so a visitor reloading the same
+      // PDP 5 times doesn't push it to the top of the list.
       const tally: Record<string, number> = {};
-      for (const v of views ?? []) if (v.product_id) tally[v.product_id] = (tally[v.product_id] ?? 0) + 1;
+      const seen = new Set<string>();
+      for (const v of views ?? []) {
+        if (!v.product_id || !v.session_id) continue;
+        const key = `${v.session_id}|${v.product_id}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        tally[v.product_id] = (tally[v.product_id] ?? 0) + 1;
+      }
 
       const top = Object.entries(tally)
         .sort((a, b) => b[1] - a[1])
