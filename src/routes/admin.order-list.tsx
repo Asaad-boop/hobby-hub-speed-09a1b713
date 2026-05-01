@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { sendOrderToPathao } from "@/lib/pathao.functions";
+import { sendOrderToPathao, syncPathaoStatuses } from "@/lib/pathao.functions";
 import { PageHeader, Card, Loading, Empty, Btn, Input } from "@/components/admin/ui";
 import { Badge as UIBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
