@@ -166,6 +166,13 @@ function Checkout() {
   });
   const shippingFee = perItemFees.length ? Math.max(...perItemFees) : defaultShippingFee;
   const subtotalWithBump = total + (bump ? bumpPrice : 0);
+  // Auto bundle discount: 2 of the same line = 10% off, 3+ of the same line = 15% off.
+  // Computed per cart line so it shows up as a real "Discount" in billing & saves to the order.
+  const bundleDiscount = items.reduce((sum, i) => {
+    const pct = i.qty >= 3 ? 15 : i.qty === 2 ? 10 : 0;
+    if (!pct) return sum;
+    return sum + Math.round(i.product.price * i.qty * (pct / 100));
+  }, 0);
   const couponDiscount = appliedCoupon
     ? appliedCoupon.type === "percentage"
       ? Math.min(
@@ -174,7 +181,8 @@ function Checkout() {
         )
       : Math.min(Number(appliedCoupon.value), subtotalWithBump)
     : 0;
-  const grand = Math.max(0, subtotalWithBump + shippingFee - couponDiscount);
+  const totalDiscount = bundleDiscount + couponDiscount;
+  const grand = Math.max(0, subtotalWithBump + shippingFee - totalDiscount);
 
   const applyCoupon = async () => {
     if (validatingCoupon) return;
@@ -250,7 +258,7 @@ function Checkout() {
       const subtotal = allItems.reduce((s, i) => s + i.product.price * i.qty, 0);
       // Recompute discount against the actual subtotal to avoid drift vs the
       // validate_order_totals DB trigger (tolerance is 1 unit).
-      const finalDiscount = appliedCoupon
+      const finalCouponDiscount = appliedCoupon
         ? appliedCoupon.type === "percentage"
           ? Math.min(
               Math.round((subtotal * Number(appliedCoupon.value)) / 100),
@@ -258,6 +266,13 @@ function Checkout() {
             )
           : Math.min(Number(appliedCoupon.value), subtotal)
         : 0;
+      // Auto bundle discount per line (qty >= 3 → 15%, qty === 2 → 10%).
+      const finalBundleDiscount = allItems.reduce((sum, i) => {
+        const pct = i.qty >= 3 ? 15 : i.qty === 2 ? 10 : 0;
+        if (!pct) return sum;
+        return sum + Math.round(i.product.price * i.qty * (pct / 100));
+      }, 0);
+      const finalDiscount = finalCouponDiscount + finalBundleDiscount;
       const orderTotal = Math.max(0, subtotal + shippingFee - finalDiscount);
 
       const attribution = getOrderAttributionPayload();
@@ -332,13 +347,13 @@ function Checkout() {
         return;
       }
 
-      if (!isGuest && appliedCoupon && finalDiscount > 0) {
+      if (!isGuest && appliedCoupon && finalCouponDiscount > 0) {
         // Best-effort — failure here should not block the order.
         const { error: couponErr } = await supabase.from("coupon_usage").insert({
           coupon_id: appliedCoupon.id,
           user_id: session!.user.id,
           order_id: order.id,
-          discount_amount: finalDiscount,
+          discount_amount: finalCouponDiscount,
         });
         if (couponErr) console.warn("Coupon usage log failed (non-fatal):", couponErr);
       }
@@ -714,6 +729,9 @@ function Checkout() {
               <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>৳{total}</span></div>
               {bump && <div className="flex justify-between"><span className="text-muted-foreground">Bonus item</span><span>৳{bumpPrice}</span></div>}
               <div className="flex justify-between"><span className="text-muted-foreground">Delivery</span><span>৳{shippingFee}</span></div>
+              {bundleDiscount > 0 && (
+                <div className="flex justify-between text-primary"><span>Bundle discount</span><span>-৳{bundleDiscount}</span></div>
+              )}
               {appliedCoupon && couponDiscount > 0 && (
                 <div className="flex justify-between text-primary"><span>Discount ({appliedCoupon.code})</span><span>-৳{couponDiscount}</span></div>
               )}
