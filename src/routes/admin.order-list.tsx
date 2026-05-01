@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -7,25 +7,21 @@ import {
   FileText,
   Truck,
   Search,
-  Loader2,
   CheckCircle2,
   ClipboardList,
   Trash2,
   RefreshCw,
   ShoppingBag,
   Clock,
-  TrendingUp,
   Phone,
   MapPin,
   User,
-  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { sendOrderToPathao, syncPathaoStatuses } from "@/lib/pathao.functions";
-import { PageHeader, Card, Loading, Empty, Btn, Input } from "@/components/admin/ui";
-import { Badge as UIBadge } from "@/components/ui/badge";
+import { Card, Loading, Empty, Input } from "@/components/admin/ui";
 import { Button } from "@/components/ui/button";
 import {
   Table,
