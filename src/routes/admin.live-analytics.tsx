@@ -278,24 +278,62 @@ function FunnelSection({ range }: { range: Range }) {
       const prevFromIso = prevFrom.toISOString();
       const prevToIso = prevTo.toISOString();
 
-      const [pv, prevPv, productPv, prevProductPv, carts, prevCarts, checkouts, prevCheckouts, orders, prevOrders] =
-        await Promise.all([
-          supabase.from("page_views").select("session_id", { count: "exact", head: true }).gte("created_at", fromIso).lte("created_at", toIso),
-          supabase.from("page_views").select("session_id", { count: "exact", head: true }).gte("created_at", prevFromIso).lte("created_at", prevToIso),
-          supabase.from("page_views").select("id", { count: "exact", head: true }).eq("page_type", "product").gte("created_at", fromIso).lte("created_at", toIso),
-          supabase.from("page_views").select("id", { count: "exact", head: true }).eq("page_type", "product").gte("created_at", prevFromIso).lte("created_at", prevToIso),
-          supabase.from("abandoned_carts").select("id", { count: "exact", head: true }).gte("created_at", fromIso).lte("created_at", toIso),
-          supabase.from("abandoned_carts").select("id", { count: "exact", head: true }).gte("created_at", prevFromIso).lte("created_at", prevToIso),
-          supabase.from("abandoned_carts").select("id", { count: "exact", head: true }).eq("last_step", "checkout").gte("created_at", fromIso).lte("created_at", toIso),
-          supabase.from("abandoned_carts").select("id", { count: "exact", head: true }).eq("last_step", "checkout").gte("created_at", prevFromIso).lte("created_at", prevToIso),
-          supabase.from("orders").select("total,status,created_at").gte("created_at", fromIso).lte("created_at", toIso),
-          supabase.from("orders").select("total,status,created_at").gte("created_at", prevFromIso).lte("created_at", prevToIso),
-        ]);
+      // GA4-style funnel: every step is one row in analytics_events. Distinct
+      // session counts use a lightweight client-side dedupe so traffic-source
+      // attribution lines up with conversions even when the cart never made it
+      // into the abandoned_carts table.
+      const select = "session_id,event_name,value";
+      const fetchEvents = (a: string, b: string) =>
+        supabase
+          .from("analytics_events")
+          .select(select)
+          .gte("created_at", a)
+          .lte("created_at", b)
+          .in("event_name", [
+            "page_view",
+            "view_item",
+            "add_to_cart",
+            "begin_checkout",
+            "purchase",
+          ])
+          .limit(20000);
+
+      const [curr, prev, orders, prevOrders] = await Promise.all([
+        fetchEvents(fromIso, toIso),
+        fetchEvents(prevFromIso, prevToIso),
+        supabase.from("orders").select("total,status,created_at").gte("created_at", fromIso).lte("created_at", toIso),
+        supabase.from("orders").select("total,status,created_at").gte("created_at", prevFromIso).lte("created_at", prevToIso),
+      ]);
+
+      const tally = (rows: Array<{ session_id: string; event_name: string }> | null) => {
+        const out = {
+          visitors: new Set<string>(),
+          productViews: new Set<string>(),
+          carts: new Set<string>(),
+          checkouts: new Set<string>(),
+          purchases: new Set<string>(),
+        };
+        for (const r of rows ?? []) {
+          if (r.event_name === "page_view") out.visitors.add(r.session_id);
+          else if (r.event_name === "view_item") out.productViews.add(r.session_id);
+          else if (r.event_name === "add_to_cart") out.carts.add(r.session_id);
+          else if (r.event_name === "begin_checkout") out.checkouts.add(r.session_id);
+          else if (r.event_name === "purchase") out.purchases.add(r.session_id);
+        }
+        return {
+          visitors: out.visitors.size,
+          productViews: out.productViews.size,
+          carts: out.carts.size,
+          checkouts: out.checkouts.size,
+          purchases: out.purchases.size,
+        };
+      };
+
+      const c = tally(curr.data);
+      const p = tally(prev.data);
 
       const ordersData = orders.data ?? [];
       const prevOrdersData = prevOrders.data ?? [];
-      const purchases = ordersData.length;
-      const prevPurchases = prevOrdersData.length;
       const revenue = ordersData
         .filter((o) => o.status === "delivered" || o.status === "confirmed")
         .reduce((s, o) => s + Number(o.total), 0);
@@ -304,10 +342,21 @@ function FunnelSection({ range }: { range: Range }) {
         .reduce((s, o) => s + Number(o.total), 0);
 
       return {
-        visitors: pv.count ?? 0,
-        prevVisitors: prevPv.count ?? 0,
-        productViews: productPv.count ?? 0,
-        prevProductViews: prevProductPv.count ?? 0,
+        visitors: c.visitors,
+        prevVisitors: p.visitors,
+        productViews: c.productViews,
+        prevProductViews: p.productViews,
+        carts: c.carts,
+        prevCarts: p.carts,
+        checkouts: c.checkouts,
+        prevCheckouts: p.checkouts,
+        purchases: c.purchases || ordersData.length,
+        prevPurchases: p.purchases || prevOrdersData.length,
+        revenue,
+        prevRevenue,
+      };
+    },
+  });
         carts: carts.count ?? 0,
         prevCarts: prevCarts.count ?? 0,
         checkouts: checkouts.count ?? 0,
