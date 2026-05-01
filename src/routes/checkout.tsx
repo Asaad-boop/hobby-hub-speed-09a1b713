@@ -347,13 +347,13 @@ function Checkout() {
         return;
       }
 
-      if (!isGuest && appliedCoupon && finalDiscount > 0) {
+      if (!isGuest && appliedCoupon && finalCouponDiscount > 0) {
         // Best-effort — failure here should not block the order.
         const { error: couponErr } = await supabase.from("coupon_usage").insert({
           coupon_id: appliedCoupon.id,
           user_id: session!.user.id,
           order_id: order.id,
-          discount_amount: finalDiscount,
+          discount_amount: finalCouponDiscount,
         });
         if (couponErr) console.warn("Coupon usage log failed (non-fatal):", couponErr);
       }
