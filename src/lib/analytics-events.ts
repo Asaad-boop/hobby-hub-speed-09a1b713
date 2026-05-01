@@ -122,7 +122,7 @@ export function trackEvent(payload: AnalyticsEventPayload): void {
 
   void supabase
     .from("analytics_events")
-    .insert(row)
+    .insert([row])
     .then(({ error }) => {
       if (error && DEV) {
         // eslint-disable-next-line no-console
