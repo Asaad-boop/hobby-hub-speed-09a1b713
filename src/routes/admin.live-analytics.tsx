@@ -553,12 +553,17 @@ function DeviceBreakdown({ range }: { range: Range }) {
     queryFn: async () => {
       const { data: rows } = await supabase
         .from("page_views")
-        .select("device_type")
+        .select("session_id,device_type")
         .gte("created_at", from.toISOString())
         .lte("created_at", to.toISOString())
-        .limit(5000);
+        .limit(10000);
+      // Count one device per session (first seen wins) so repeat page views
+      // from the same visitor don't skew the device split.
       const counts: Record<string, number> = { mobile: 0, desktop: 0, tablet: 0 };
+      const seen = new Set<string>();
       for (const r of rows ?? []) {
+        if (!r.session_id || seen.has(r.session_id)) continue;
+        seen.add(r.session_id);
         const k = (r.device_type as string) || "desktop";
         counts[k] = (counts[k] ?? 0) + 1;
       }
