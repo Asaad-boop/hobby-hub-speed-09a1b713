@@ -11,11 +11,12 @@ import {
   CheckCircle2,
   ClipboardList,
   Trash2,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { sendOrderToPathao } from "@/lib/pathao.functions";
+import { sendOrderToPathao, syncPathaoStatuses } from "@/lib/pathao.functions";
 import { PageHeader, Card, Loading, Empty, Btn, Input } from "@/components/admin/ui";
 import { Badge as UIBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -119,6 +120,22 @@ function OrderListPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [invoiceOrderId, setInvoiceOrderId] = useState<string | null>(null);
   const sendToPathaoFn = useServerFn(sendOrderToPathao);
+  const syncPathaoFn = useServerFn(syncPathaoStatuses);
+  const [syncing, setSyncing] = useState(false);
+
+  async function runSyncPathao() {
+    setSyncing(true);
+    const t = toast.loading("Syncing Pathao statuses…");
+    try {
+      const res = await syncPathaoFn({});
+      toast.success(`Synced ${res.updated}/${res.checked} shipments`, { id: t });
+      qc.invalidateQueries({ queryKey: ["order-list-confirmed"] });
+    } catch (e) {
+      toast.error("Sync failed: " + (e as Error).message, { id: t });
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   const { data, isLoading } = useQuery({
     queryKey: ["order-list-confirmed"],
@@ -295,6 +312,10 @@ function OrderListPage() {
             >
               <ClipboardList className="h-3.5 w-3.5" />
               Picking list ({selected.size})
+            </Btn>
+            <Btn variant="default" onClick={runSyncPathao} disabled={syncing}>
+              <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+              Sync Pathao
             </Btn>
             {selected.size > 0 && (
               <>
