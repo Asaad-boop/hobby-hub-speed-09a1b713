@@ -662,7 +662,7 @@ function OrderListPage() {
                         </div>
                         {o.tracking_number && !o.tracking_number.startsWith("PENDING_") && (
                           <div className="font-mono text-[10px] text-emerald-600">
-                            {o.tracking_number}
+                            <Highlight text={o.tracking_number} query={debouncedSearch} />
                           </div>
                         )}
                       </TableCell>
