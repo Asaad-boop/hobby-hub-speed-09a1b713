@@ -208,18 +208,28 @@ function OrderListPage() {
   const filtered = useMemo(() => {
     let rows = data ?? [];
     if (filter !== "all") rows = rows.filter((r) => r.status === filter);
-    const q = search.trim().toLowerCase();
+    const raw = debouncedSearch.trim();
+    const q = raw.toLowerCase();
+    // Allow searching with or without "#", and tolerate spaces/dashes in phone numbers
+    const qDigits = raw.replace(/\D+/g, "");
     if (q) {
-      rows = rows.filter(
-        (r) =>
-          r.id.toLowerCase().includes(q) ||
-          (r.shipping_name ?? "").toLowerCase().includes(q) ||
-          (r.shipping_phone ?? "").toLowerCase().includes(q) ||
-          (r.tracking_number ?? "").toLowerCase().includes(q),
-      );
+      rows = rows.filter((r) => {
+        const id = r.id.toLowerCase();
+        const short = shortId(r.id).toLowerCase();
+        const name = (r.shipping_name ?? "").toLowerCase();
+        const phone = (r.shipping_phone ?? "").replace(/\D+/g, "");
+        const tracking = (r.tracking_number ?? "").toLowerCase();
+        return (
+          id.includes(q) ||
+          short.includes(q.replace(/^#/, "")) ||
+          name.includes(q) ||
+          tracking.includes(q) ||
+          (qDigits.length >= 3 && phone.includes(qDigits))
+        );
+      });
     }
     return rows;
-  }, [data, filter, search]);
+  }, [data, filter, debouncedSearch]);
 
   const counts = useMemo(() => {
     const map: Record<string, number> = { all: 0 };
