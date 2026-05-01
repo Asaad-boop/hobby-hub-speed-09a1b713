@@ -383,3 +383,108 @@ export const resetStaffPassword = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { success: true as const };
   });
+
+/** List all auth users with their current roles. Useful to pick an existing user and assign a role. */
+export const listAllUsers = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.userId);
+
+    // Paginate through all auth users
+    const allUsers: { id: string; email: string | null; created_at: string }[] = [];
+    let page = 1;
+    const perPage = 200;
+    while (page <= 50) {
+      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({
+        page,
+        perPage,
+      });
+      if (error) throw new Error(error.message);
+      for (const u of list.users) {
+        allUsers.push({ id: u.id, email: u.email ?? null, created_at: u.created_at });
+      }
+      if (list.users.length < perPage) break;
+      page += 1;
+    }
+
+    const userIds = allUsers.map((u) => u.id);
+
+    // Fetch profiles
+    const profileMap = new Map<string, string | null>();
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabaseAdmin
+        .from("profiles")
+        .select("id, display_name")
+        .in("id", userIds);
+      for (const p of profiles ?? []) profileMap.set(p.id, p.display_name);
+    }
+
+    // Fetch roles for all
+    const rolesByUser = new Map<string, AppRole[]>();
+    if (userIds.length > 0) {
+      const { data: rolesRows } = await supabaseAdmin
+        .from("user_roles")
+        .select("user_id, role")
+        .in("user_id", userIds);
+      for (const r of rolesRows ?? []) {
+        const arr = rolesByUser.get(r.user_id) ?? [];
+        arr.push(r.role as AppRole);
+        rolesByUser.set(r.user_id, arr);
+      }
+    }
+
+    const users = allUsers.map((u) => ({
+      user_id: u.id,
+      email: u.email,
+      display_name: profileMap.get(u.id) ?? null,
+      roles: rolesByUser.get(u.id) ?? [],
+      created_at: u.created_at,
+    }));
+
+    // Sort newest first
+    users.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+
+    return { users };
+  });
+
+/** Assign a role to a user by user_id (used when picking from a list). */
+export const assignRoleByUserId = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { user_id: string; role: AppRole }) => {
+    const user_id = String(input?.user_id ?? "");
+    const role = input?.role;
+    if (!user_id) throw new Error("user_id required");
+    if (!role) throw new Error("Role is required");
+    if (!STAFF_ROLES.includes(role)) {
+      throw new Error(`Invalid role "${role}". Must be one of: ${STAFF_ROLES.join(", ")}`);
+    }
+    return { user_id, role };
+  })
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context.userId);
+
+    // Verify user exists
+    const { data: u, error: getErr } = await supabaseAdmin.auth.admin.getUserById(data.user_id);
+    if (getErr || !u?.user) {
+      throw new Error("User not found");
+    }
+
+    const { data: existing } = await supabaseAdmin
+      .from("user_roles")
+      .select("id")
+      .eq("user_id", data.user_id)
+      .eq("role", data.role)
+      .maybeSingle();
+    if (existing) {
+      throw new Error(`This user already has the "${data.role}" role.`);
+    }
+
+    const { error } = await supabaseAdmin
+      .from("user_roles")
+      .insert({ user_id: data.user_id, role: data.role });
+    if (error) {
+      throw new Error(`Failed to assign role: ${error.message}`);
+    }
+
+    return { success: true as const, user_id: data.user_id };
+  });
