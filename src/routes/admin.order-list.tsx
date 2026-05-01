@@ -13,7 +13,9 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { sendOrderToPathao } from "@/lib/pathao.functions";
 import { PageHeader, Card, Loading, Empty, Btn, Input } from "@/components/admin/ui";
 import { Badge as UIBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -116,6 +118,7 @@ function OrderListPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [invoiceOrderId, setInvoiceOrderId] = useState<string | null>(null);
+  const sendToPathaoFn = useServerFn(sendOrderToPathao);
 
   const { data, isLoading } = useQuery({
     queryKey: ["order-list-confirmed"],
@@ -185,10 +188,36 @@ function OrderListPage() {
     }
   }
 
-  async function bookCourier(id: string) {
-    // Mark ready_to_ship as a lightweight "courier entry" action.
-    // Real integration can be wired into BDCourierIntegration.
-    await changeStatus(id, "ready_to_ship");
+  async function sendToPathao(id: string) {
+    setBusyId(id);
+    const t = toast.loading("Sending to Pathao…");
+    try {
+      const res = await sendToPathaoFn({ data: { order_id: id } });
+      toast.success(`Pathao booked: ${res.consignment_id}`, { id: t });
+      qc.invalidateQueries({ queryKey: ["order-list-confirmed"] });
+    } catch (e) {
+      toast.error("Pathao failed: " + (e as Error).message, { id: t });
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function sendBulkToPathao(ids: string[]) {
+    if (!ids.length) return;
+    const t = toast.loading(`Sending ${ids.length} order(s) to Pathao…`);
+    let ok = 0;
+    let fail = 0;
+    for (const id of ids) {
+      try {
+        await sendToPathaoFn({ data: { order_id: id } });
+        ok++;
+      } catch {
+        fail++;
+      }
+    }
+    toast.success(`Pathao: ${ok} booked, ${fail} failed`, { id: t });
+    setSelected(new Set());
+    qc.invalidateQueries({ queryKey: ["order-list-confirmed"] });
   }
 
   function openInvoice(id: string) {
@@ -268,13 +297,22 @@ function OrderListPage() {
               Picking list ({selected.size})
             </Btn>
             {selected.size > 0 && (
-              <Btn
-                variant="default"
-                onClick={() => hardDelete([...selected])}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                Delete ({selected.size})
-              </Btn>
+              <>
+                <Btn
+                  variant="default"
+                  onClick={() => sendBulkToPathao([...selected])}
+                >
+                  <Truck className="h-3.5 w-3.5" />
+                  Send to Pathao ({selected.size})
+                </Btn>
+                <Btn
+                  variant="default"
+                  onClick={() => hardDelete([...selected])}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete ({selected.size})
+                </Btn>
+              </>
             )}
           </>
         }
@@ -407,14 +445,18 @@ function OrderListPage() {
                         <div className="flex flex-wrap items-center justify-end gap-1">
                           <Button
                             size="sm"
-                            variant="outline"
+                            variant="default"
                             className="h-7 px-2 text-[11px]"
-                            onClick={() => bookCourier(o.id)}
-                            disabled={busyId === o.id}
-                            title="Send to courier (mark Ready to ship)"
+                            onClick={() => sendToPathao(o.id)}
+                            disabled={busyId === o.id || !!o.tracking_number}
+                            title={
+                              o.tracking_number
+                                ? `Already booked: ${o.tracking_number}`
+                                : "Send to Pathao courier"
+                            }
                           >
                             <Truck className="h-3 w-3" />
-                            Courier
+                            {o.tracking_number ? "Booked" : "Pathao"}
                           </Button>
                           <Button
                             size="sm"
