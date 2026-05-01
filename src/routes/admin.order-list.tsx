@@ -616,7 +616,7 @@ function OrderListPage() {
                             <ShoppingBag className="h-4 w-4 text-primary" />
                           </div>
                           <div>
-                            <div className="font-mono text-xs font-bold tracking-tight">#{shortId(o.id)}</div>
+                            <div className="font-mono text-xs font-bold tracking-tight">#<Highlight text={shortId(o.id)} query={debouncedSearch.replace(/^#/, "")} /></div>
                             <div className="text-[10px] text-muted-foreground">{fmtDate(o.created_at)}</div>
                           </div>
                         </div>
