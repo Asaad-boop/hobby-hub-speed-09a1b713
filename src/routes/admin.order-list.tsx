@@ -313,6 +313,10 @@ function OrderListPage() {
               <ClipboardList className="h-3.5 w-3.5" />
               Picking list ({selected.size})
             </Btn>
+            <Btn variant="default" onClick={runSyncPathao} disabled={syncing}>
+              <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+              Sync Pathao
+            </Btn>
             {selected.size > 0 && (
               <>
                 <Btn
