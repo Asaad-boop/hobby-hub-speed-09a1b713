@@ -634,7 +634,7 @@ function OrderListPage() {
                             <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground">
                               <span className="inline-flex items-center gap-0.5">
                                 <Phone className="h-2.5 w-2.5" />
-                                {o.shipping_phone ?? "—"}
+                                <Highlight text={o.shipping_phone} query={debouncedSearch} />
                               </span>
                               <span className="inline-flex items-center gap-0.5">
                                 <MapPin className="h-2.5 w-2.5" />
