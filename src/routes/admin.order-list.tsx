@@ -297,13 +297,22 @@ function OrderListPage() {
               Picking list ({selected.size})
             </Btn>
             {selected.size > 0 && (
-              <Btn
-                variant="default"
-                onClick={() => hardDelete([...selected])}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                Delete ({selected.size})
-              </Btn>
+              <>
+                <Btn
+                  variant="default"
+                  onClick={() => sendBulkToPathao([...selected])}
+                >
+                  <Truck className="h-3.5 w-3.5" />
+                  Send to Pathao ({selected.size})
+                </Btn>
+                <Btn
+                  variant="default"
+                  onClick={() => hardDelete([...selected])}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete ({selected.size})
+                </Btn>
+              </>
             )}
           </>
         }
