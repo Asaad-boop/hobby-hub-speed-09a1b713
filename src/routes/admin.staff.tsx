@@ -184,6 +184,7 @@ function StaffPage() {
           onSaved={() => {
             setAssignOpen(false);
             qc.invalidateQueries({ queryKey: ["admin", "staff"] });
+            qc.invalidateQueries({ queryKey: ["admin", "all-users"] });
           }}
         />
       )}
@@ -275,15 +276,35 @@ function AssignRoleModal({ onClose, onSaved }: { onClose: () => void; onSaved: (
       )
     : users;
 
+  function extractError(e: any): string {
+    // TanStack server-fn errors can be deeply nested
+    const msg =
+      e?.message ||
+      e?.body?.message ||
+      e?.response?.data?.message ||
+      e?.cause?.message ||
+      (typeof e === "string" ? e : null);
+    if (msg) return msg;
+    try {
+      return JSON.stringify(e);
+    } catch {
+      return "Unknown error";
+    }
+  }
+
   async function saveByPick() {
     if (!selectedUserId) return toast.error("Select a user from the list");
     setSaving(true);
     try {
-      await assignRoleByUserId({ data: { user_id: selectedUserId, role } });
-      toast.success("Role assigned");
+      const res = await assignRoleByUserId({
+        data: { user_id: selectedUserId, role },
+      });
+      console.log("[assignRoleByUserId] success", res);
+      toast.success(`Role "${role}" assigned`);
       onSaved();
     } catch (e: any) {
-      toast.error(e?.message ?? "Failed to assign role");
+      console.error("[assignRoleByUserId] failed", e);
+      toast.error(extractError(e));
     } finally {
       setSaving(false);
     }
@@ -293,11 +314,13 @@ function AssignRoleModal({ onClose, onSaved }: { onClose: () => void; onSaved: (
     if (!email) return toast.error("Email required");
     setSaving(true);
     try {
-      await assignRoleByEmail({ data: { email, role } });
-      toast.success("Role assigned");
+      const res = await assignRoleByEmail({ data: { email, role } });
+      console.log("[assignRoleByEmail] success", res);
+      toast.success(`Role "${role}" assigned`);
       onSaved();
     } catch (e: any) {
-      toast.error(e?.message ?? "Failed to assign role");
+      console.error("[assignRoleByEmail] failed", e);
+      toast.error(extractError(e));
     } finally {
       setSaving(false);
     }
