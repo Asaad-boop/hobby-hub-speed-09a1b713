@@ -395,7 +395,7 @@ async function syncPathaoStatusesInternal(maxOrders = 200) {
 
       const slug = info.order_status_slug ?? info.order_status ?? null;
       const mapped = mapPathaoStatus(slug);
-      const newShipmentStatus = mapped ?? sh.status ?? "in_transit";
+      const newShipmentStatus = toShipmentStatus(mapped, (sh.status as ShipmentStatus) ?? "in_transit");
 
       // Update courier_shipments row with latest courier-side state.
       await supabaseAdmin
