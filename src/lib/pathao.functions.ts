@@ -164,97 +164,116 @@ export const sendOrderToPathao = createServerFn({ method: "POST" })
       throw new Error("Already booked or booking in progress");
     }
 
-    const phone = (order.shipping_phone ?? "").replace(/\D/g, "").slice(-11);
-    if (!/^01[3-9]\d{8}$/.test(phone)) {
-      throw new Error("Invalid recipient phone");
-    }
-    const itemCount =
-      (order.order_items ?? []).reduce(
-        (s: number, it: { quantity?: number }) => s + (it.quantity ?? 0),
-        0,
-      ) || 1;
-    const itemDesc =
-      (order.order_items ?? [])
-        .map((it: { name?: string; quantity?: number }) => `${it.name} x${it.quantity ?? 1}`)
-        .join(", ")
-        .slice(0, 250) || "Order items";
-
-    const isCOD = (order.payment_method ?? "cod").toLowerCase().includes("cod");
-    const loc = inferLocation(order);
-
-    const token = await getAccessToken();
-    const payload = {
-      store_id: Number(storeId),
-      merchant_order_id: order.id.slice(0, 20),
-      recipient_name: (order.shipping_name ?? "Customer").slice(0, 100),
-      recipient_phone: phone,
-      recipient_address: [order.shipping_address, order.shipping_thana, order.shipping_city]
-        .filter(Boolean)
-        .join(", ")
-        .slice(0, 220) || "N/A",
-      recipient_city: loc.city_id,
-      recipient_zone: loc.zone_id,
-      recipient_area: loc.area_id,
-      delivery_type: 48, // 48 = Normal Delivery
-      item_type: 2, // 2 = Parcel
-      special_instruction: "",
-      item_quantity: itemCount,
-      item_weight: 0.5,
-      amount_to_collect: isCOD ? Math.round(Number(order.total)) : 0,
-      item_description: itemDesc,
+    const releaseClaim = async () => {
+      await supabaseAdmin
+        .from("orders")
+        .update({ tracking_number: null, updated_at: new Date().toISOString() })
+        .eq("id", order.id)
+        .eq("tracking_number", claimToken);
     };
 
-    const res = await fetchWithTimeout(`${PATHAO_BASE_URL}/aladdin/api/v1/orders`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
-    const body = (await res.json().catch(() => ({}))) as PathaoCreateOrderResponse;
-    if (!res.ok || !body.data?.consignment_id) {
-      const errMsg = body.errors
-        ? Object.entries(body.errors)
-            .map(([k, v]) => `${k}: ${v.join(", ")}`)
-            .join("; ")
-        : body.message;
-      throw new Error(`Pathao order failed [${res.status}]: ${errMsg ?? "unknown"}`);
+    let consignmentId: string;
+    let body: PathaoCreateOrderResponse;
+    try {
+      const phone = (order.shipping_phone ?? "").replace(/\D/g, "").slice(-11);
+      if (!/^01[3-9]\d{8}$/.test(phone)) {
+        throw new Error("Invalid recipient phone");
+      }
+      const itemCount =
+        (order.order_items ?? []).reduce(
+          (s: number, it: { quantity?: number }) => s + (it.quantity ?? 0),
+          0,
+        ) || 1;
+      const itemDesc =
+        (order.order_items ?? [])
+          .map((it: { name?: string; quantity?: number }) => `${it.name} x${it.quantity ?? 1}`)
+          .join(", ")
+          .slice(0, 250) || "Order items";
+
+      const isCOD = (order.payment_method ?? "cod").toLowerCase().includes("cod");
+      const loc = inferLocation(order);
+
+      const token = await getAccessToken();
+      const payload = {
+        store_id: Number(storeId),
+        merchant_order_id: order.id.slice(0, 20),
+        recipient_name: (order.shipping_name ?? "Customer").slice(0, 100),
+        recipient_phone: phone,
+        recipient_address:
+          [order.shipping_address, order.shipping_thana, order.shipping_city]
+            .filter(Boolean)
+            .join(", ")
+            .slice(0, 220) || "N/A",
+        recipient_city: loc.city_id,
+        recipient_zone: loc.zone_id,
+        recipient_area: loc.area_id,
+        delivery_type: 48,
+        item_type: 2,
+        special_instruction: "",
+        item_quantity: itemCount,
+        item_weight: 0.5,
+        amount_to_collect: isCOD ? Math.round(Number(order.total)) : 0,
+        item_description: itemDesc,
+      };
+
+      const res = await fetchWithTimeout(`${PATHAO_BASE_URL}/aladdin/api/v1/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      body = (await res.json().catch(() => ({}))) as PathaoCreateOrderResponse;
+      if (!res.ok || !body.data?.consignment_id) {
+        const errMsg = body.errors
+          ? Object.entries(body.errors)
+              .map(([k, v]) => `${k}: ${v.join(", ")}`)
+              .join("; ")
+          : body.message;
+        throw new Error(`Pathao order failed [${res.status}]: ${errMsg ?? "unknown"}`);
+      }
+      consignmentId = body.data.consignment_id;
+
+      // Replace the claim token with the real consignment id
+      await supabaseAdmin
+        .from("orders")
+        .update({
+          courier_name: "pathao",
+          tracking_number: consignmentId,
+          delivery_method: "pathao",
+          courier_assigned_at: new Date().toISOString(),
+          status: "ready_to_ship",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", order.id)
+        .eq("tracking_number", claimToken);
+
+      // Upsert shipment record — unique (order_id, provider) prevents duplicates
+      await supabaseAdmin.from("courier_shipments").upsert(
+        {
+          order_id: order.id,
+          provider: "pathao",
+          tracking_id: consignmentId,
+          consignment_id: consignmentId,
+          status: "booked",
+          booked_at: new Date().toISOString(),
+          cod_amount_expected: isCOD ? Math.round(Number(order.total)) : 0,
+          delivery_zone: loc.city_id === 1 ? "inside_dhaka" : "outside_dhaka",
+          items_breakdown: order.order_items ?? [],
+        },
+        { onConflict: "order_id,provider" },
+      );
+    } catch (err) {
+      await releaseClaim();
+      throw err;
     }
-
-    const consignmentId = body.data.consignment_id;
-
-    // Update order
-    await supabaseAdmin
-      .from("orders")
-      .update({
-        courier_name: "pathao",
-        tracking_number: consignmentId,
-        delivery_method: "pathao",
-        courier_assigned_at: new Date().toISOString(),
-        status: "ready_to_ship",
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", order.id);
-
-    // Insert shipment record (best effort)
-    await supabaseAdmin.from("courier_shipments").insert({
-      order_id: order.id,
-      provider: "pathao",
-      tracking_id: consignmentId,
-      consignment_id: consignmentId,
-      status: "booked",
-      booked_at: new Date().toISOString(),
-      cod_amount_expected: isCOD ? Math.round(Number(order.total)) : 0,
-      delivery_zone: loc.city_id === 1 ? "inside_dhaka" : "outside_dhaka",
-      items_breakdown: order.order_items ?? [],
-    });
 
     return {
       ok: true as const,
       consignment_id: consignmentId,
-      order_status: body.data.order_status,
-      delivery_fee: body.data.delivery_fee,
+      order_status: body.data?.order_status,
+      delivery_fee: body.data?.delivery_fee,
     };
   });
