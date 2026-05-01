@@ -446,6 +446,16 @@ function OrderListPage() {
                             <Printer className="h-3 w-3" />
                             Picking
                           </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2 text-[11px] text-destructive hover:bg-destructive/10"
+                            onClick={() => hardDelete([o.id])}
+                            disabled={busyId === o.id}
+                            title="Hard delete order"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
