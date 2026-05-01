@@ -179,12 +179,14 @@ export function InvoicePreviewDialog({
         if (pids.length) {
           const { data: prods } = await supabase
             .from("products")
-            .select("id,images")
+            .select("id,image,gallery")
             .in("id", pids);
           if (!cancelled && prods) {
             const map: Record<string, string> = {};
-            for (const p of prods as unknown as { id: string; images: string[] | null }[]) {
-              const first = p.images?.[0];
+            for (const p of prods as unknown as { id: string; image: string | null; gallery: string[] | null }[]) {
+              const first =
+                (p.image && p.image.trim()) ||
+                (Array.isArray(p.gallery) ? p.gallery.find((g) => typeof g === "string" && g.trim()) : undefined);
               if (first) map[p.id] = first;
             }
             setProductImages(map);
