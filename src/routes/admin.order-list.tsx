@@ -532,14 +532,30 @@ function OrderListPage() {
               />
             ))}
           </div>
-          <div className="relative w-full max-w-xs">
+          <div className="relative w-full max-w-sm">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search id, name, phone, tracking…"
-              className="pl-9 shadow-sm"
+              placeholder="Search order ID, phone, tracking, name…"
+              className="pl-9 pr-20 shadow-sm"
             />
+            {search && (
+              <div className="absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-1">
+                <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground">
+                  {filtered.length}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+                  title="Clear search"
+                  aria-label="Clear search"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
