@@ -475,7 +475,7 @@ function ActivityChart({ range }: { range: Range }) {
     refetchInterval: range === "live" ? 10_000 : 60_000,
     queryFn: async () => {
       const [views, orders] = await Promise.all([
-        supabase.from("page_views").select("created_at").gte("created_at", from.toISOString()).lte("created_at", to.toISOString()).limit(5000),
+        supabase.from("page_views").select("session_id,created_at").gte("created_at", from.toISOString()).lte("created_at", to.toISOString()).limit(10000),
         supabase.from("orders").select("created_at,total").gte("created_at", from.toISOString()).lte("created_at", to.toISOString()).limit(2000),
       ]);
 
@@ -486,10 +486,16 @@ function ActivityChart({ range }: { range: Range }) {
         const t = from.getTime() + i * step;
         return { time: t, label: formatBucket(new Date(t), range), visitors: 0, orders: 0 };
       });
+      // Distinct sessions per bucket so refresh storms / StrictMode dupes
+      // don't inflate the visitor line.
+      const seenPerBucket: Array<Set<string>> = Array.from({ length: buckets }, () => new Set());
 
       for (const v of views.data ?? []) {
         const idx = Math.min(buckets - 1, Math.floor((new Date(v.created_at).getTime() - from.getTime()) / step));
-        if (idx >= 0) out[idx].visitors += 1;
+        if (idx >= 0 && v.session_id && !seenPerBucket[idx].has(v.session_id)) {
+          seenPerBucket[idx].add(v.session_id);
+          out[idx].visitors += 1;
+        }
       }
       for (const o of orders.data ?? []) {
         const idx = Math.min(buckets - 1, Math.floor((new Date(o.created_at).getTime() - from.getTime()) / step));
