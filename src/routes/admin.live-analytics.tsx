@@ -357,17 +357,6 @@ function FunnelSection({ range }: { range: Range }) {
       };
     },
   });
-        carts: carts.count ?? 0,
-        prevCarts: prevCarts.count ?? 0,
-        checkouts: checkouts.count ?? 0,
-        prevCheckouts: prevCheckouts.count ?? 0,
-        purchases,
-        prevPurchases,
-        revenue,
-        prevRevenue,
-      };
-    },
-  });
 
   const steps = data
     ? [
