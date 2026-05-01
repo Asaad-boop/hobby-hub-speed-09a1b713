@@ -258,7 +258,7 @@ function Checkout() {
       const subtotal = allItems.reduce((s, i) => s + i.product.price * i.qty, 0);
       // Recompute discount against the actual subtotal to avoid drift vs the
       // validate_order_totals DB trigger (tolerance is 1 unit).
-      const finalDiscount = appliedCoupon
+      const finalCouponDiscount = appliedCoupon
         ? appliedCoupon.type === "percentage"
           ? Math.min(
               Math.round((subtotal * Number(appliedCoupon.value)) / 100),
@@ -266,6 +266,13 @@ function Checkout() {
             )
           : Math.min(Number(appliedCoupon.value), subtotal)
         : 0;
+      // Auto bundle discount per line (qty >= 3 → 15%, qty === 2 → 10%).
+      const finalBundleDiscount = allItems.reduce((sum, i) => {
+        const pct = i.qty >= 3 ? 15 : i.qty === 2 ? 10 : 0;
+        if (!pct) return sum;
+        return sum + Math.round(i.product.price * i.qty * (pct / 100));
+      }, 0);
+      const finalDiscount = finalCouponDiscount + finalBundleDiscount;
       const orderTotal = Math.max(0, subtotal + shippingFee - finalDiscount);
 
       const attribution = getOrderAttributionPayload();
