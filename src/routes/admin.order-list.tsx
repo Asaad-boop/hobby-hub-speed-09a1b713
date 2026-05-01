@@ -119,6 +119,22 @@ function OrderListPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [invoiceOrderId, setInvoiceOrderId] = useState<string | null>(null);
   const sendToPathaoFn = useServerFn(sendOrderToPathao);
+  const syncPathaoFn = useServerFn(syncPathaoStatuses);
+  const [syncing, setSyncing] = useState(false);
+
+  async function runSyncPathao() {
+    setSyncing(true);
+    const t = toast.loading("Syncing Pathao statuses…");
+    try {
+      const res = await syncPathaoFn({});
+      toast.success(`Synced ${res.updated}/${res.checked} shipments`, { id: t });
+      qc.invalidateQueries({ queryKey: ["order-list-confirmed"] });
+    } catch (e) {
+      toast.error("Sync failed: " + (e as Error).message, { id: t });
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   const { data, isLoading } = useQuery({
     queryKey: ["order-list-confirmed"],
