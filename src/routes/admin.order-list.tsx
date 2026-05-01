@@ -670,13 +670,16 @@ function StatCard({
   tone: string;
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-border/60 bg-background/80 p-3 shadow-sm backdrop-blur transition-all hover:shadow-md">
+    <div className="group relative overflow-hidden rounded-xl border border-border/60 bg-background/80 p-3 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10">
+      <div
+        className={`pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r ${tone} opacity-80`}
+      />
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           {label}
         </span>
         <span
-          className={`inline-flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br ${tone} text-white shadow-sm`}
+          className={`inline-flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br ${tone} text-white shadow-sm transition-transform group-hover:scale-110`}
         >
           {icon}
         </span>
@@ -703,16 +706,16 @@ function FilterPill({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+      className={`group inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all ${
         active
-          ? "border-transparent bg-gradient-to-r from-primary to-violet-600 text-primary-foreground shadow-md shadow-primary/20"
-          : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-accent"
+          ? "border-transparent bg-gradient-to-r from-primary to-violet-600 text-primary-foreground shadow-md shadow-primary/25"
+          : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-accent hover:shadow-sm"
       }`}
     >
       {label}
       <span
-        className={`inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-bold ${
-          active ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
+        className={`inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums transition-colors ${
+          active ? "bg-white/25 text-white" : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
         }`}
       >
         {count}
