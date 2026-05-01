@@ -757,15 +757,26 @@ function WebOrdersPage() {
                         </div>
                       </TableCell>
                       <TableCell className="pt-3 text-right">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 gap-1 text-xs"
-                          onClick={() => setOpenOrder(o)}
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                          Open
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 gap-1 text-xs"
+                            onClick={() => setOpenOrder(o)}
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            Open
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10"
+                            onClick={() => hardDeleteOrders([o.id])}
+                            title="Hard delete order"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
