@@ -75,10 +75,8 @@ export const Route = createFileRoute("/lp/scratch-art-hue-board")({
       },
     ],
   }),
+  component: LP,
 });
-
-function Route_default() {}
-export default Route_default;
 
 // -- helpers --------------------------------------------------------------
 function Stars({ n = 5 }: { n?: number }) {
