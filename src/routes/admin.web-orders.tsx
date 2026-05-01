@@ -419,6 +419,27 @@ function WebOrdersPage() {
     setSelected(next);
   };
 
+  async function hardDeleteOrders(ids: string[]) {
+    if (!ids.length) return;
+    const ok = window.confirm(
+      `Hard delete ${ids.length} order(s)? This cannot be undone.`,
+    );
+    if (!ok) return;
+    const t = toast.loading(`Deleting ${ids.length} order(s)…`);
+    try {
+      for (const id of ids) {
+        const { error } = await supabase.rpc("hard_delete_order", { _order_id: id });
+        if (error) throw error;
+      }
+      toast.success("Deleted", { id: t });
+      setSelected(new Set());
+      setOpenOrder(null);
+      await loadOrders();
+    } catch (e) {
+      toast.error("Delete failed: " + (e as Error).message, { id: t });
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-end justify-between gap-3">
