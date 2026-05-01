@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -119,9 +119,45 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+/**
+ * Highlights all case-insensitive occurrences of `query` inside `text`.
+ * Returns the original text untouched when query is empty.
+ */
+function Highlight({
+  text,
+  query,
+}: {
+  text: string | null | undefined;
+  query: string;
+}) {
+  const value = text ?? "";
+  const q = query.trim();
+  if (!q) return <>{value || "—"}</>;
+  if (!value) return <>—</>;
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = value.split(new RegExp(`(${escaped})`, "ig"));
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === q.toLowerCase() ? (
+          <mark
+            key={i}
+            className="rounded-sm bg-yellow-200/70 px-0.5 font-semibold text-foreground dark:bg-yellow-500/30"
+          >
+            {part}
+          </mark>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </>
+  );
+}
+
 function OrderListPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filter, setFilter] = useState<StatusValue | "all">("all");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -129,6 +165,12 @@ function OrderListPage() {
   const sendToPathaoFn = useServerFn(sendOrderToPathao);
   const syncPathaoFn = useServerFn(syncPathaoStatuses);
   const [syncing, setSyncing] = useState(false);
+
+  // Debounce the input so filtering feels instant without thrashing on every keystroke
+  useEffect(() => {
+    const t = window.setTimeout(() => setDebouncedSearch(search), 120);
+    return () => window.clearTimeout(t);
+  }, [search]);
 
   async function runSyncPathao() {
     setSyncing(true);
@@ -166,18 +208,28 @@ function OrderListPage() {
   const filtered = useMemo(() => {
     let rows = data ?? [];
     if (filter !== "all") rows = rows.filter((r) => r.status === filter);
-    const q = search.trim().toLowerCase();
+    const raw = debouncedSearch.trim();
+    const q = raw.toLowerCase();
+    // Allow searching with or without "#", and tolerate spaces/dashes in phone numbers
+    const qDigits = raw.replace(/\D+/g, "");
     if (q) {
-      rows = rows.filter(
-        (r) =>
-          r.id.toLowerCase().includes(q) ||
-          (r.shipping_name ?? "").toLowerCase().includes(q) ||
-          (r.shipping_phone ?? "").toLowerCase().includes(q) ||
-          (r.tracking_number ?? "").toLowerCase().includes(q),
-      );
+      rows = rows.filter((r) => {
+        const id = r.id.toLowerCase();
+        const short = shortId(r.id).toLowerCase();
+        const name = (r.shipping_name ?? "").toLowerCase();
+        const phone = (r.shipping_phone ?? "").replace(/\D+/g, "");
+        const tracking = (r.tracking_number ?? "").toLowerCase();
+        return (
+          id.includes(q) ||
+          short.includes(q.replace(/^#/, "")) ||
+          name.includes(q) ||
+          tracking.includes(q) ||
+          (qDigits.length >= 3 && phone.includes(qDigits))
+        );
+      });
     }
     return rows;
-  }, [data, filter, search]);
+  }, [data, filter, debouncedSearch]);
 
   const counts = useMemo(() => {
     const map: Record<string, number> = { all: 0 };
@@ -480,14 +532,30 @@ function OrderListPage() {
               />
             ))}
           </div>
-          <div className="relative w-full max-w-xs">
+          <div className="relative w-full max-w-sm">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search id, name, phone, tracking…"
-              className="pl-9 shadow-sm"
+              placeholder="Search order ID, phone, tracking, name…"
+              className="pl-9 pr-20 shadow-sm"
             />
+            {search && (
+              <div className="absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-1">
+                <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground">
+                  {filtered.length}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+                  title="Clear search"
+                  aria-label="Clear search"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -497,7 +565,14 @@ function OrderListPage() {
         {isLoading ? (
           <Loading label="Loading orders…" />
         ) : filtered.length === 0 ? (
-          <Empty title="No orders" description="No confirmed orders match your filter." />
+          <Empty
+            title={debouncedSearch ? "No matches found" : "No orders"}
+            description={
+              debouncedSearch
+                ? `Nothing matches "${debouncedSearch}" — try an order ID, phone, tracking, or name.`
+                : "No confirmed orders match your filter."
+            }
+          />
         ) : (
           <div className="overflow-x-auto">
             <Table>
@@ -548,7 +623,7 @@ function OrderListPage() {
                             <ShoppingBag className="h-4 w-4 text-primary" />
                           </div>
                           <div>
-                            <div className="font-mono text-xs font-bold tracking-tight">#{shortId(o.id)}</div>
+                            <div className="font-mono text-xs font-bold tracking-tight">#<Highlight text={shortId(o.id)} query={debouncedSearch.replace(/^#/, "")} /></div>
                             <div className="text-[10px] text-muted-foreground">{fmtDate(o.created_at)}</div>
                           </div>
                         </div>
@@ -561,12 +636,12 @@ function OrderListPage() {
                           <div className="min-w-0">
                             <div className="flex items-center gap-1 truncate text-sm font-medium">
                               <User className="h-3 w-3 shrink-0 text-muted-foreground" />
-                              <span className="truncate">{o.shipping_name ?? "—"}</span>
+                              <span className="truncate"><Highlight text={o.shipping_name} query={debouncedSearch} /></span>
                             </div>
                             <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground">
                               <span className="inline-flex items-center gap-0.5">
                                 <Phone className="h-2.5 w-2.5" />
-                                {o.shipping_phone ?? "—"}
+                                <Highlight text={o.shipping_phone} query={debouncedSearch} />
                               </span>
                               <span className="inline-flex items-center gap-0.5">
                                 <MapPin className="h-2.5 w-2.5" />
@@ -594,7 +669,7 @@ function OrderListPage() {
                         </div>
                         {o.tracking_number && !o.tracking_number.startsWith("PENDING_") && (
                           <div className="font-mono text-[10px] text-emerald-600">
-                            {o.tracking_number}
+                            <Highlight text={o.tracking_number} query={debouncedSearch} />
                           </div>
                         )}
                       </TableCell>
