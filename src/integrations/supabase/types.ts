@@ -1195,6 +1195,48 @@ export type Database = {
           },
         ]
       }
+      page_views: {
+        Row: {
+          country: string | null
+          created_at: string
+          device_type: string | null
+          id: string
+          page_type: string | null
+          path: string
+          product_id: string | null
+          referrer: string | null
+          session_id: string
+          user_id: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          page_type?: string | null
+          path: string
+          product_id?: string | null
+          referrer?: string | null
+          session_id: string
+          user_id?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          page_type?: string | null
+          path?: string
+          product_id?: string | null
+          referrer?: string | null
+          session_id?: string
+          user_id?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
       product_option_types: {
         Row: {
           created_at: string

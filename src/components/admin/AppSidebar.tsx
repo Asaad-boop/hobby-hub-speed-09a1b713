@@ -13,6 +13,7 @@ import {
   Ticket,
   Sparkles,
   ClipboardList,
+  Activity,
 } from "lucide-react";
 import {
   Sidebar,
@@ -65,7 +66,10 @@ const GROUPS: NavGroup[] = [
   },
   {
     label: "Insights",
-    items: [{ title: "Reports", url: "/admin/reports", icon: BarChart3 }],
+    items: [
+      { title: "Live Analytics", url: "/admin/live-analytics", icon: Activity },
+      { title: "Reports", url: "/admin/reports", icon: BarChart3 },
+    ],
   },
   {
     label: "System",

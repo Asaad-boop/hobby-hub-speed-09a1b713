@@ -42,6 +42,7 @@ import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminOrderListRouteImport } from './routes/admin.order-list'
+import { Route as AdminLiveAnalyticsRouteImport } from './routes/admin.live-analytics'
 import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminDiscountsRouteImport } from './routes/admin.discounts'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
@@ -212,6 +213,11 @@ const AdminOrderListRoute = AdminOrderListRouteImport.update({
   path: '/order-list',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminLiveAnalyticsRoute = AdminLiveAnalyticsRouteImport.update({
+  id: '/live-analytics',
+  path: '/live-analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminInventoryRoute = AdminInventoryRouteImport.update({
   id: '/inventory',
   path: '/inventory',
@@ -256,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/discounts': typeof AdminDiscountsRoute
   '/admin/inventory': typeof AdminInventoryRoute
+  '/admin/live-analytics': typeof AdminLiveAnalyticsRoute
   '/admin/order-list': typeof AdminOrderListRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/products': typeof AdminProductsRoute
@@ -294,6 +301,7 @@ export interface FileRoutesByTo {
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/discounts': typeof AdminDiscountsRoute
   '/admin/inventory': typeof AdminInventoryRoute
+  '/admin/live-analytics': typeof AdminLiveAnalyticsRoute
   '/admin/order-list': typeof AdminOrderListRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/products': typeof AdminProductsRoute
@@ -334,6 +342,7 @@ export interface FileRoutesById {
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/discounts': typeof AdminDiscountsRoute
   '/admin/inventory': typeof AdminInventoryRoute
+  '/admin/live-analytics': typeof AdminLiveAnalyticsRoute
   '/admin/order-list': typeof AdminOrderListRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/products': typeof AdminProductsRoute
@@ -375,6 +384,7 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/discounts'
     | '/admin/inventory'
+    | '/admin/live-analytics'
     | '/admin/order-list'
     | '/admin/payments'
     | '/admin/products'
@@ -413,6 +423,7 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/discounts'
     | '/admin/inventory'
+    | '/admin/live-analytics'
     | '/admin/order-list'
     | '/admin/payments'
     | '/admin/products'
@@ -452,6 +463,7 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/discounts'
     | '/admin/inventory'
+    | '/admin/live-analytics'
     | '/admin/order-list'
     | '/admin/payments'
     | '/admin/products'
@@ -730,6 +742,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrderListRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/live-analytics': {
+      id: '/admin/live-analytics'
+      path: '/live-analytics'
+      fullPath: '/admin/live-analytics'
+      preLoaderRoute: typeof AdminLiveAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/inventory': {
       id: '/admin/inventory'
       path: '/inventory'
@@ -766,6 +785,7 @@ interface AdminRouteChildren {
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminDiscountsRoute: typeof AdminDiscountsRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
+  AdminLiveAnalyticsRoute: typeof AdminLiveAnalyticsRoute
   AdminOrderListRoute: typeof AdminOrderListRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminProductsRoute: typeof AdminProductsRoute
@@ -781,6 +801,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCustomersRoute: AdminCustomersRoute,
   AdminDiscountsRoute: AdminDiscountsRoute,
   AdminInventoryRoute: AdminInventoryRoute,
+  AdminLiveAnalyticsRoute: AdminLiveAnalyticsRoute,
   AdminOrderListRoute: AdminOrderListRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
   AdminProductsRoute: AdminProductsRoute,

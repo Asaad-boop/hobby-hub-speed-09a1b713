@@ -6,6 +6,7 @@ import appCss from "../styles.css?url";
 import "@/lib/i18n";
 import { captureSessionOnFirstVisit } from "@/lib/session-tracking";
 import { usePresenceHeartbeat } from "@/hooks/use-presence";
+import { usePageViewTracking } from "@/hooks/use-page-view-tracking";
 import { META_PIXEL_ID, fbTrack } from "@/lib/meta-pixel";
 import { clarityTag, clarityEvent } from "@/lib/clarity";
 import Header from "@/components/Header";
@@ -113,6 +114,8 @@ function RootComponent() {
 
   // Heartbeat for live visitors dashboard.
   usePresenceHeartbeat();
+  // Log page views for analytics funnel.
+  usePageViewTracking();
 
   // Fire Meta Pixel PageView on SPA route changes. The first PageView is
   // already sent by the base snippet during initial HTML load, so skip the
