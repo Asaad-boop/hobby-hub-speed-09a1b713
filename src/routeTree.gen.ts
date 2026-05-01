@@ -32,6 +32,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TrackOrderIdRouteImport } from './routes/track.$orderId'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as OrderSuccessOrderIdRouteImport } from './routes/order-success.$orderId'
+import { Route as LpScratchArtHueBoardRouteImport } from './routes/lp.scratch-art-hue-board'
 import { Route as LpOrigamiComboRouteImport } from './routes/lp.origami-combo'
 import { Route as LpAuroraLampRouteImport } from './routes/lp.aurora-lamp'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
@@ -165,6 +166,11 @@ const OrderSuccessOrderIdRoute = OrderSuccessOrderIdRouteImport.update({
   path: '/order-success/$orderId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LpScratchArtHueBoardRoute = LpScratchArtHueBoardRouteImport.update({
+  id: '/lp/scratch-art-hue-board',
+  path: '/lp/scratch-art-hue-board',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LpOrigamiComboRoute = LpOrigamiComboRouteImport.update({
   id: '/lp/origami-combo',
   path: '/lp/origami-combo',
@@ -287,6 +293,7 @@ export interface FileRoutesByFullPath {
   '/category/$slug': typeof CategorySlugRoute
   '/lp/aurora-lamp': typeof LpAuroraLampRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
+  '/lp/scratch-art-hue-board': typeof LpScratchArtHueBoardRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -328,6 +335,7 @@ export interface FileRoutesByTo {
   '/category/$slug': typeof CategorySlugRoute
   '/lp/aurora-lamp': typeof LpAuroraLampRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
+  '/lp/scratch-art-hue-board': typeof LpScratchArtHueBoardRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -371,6 +379,7 @@ export interface FileRoutesById {
   '/category/$slug': typeof CategorySlugRoute
   '/lp/aurora-lamp': typeof LpAuroraLampRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
+  '/lp/scratch-art-hue-board': typeof LpScratchArtHueBoardRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
   '/product/$id': typeof ProductIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -415,6 +424,7 @@ export interface FileRouteTypes {
     | '/category/$slug'
     | '/lp/aurora-lamp'
     | '/lp/origami-combo'
+    | '/lp/scratch-art-hue-board'
     | '/order-success/$orderId'
     | '/product/$id'
     | '/track/$orderId'
@@ -456,6 +466,7 @@ export interface FileRouteTypes {
     | '/category/$slug'
     | '/lp/aurora-lamp'
     | '/lp/origami-combo'
+    | '/lp/scratch-art-hue-board'
     | '/order-success/$orderId'
     | '/product/$id'
     | '/track/$orderId'
@@ -498,6 +509,7 @@ export interface FileRouteTypes {
     | '/category/$slug'
     | '/lp/aurora-lamp'
     | '/lp/origami-combo'
+    | '/lp/scratch-art-hue-board'
     | '/order-success/$orderId'
     | '/product/$id'
     | '/track/$orderId'
@@ -528,6 +540,7 @@ export interface RootRouteChildren {
   CategorySlugRoute: typeof CategorySlugRoute
   LpAuroraLampRoute: typeof LpAuroraLampRoute
   LpOrigamiComboRoute: typeof LpOrigamiComboRoute
+  LpScratchArtHueBoardRoute: typeof LpScratchArtHueBoardRoute
   OrderSuccessOrderIdRoute: typeof OrderSuccessOrderIdRoute
   ProductIdRoute: typeof ProductIdRoute
   TrackOrderIdRoute: typeof TrackOrderIdRoute
@@ -696,6 +709,13 @@ declare module '@tanstack/react-router' {
       path: '/order-success/$orderId'
       fullPath: '/order-success/$orderId'
       preLoaderRoute: typeof OrderSuccessOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lp/scratch-art-hue-board': {
+      id: '/lp/scratch-art-hue-board'
+      path: '/lp/scratch-art-hue-board'
+      fullPath: '/lp/scratch-art-hue-board'
+      preLoaderRoute: typeof LpScratchArtHueBoardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lp/origami-combo': {
@@ -878,6 +898,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategorySlugRoute: CategorySlugRoute,
   LpAuroraLampRoute: LpAuroraLampRoute,
   LpOrigamiComboRoute: LpOrigamiComboRoute,
+  LpScratchArtHueBoardRoute: LpScratchArtHueBoardRoute,
   OrderSuccessOrderIdRoute: OrderSuccessOrderIdRoute,
   ProductIdRoute: ProductIdRoute,
   TrackOrderIdRoute: TrackOrderIdRoute,
