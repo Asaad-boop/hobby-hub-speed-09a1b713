@@ -294,6 +294,25 @@ function OrderListPage() {
     }
   }
 
+  async function printPackingBulk(ids: string[]) {
+    if (!ids.length) {
+      toast.error("Select at least one order");
+      return;
+    }
+    const t = toast.loading(`Generating ${ids.length} packing label(s)…`);
+    let ok = 0;
+    let fail = 0;
+    for (const id of ids) {
+      try {
+        await generatePackingListPDF(id);
+        ok++;
+      } catch {
+        fail++;
+      }
+    }
+    toast.success(`Labels: ${ok} generated, ${fail} failed`, { id: t });
+  }
+
   function toggleSel(id: string) {
     setSelected((prev) => {
       const n = new Set(prev);
