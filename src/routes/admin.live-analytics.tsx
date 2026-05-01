@@ -148,19 +148,21 @@ function LiveBar() {
       const since30m = new Date(Date.now() - 30 * 60_000).toISOString();
 
       const [activeVisitors, activeCarts, activeCheckouts, recentPurchases, productViews] = await Promise.all([
+        // active_sessions PK is session_id, so each row is already one unique
+        // visitor — no extra dedupe needed here.
         supabase
           .from("active_sessions")
-          .select("session_id,path", { count: "exact" })
+          .select("session_id,path")
           .gte("last_seen_at", since60),
         supabase
           .from("abandoned_carts")
-          .select("id", { count: "exact", head: true })
+          .select("session_id,user_id,id")
           .gte("updated_at", since30m)
           .eq("is_converted", false)
           .or("last_step.is.null,last_step.neq.checkout"),
         supabase
           .from("abandoned_carts")
-          .select("id", { count: "exact", head: true })
+          .select("session_id,user_id,id")
           .gte("updated_at", since30m)
           .eq("is_converted", false)
           .eq("last_step", "checkout"),
@@ -168,24 +170,40 @@ function LiveBar() {
           .from("orders")
           .select("id", { count: "exact", head: true })
           .gte("created_at", since30m),
+        // Pull session_id so we can count *distinct* viewers, not raw rows.
         supabase
           .from("page_views")
-          .select("id", { count: "exact", head: true })
+          .select("session_id")
           .gte("created_at", since30m)
-          .eq("page_type", "product"),
+          .eq("page_type", "product")
+          .limit(5000),
       ]);
 
-      const visitors = activeVisitors.data ?? [];
+      const visitorRows = activeVisitors.data ?? [];
+      // Defensive: dedupe by session_id even though PK should guarantee it.
+      const uniqVisitors = new Map<string, { path: string | null }>();
+      for (const v of visitorRows) {
+        if (!uniqVisitors.has(v.session_id)) {
+          uniqVisitors.set(v.session_id, { path: v.path ?? null });
+        }
+      }
+      const visitors = Array.from(uniqVisitors.values());
       const onProduct = visitors.filter((v) => v.path?.startsWith("/product/")).length;
       const onCheckout = visitors.filter((v) => v.path?.startsWith("/checkout")).length;
       const onHome = visitors.filter((v) => v.path === "/").length;
 
+      const dedupeKey = (r: { session_id: string | null; user_id: string | null; id: string }) =>
+        r.user_id || r.session_id || r.id;
+      const cartSet = new Set((activeCarts.data ?? []).map(dedupeKey));
+      const checkoutSet = new Set((activeCheckouts.data ?? []).map(dedupeKey));
+      const productViewSessions = new Set((productViews.data ?? []).map((r) => r.session_id));
+
       return {
         live: visitors.length,
-        carts: activeCarts.count ?? 0,
-        checkouts: activeCheckouts.count ?? 0,
+        carts: cartSet.size,
+        checkouts: checkoutSet.size,
         purchases30m: recentPurchases.count ?? 0,
-        productViews30m: productViews.count ?? 0,
+        productViews30m: productViewSessions.size,
         onProduct,
         onCheckout,
         onHome,
