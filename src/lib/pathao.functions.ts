@@ -277,3 +277,165 @@ export const sendOrderToPathao = createServerFn({ method: "POST" })
       delivery_fee: body.data?.delivery_fee,
     };
   });
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * Pathao status sync
+ * ──────────────────────────────────────────────────────────────────────── */
+
+type PathaoOrderInfoResponse = {
+  code?: number;
+  message?: string;
+  data?: {
+    consignment_id?: string;
+    order_status?: string;
+    order_status_slug?: string;
+    updated_at?: string;
+  };
+};
+
+/**
+ * Map Pathao order status slug → our internal order_status enum.
+ * Unknown slugs do not change status (we only update courier_shipments).
+ */
+function mapPathaoStatus(slug: string | undefined | null): string | null {
+  if (!slug) return null;
+  const s = slug.toLowerCase();
+  if (s.includes("delivered") && s.includes("partial")) return "partial_delivered";
+  if (s === "delivered" || s.includes("delivered")) return "delivered";
+  if (s.includes("return")) return "returned";
+  if (s.includes("hold")) return "on_hold";
+  if (s.includes("cancel")) return "cancelled";
+  if (
+    s.includes("transit") ||
+    s.includes("on_the_way") ||
+    s.includes("on-the-way") ||
+    s.includes("at_the_hub") ||
+    s.includes("hub") ||
+    s.includes("out_for_delivery") ||
+    s.includes("delivery_man_assigned")
+  )
+    return "in_transit";
+  if (s.includes("pickup") || s.includes("picked")) return "shipped";
+  return null;
+}
+
+async function fetchPathaoOrderInfo(
+  consignmentId: string,
+  token: string,
+): Promise<PathaoOrderInfoResponse["data"] | null> {
+  const res = await fetchWithTimeout(
+    `${PATHAO_BASE_URL}/aladdin/api/v1/orders/${encodeURIComponent(consignmentId)}/info`,
+    {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+  const json = (await res.json().catch(() => ({}))) as PathaoOrderInfoResponse;
+  if (!res.ok || !json.data) return null;
+  return json.data;
+}
+
+async function syncPathaoStatusesInternal(maxOrders = 200) {
+  // Pull active Pathao shipments that aren't in a terminal state.
+  const { data: shipments, error } = await supabaseAdmin
+    .from("courier_shipments")
+    .select("id, order_id, consignment_id, status")
+    .eq("provider", "pathao")
+    .not("consignment_id", "is", null)
+    .not("status", "in", '("delivered","returned","cancelled")')
+    .order("booked_at", { ascending: false })
+    .limit(maxOrders);
+
+  if (error) throw new Error(error.message);
+  if (!shipments || shipments.length === 0) {
+    return { ok: true as const, checked: 0, updated: 0 };
+  }
+
+  const token = await getAccessToken();
+  let updated = 0;
+  const errors: { consignment_id: string; reason: string }[] = [];
+
+  for (const sh of shipments) {
+    if (!sh.consignment_id) continue;
+    try {
+      const info = await fetchPathaoOrderInfo(sh.consignment_id, token);
+      if (!info) continue;
+
+      const slug = info.order_status_slug ?? info.order_status ?? null;
+      const mapped = mapPathaoStatus(slug);
+      const newShipmentStatus = mapped ?? sh.status ?? "in_transit";
+
+      // Update courier_shipments row with latest courier-side state.
+      await supabaseAdmin
+        .from("courier_shipments")
+        .update({
+          status: newShipmentStatus,
+          last_status_text: info.order_status ?? slug ?? null,
+          last_synced_at: new Date().toISOString(),
+        })
+        .eq("id", sh.id);
+
+      // Promote our orders.status only when we have a confident mapping
+      // and the new status is "more advanced" than current.
+      if (mapped) {
+        const { data: ord } = await supabaseAdmin
+          .from("orders")
+          .select("status")
+          .eq("id", sh.order_id)
+          .maybeSingle();
+
+        const cur = ord?.status as string | undefined;
+        const advanceable = new Set([
+          "ready_to_ship",
+          "shipped",
+          "in_transit",
+          "courier_entry",
+        ]);
+        const terminalStays = new Set([
+          "delivered",
+          "returned",
+          "cancelled",
+          "fake",
+          "partial_delivered",
+        ]);
+
+        if (cur && !terminalStays.has(cur) && (advanceable.has(cur) || mapped === "delivered" || mapped === "returned")) {
+          await supabaseAdmin
+            .from("orders")
+            .update({ status: mapped, updated_at: new Date().toISOString() })
+            .eq("id", sh.order_id);
+        }
+      }
+
+      updated += 1;
+    } catch (e) {
+      errors.push({
+        consignment_id: sh.consignment_id,
+        reason: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
+  return {
+    ok: true as const,
+    checked: shipments.length,
+    updated,
+    errors: errors.slice(0, 20),
+  };
+}
+
+/** Manual trigger from admin UI. Staff-only. */
+export const syncPathaoStatuses = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertStaff(context.userId);
+    return syncPathaoStatusesInternal(200);
+  });
+
+/** Internal entry-point used by the cron route (no auth — protected by route). */
+export async function runPathaoStatusSync() {
+  return syncPathaoStatusesInternal(300);
+}
