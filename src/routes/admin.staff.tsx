@@ -257,8 +257,39 @@ function AssignRoleModal({ onClose, onSaved }: { onClose: () => void; onSaved: (
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<AppRole>("customer_service");
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-  async function save() {
+  const { data: usersData, isLoading } = useQuery({
+    queryKey: ["admin", "all-users"],
+    queryFn: async () => await listAllUsers(),
+  });
+
+  const users = usersData?.users ?? [];
+  const term = search.trim().toLowerCase();
+  const filtered = term
+    ? users.filter(
+        (u) =>
+          (u.email ?? "").toLowerCase().includes(term) ||
+          (u.display_name ?? "").toLowerCase().includes(term),
+      )
+    : users;
+
+  async function saveByPick() {
+    if (!selectedUserId) return toast.error("Select a user from the list");
+    setSaving(true);
+    try {
+      await assignRoleByUserId({ data: { user_id: selectedUserId, role } });
+      toast.success("Role assigned");
+      onSaved();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to assign role");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function saveByEmail() {
     if (!email) return toast.error("Email required");
     setSaving(true);
     try {
@@ -272,13 +303,12 @@ function AssignRoleModal({ onClose, onSaved }: { onClose: () => void; onSaved: (
     }
   }
 
+  const selectedUser = users.find((u) => u.user_id === selectedUserId) ?? null;
+
   return (
     <Modal open onClose={onClose} title="Assign role to existing user">
       <div className="space-y-3">
-        <Field label="User email">
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="existing@example.com" />
-        </Field>
-        <Field label="Role">
+        <Field label="Role to assign">
           <Select value={role} onChange={(e) => setRole(e.target.value as AppRole)}>
             {ASSIGNABLE_ROLES.map((r) => (
               <option key={r} value={r}>
@@ -287,11 +317,92 @@ function AssignRoleModal({ onClose, onSaved }: { onClose: () => void; onSaved: (
             ))}
           </Select>
         </Field>
+
+        <div>
+          <div className="mb-1 flex items-center justify-between">
+            <div className="text-xs font-medium text-gray-600">
+              Pick from existing users {users.length > 0 && `(${users.length})`}
+            </div>
+          </div>
+          <Input
+            placeholder="Search by email or name…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="mt-2 max-h-64 overflow-y-auto rounded border border-gray-200">
+            {isLoading ? (
+              <div className="p-3 text-xs text-gray-500">Loading users…</div>
+            ) : filtered.length === 0 ? (
+              <div className="p-3 text-xs text-gray-500">No users found</div>
+            ) : (
+              <ul className="divide-y divide-gray-100">
+                {filtered.slice(0, 100).map((u) => {
+                  const isSel = selectedUserId === u.user_id;
+                  return (
+                    <li
+                      key={u.user_id}
+                      onClick={() => setSelectedUserId(u.user_id)}
+                      className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-50 ${
+                        isSel ? "bg-blue-50" : ""
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="truncate font-medium">{u.email ?? "—"}</div>
+                          <div className="truncate text-xs text-gray-500">
+                            {u.display_name ?? "No name"}
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {u.roles.length === 0 ? (
+                            <Badge tone="gray">customer</Badge>
+                          ) : (
+                            u.roles.map((r) => (
+                              <Badge key={r} tone={ROLE_TONE[r] ?? "gray"}>
+                                {r}
+                              </Badge>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+          {selectedUser && (
+            <div className="mt-2 text-xs text-gray-600">
+              Selected: <span className="font-medium">{selectedUser.email}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end">
+          <Btn variant="primary" onClick={saveByPick} disabled={saving || !selectedUserId}>
+            {saving ? "Assigning…" : `Assign "${role}" to selected`}
+          </Btn>
+        </div>
+
+        <div className="flex items-center gap-2 pt-2">
+          <div className="h-px flex-1 bg-gray-200" />
+          <span className="text-[11px] uppercase tracking-wider text-gray-400">or by email</span>
+          <div className="h-px flex-1 bg-gray-200" />
+        </div>
+
+        <Field label="User email">
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="existing@example.com"
+          />
+        </Field>
       </div>
       <div className="mt-4 flex justify-end gap-2">
         <Btn onClick={onClose}>Cancel</Btn>
-        <Btn variant="primary" onClick={save} disabled={saving}>
-          {saving ? "Assigning…" : "Assign role"}
+        <Btn variant="primary" onClick={saveByEmail} disabled={saving || !email}>
+          {saving ? "Assigning…" : "Assign by email"}
         </Btn>
       </div>
     </Modal>
