@@ -10,6 +10,7 @@ import {
   Loader2,
   CheckCircle2,
   ClipboardList,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -231,6 +232,26 @@ function OrderListPage() {
     else setSelected(new Set(filtered.map((r) => r.id)));
   }
 
+  async function hardDelete(ids: string[]) {
+    if (!ids.length) return;
+    const ok = window.confirm(
+      `Hard delete ${ids.length} order(s)? This cannot be undone.`,
+    );
+    if (!ok) return;
+    const t = toast.loading(`Deleting ${ids.length} order(s)…`);
+    try {
+      for (const id of ids) {
+        const { error } = await supabase.rpc("hard_delete_order", { _order_id: id });
+        if (error) throw error;
+      }
+      toast.success("Deleted", { id: t });
+      setSelected(new Set());
+      qc.invalidateQueries({ queryKey: ["order-list-confirmed"] });
+    } catch (e) {
+      toast.error("Delete failed: " + (e as Error).message, { id: t });
+    }
+  }
+
   return (
     <div className="space-y-4">
       <PageHeader
@@ -246,6 +267,15 @@ function OrderListPage() {
               <ClipboardList className="h-3.5 w-3.5" />
               Picking list ({selected.size})
             </Btn>
+            {selected.size > 0 && (
+              <Btn
+                variant="default"
+                onClick={() => hardDelete([...selected])}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete ({selected.size})
+              </Btn>
+            )}
           </>
         }
       />
@@ -415,6 +445,16 @@ function OrderListPage() {
                           >
                             <Printer className="h-3 w-3" />
                             Picking
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2 text-[11px] text-destructive hover:bg-destructive/10"
+                            onClick={() => hardDelete([o.id])}
+                            disabled={busyId === o.id}
+                            title="Hard delete order"
+                          >
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </div>
                       </TableCell>

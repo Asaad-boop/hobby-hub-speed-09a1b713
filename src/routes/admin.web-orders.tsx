@@ -419,6 +419,27 @@ function WebOrdersPage() {
     setSelected(next);
   };
 
+  async function hardDeleteOrders(ids: string[]) {
+    if (!ids.length) return;
+    const ok = window.confirm(
+      `Hard delete ${ids.length} order(s)? This cannot be undone.`,
+    );
+    if (!ok) return;
+    const t = toast.loading(`Deleting ${ids.length} order(s)…`);
+    try {
+      for (const id of ids) {
+        const { error } = await supabase.rpc("hard_delete_order", { _order_id: id });
+        if (error) throw error;
+      }
+      toast.success("Deleted", { id: t });
+      setSelected(new Set());
+      setOpenOrder(null);
+      await loadOrders();
+    } catch (e) {
+      toast.error("Delete failed: " + (e as Error).message, { id: t });
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-end justify-between gap-3">
@@ -433,6 +454,16 @@ function WebOrdersPage() {
             {selected.size > 0 && <span className="mr-3">{selected.size} selected</span>}
             {total} orders
           </div>
+          {selected.size > 0 && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => hardDeleteOrders([...selected])}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete ({selected.size})
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={loadOrders} disabled={loading}>
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
           </Button>
@@ -726,15 +757,26 @@ function WebOrdersPage() {
                         </div>
                       </TableCell>
                       <TableCell className="pt-3 text-right">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 gap-1 text-xs"
-                          onClick={() => setOpenOrder(o)}
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                          Open
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 gap-1 text-xs"
+                            onClick={() => setOpenOrder(o)}
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            Open
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10"
+                            onClick={() => hardDeleteOrders([o.id])}
+                            title="Hard delete order"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
