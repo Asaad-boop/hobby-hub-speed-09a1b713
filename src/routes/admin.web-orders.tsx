@@ -454,6 +454,16 @@ function WebOrdersPage() {
             {selected.size > 0 && <span className="mr-3">{selected.size} selected</span>}
             {total} orders
           </div>
+          {selected.size > 0 && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => hardDeleteOrders([...selected])}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete ({selected.size})
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={loadOrders} disabled={loading}>
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
           </Button>
