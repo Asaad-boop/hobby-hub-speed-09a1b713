@@ -118,6 +118,7 @@ function OrderListPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [invoiceOrderId, setInvoiceOrderId] = useState<string | null>(null);
+  const sendToPathaoFn = useServerFn(sendOrderToPathao);
 
   const { data, isLoading } = useQuery({
     queryKey: ["order-list-confirmed"],
