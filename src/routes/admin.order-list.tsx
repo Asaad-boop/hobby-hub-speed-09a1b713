@@ -347,23 +347,18 @@ function OrderListPage() {
     }
   }
 
-  async function printPackingBulk(ids: string[]) {
+  async function printPackingSlips(ids: string[]) {
     if (!ids.length) {
       toast.error("Select at least one order");
       return;
     }
-    const t = toast.loading(`Generating ${ids.length} packing label(s)…`);
-    let ok = 0;
-    let fail = 0;
-    for (const id of ids) {
-      try {
-        await generatePackingListPDF(id);
-        ok++;
-      } catch {
-        fail++;
-      }
+    const t = toast.loading(`Generating ${ids.length} packing slip(s)…`);
+    try {
+      await generatePackingSlipsPDF(ids);
+      toast.success(`Packing slips ready (${ids.length})`, { id: t });
+    } catch (e) {
+      toast.error("Slips failed: " + (e as Error).message, { id: t });
     }
-    toast.success(`Labels: ${ok} generated, ${fail} failed`, { id: t });
   }
 
   function toggleSel(id: string) {
