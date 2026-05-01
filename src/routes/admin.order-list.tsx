@@ -697,6 +697,106 @@ function OrderListPage() {
         open={!!invoiceOrderId}
         onClose={() => setInvoiceOrderId(null)}
       />
+
+      {/* Floating bulk actions toolbar */}
+      {selected.size > 0 && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4 animate-in fade-in slide-in-from-bottom-4 duration-200">
+          <div className="pointer-events-auto flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-background/95 px-3 py-2 shadow-2xl shadow-primary/20 backdrop-blur-xl ring-1 ring-primary/10">
+            <div className="flex items-center gap-2 pl-1 pr-2">
+              <span className="inline-flex h-7 min-w-[1.75rem] items-center justify-center rounded-full bg-gradient-to-r from-primary to-violet-600 px-2 text-xs font-bold text-primary-foreground shadow-md shadow-primary/30">
+                {selected.size}
+              </span>
+              <span className="text-xs font-medium text-foreground">
+                selected
+              </span>
+            </div>
+
+            <div className="h-6 w-px bg-border" />
+
+            {/* One-click status update */}
+            <Select onValueChange={(v) => bulkChangeStatus([...selected], v as StatusValue)}>
+              <SelectTrigger className="h-8 w-[160px] gap-1 text-xs">
+                <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                <SelectValue placeholder="Update status…" />
+              </SelectTrigger>
+              <SelectContent>
+                {PIPELINE_STATUSES.map((s) => (
+                  <SelectItem key={s.value} value={s.value} className="text-xs">
+                    {s.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Courier sync (Pathao bulk send) */}
+            <Button
+              size="sm"
+              className="h-8 gap-1.5 bg-gradient-to-r from-primary to-violet-600 text-primary-foreground shadow-md shadow-primary/30 hover:opacity-90"
+              onClick={() => sendBulkToPathao([...selected])}
+            >
+              <Truck className="h-3.5 w-3.5" />
+              Send Pathao
+            </Button>
+
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 gap-1.5"
+              onClick={runSyncPathao}
+              disabled={syncing}
+              title="Sync Pathao statuses"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+              Sync
+            </Button>
+
+            {/* Label print */}
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 gap-1.5"
+              onClick={() => printPackingBulk([...selected])}
+              title="Print packing labels"
+            >
+              <Printer className="h-3.5 w-3.5" />
+              Labels
+            </Button>
+
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 gap-1.5"
+              onClick={() => printPicking([...selected])}
+              title="Print picking list"
+            >
+              <ClipboardList className="h-3.5 w-3.5" />
+              Picking
+            </Button>
+
+            <div className="h-6 w-px bg-border" />
+
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => hardDelete([...selected])}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete
+            </Button>
+
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 w-8 p-0"
+              onClick={() => setSelected(new Set())}
+              title="Clear selection"
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
