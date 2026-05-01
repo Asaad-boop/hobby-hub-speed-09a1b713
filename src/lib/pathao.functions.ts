@@ -293,11 +293,32 @@ type PathaoOrderInfoResponse = {
   };
 };
 
+type OrderStatus =
+  | "delivered"
+  | "partial_delivered"
+  | "returned"
+  | "on_hold"
+  | "cancelled"
+  | "in_transit"
+  | "courier_entry";
+
+type ShipmentStatus =
+  | "booked"
+  | "pickup_pending"
+  | "in_transit"
+  | "delivered"
+  | "partial_delivered"
+  | "returned"
+  | "cancelled"
+  | "damaged"
+  | "lost"
+  | "exchanged";
+
 /**
- * Map Pathao order status slug → our internal order_status enum.
- * Unknown slugs do not change status (we only update courier_shipments).
+ * Map Pathao status slug → our internal order_status enum (subset).
+ * Returns null if no confident mapping.
  */
-function mapPathaoStatus(slug: string | undefined | null): string | null {
+function mapPathaoStatus(slug: string | undefined | null): OrderStatus | null {
   if (!slug) return null;
   const s = slug.toLowerCase();
   if (s.includes("delivered") && s.includes("partial")) return "partial_delivered";
@@ -315,8 +336,16 @@ function mapPathaoStatus(slug: string | undefined | null): string | null {
     s.includes("delivery_man_assigned")
   )
     return "in_transit";
-  if (s.includes("pickup") || s.includes("picked")) return "shipped";
+  if (s.includes("pickup") || s.includes("picked")) return "courier_entry";
   return null;
+}
+
+/** Map order-side status → courier_shipments.status enum. */
+function toShipmentStatus(s: OrderStatus | null, fallback: ShipmentStatus): ShipmentStatus {
+  if (!s) return fallback;
+  if (s === "courier_entry") return "pickup_pending";
+  if (s === "on_hold") return fallback;
+  return s as ShipmentStatus;
 }
 
 async function fetchPathaoOrderInfo(
