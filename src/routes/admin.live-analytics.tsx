@@ -719,7 +719,7 @@ function TrafficSources({ range }: { range: Range }) {
     <Card>
       <div className="border-b border-gray-200 px-5 py-3">
         <h3 className="text-sm font-semibold text-gray-900">Traffic Sources</h3>
-        <p className="text-xs text-gray-500">Where visitors come from</p>
+        <p className="text-xs text-gray-500">Visits and conversions by source</p>
       </div>
       <div className="h-56 p-4">
         {(data ?? []).length === 0 ? (
@@ -731,14 +731,26 @@ function TrafficSources({ range }: { range: Range }) {
               <XAxis type="number" tick={{ fontSize: 10 }} stroke="#9ca3af" />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} stroke="#9ca3af" width={80} />
               <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }} />
-              <Bar dataKey="count" fill="#6366f1" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="count" fill="#6366f1" radius={[0, 4, 4, 0]} name="Visits" />
+              <Bar dataKey="conversions" fill="#10b981" radius={[0, 4, 4, 0]} name="Conversions" />
             </BarChart>
           </ResponsiveContainer>
         )}
       </div>
-      {total > 0 && (
-        <div className="border-t border-gray-100 px-5 py-2 text-[11px] text-gray-500">
-          Total visits: <span className="font-medium text-gray-900">{total.toLocaleString()}</span>
+      {(data ?? []).length > 0 && (
+        <div className="divide-y divide-gray-100 border-t border-gray-100 text-[11px]">
+          {(data ?? []).slice(0, 5).map((r) => {
+            const cvr = r.count > 0 ? (r.conversions / r.count) * 100 : 0;
+            return (
+              <div key={r.name} className="flex items-center justify-between px-5 py-1.5">
+                <span className="font-medium text-gray-700">{r.name}</span>
+                <span className="text-gray-500 tabular-nums">
+                  {r.count.toLocaleString()} visits ·{" "}
+                  <span className="font-medium text-emerald-700">{r.conversions} conv ({cvr.toFixed(1)}%)</span>
+                </span>
+              </div>
+            );
+          })}
         </div>
       )}
     </Card>
