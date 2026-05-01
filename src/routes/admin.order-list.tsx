@@ -242,6 +242,29 @@ function OrderListPage() {
     qc.invalidateQueries({ queryKey: ["order-list-confirmed"] });
   }
 
+  async function bulkChangeStatus(ids: string[], newStatus: StatusValue) {
+    if (!ids.length) return;
+    const t = toast.loading(`Updating ${ids.length} order(s)…`);
+    try {
+      const patch: Record<string, unknown> = {
+        status: newStatus,
+        updated_at: new Date().toISOString(),
+      };
+      if (newStatus === "shipped") patch.shipped_at = new Date().toISOString();
+      if (newStatus === "delivered") patch.delivered_at = new Date().toISOString();
+      const { error } = await supabase
+        .from("orders")
+        .update(patch as never)
+        .in("id", ids);
+      if (error) throw error;
+      toast.success(`Updated ${ids.length} order(s)`, { id: t });
+      setSelected(new Set());
+      qc.invalidateQueries({ queryKey: ["order-list-confirmed"] });
+    } catch (e) {
+      toast.error("Bulk update failed: " + (e as Error).message, { id: t });
+    }
+  }
+
   function openInvoice(id: string) {
     setInvoiceOrderId(id);
   }
