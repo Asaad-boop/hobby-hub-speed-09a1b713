@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { runPathaoStatusSync } from "@/lib/pathao.functions";
+import { syncPathaoStatusesInternal } from "@/lib/pathao-sync.server";
 
 export const Route = createFileRoute("/api/public/hooks/sync-pathao-status")({
   server: {
     handlers: {
       POST: async () => {
         try {
-          const result = await runPathaoStatusSync();
+          const result = await syncPathaoStatusesInternal(300);
           return Response.json(result);
         } catch (err) {
           const message = err instanceof Error ? err.message : "Unknown error";
