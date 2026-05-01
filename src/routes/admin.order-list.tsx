@@ -188,10 +188,36 @@ function OrderListPage() {
     }
   }
 
-  async function bookCourier(id: string) {
-    // Mark ready_to_ship as a lightweight "courier entry" action.
-    // Real integration can be wired into BDCourierIntegration.
-    await changeStatus(id, "ready_to_ship");
+  async function sendToPathao(id: string) {
+    setBusyId(id);
+    const t = toast.loading("Sending to Pathao…");
+    try {
+      const res = await sendToPathaoFn({ data: { order_id: id } });
+      toast.success(`Pathao booked: ${res.consignment_id}`, { id: t });
+      qc.invalidateQueries({ queryKey: ["order-list-confirmed"] });
+    } catch (e) {
+      toast.error("Pathao failed: " + (e as Error).message, { id: t });
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function sendBulkToPathao(ids: string[]) {
+    if (!ids.length) return;
+    const t = toast.loading(`Sending ${ids.length} order(s) to Pathao…`);
+    let ok = 0;
+    let fail = 0;
+    for (const id of ids) {
+      try {
+        await sendToPathaoFn({ data: { order_id: id } });
+        ok++;
+      } catch {
+        fail++;
+      }
+    }
+    toast.success(`Pathao: ${ok} booked, ${fail} failed`, { id: t });
+    setSelected(new Set());
+    qc.invalidateQueries({ queryKey: ["order-list-confirmed"] });
   }
 
   function openInvoice(id: string) {
