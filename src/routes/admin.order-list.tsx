@@ -157,6 +157,7 @@ function Highlight({
 function OrderListPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filter, setFilter] = useState<StatusValue | "all">("all");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -164,6 +165,12 @@ function OrderListPage() {
   const sendToPathaoFn = useServerFn(sendOrderToPathao);
   const syncPathaoFn = useServerFn(syncPathaoStatuses);
   const [syncing, setSyncing] = useState(false);
+
+  // Debounce the input so filtering feels instant without thrashing on every keystroke
+  useEffect(() => {
+    const t = window.setTimeout(() => setDebouncedSearch(search), 120);
+    return () => window.clearTimeout(t);
+  }, [search]);
 
   async function runSyncPathao() {
     setSyncing(true);
