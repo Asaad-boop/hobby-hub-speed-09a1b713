@@ -166,6 +166,13 @@ function Checkout() {
   });
   const shippingFee = perItemFees.length ? Math.max(...perItemFees) : defaultShippingFee;
   const subtotalWithBump = total + (bump ? bumpPrice : 0);
+  // Auto bundle discount: 2 of the same line = 10% off, 3+ of the same line = 15% off.
+  // Computed per cart line so it shows up as a real "Discount" in billing & saves to the order.
+  const bundleDiscount = items.reduce((sum, i) => {
+    const pct = i.qty >= 3 ? 15 : i.qty === 2 ? 10 : 0;
+    if (!pct) return sum;
+    return sum + Math.round(i.product.price * i.qty * (pct / 100));
+  }, 0);
   const couponDiscount = appliedCoupon
     ? appliedCoupon.type === "percentage"
       ? Math.min(
@@ -174,7 +181,8 @@ function Checkout() {
         )
       : Math.min(Number(appliedCoupon.value), subtotalWithBump)
     : 0;
-  const grand = Math.max(0, subtotalWithBump + shippingFee - couponDiscount);
+  const totalDiscount = bundleDiscount + couponDiscount;
+  const grand = Math.max(0, subtotalWithBump + shippingFee - totalDiscount);
 
   const applyCoupon = async () => {
     if (validatingCoupon) return;
