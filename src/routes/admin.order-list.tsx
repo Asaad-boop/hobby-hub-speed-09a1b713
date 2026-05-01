@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/select";
 import { generatePickingListPDF } from "@/lib/pdf/picking-list";
 import { generatePackingListPDF } from "@/lib/pdf/packing-list";
+import { generatePackingSlipsPDF } from "@/lib/pdf/packing-slips";
 import { InvoicePreviewDialog } from "@/components/admin/InvoicePreviewDialog";
 
 export const Route = createFileRoute("/admin/order-list")({
