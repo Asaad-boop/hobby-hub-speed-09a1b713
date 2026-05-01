@@ -984,5 +984,3 @@ function LP() {
   );
 }
 
-// Wire component into the Route
-Route.update({ component: LP });
