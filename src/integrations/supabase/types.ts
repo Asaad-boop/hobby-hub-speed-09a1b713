@@ -218,6 +218,87 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_events: {
+        Row: {
+          created_at: string
+          currency: string | null
+          device_type: string | null
+          event_name: string
+          fb_browser_pixel: string | null
+          fb_click_id: string | null
+          id: string
+          order_id: string | null
+          page_type: string | null
+          params: Json
+          path: string | null
+          product_id: string | null
+          product_name: string | null
+          quantity: number | null
+          referrer: string | null
+          session_id: string
+          user_agent: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          value: number | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          device_type?: string | null
+          event_name: string
+          fb_browser_pixel?: string | null
+          fb_click_id?: string | null
+          id?: string
+          order_id?: string | null
+          page_type?: string | null
+          params?: Json
+          path?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          quantity?: number | null
+          referrer?: string | null
+          session_id: string
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          value?: number | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          device_type?: string | null
+          event_name?: string
+          fb_browser_pixel?: string | null
+          fb_click_id?: string | null
+          id?: string
+          order_id?: string | null
+          page_type?: string | null
+          params?: Json
+          path?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          quantity?: number | null
+          referrer?: string | null
+          session_id?: string
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          value?: number | null
+        }
+        Relationships: []
+      }
       bd_areas: {
         Row: {
           created_at: string | null

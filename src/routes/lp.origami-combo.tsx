@@ -7,6 +7,7 @@ import reviewPhoto2 from "@/assets/review-customer-2.webp";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { getOrderAttributionPayload } from "@/lib/session-tracking";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
+import { trackViewItem } from "@/lib/analytics-events";
 import { clarityTag } from "@/lib/clarity";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -220,6 +221,7 @@ function LandingPage() {
     });
     clarityTag("lp_campaign", "origami-car-plane");
     clarityTag("lp_variant_selected", variant);
+    trackViewItem({ id: activeProduct.id, title: activeProduct.title, price: unitPrice });
   }, [activeProduct, plane, unitPrice, variant]);
 
   const subtotal = unitPrice * qty;

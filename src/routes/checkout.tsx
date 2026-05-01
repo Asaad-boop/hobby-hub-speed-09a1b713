@@ -8,6 +8,7 @@ import { validateCoupon, type Coupon } from "@/lib/coupons";
 import { getOrderAttributionPayload } from "@/lib/session-tracking";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
 import { clarityEvent, clarityTag, clarityUpgrade } from "@/lib/clarity";
+import { trackBeginCheckout } from "@/lib/analytics-events";
 import { toast } from "sonner";
 import {
   Truck,
@@ -71,6 +72,17 @@ function Checkout() {
     clarityTag("reached_checkout", "true");
     clarityTag("checkout_value_bdt", String(Math.round(total)));
     clarityUpgrade("initiate_checkout");
+    // GA4-style begin_checkout for source -> conversion reporting.
+    trackBeginCheckout({
+      value: total,
+      items: items.map((i) => ({
+        item_id: i.product.id,
+        item_name: i.product.title,
+        price: i.product.price,
+        quantity: i.qty,
+        variant: i.variantLabel ?? null,
+      })),
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

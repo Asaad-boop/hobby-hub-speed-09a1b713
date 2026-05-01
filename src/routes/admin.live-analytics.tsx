@@ -278,24 +278,62 @@ function FunnelSection({ range }: { range: Range }) {
       const prevFromIso = prevFrom.toISOString();
       const prevToIso = prevTo.toISOString();
 
-      const [pv, prevPv, productPv, prevProductPv, carts, prevCarts, checkouts, prevCheckouts, orders, prevOrders] =
-        await Promise.all([
-          supabase.from("page_views").select("session_id", { count: "exact", head: true }).gte("created_at", fromIso).lte("created_at", toIso),
-          supabase.from("page_views").select("session_id", { count: "exact", head: true }).gte("created_at", prevFromIso).lte("created_at", prevToIso),
-          supabase.from("page_views").select("id", { count: "exact", head: true }).eq("page_type", "product").gte("created_at", fromIso).lte("created_at", toIso),
-          supabase.from("page_views").select("id", { count: "exact", head: true }).eq("page_type", "product").gte("created_at", prevFromIso).lte("created_at", prevToIso),
-          supabase.from("abandoned_carts").select("id", { count: "exact", head: true }).gte("created_at", fromIso).lte("created_at", toIso),
-          supabase.from("abandoned_carts").select("id", { count: "exact", head: true }).gte("created_at", prevFromIso).lte("created_at", prevToIso),
-          supabase.from("abandoned_carts").select("id", { count: "exact", head: true }).eq("last_step", "checkout").gte("created_at", fromIso).lte("created_at", toIso),
-          supabase.from("abandoned_carts").select("id", { count: "exact", head: true }).eq("last_step", "checkout").gte("created_at", prevFromIso).lte("created_at", prevToIso),
-          supabase.from("orders").select("total,status,created_at").gte("created_at", fromIso).lte("created_at", toIso),
-          supabase.from("orders").select("total,status,created_at").gte("created_at", prevFromIso).lte("created_at", prevToIso),
-        ]);
+      // GA4-style funnel: every step is one row in analytics_events. Distinct
+      // session counts use a lightweight client-side dedupe so traffic-source
+      // attribution lines up with conversions even when the cart never made it
+      // into the abandoned_carts table.
+      const select = "session_id,event_name,value";
+      const fetchEvents = (a: string, b: string) =>
+        supabase
+          .from("analytics_events")
+          .select(select)
+          .gte("created_at", a)
+          .lte("created_at", b)
+          .in("event_name", [
+            "page_view",
+            "view_item",
+            "add_to_cart",
+            "begin_checkout",
+            "purchase",
+          ])
+          .limit(20000);
+
+      const [curr, prev, orders, prevOrders] = await Promise.all([
+        fetchEvents(fromIso, toIso),
+        fetchEvents(prevFromIso, prevToIso),
+        supabase.from("orders").select("total,status,created_at").gte("created_at", fromIso).lte("created_at", toIso),
+        supabase.from("orders").select("total,status,created_at").gte("created_at", prevFromIso).lte("created_at", prevToIso),
+      ]);
+
+      const tally = (rows: Array<{ session_id: string; event_name: string }> | null) => {
+        const out = {
+          visitors: new Set<string>(),
+          productViews: new Set<string>(),
+          carts: new Set<string>(),
+          checkouts: new Set<string>(),
+          purchases: new Set<string>(),
+        };
+        for (const r of rows ?? []) {
+          if (r.event_name === "page_view") out.visitors.add(r.session_id);
+          else if (r.event_name === "view_item") out.productViews.add(r.session_id);
+          else if (r.event_name === "add_to_cart") out.carts.add(r.session_id);
+          else if (r.event_name === "begin_checkout") out.checkouts.add(r.session_id);
+          else if (r.event_name === "purchase") out.purchases.add(r.session_id);
+        }
+        return {
+          visitors: out.visitors.size,
+          productViews: out.productViews.size,
+          carts: out.carts.size,
+          checkouts: out.checkouts.size,
+          purchases: out.purchases.size,
+        };
+      };
+
+      const c = tally(curr.data);
+      const p = tally(prev.data);
 
       const ordersData = orders.data ?? [];
       const prevOrdersData = prevOrders.data ?? [];
-      const purchases = ordersData.length;
-      const prevPurchases = prevOrdersData.length;
       const revenue = ordersData
         .filter((o) => o.status === "delivered" || o.status === "confirmed")
         .reduce((s, o) => s + Number(o.total), 0);
@@ -304,16 +342,16 @@ function FunnelSection({ range }: { range: Range }) {
         .reduce((s, o) => s + Number(o.total), 0);
 
       return {
-        visitors: pv.count ?? 0,
-        prevVisitors: prevPv.count ?? 0,
-        productViews: productPv.count ?? 0,
-        prevProductViews: prevProductPv.count ?? 0,
-        carts: carts.count ?? 0,
-        prevCarts: prevCarts.count ?? 0,
-        checkouts: checkouts.count ?? 0,
-        prevCheckouts: prevCheckouts.count ?? 0,
-        purchases,
-        prevPurchases,
+        visitors: c.visitors,
+        prevVisitors: p.visitors,
+        productViews: c.productViews,
+        prevProductViews: p.productViews,
+        carts: c.carts,
+        prevCarts: p.carts,
+        checkouts: c.checkouts,
+        prevCheckouts: p.checkouts,
+        purchases: c.purchases || ordersData.length,
+        prevPurchases: p.purchases || prevOrdersData.length,
         revenue,
         prevRevenue,
       };
@@ -630,33 +668,46 @@ function TrafficSources({ range }: { range: Range }) {
     queryKey: ["traffic-sources", range],
     refetchInterval: 60_000,
     queryFn: async () => {
+      // Read directly from analytics_events so traffic-source numbers match
+      // funnel/conversion numbers exactly (same table, same session_id space).
       const { data: rows } = await supabase
-        .from("page_views")
-        .select("utm_source,referrer")
+        .from("analytics_events")
+        .select("session_id,event_name,utm_source,referrer,value")
+        .in("event_name", ["page_view", "purchase"])
         .gte("created_at", from.toISOString())
         .lte("created_at", to.toISOString())
-        .limit(5000);
+        .limit(20000);
 
-      const tally: Record<string, number> = {};
-      for (const r of rows ?? []) {
-        let src = (r.utm_source as string) || null;
-        if (!src && r.referrer) {
-          try {
-            src = new URL(r.referrer as string).hostname.replace(/^www\./, "");
-          } catch {
-            src = null;
-          }
+      const normalize = (utm: string | null, ref: string | null): string => {
+        let src = utm || null;
+        if (!src && ref) {
+          try { src = new URL(ref).hostname.replace(/^www\./, ""); } catch { src = null; }
         }
-        if (!src) src = "Direct";
-        if (src.includes("facebook") || src.includes("fb.com")) src = "Facebook";
-        else if (src.includes("instagram")) src = "Instagram";
-        else if (src.includes("google")) src = "Google";
-        else if (src.includes("tiktok")) src = "TikTok";
-        else if (src.includes("youtube")) src = "YouTube";
-        tally[src] = (tally[src] ?? 0) + 1;
+        if (!src) return "Direct";
+        const s = src.toLowerCase();
+        if (s.includes("facebook") || s.includes("fb.com")) return "Facebook";
+        if (s.includes("instagram")) return "Instagram";
+        if (s.includes("google")) return "Google";
+        if (s.includes("tiktok")) return "TikTok";
+        if (s.includes("youtube")) return "YouTube";
+        return src;
+      };
+
+      const tally: Record<string, { visits: number; conversions: number; revenue: number }> = {};
+      for (const r of rows ?? []) {
+        const name = normalize(
+          (r.utm_source as string) ?? null,
+          (r.referrer as string) ?? null,
+        );
+        if (!tally[name]) tally[name] = { visits: 0, conversions: 0, revenue: 0 };
+        if (r.event_name === "page_view") tally[name].visits += 1;
+        else if (r.event_name === "purchase") {
+          tally[name].conversions += 1;
+          tally[name].revenue += Number(r.value ?? 0);
+        }
       }
       return Object.entries(tally)
-        .map(([name, count]) => ({ name, count }))
+        .map(([name, v]) => ({ name, count: v.visits, conversions: v.conversions, revenue: v.revenue }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 8);
     },
@@ -668,7 +719,7 @@ function TrafficSources({ range }: { range: Range }) {
     <Card>
       <div className="border-b border-gray-200 px-5 py-3">
         <h3 className="text-sm font-semibold text-gray-900">Traffic Sources</h3>
-        <p className="text-xs text-gray-500">Where visitors come from</p>
+        <p className="text-xs text-gray-500">Visits and conversions by source</p>
       </div>
       <div className="h-56 p-4">
         {(data ?? []).length === 0 ? (
@@ -680,14 +731,26 @@ function TrafficSources({ range }: { range: Range }) {
               <XAxis type="number" tick={{ fontSize: 10 }} stroke="#9ca3af" />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} stroke="#9ca3af" width={80} />
               <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }} />
-              <Bar dataKey="count" fill="#6366f1" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="count" fill="#6366f1" radius={[0, 4, 4, 0]} name="Visits" />
+              <Bar dataKey="conversions" fill="#10b981" radius={[0, 4, 4, 0]} name="Conversions" />
             </BarChart>
           </ResponsiveContainer>
         )}
       </div>
-      {total > 0 && (
-        <div className="border-t border-gray-100 px-5 py-2 text-[11px] text-gray-500">
-          Total visits: <span className="font-medium text-gray-900">{total.toLocaleString()}</span>
+      {(data ?? []).length > 0 && (
+        <div className="divide-y divide-gray-100 border-t border-gray-100 text-[11px]">
+          {(data ?? []).slice(0, 5).map((r) => {
+            const cvr = r.count > 0 ? (r.conversions / r.count) * 100 : 0;
+            return (
+              <div key={r.name} className="flex items-center justify-between px-5 py-1.5">
+                <span className="font-medium text-gray-700">{r.name}</span>
+                <span className="text-gray-500 tabular-nums">
+                  {r.count.toLocaleString()} visits ·{" "}
+                  <span className="font-medium text-emerald-700">{r.conversions} conv ({cvr.toFixed(1)}%)</span>
+                </span>
+              </div>
+            );
+          })}
         </div>
       )}
     </Card>
