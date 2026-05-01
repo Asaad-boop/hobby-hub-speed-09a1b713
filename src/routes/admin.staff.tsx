@@ -42,11 +42,11 @@ const ASSIGNABLE_ROLES: AppRole[] = [
   "accountant",
 ];
 
-const ROLE_TONE: Record<string, "purple" | "blue" | "green" | "amber" | "gray"> = {
+const ROLE_TONE: Record<string, "purple" | "blue" | "green" | "yellow" | "gray"> = {
   admin: "purple",
   moderator: "blue",
   customer_service: "green",
-  operations: "amber",
+  operations: "yellow",
   packer: "gray",
   accountant: "gray",
 };
