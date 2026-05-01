@@ -668,33 +668,46 @@ function TrafficSources({ range }: { range: Range }) {
     queryKey: ["traffic-sources", range],
     refetchInterval: 60_000,
     queryFn: async () => {
+      // Read directly from analytics_events so traffic-source numbers match
+      // funnel/conversion numbers exactly (same table, same session_id space).
       const { data: rows } = await supabase
-        .from("page_views")
-        .select("utm_source,referrer")
+        .from("analytics_events")
+        .select("session_id,event_name,utm_source,referrer,value")
+        .in("event_name", ["page_view", "purchase"])
         .gte("created_at", from.toISOString())
         .lte("created_at", to.toISOString())
-        .limit(5000);
+        .limit(20000);
 
-      const tally: Record<string, number> = {};
-      for (const r of rows ?? []) {
-        let src = (r.utm_source as string) || null;
-        if (!src && r.referrer) {
-          try {
-            src = new URL(r.referrer as string).hostname.replace(/^www\./, "");
-          } catch {
-            src = null;
-          }
+      const normalize = (utm: string | null, ref: string | null): string => {
+        let src = utm || null;
+        if (!src && ref) {
+          try { src = new URL(ref).hostname.replace(/^www\./, ""); } catch { src = null; }
         }
-        if (!src) src = "Direct";
-        if (src.includes("facebook") || src.includes("fb.com")) src = "Facebook";
-        else if (src.includes("instagram")) src = "Instagram";
-        else if (src.includes("google")) src = "Google";
-        else if (src.includes("tiktok")) src = "TikTok";
-        else if (src.includes("youtube")) src = "YouTube";
-        tally[src] = (tally[src] ?? 0) + 1;
+        if (!src) return "Direct";
+        const s = src.toLowerCase();
+        if (s.includes("facebook") || s.includes("fb.com")) return "Facebook";
+        if (s.includes("instagram")) return "Instagram";
+        if (s.includes("google")) return "Google";
+        if (s.includes("tiktok")) return "TikTok";
+        if (s.includes("youtube")) return "YouTube";
+        return src;
+      };
+
+      const tally: Record<string, { visits: number; conversions: number; revenue: number }> = {};
+      for (const r of rows ?? []) {
+        const name = normalize(
+          (r.utm_source as string) ?? null,
+          (r.referrer as string) ?? null,
+        );
+        if (!tally[name]) tally[name] = { visits: 0, conversions: 0, revenue: 0 };
+        if (r.event_name === "page_view") tally[name].visits += 1;
+        else if (r.event_name === "purchase") {
+          tally[name].conversions += 1;
+          tally[name].revenue += Number(r.value ?? 0);
+        }
       }
       return Object.entries(tally)
-        .map(([name, count]) => ({ name, count }))
+        .map(([name, v]) => ({ name, count: v.visits, conversions: v.conversions, revenue: v.revenue }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 8);
     },
