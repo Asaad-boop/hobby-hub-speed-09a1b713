@@ -184,6 +184,7 @@ function StaffPage() {
           onSaved={() => {
             setAssignOpen(false);
             qc.invalidateQueries({ queryKey: ["admin", "staff"] });
+            qc.invalidateQueries({ queryKey: ["admin", "all-users"] });
           }}
         />
       )}
