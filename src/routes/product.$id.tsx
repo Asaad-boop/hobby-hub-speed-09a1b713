@@ -205,6 +205,28 @@ function ProductPage() {
       )
     : null;
 
+  // Variant images are kept OUT of the regular gallery and shown only
+  // when the matching variant is selected.
+  const variantImages = useMemo(
+    () => variants.map((v) => v.image).filter((s): s is string => !!s),
+    [variants],
+  );
+  const displayGallery = useMemo(() => {
+    const base = product.gallery.filter((g) => !variantImages.includes(g));
+    if (selectedVariant?.image) return [selectedVariant.image, ...base];
+    return base;
+  }, [product.gallery, variantImages, selectedVariant]);
+
+  // When a variant with an image is selected, switch the main image to it.
+  useEffect(() => {
+    if (selectedVariant?.image) {
+      setActiveImg(selectedVariant.image);
+    } else if (!displayGallery.includes(activeImg)) {
+      setActiveImg(displayGallery[0] ?? product.image);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedVariant?.id]);
+
   const handleReviewSubmit = async (r: NewReview) => {
     try {
       let imageUrls: string[] = [];
@@ -337,7 +359,7 @@ function ProductPage() {
               <Share2 className="h-4 w-4" />
             </button>
             {(() => {
-              const imgs = product.gallery;
+              const imgs = displayGallery;
               const curIdx = Math.max(0, imgs.indexOf(activeImg));
               const goto = (i: number) => setActiveImg(imgs[(i + imgs.length) % imgs.length]);
               const handleSwipeEnd = (sx: number | undefined, ex: number) => {
@@ -418,7 +440,7 @@ function ProductPage() {
             })()}
           </div>
           <div className="mt-3 grid max-w-sm grid-cols-4 gap-2 md:max-w-md">
-            {product.gallery.map((src: string, i: number) => (
+            {displayGallery.map((src: string, i: number) => (
               <button
                 key={i}
                 onClick={() => setActiveImg(src)}
