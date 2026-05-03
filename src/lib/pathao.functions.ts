@@ -289,9 +289,9 @@ export const sendOrderToPathao = createServerFn({ method: "POST" })
           .slice(0, 250) || "Order items";
 
       const isCOD = (order.payment_method ?? "cod").toLowerCase().includes("cod");
-      const loc = inferLocation(order);
-
       const token = await getAccessToken();
+      const loc = await resolveLocation(order, token);
+
       const payload = {
         store_id: Number(storeId),
         merchant_order_id: order.id.slice(0, 20),
@@ -304,7 +304,6 @@ export const sendOrderToPathao = createServerFn({ method: "POST" })
             .slice(0, 220) || "N/A",
         recipient_city: loc.city_id,
         recipient_zone: loc.zone_id,
-        recipient_area: loc.area_id,
         delivery_type: 48,
         item_type: 2,
         special_instruction: "",
