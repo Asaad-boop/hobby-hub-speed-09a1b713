@@ -205,6 +205,28 @@ function ProductPage() {
       )
     : null;
 
+  // Variant images are kept OUT of the regular gallery and shown only
+  // when the matching variant is selected.
+  const variantImages = useMemo(
+    () => variants.map((v) => v.image).filter((s): s is string => !!s),
+    [variants],
+  );
+  const displayGallery = useMemo(() => {
+    const base = product.gallery.filter((g) => !variantImages.includes(g));
+    if (selectedVariant?.image) return [selectedVariant.image, ...base];
+    return base;
+  }, [product.gallery, variantImages, selectedVariant]);
+
+  // When a variant with an image is selected, switch the main image to it.
+  useEffect(() => {
+    if (selectedVariant?.image) {
+      setActiveImg(selectedVariant.image);
+    } else if (!displayGallery.includes(activeImg)) {
+      setActiveImg(displayGallery[0] ?? product.image);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedVariant?.id]);
+
   const handleReviewSubmit = async (r: NewReview) => {
     try {
       let imageUrls: string[] = [];
