@@ -98,25 +98,123 @@ type PathaoCreateOrderResponse = {
   errors?: Record<string, string[]>;
 };
 
-/** Map our shipping_city / district to Pathao city/zone IDs.
- *  For now we default to Dhaka (city_id=1, zone_id=298 = "Bashundhara R/A" placeholder).
- *  Admin can extend by storing pathao_city_id / pathao_zone_id on bd_areas later.
- */
-function inferLocation(order: {
-  shipping_city: string | null;
-  shipping_district: string | null;
-}): { city_id: number; zone_id: number; area_id?: number } {
-  const c = (order.shipping_city || order.shipping_district || "").toLowerCase();
-  if (c.includes("dhaka")) return { city_id: 1, zone_id: 298 };
-  if (c.includes("chittagong") || c.includes("chattogram")) return { city_id: 2, zone_id: 426 };
-  if (c.includes("sylhet")) return { city_id: 3, zone_id: 538 };
-  if (c.includes("rajshahi")) return { city_id: 4, zone_id: 612 };
-  if (c.includes("khulna")) return { city_id: 5, zone_id: 686 };
-  if (c.includes("barisal") || c.includes("barishal")) return { city_id: 6, zone_id: 737 };
-  if (c.includes("rangpur")) return { city_id: 7, zone_id: 766 };
-  if (c.includes("mymensingh")) return { city_id: 8, zone_id: 806 };
-  // Default outside Dhaka
-  return { city_id: 1, zone_id: 298 };
+/* ──────────────────────────────────────────────────────────────────────────
+ * Dynamic location resolution via Pathao API.
+ * Pathao requires the merchant's actual numeric city/zone IDs which differ
+ * per account. We fetch & cache them at runtime.
+ * ────────────────────────────────────────────────────────────────────────*/
+
+type PathaoCity = { city_id: number; city_name: string };
+type PathaoZone = { zone_id: number; zone_name: string };
+
+let cityCache: { data: PathaoCity[]; expiresAt: number } | null = null;
+const zoneCache = new Map<number, { data: PathaoZone[]; expiresAt: number }>();
+const TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+async function pathaoGet<T>(path: string, token: string): Promise<T> {
+  const res = await fetchWithTimeout(`${PATHAO_BASE_URL}${path}`, {
+    method: "GET",
+    headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+  });
+  const json = (await res.json().catch(() => ({}))) as { data?: { data?: T } };
+  if (!res.ok || !json.data?.data) {
+    throw new Error(`Pathao GET ${path} failed [${res.status}]`);
+  }
+  return json.data.data;
+}
+
+async function getCities(token: string): Promise<PathaoCity[]> {
+  if (cityCache && cityCache.expiresAt > Date.now()) return cityCache.data;
+  const data = await pathaoGet<PathaoCity[]>("/aladdin/api/v1/city-list", token);
+  cityCache = { data, expiresAt: Date.now() + TTL_MS };
+  return data;
+}
+
+async function getZones(cityId: number, token: string): Promise<PathaoZone[]> {
+  const cached = zoneCache.get(cityId);
+  if (cached && cached.expiresAt > Date.now()) return cached.data;
+  const data = await pathaoGet<PathaoZone[]>(
+    `/aladdin/api/v1/cities/${cityId}/zone-list`,
+    token,
+  );
+  zoneCache.set(cityId, { data, expiresAt: Date.now() + TTL_MS });
+  return data;
+}
+
+function normalize(s: string | null | undefined): string {
+  return (s ?? "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+/** Map common BD city/district names to Pathao's city naming. */
+function cityAliases(input: string): string[] {
+  const n = normalize(input);
+  const aliases: string[] = [n];
+  if (n.includes("chittagong") || n.includes("chattogram")) aliases.push("chittagong");
+  if (n.includes("comilla") || n.includes("cumilla")) aliases.push("cumilla");
+  if (n.includes("bogra") || n.includes("bogura")) aliases.push("bogra");
+  if (n.includes("barishal") || n.includes("barisal")) aliases.push("barisal");
+  if (n.includes("jessore") || n.includes("jashore")) aliases.push("jashore");
+  // Dhaka area suburbs / thanas → Dhaka city
+  const dhakaSubs = [
+    "uttara", "mirpur", "gulshan", "banani", "dhanmondi", "mohammadpur",
+    "khilgaon", "badda", "rampura", "motijheel", "tejgaon", "shyamoli",
+    "farmgate", "bashundhara", "savar", "keraniganj", "jatrabari",
+  ];
+  if (dhakaSubs.some((s) => n.includes(s))) aliases.push("dhaka");
+  return aliases;
+}
+
+async function resolveLocation(
+  order: {
+    shipping_city: string | null;
+    shipping_district: string | null;
+    shipping_thana: string | null;
+    shipping_address: string | null;
+  },
+  token: string,
+): Promise<{ city_id: number; zone_id: number }> {
+  const cities = await getCities(token);
+
+  // 1. Try district first (more reliable city-level), then city
+  const candidates = [
+    ...cityAliases(order.shipping_district ?? ""),
+    ...cityAliases(order.shipping_city ?? ""),
+  ];
+
+  let matchedCity: PathaoCity | undefined;
+  for (const cand of candidates) {
+    if (!cand) continue;
+    matchedCity = cities.find((c) => normalize(c.city_name) === cand);
+    if (matchedCity) break;
+    matchedCity = cities.find((c) => normalize(c.city_name).includes(cand));
+    if (matchedCity) break;
+  }
+  if (!matchedCity) {
+    // Default to Dhaka so booking still goes through; merchant can edit on Pathao side.
+    matchedCity = cities.find((c) => normalize(c.city_name) === "dhaka") ?? cities[0];
+  }
+  if (!matchedCity) throw new Error("Pathao city list empty");
+
+  const zones = await getZones(matchedCity.city_id, token);
+  if (!zones.length) throw new Error(`No zones for city ${matchedCity.city_name}`);
+
+  // Try to match thana/area against zones
+  const thana = normalize(order.shipping_thana ?? "");
+  const addr = normalize(order.shipping_address ?? "");
+  let matchedZone: PathaoZone | undefined;
+  if (thana) {
+    matchedZone =
+      zones.find((z) => normalize(z.zone_name) === thana) ??
+      zones.find((z) => normalize(z.zone_name).includes(thana)) ??
+      zones.find((z) => thana.includes(normalize(z.zone_name).split(" ")[0])) ??
+      undefined;
+  }
+  if (!matchedZone && addr) {
+    matchedZone = zones.find((z) => addr.includes(normalize(z.zone_name)));
+  }
+  if (!matchedZone) matchedZone = zones[0]; // fallback: first zone of the city
+
+  return { city_id: matchedCity.city_id, zone_id: matchedZone.zone_id };
 }
 
 export const sendOrderToPathao = createServerFn({ method: "POST" })
@@ -191,9 +289,9 @@ export const sendOrderToPathao = createServerFn({ method: "POST" })
           .slice(0, 250) || "Order items";
 
       const isCOD = (order.payment_method ?? "cod").toLowerCase().includes("cod");
-      const loc = inferLocation(order);
-
       const token = await getAccessToken();
+      const loc = await resolveLocation(order, token);
+
       const payload = {
         store_id: Number(storeId),
         merchant_order_id: order.id.slice(0, 20),
@@ -206,7 +304,6 @@ export const sendOrderToPathao = createServerFn({ method: "POST" })
             .slice(0, 220) || "N/A",
         recipient_city: loc.city_id,
         recipient_zone: loc.zone_id,
-        recipient_area: loc.area_id,
         delivery_type: 48,
         item_type: 2,
         special_instruction: "",
