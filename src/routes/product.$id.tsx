@@ -359,7 +359,7 @@ function ProductPage() {
               <Share2 className="h-4 w-4" />
             </button>
             {(() => {
-              const imgs = product.gallery;
+              const imgs = displayGallery;
               const curIdx = Math.max(0, imgs.indexOf(activeImg));
               const goto = (i: number) => setActiveImg(imgs[(i + imgs.length) % imgs.length]);
               const handleSwipeEnd = (sx: number | undefined, ex: number) => {
@@ -440,7 +440,7 @@ function ProductPage() {
             })()}
           </div>
           <div className="mt-3 grid max-w-sm grid-cols-4 gap-2 md:max-w-md">
-            {product.gallery.map((src: string, i: number) => (
+            {displayGallery.map((src: string, i: number) => (
               <button
                 key={i}
                 onClick={() => setActiveImg(src)}
