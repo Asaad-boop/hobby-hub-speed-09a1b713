@@ -36,12 +36,27 @@ type Order = {
   order_items: { id: string; name: string; image: string | null; price: number; quantity: number }[];
 };
 
+// Module-level guard prevents double-fire from React StrictMode / fast remounts
+// where two concurrent effect invocations both pass the sessionStorage check
+// before either has a chance to write the dedupe key.
+const PURCHASE_FIRED = new Set<string>();
+
 function OrderSuccessPage() {
   const { orderId } = Route.useParams();
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<Order | null>(null);
 
   useEffect(() => {
+    // Synchronously claim this orderId BEFORE the async fetch starts.
+    const alreadyFired =
+      PURCHASE_FIRED.has(orderId) ||
+      (typeof window !== "undefined" &&
+        sessionStorage.getItem(`fb_purchase_fired_${orderId}`) === "1");
+    PURCHASE_FIRED.add(orderId);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem(`fb_purchase_fired_${orderId}`, "1");
+    }
+
     (async () => {
       const { data } = await supabase
         .from("orders")
@@ -52,37 +67,33 @@ function OrderSuccessPage() {
       setOrder(o);
       setLoading(false);
 
-      // Meta Pixel: Purchase (dedupe per order via sessionStorage)
+      // Meta Pixel: Purchase — guarded above to prevent any double-fire.
+      if (o && typeof window !== "undefined" && !alreadyFired) {
+        fbTrack("Purchase", {
+          content_ids: o.order_items.map((it) => it.id),
+          contents: o.order_items.map((it) => ({
+            id: it.id,
+            quantity: it.quantity,
+            item_price: it.price,
+          })),
+          num_items: o.order_items.reduce((s, it) => s + it.quantity, 0),
+          value: o.total,
+          currency: META_CURRENCY,
+          order_id: o.id,
+        });
+        trackPurchase({
+          order_id: o.id,
+          value: Number(o.total),
+          items: o.order_items.map((it) => ({
+            item_id: it.id,
+            item_name: it.name,
+            price: Number(it.price),
+            quantity: it.quantity,
+          })),
+        });
+      }
       if (o && typeof window !== "undefined") {
-        const key = `fb_purchase_fired_${o.id}`;
-        if (!sessionStorage.getItem(key)) {
-          fbTrack("Purchase", {
-            content_ids: o.order_items.map((it) => it.id),
-            contents: o.order_items.map((it) => ({
-              id: it.id,
-              quantity: it.quantity,
-              item_price: it.price,
-            })),
-            num_items: o.order_items.reduce((s, it) => s + it.quantity, 0),
-            value: o.total,
-            currency: META_CURRENCY,
-            order_id: o.id,
-          });
-          sessionStorage.setItem(key, "1");
-          // GA4-style purchase event — gates by the same dedupe key so we
-          // never double-log on a refresh of the success page.
-          trackPurchase({
-            order_id: o.id,
-            value: Number(o.total),
-            items: o.order_items.map((it) => ({
-              item_id: it.id,
-              item_name: it.name,
-              price: Number(it.price),
-              quantity: it.quantity,
-            })),
-          });
-        }
-        // Clarity: mark this session as a converter — top priority retention.
+        // Clarity tags are idempotent — safe to set every time.
         clarityEvent("purchase");
         clarityTag("converted", "true");
         clarityTag("order_value_bdt", String(Math.round(o.total)));
