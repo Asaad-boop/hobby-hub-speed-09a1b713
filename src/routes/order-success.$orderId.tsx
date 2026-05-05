@@ -36,12 +36,27 @@ type Order = {
   order_items: { id: string; name: string; image: string | null; price: number; quantity: number }[];
 };
 
+// Module-level guard prevents double-fire from React StrictMode / fast remounts
+// where two concurrent effect invocations both pass the sessionStorage check
+// before either has a chance to write the dedupe key.
+const PURCHASE_FIRED = new Set<string>();
+
 function OrderSuccessPage() {
   const { orderId } = Route.useParams();
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<Order | null>(null);
 
   useEffect(() => {
+    // Synchronously claim this orderId BEFORE the async fetch starts.
+    const alreadyFired =
+      PURCHASE_FIRED.has(orderId) ||
+      (typeof window !== "undefined" &&
+        sessionStorage.getItem(`fb_purchase_fired_${orderId}`) === "1");
+    PURCHASE_FIRED.add(orderId);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem(`fb_purchase_fired_${orderId}`, "1");
+    }
+
     (async () => {
       const { data } = await supabase
         .from("orders")
