@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getOrderByFullId } from "@/lib/order-lookup.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -112,12 +113,14 @@ function TrackOrderPage() {
         navigate({ to: "/track" });
         return;
       }
-      const { data } = await supabase
-        .from("orders")
-        .select("*, order_items(id,name,image,price,quantity)")
-        .eq("id", orderId)
-        .maybeSingle();
-      setOrder(data as Order | null);
+      const res = await getOrderByFullId({ data: { orderId } }).catch(() => null);
+      const o = res && res.ok ? (res.order as Order) : null;
+      // Only allow signed-in user to view their own order via this path.
+      if (o && (o as { user_id?: string }).user_id && session.user.id !== (o as { user_id?: string }).user_id) {
+        setOrder(null);
+      } else {
+        setOrder(o);
+      }
       setLoading(false);
     })();
   }, [orderId, navigate]);
