@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "anyone read guest orders by id" ON public.orders;
