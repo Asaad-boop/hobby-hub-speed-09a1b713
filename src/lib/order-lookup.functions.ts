@@ -6,6 +6,32 @@ import type { Database } from "@/integrations/supabase/types";
 
 const normalizePhone = (p: string) => p.replace(/\D/g, "").slice(-10);
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Fetch an order by full UUID. The 36-char UUID acts as the unguessable
+ * token, so this is safe to call without auth (used by guest order-success
+ * and track pages). Returns ok:false if not found.
+ */
+export const getOrderByFullId = createServerFn({ method: "POST" })
+  .inputValidator((input: { orderId: string }) => {
+    const orderId = String(input.orderId || "").trim().toLowerCase();
+    if (!UUID_RE.test(orderId)) throw new Error("Invalid order id");
+    return { orderId };
+  })
+  .handler(async ({ data }) => {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.ADMIN_SERVICE_ROLE_KEY) {
+      return { ok: false as const, error: "Order lookup temporarily unavailable" };
+    }
+    const { data: order } = await supabaseAdmin
+      .from("orders")
+      .select("*, order_items(id,name,image,price,quantity)")
+      .eq("id", data.orderId)
+      .maybeSingle();
+    if (!order) return { ok: false as const, error: "Order not found" };
+    return { ok: true as const, order };
+  });
+
 /**
  * Order lookup — REQUIRES AUTHENTICATION.
  * Returns ok:false with a friendly error instead of throwing, so the

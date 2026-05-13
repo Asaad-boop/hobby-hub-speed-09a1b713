@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { getOrderByFullId } from "@/lib/order-lookup.functions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Check, Package, Truck, Copy, Home, ShoppingBag, MapPin, Loader2, PartyPopper } from "lucide-react";
@@ -58,12 +58,8 @@ function OrderSuccessPage() {
     }
 
     (async () => {
-      const { data } = await supabase
-        .from("orders")
-        .select("*, order_items(id,name,image,price,quantity)")
-        .eq("id", orderId)
-        .maybeSingle();
-      const o = data as Order | null;
+      const res = await getOrderByFullId({ data: { orderId } }).catch(() => null);
+      const o = (res && res.ok ? (res.order as Order) : null);
       setOrder(o);
       setLoading(false);
 
