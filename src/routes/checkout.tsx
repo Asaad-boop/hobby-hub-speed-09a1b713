@@ -235,10 +235,8 @@ function Checkout() {
       toast.error("Please enter a valid Bangladeshi phone number (e.g. 01712345678).");
       return;
     }
-    if (!form.district) {
-      toast.error("Please select your district.");
-      return;
-    }
+    const deliveryDistrict = form.district || (shipMethod === "inside" ? "Dhaka" : "Outside Dhaka");
+    const deliveryCity = form.city.trim() || deliveryDistrict;
 
     setSubmitting(true);
     let createdOrderId: string | null = null;
@@ -290,8 +288,8 @@ function Checkout() {
         shipping_name: trimmedName,
         shipping_phone: normalizedPhone,
         shipping_address: trimmedAddress,
-        shipping_city: form.city.trim() || form.district,
-        shipping_district: form.district,
+        shipping_city: deliveryCity,
+        shipping_district: deliveryDistrict,
         ...attribution,
       };
       const orderInsert = isGuest
