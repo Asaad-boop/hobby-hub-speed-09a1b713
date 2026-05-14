@@ -101,6 +101,17 @@ function OrderSuccessPage() {
 
   const shortId = orderId.slice(0, 8).toUpperCase();
 
+  // Estimated delivery: inside Dhaka 1-2 days, outside 2-4 days from now.
+  const estimatedDelivery = (() => {
+    const isDhaka = (order?.shipping_city || "").toLowerCase().includes("dhaka");
+    const start = new Date();
+    const end = new Date();
+    start.setDate(start.getDate() + (isDhaka ? 1 : 2));
+    end.setDate(end.getDate() + (isDhaka ? 2 : 4));
+    const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    return `${fmt(start)} – ${fmt(end)}`;
+  })();
+
   const copyId = async () => {
     await navigator.clipboard.writeText(shortId);
     toast.success("Order ID copied!");
