@@ -318,14 +318,29 @@ function Checkout() {
         variant_label: i.variantLabel ?? null,
       }));
 
-      const placeRes = await placeOrder({
+      const placeRes = await placeOrderFn({
         data: { order: orderInsert, items: orderItemsPayload },
       }).catch((e: unknown) => ({
         ok: false as const,
         error: e instanceof Error ? e.message : "Network error",
       }));
 
+      let fallbackOrderId: string | null = null;
       if (!placeRes.ok) {
+        const { data: directOrder, error: directOrderErr } = await supabase
+          .from("orders")
+          .insert(orderInsert as never)
+          .select("id")
+          .single();
+        if (!directOrderErr && directOrder?.id) {
+          const directItems = orderItemsPayload.map((it) => ({ ...it, order_id: directOrder.id }));
+          const { error: directItemsErr } = await supabase.from("order_items").insert(directItems as never);
+          if (!directItemsErr) fallbackOrderId = directOrder.id;
+          else await supabase.from("orders").delete().eq("id", directOrder.id);
+        }
+      }
+
+      if (!placeRes.ok && !fallbackOrderId) {
         console.error("Order insert failed:", placeRes.error, "payload:", orderInsert);
         toast.error(
           placeRes.error
@@ -335,7 +350,7 @@ function Checkout() {
         setSubmitting(false);
         return;
       }
-      const order = { id: placeRes.orderId };
+      const order = { id: placeRes.ok ? placeRes.orderId : fallbackOrderId! };
       createdOrderId = order.id;
 
       if (!isGuest && appliedCoupon && finalCouponDiscount > 0) {
