@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useProducts } from "@/lib/products";
@@ -43,6 +44,7 @@ function Checkout() {
   const { items, total, clear, add, setQty, remove } = useCart();
   const { data: allProducts = [] } = useProducts();
   const navigate = useNavigate();
+  const placeOrderFn = useServerFn(placeOrder);
   const [bump] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
@@ -233,10 +235,8 @@ function Checkout() {
       toast.error("Please enter a valid Bangladeshi phone number (e.g. 01712345678).");
       return;
     }
-    if (!form.district) {
-      toast.error("Please select your district.");
-      return;
-    }
+    const deliveryDistrict = form.district || (shipMethod === "inside" ? "Dhaka" : "Outside Dhaka");
+    const deliveryCity = form.city.trim() || deliveryDistrict;
 
     setSubmitting(true);
     let createdOrderId: string | null = null;
@@ -288,8 +288,8 @@ function Checkout() {
         shipping_name: trimmedName,
         shipping_phone: normalizedPhone,
         shipping_address: trimmedAddress,
-        shipping_city: form.city.trim() || form.district,
-        shipping_district: form.district,
+        shipping_city: deliveryCity,
+        shipping_district: deliveryDistrict,
         ...attribution,
       };
       const orderInsert = isGuest
@@ -316,14 +316,27 @@ function Checkout() {
         variant_label: i.variantLabel ?? null,
       }));
 
-      const placeRes = await placeOrder({
+      const placeRes = await placeOrderFn({
         data: { order: orderInsert, items: orderItemsPayload },
       }).catch((e: unknown) => ({
         ok: false as const,
         error: e instanceof Error ? e.message : "Network error",
       }));
 
+      let fallbackOrderId: string | null = null;
       if (!placeRes.ok) {
+        const directOrderId = crypto.randomUUID();
+        const { error: directOrderErr } = await supabase
+          .from("orders")
+          .insert({ ...orderInsert, id: directOrderId } as never);
+        if (!directOrderErr) {
+          const directItems = orderItemsPayload.map((it) => ({ ...it, order_id: directOrderId }));
+          const { error: directItemsErr } = await supabase.from("order_items").insert(directItems as never);
+          if (!directItemsErr) fallbackOrderId = directOrderId;
+        }
+      }
+
+      if (!placeRes.ok && !fallbackOrderId) {
         console.error("Order insert failed:", placeRes.error, "payload:", orderInsert);
         toast.error(
           placeRes.error
@@ -333,7 +346,7 @@ function Checkout() {
         setSubmitting(false);
         return;
       }
-      const order = { id: placeRes.orderId };
+      const order = { id: placeRes.ok ? placeRes.orderId : fallbackOrderId! };
       createdOrderId = order.id;
 
       if (!isGuest && appliedCoupon && finalCouponDiscount > 0) {
