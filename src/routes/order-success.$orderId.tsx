@@ -127,12 +127,26 @@ function OrderSuccessPage() {
           আমরা শীঘ্রই আপনাকে কল করে কনফার্ম করব। Confirmation এর পর ২৪–৪৮ ঘন্টায় ডেলিভারি।
         </p>
 
-        <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm">
-          <span className="text-muted-foreground">Order ID:</span>
-          <span className="font-bold">#{shortId}</span>
-          <button onClick={copyId} className="ml-1 text-primary hover:opacity-70" aria-label="Copy order ID">
-            <Copy className="h-3.5 w-3.5" />
-          </button>
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm">
+            <span className="text-muted-foreground">Order ID:</span>
+            <span className="font-bold">#{shortId}</span>
+            <button onClick={copyId} className="ml-1 text-primary hover:opacity-70" aria-label="Copy order ID">
+              <Copy className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          {order && (
+            <>
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-bold text-primary">
+                <Clock className="h-3.5 w-3.5" />
+                ডেলিভারি: {estimatedDelivery}
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm">
+                <span className="text-muted-foreground">মোট:</span>
+                <span className="font-bold text-primary">৳{Number(order.total).toFixed(0)}</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
