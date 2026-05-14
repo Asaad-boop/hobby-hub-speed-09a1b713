@@ -35,42 +35,49 @@ export const placeOrder = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data }) => {
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.ADMIN_SERVICE_ROLE_KEY) {
-      return { ok: false as const, error: "Order service temporarily unavailable" };
+    try {
+      if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.ADMIN_SERVICE_ROLE_KEY) {
+        return { ok: false as const, error: "Order service temporarily unavailable" };
+      }
+
+      const { data: order, error: orderErr } = await supabaseAdmin
+        .from("orders")
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .insert(data.order as any)
+        .select("id")
+        .single();
+
+      if (orderErr || !order) {
+        console.error("[placeOrder] order insert failed", orderErr);
+        return {
+          ok: false as const,
+          error: orderErr?.message || "Could not place order",
+        };
+      }
+
+      const itemsPayload = data.items.map((it) => ({
+        ...it,
+        order_id: order.id,
+      }));
+
+      const { error: itemsErr } = await supabaseAdmin
+        .from("order_items")
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .insert(itemsPayload as any);
+
+      if (itemsErr) {
+        console.error("[placeOrder] items insert failed", itemsErr);
+        await supabaseAdmin.from("orders").delete().eq("id", order.id);
+        return {
+          ok: false as const,
+          error: `Could not save your items: ${itemsErr.message}`,
+        };
+      }
+
+      return { ok: true as const, orderId: order.id as string };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[placeOrder] unhandled exception:", msg, e);
+      return { ok: false as const, error: `Server error: ${msg}` };
     }
-
-    const { data: order, error: orderErr } = await supabaseAdmin
-      .from("orders")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .insert(data.order as any)
-      .select("id")
-      .single();
-
-    if (orderErr || !order) {
-      return {
-        ok: false as const,
-        error: orderErr?.message || "Could not place order",
-      };
-    }
-
-    const itemsPayload = data.items.map((it) => ({
-      ...it,
-      order_id: order.id,
-    }));
-
-    const { error: itemsErr } = await supabaseAdmin
-      .from("order_items")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .insert(itemsPayload as any);
-
-    if (itemsErr) {
-      // Best-effort cleanup of the orphaned order row
-      await supabaseAdmin.from("orders").delete().eq("id", order.id);
-      return {
-        ok: false as const,
-        error: `Could not save your items: ${itemsErr.message}`,
-      };
-    }
-
-    return { ok: true as const, orderId: order.id as string };
   });
