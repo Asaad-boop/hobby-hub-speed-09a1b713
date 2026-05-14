@@ -6,6 +6,7 @@ import { supabase, getClientSessionId } from "@/integrations/supabase/client";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { validateCoupon, type Coupon } from "@/lib/coupons";
 import { getOrderAttributionPayload } from "@/lib/session-tracking";
+import { placeOrder } from "@/lib/place-order.functions";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
 import { clarityEvent, clarityTag, clarityUpgrade } from "@/lib/clarity";
 import { trackBeginCheckout } from "@/lib/analytics-events";
@@ -304,26 +305,7 @@ function Checkout() {
             user_id: session!.user.id,
           };
 
-      const { data: order, error: orderErr } = await supabase
-        .from("orders")
-        .insert(orderInsert)
-        .select("id")
-        .single();
-
-      if (orderErr || !order) {
-        console.error("Order insert failed:", orderErr, "payload:", orderInsert);
-        toast.error(
-          orderErr?.message
-            ? `Could not place order: ${orderErr.message}`
-            : "Could not place order. Please check your connection and try again.",
-        );
-        setSubmitting(false);
-        return;
-      }
-      createdOrderId = order.id;
-
       const orderItemsPayload = allItems.map((i) => ({
-        order_id: order.id,
         user_id: isGuest ? null : session!.user.id,
         product_id: i.product.id,
         name: i.product.title,
@@ -333,19 +315,26 @@ function Checkout() {
         variant_id: i.variantId ?? null,
         variant_label: i.variantLabel ?? null,
       }));
-      const { error: itemsErr } = await supabase.from("order_items").insert(orderItemsPayload);
-      if (itemsErr) {
-        console.error("Order items insert failed:", itemsErr, "payload:", orderItemsPayload);
-        // Clean up the orphaned order row so the user can retry cleanly.
-        // Guest rows can't be deleted by the user under RLS — that's OK; the
-        // order will simply remain empty and admins can purge it.
-        if (!isGuest) {
-          await supabase.from("orders").delete().eq("id", order.id);
-        }
-        toast.error(`Could not save your items: ${itemsErr.message}. Please try again.`);
+
+      const placeRes = await placeOrder({
+        data: { order: orderInsert, items: orderItemsPayload },
+      }).catch((e: unknown) => ({
+        ok: false as const,
+        error: e instanceof Error ? e.message : "Network error",
+      }));
+
+      if (!placeRes.ok) {
+        console.error("Order insert failed:", placeRes.error, "payload:", orderInsert);
+        toast.error(
+          placeRes.error
+            ? `Could not place order: ${placeRes.error}`
+            : "Could not place order. Please check your connection and try again.",
+        );
         setSubmitting(false);
         return;
       }
+      const order = { id: placeRes.orderId };
+      createdOrderId = order.id;
 
       if (!isGuest && appliedCoupon && finalCouponDiscount > 0) {
         // Best-effort — failure here should not block the order.
