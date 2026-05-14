@@ -1909,6 +1909,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      is_guest_order: { Args: { _order_id: string }; Returns: boolean }
       log_order_view: { Args: { p_order_id: string }; Returns: undefined }
       mark_abandoned_cart_converted: {
         Args: { _id: string; _order_id: string }
