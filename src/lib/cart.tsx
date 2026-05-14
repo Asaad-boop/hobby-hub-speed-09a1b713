@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode, useMemo } from "react";
+import { createContext, useContext, useState, useCallback, ReactNode, useMemo, useEffect } from "react";
 import type { Product } from "./products";
 import { fbTrack, META_CURRENCY } from "./meta-pixel";
 import { clarityEvent, clarityTag, clarityUpgrade } from "./clarity";
@@ -36,9 +36,38 @@ export function cartLineKey(item: CartItem): string {
   return `${item.product.id}::${item.variantId ?? ""}`;
 }
 
+const CART_STORAGE_KEY = "hh_cart_v1";
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [open, setOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  // Load from localStorage on mount (client only)
+  useEffect(() => {
+    try {
+      if (typeof window === "undefined") return;
+      const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) setItems(parsed);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setHydrated(true);
+    }
+  }, []);
+
+  // Persist on change (after hydration to avoid clobbering)
+  useEffect(() => {
+    if (!hydrated || typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    } catch {
+      // ignore
+    }
+  }, [items, hydrated]);
 
   const add = useCallback<CartCtx["add"]>((p, qty = 1, opts) => {
     const variantId = opts?.variantId ?? null;
