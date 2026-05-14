@@ -327,16 +327,14 @@ function Checkout() {
 
       let fallbackOrderId: string | null = null;
       if (!placeRes.ok) {
-        const { data: directOrder, error: directOrderErr } = await supabase
+        const directOrderId = crypto.randomUUID();
+        const { error: directOrderErr } = await supabase
           .from("orders")
-          .insert(orderInsert as never)
-          .select("id")
-          .single();
-        if (!directOrderErr && directOrder?.id) {
-          const directItems = orderItemsPayload.map((it) => ({ ...it, order_id: directOrder.id }));
+          .insert({ ...orderInsert, id: directOrderId } as never);
+        if (!directOrderErr) {
+          const directItems = orderItemsPayload.map((it) => ({ ...it, order_id: directOrderId }));
           const { error: directItemsErr } = await supabase.from("order_items").insert(directItems as never);
-          if (!directItemsErr) fallbackOrderId = directOrder.id;
-          else await supabase.from("orders").delete().eq("id", directOrder.id);
+          if (!directItemsErr) fallbackOrderId = directOrderId;
         }
       }
 
