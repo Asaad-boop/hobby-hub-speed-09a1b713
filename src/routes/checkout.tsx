@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useProducts } from "@/lib/products";
@@ -43,6 +44,7 @@ function Checkout() {
   const { items, total, clear, add, setQty, remove } = useCart();
   const { data: allProducts = [] } = useProducts();
   const navigate = useNavigate();
+  const placeOrderFn = useServerFn(placeOrder);
   const [bump] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
