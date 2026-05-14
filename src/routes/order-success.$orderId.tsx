@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getOrderByFullId } from "@/lib/order-lookup.functions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, Package, Truck, Copy, Home, ShoppingBag, MapPin, Loader2, PartyPopper } from "lucide-react";
+import { Check, Package, Truck, Copy, Home, ShoppingBag, MapPin, Loader2, PartyPopper, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
 import { clarityEvent, clarityTag, clarityUpgrade } from "@/lib/clarity";
