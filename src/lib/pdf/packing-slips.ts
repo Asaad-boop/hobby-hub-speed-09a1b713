@@ -55,7 +55,7 @@ export async function generatePackingSlipsPDF(orderIds: string[]) {
   ordered.forEach((order, idx) => {
     if (idx > 0) doc.addPage("a5");
     const items = itemsByOrder.get(order.id) ?? [];
-    const shipment: { consignment_id?: string | null; tracking_id?: string | null; cod_amount_expected?: number | null } | undefined = undefined;
+    
 
     drawHeader(doc, `Packing Slip #${shortId(order.id)}`);
 
