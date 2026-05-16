@@ -29,17 +29,12 @@ function isCOD(payment_method: string | null | undefined) {
 export async function generatePackingSlipsPDF(orderIds: string[]) {
   if (!orderIds.length) throw new Error("No orders selected");
 
-  const [ordersRes, itemsRes, shipmentsRes] = await Promise.all([
+  const [ordersRes, itemsRes] = await Promise.all([
     supabase.from("orders").select("*").in("id", orderIds),
     supabase.from("order_items").select("*").in("order_id", orderIds),
-    supabase
-      .from("courier_shipments")
-      .select("order_id, consignment_id, tracking_id, cod_amount_expected")
-      .in("order_id", orderIds),
   ]);
   if (ordersRes.error) throw ordersRes.error;
   if (itemsRes.error) throw itemsRes.error;
-  if (shipmentsRes.error) throw shipmentsRes.error;
 
   const orders = ordersRes.data ?? [];
   const itemsByOrder = new Map<string, OrderItem[]>();
@@ -47,10 +42,6 @@ export async function generatePackingSlipsPDF(orderIds: string[]) {
     const arr = itemsByOrder.get(it.order_id) ?? [];
     arr.push(it as unknown as OrderItem);
     itemsByOrder.set(it.order_id, arr);
-  }
-  const shipmentByOrder = new Map<string, ShipmentRow>();
-  for (const s of shipmentsRes.data ?? []) {
-    shipmentByOrder.set(s.order_id, s as ShipmentRow);
   }
 
   // Preserve the requested order
