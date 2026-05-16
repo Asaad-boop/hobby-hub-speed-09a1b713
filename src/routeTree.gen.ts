@@ -49,8 +49,6 @@ import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminDiscountsRouteImport } from './routes/admin.discounts'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
-import { Route as ApiPublicDiagPathaoRouteImport } from './routes/api/public/diag-pathao'
-import { Route as ApiPublicHooksSyncPathaoStatusRouteImport } from './routes/api/public/hooks/sync-pathao-status'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -252,17 +250,6 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => AdminRoute,
 } as any)
-const ApiPublicDiagPathaoRoute = ApiPublicDiagPathaoRouteImport.update({
-  id: '/api/public/diag-pathao',
-  path: '/api/public/diag-pathao',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicHooksSyncPathaoStatusRoute =
-  ApiPublicHooksSyncPathaoStatusRouteImport.update({
-    id: '/api/public/hooks/sync-pathao-status',
-    path: '/api/public/hooks/sync-pathao-status',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -305,8 +292,6 @@ export interface FileRoutesByFullPath {
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
-  '/api/public/diag-pathao': typeof ApiPublicDiagPathaoRoute
-  '/api/public/hooks/sync-pathao-status': typeof ApiPublicHooksSyncPathaoStatusRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -348,8 +333,6 @@ export interface FileRoutesByTo {
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin': typeof AdminIndexRoute
   '/track': typeof TrackIndexRoute
-  '/api/public/diag-pathao': typeof ApiPublicDiagPathaoRoute
-  '/api/public/hooks/sync-pathao-status': typeof ApiPublicHooksSyncPathaoStatusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -393,8 +376,6 @@ export interface FileRoutesById {
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
-  '/api/public/diag-pathao': typeof ApiPublicDiagPathaoRoute
-  '/api/public/hooks/sync-pathao-status': typeof ApiPublicHooksSyncPathaoStatusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -439,8 +420,6 @@ export interface FileRouteTypes {
     | '/track/$orderId'
     | '/admin/'
     | '/track/'
-    | '/api/public/diag-pathao'
-    | '/api/public/hooks/sync-pathao-status'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -482,8 +461,6 @@ export interface FileRouteTypes {
     | '/track/$orderId'
     | '/admin'
     | '/track'
-    | '/api/public/diag-pathao'
-    | '/api/public/hooks/sync-pathao-status'
   id:
     | '__root__'
     | '/'
@@ -526,8 +503,6 @@ export interface FileRouteTypes {
     | '/track/$orderId'
     | '/admin/'
     | '/track/'
-    | '/api/public/diag-pathao'
-    | '/api/public/hooks/sync-pathao-status'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -557,8 +532,6 @@ export interface RootRouteChildren {
   ProductIdRoute: typeof ProductIdRoute
   TrackOrderIdRoute: typeof TrackOrderIdRoute
   TrackIndexRoute: typeof TrackIndexRoute
-  ApiPublicDiagPathaoRoute: typeof ApiPublicDiagPathaoRoute
-  ApiPublicHooksSyncPathaoStatusRoute: typeof ApiPublicHooksSyncPathaoStatusRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -843,20 +816,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/api/public/diag-pathao': {
-      id: '/api/public/diag-pathao'
-      path: '/api/public/diag-pathao'
-      fullPath: '/api/public/diag-pathao'
-      preLoaderRoute: typeof ApiPublicDiagPathaoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/sync-pathao-status': {
-      id: '/api/public/hooks/sync-pathao-status'
-      path: '/api/public/hooks/sync-pathao-status'
-      fullPath: '/api/public/hooks/sync-pathao-status'
-      preLoaderRoute: typeof ApiPublicHooksSyncPathaoStatusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -923,8 +882,6 @@ const rootRouteChildren: RootRouteChildren = {
   ProductIdRoute: ProductIdRoute,
   TrackOrderIdRoute: TrackOrderIdRoute,
   TrackIndexRoute: TrackIndexRoute,
-  ApiPublicDiagPathaoRoute: ApiPublicDiagPathaoRoute,
-  ApiPublicHooksSyncPathaoStatusRoute: ApiPublicHooksSyncPathaoStatusRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

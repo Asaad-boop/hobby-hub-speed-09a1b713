@@ -555,185 +555,6 @@ export type Database = {
         }
         Relationships: []
       }
-      courier_shipments: {
-        Row: {
-          actual_cod_charge: number
-          actual_delivery_charge: number
-          actual_return_charge: number
-          booked_at: string | null
-          cod_amount_expected: number
-          cod_amount_received: number
-          cod_settlement_batch_id: string | null
-          cod_settlement_date: string | null
-          consignment_id: string | null
-          created_at: string
-          delivered_at: string | null
-          delivery_zone: Database["public"]["Enums"]["delivery_zone"]
-          id: string
-          items_breakdown: Json
-          last_status_text: string | null
-          last_synced_at: string | null
-          notes: string | null
-          order_id: string
-          provider: Database["public"]["Enums"]["courier_provider"]
-          status: Database["public"]["Enums"]["shipment_status"]
-          tracking_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          actual_cod_charge?: number
-          actual_delivery_charge?: number
-          actual_return_charge?: number
-          booked_at?: string | null
-          cod_amount_expected?: number
-          cod_amount_received?: number
-          cod_settlement_batch_id?: string | null
-          cod_settlement_date?: string | null
-          consignment_id?: string | null
-          created_at?: string
-          delivered_at?: string | null
-          delivery_zone?: Database["public"]["Enums"]["delivery_zone"]
-          id?: string
-          items_breakdown?: Json
-          last_status_text?: string | null
-          last_synced_at?: string | null
-          notes?: string | null
-          order_id: string
-          provider?: Database["public"]["Enums"]["courier_provider"]
-          status?: Database["public"]["Enums"]["shipment_status"]
-          tracking_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          actual_cod_charge?: number
-          actual_delivery_charge?: number
-          actual_return_charge?: number
-          booked_at?: string | null
-          cod_amount_expected?: number
-          cod_amount_received?: number
-          cod_settlement_batch_id?: string | null
-          cod_settlement_date?: string | null
-          consignment_id?: string | null
-          created_at?: string
-          delivered_at?: string | null
-          delivery_zone?: Database["public"]["Enums"]["delivery_zone"]
-          id?: string
-          items_breakdown?: Json
-          last_status_text?: string | null
-          last_synced_at?: string | null
-          notes?: string | null
-          order_id?: string
-          provider?: Database["public"]["Enums"]["courier_provider"]
-          status?: Database["public"]["Enums"]["shipment_status"]
-          tracking_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "courier_shipments_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      courier_stats_cache: {
-        Row: {
-          carrybee: Json | null
-          expires_at: string
-          fetch_count: number
-          last_fetched_at: string
-          overall_cancel: number
-          overall_success: number
-          overall_success_rate: number
-          overall_total: number
-          paperfly: Json | null
-          parceldex: Json | null
-          pathao: Json | null
-          phone: string
-          raw_response: Json | null
-          redx: Json | null
-          risk_level: string | null
-          steadfast: Json | null
-        }
-        Insert: {
-          carrybee?: Json | null
-          expires_at?: string
-          fetch_count?: number
-          last_fetched_at?: string
-          overall_cancel?: number
-          overall_success?: number
-          overall_success_rate?: number
-          overall_total?: number
-          paperfly?: Json | null
-          parceldex?: Json | null
-          pathao?: Json | null
-          phone: string
-          raw_response?: Json | null
-          redx?: Json | null
-          risk_level?: string | null
-          steadfast?: Json | null
-        }
-        Update: {
-          carrybee?: Json | null
-          expires_at?: string
-          fetch_count?: number
-          last_fetched_at?: string
-          overall_cancel?: number
-          overall_success?: number
-          overall_success_rate?: number
-          overall_total?: number
-          paperfly?: Json | null
-          parceldex?: Json | null
-          pathao?: Json | null
-          phone?: string
-          raw_response?: Json | null
-          redx?: Json | null
-          risk_level?: string | null
-          steadfast?: Json | null
-        }
-        Relationships: []
-      }
-      fraud_checks: {
-        Row: {
-          cancelled_orders: number
-          checked_at: string
-          expires_at: string
-          id: string
-          phone: string
-          raw_response: Json | null
-          risk_level: Database["public"]["Enums"]["fraud_risk_level"]
-          success_rate: number
-          successful_orders: number
-          total_orders: number
-        }
-        Insert: {
-          cancelled_orders?: number
-          checked_at?: string
-          expires_at?: string
-          id?: string
-          phone: string
-          raw_response?: Json | null
-          risk_level?: Database["public"]["Enums"]["fraud_risk_level"]
-          success_rate?: number
-          successful_orders?: number
-          total_orders?: number
-        }
-        Update: {
-          cancelled_orders?: number
-          checked_at?: string
-          expires_at?: string
-          id?: string
-          phone?: string
-          raw_response?: Json | null
-          risk_level?: Database["public"]["Enums"]["fraud_risk_level"]
-          success_rate?: number
-          successful_orders?: number
-          total_orders?: number
-        }
-        Relationships: []
-      }
       homepage_versions: {
         Row: {
           created_at: string
@@ -755,78 +576,6 @@ export type Database = {
           id?: string
           label?: string | null
           sections?: Json
-        }
-        Relationships: []
-      }
-      integration_logs: {
-        Row: {
-          created_at: string
-          duration_ms: number | null
-          endpoint: string | null
-          error: string | null
-          id: string
-          integration_name: string
-          method: string | null
-          request_payload: Json | null
-          response_payload: Json | null
-          status_code: number | null
-        }
-        Insert: {
-          created_at?: string
-          duration_ms?: number | null
-          endpoint?: string | null
-          error?: string | null
-          id?: string
-          integration_name: string
-          method?: string | null
-          request_payload?: Json | null
-          response_payload?: Json | null
-          status_code?: number | null
-        }
-        Update: {
-          created_at?: string
-          duration_ms?: number | null
-          endpoint?: string | null
-          error?: string | null
-          id?: string
-          integration_name?: string
-          method?: string | null
-          request_payload?: Json | null
-          response_payload?: Json | null
-          status_code?: number | null
-        }
-        Relationships: []
-      }
-      integrations: {
-        Row: {
-          config: Json
-          created_at: string
-          id: string
-          is_enabled: boolean
-          last_sync_at: string | null
-          last_sync_status: string | null
-          name: string
-          provider: string | null
-        }
-        Insert: {
-          config?: Json
-          created_at?: string
-          id?: string
-          is_enabled?: boolean
-          last_sync_at?: string | null
-          last_sync_status?: string | null
-          name: string
-          provider?: string | null
-        }
-        Update: {
-          config?: Json
-          created_at?: string
-          id?: string
-          is_enabled?: boolean
-          last_sync_at?: string | null
-          last_sync_status?: string | null
-          name?: string
-          provider?: string | null
         }
         Relationships: []
       }
@@ -1060,7 +809,6 @@ export type Database = {
           return_type: string | null
           risk_flag: boolean
           scheduled_date: string | null
-          shipment_id: string | null
           shipped_at: string | null
           shipped_by: string | null
           shipping_address: string | null
@@ -1143,7 +891,6 @@ export type Database = {
           return_type?: string | null
           risk_flag?: boolean
           scheduled_date?: string | null
-          shipment_id?: string | null
           shipped_at?: string | null
           shipped_by?: string | null
           shipping_address?: string | null
@@ -1226,7 +973,6 @@ export type Database = {
           return_type?: string | null
           risk_flag?: boolean
           scheduled_date?: string | null
-          shipment_id?: string | null
           shipped_at?: string | null
           shipped_by?: string | null
           shipping_address?: string | null
@@ -1271,13 +1017,6 @@ export type Database = {
             columns: ["delivery_zone_id"]
             isOneToOne: false
             referencedRelation: "bd_zones"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "orders_shipment_id_fkey"
-            columns: ["shipment_id"]
-            isOneToOne: false
-            referencedRelation: "courier_shipments"
             referencedColumns: ["id"]
           },
         ]
@@ -1780,17 +1519,6 @@ export type Database = {
       }
     }
     Views: {
-      customer_courier_stats: {
-        Row: {
-          cancelled_orders: number | null
-          delivered_orders: number | null
-          phone: string | null
-          provider: Database["public"]["Enums"]["courier_provider"] | null
-          success_rate: number | null
-          total_orders: number | null
-        }
-        Relationships: []
-      }
       customer_stats_by_phone: {
         Row: {
           cancelled_orders: number | null
@@ -1974,10 +1702,7 @@ export type Database = {
         | "on_hold"
         | "advance_pending"
       coupon_type: "percentage" | "fixed"
-      courier_provider: "pathao" | "steadfast" | "redx" | "manual"
-      delivery_zone: "inside_dhaka" | "outside_dhaka" | "sub_city" | "other"
       discount_type: "flat" | "percent"
-      fraud_risk_level: "low" | "medium" | "high" | "unknown"
       order_priority: "low" | "normal" | "high" | "urgent"
       order_source: "website" | "facebook" | "manual" | "phone"
       order_status:
@@ -2006,17 +1731,6 @@ export type Database = {
         | "partial_return"
         | "pending_return"
       payment_status: "unpaid" | "partial" | "paid" | "refunded"
-      shipment_status:
-        | "booked"
-        | "pickup_pending"
-        | "in_transit"
-        | "delivered"
-        | "partial_delivered"
-        | "returned"
-        | "exchanged"
-        | "damaged"
-        | "lost"
-        | "cancelled"
       web_order_status:
         | "processing"
         | "incomplete"
@@ -2181,10 +1895,7 @@ export const Constants = {
         "advance_pending",
       ],
       coupon_type: ["percentage", "fixed"],
-      courier_provider: ["pathao", "steadfast", "redx", "manual"],
-      delivery_zone: ["inside_dhaka", "outside_dhaka", "sub_city", "other"],
       discount_type: ["flat", "percent"],
-      fraud_risk_level: ["low", "medium", "high", "unknown"],
       order_priority: ["low", "normal", "high", "urgent"],
       order_source: ["website", "facebook", "manual", "phone"],
       order_status: [
@@ -2214,18 +1925,6 @@ export const Constants = {
         "pending_return",
       ],
       payment_status: ["unpaid", "partial", "paid", "refunded"],
-      shipment_status: [
-        "booked",
-        "pickup_pending",
-        "in_transit",
-        "delivered",
-        "partial_delivered",
-        "returned",
-        "exchanged",
-        "damaged",
-        "lost",
-        "cancelled",
-      ],
       web_order_status: [
         "processing",
         "incomplete",

@@ -12,12 +12,6 @@ type OrderItem = {
   line_total: number | null;
 };
 
-type ShipmentRow = {
-  order_id: string;
-  consignment_id: string | null;
-  tracking_id: string | null;
-  cod_amount_expected: number | null;
-};
 
 function bdt(n: number | null | undefined) {
   return "Tk " + Number(n ?? 0).toLocaleString("en-BD");
@@ -35,17 +29,12 @@ function isCOD(payment_method: string | null | undefined) {
 export async function generatePackingSlipsPDF(orderIds: string[]) {
   if (!orderIds.length) throw new Error("No orders selected");
 
-  const [ordersRes, itemsRes, shipmentsRes] = await Promise.all([
+  const [ordersRes, itemsRes] = await Promise.all([
     supabase.from("orders").select("*").in("id", orderIds),
     supabase.from("order_items").select("*").in("order_id", orderIds),
-    supabase
-      .from("courier_shipments")
-      .select("order_id, consignment_id, tracking_id, cod_amount_expected")
-      .in("order_id", orderIds),
   ]);
   if (ordersRes.error) throw ordersRes.error;
   if (itemsRes.error) throw itemsRes.error;
-  if (shipmentsRes.error) throw shipmentsRes.error;
 
   const orders = ordersRes.data ?? [];
   const itemsByOrder = new Map<string, OrderItem[]>();
@@ -53,10 +42,6 @@ export async function generatePackingSlipsPDF(orderIds: string[]) {
     const arr = itemsByOrder.get(it.order_id) ?? [];
     arr.push(it as unknown as OrderItem);
     itemsByOrder.set(it.order_id, arr);
-  }
-  const shipmentByOrder = new Map<string, ShipmentRow>();
-  for (const s of shipmentsRes.data ?? []) {
-    shipmentByOrder.set(s.order_id, s as ShipmentRow);
   }
 
   // Preserve the requested order
@@ -70,7 +55,7 @@ export async function generatePackingSlipsPDF(orderIds: string[]) {
   ordered.forEach((order, idx) => {
     if (idx > 0) doc.addPage("a5");
     const items = itemsByOrder.get(order.id) ?? [];
-    const shipment = shipmentByOrder.get(order.id);
+    
 
     drawHeader(doc, `Packing Slip #${shortId(order.id)}`);
 
@@ -163,9 +148,7 @@ export async function generatePackingSlipsPDF(orderIds: string[]) {
     const shipping = Number(order.shipping_fee ?? 0);
     const advance = Number(order.advance_amount ?? 0);
     const total = Number(order.total ?? 0);
-    const codExpected = Number(
-      shipment?.cod_amount_expected ?? Math.max(total - advance, 0),
-    );
+    const codExpected = Math.max(total - advance, 0);
     const cod = isCOD(order.payment_method);
 
     const rightX = pageWidth - 14;
@@ -216,20 +199,15 @@ export async function generatePackingSlipsPDF(orderIds: string[]) {
     );
     doc.setTextColor(0);
 
-    // Tracking / consignment row
-    if (shipment?.consignment_id || shipment?.tracking_id || order.tracking_number) {
+    // Tracking row
+    if (order.tracking_number) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
       doc.setTextColor(110);
-      const trackParts: string[] = [];
-      if (shipment?.consignment_id) trackParts.push(`Consignment: ${shipment.consignment_id}`);
-      if (shipment?.tracking_id || order.tracking_number)
-        trackParts.push(
-          `Tracking: ${shipment?.tracking_id ?? order.tracking_number}`,
-        );
-      doc.text(trackParts.join("   •   "), 14, finalY + 10);
+      doc.text(`Tracking: ${order.tracking_number}`, 14, finalY + 10);
       doc.setTextColor(0);
     }
+
 
     drawFooter(
       doc,

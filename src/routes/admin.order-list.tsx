@@ -23,7 +23,7 @@ import {
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { sendOrderToPathao, syncPathaoStatuses } from "@/lib/pathao.functions";
+
 import { Card, Loading, Empty, Input } from "@/components/admin/ui";
 import { Button } from "@/components/ui/button";
 import {
@@ -163,29 +163,12 @@ function OrderListPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [invoiceOrderId, setInvoiceOrderId] = useState<string | null>(null);
-  const sendToPathaoFn = useServerFn(sendOrderToPathao);
-  const syncPathaoFn = useServerFn(syncPathaoStatuses);
-  const [syncing, setSyncing] = useState(false);
 
   // Debounce the input so filtering feels instant without thrashing on every keystroke
   useEffect(() => {
     const t = window.setTimeout(() => setDebouncedSearch(search), 120);
     return () => window.clearTimeout(t);
   }, [search]);
-
-  async function runSyncPathao() {
-    setSyncing(true);
-    const t = toast.loading("Syncing Pathao statuses…");
-    try {
-      const res = await syncPathaoFn({});
-      toast.success(`Synced ${res.updated}/${res.checked} shipments`, { id: t });
-      qc.invalidateQueries({ queryKey: ["order-list-confirmed"] });
-    } catch (e) {
-      toast.error("Sync failed: " + (e as Error).message, { id: t });
-    } finally {
-      setSyncing(false);
-    }
-  }
 
   const { data, isLoading } = useQuery({
     queryKey: ["order-list-confirmed"],
@@ -265,37 +248,6 @@ function OrderListPage() {
     }
   }
 
-  async function sendToPathao(id: string) {
-    setBusyId(id);
-    const t = toast.loading("Sending to Pathao…");
-    try {
-      const res = await sendToPathaoFn({ data: { order_id: id } });
-      toast.success(`Pathao booked: ${res.consignment_id}`, { id: t });
-      qc.invalidateQueries({ queryKey: ["order-list-confirmed"] });
-    } catch (e) {
-      toast.error("Pathao failed: " + (e as Error).message, { id: t });
-    } finally {
-      setBusyId(null);
-    }
-  }
-
-  async function sendBulkToPathao(ids: string[]) {
-    if (!ids.length) return;
-    const t = toast.loading(`Sending ${ids.length} order(s) to Pathao…`);
-    let ok = 0;
-    let fail = 0;
-    for (const id of ids) {
-      try {
-        await sendToPathaoFn({ data: { order_id: id } });
-        ok++;
-      } catch {
-        fail++;
-      }
-    }
-    toast.success(`Pathao: ${ok} booked, ${fail} failed`, { id: t });
-    setSelected(new Set());
-    qc.invalidateQueries({ queryKey: ["order-list-confirmed"] });
-  }
 
   async function bulkChangeStatus(ids: string[], newStatus: StatusValue) {
     if (!ids.length) return;
@@ -439,26 +391,8 @@ function OrderListPage() {
               <ClipboardList className="h-3.5 w-3.5" />
               Picking ({selected.size})
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 gap-1.5 bg-background/70 backdrop-blur"
-              onClick={runSyncPathao}
-              disabled={syncing}
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
-              Sync Pathao
-            </Button>
             {selected.size > 0 && (
               <>
-                <Button
-                  size="sm"
-                  className="h-8 gap-1.5 bg-gradient-to-r from-primary to-violet-600 text-primary-foreground shadow-md shadow-primary/30 hover:opacity-90"
-                  onClick={() => sendBulkToPathao([...selected])}
-                >
-                  <Truck className="h-3.5 w-3.5" />
-                  Send ({selected.size})
-                </Button>
                 <Button
                   size="sm"
                   variant="destructive"
@@ -693,28 +627,6 @@ function OrderListPage() {
                         <div className="flex flex-wrap items-center justify-end gap-1 opacity-80 transition-opacity group-hover:opacity-100">
                           <Button
                             size="sm"
-                            className={`h-7 px-2 text-[11px] ${
-                              o.tracking_number
-                                ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
-                                : "bg-gradient-to-r from-primary to-violet-600 text-primary-foreground hover:opacity-90"
-                            }`}
-                            onClick={() => sendToPathao(o.id)}
-                            disabled={busyId === o.id || !!o.tracking_number}
-                            title={
-                              o.tracking_number
-                                ? `Already booked: ${o.tracking_number}`
-                                : "Send to Pathao courier"
-                            }
-                          >
-                            {o.tracking_number ? (
-                              <CheckCircle2 className="h-3 w-3" />
-                            ) : (
-                              <Truck className="h-3 w-3" />
-                            )}
-                            {o.tracking_number ? "Booked" : "Pathao"}
-                          </Button>
-                          <Button
-                            size="sm"
                             variant="outline"
                             className="h-7 px-2 text-[11px]"
                             onClick={() => openInvoice(o.id)}
@@ -798,28 +710,6 @@ function OrderListPage() {
                 ))}
               </SelectContent>
             </Select>
-
-            {/* Courier sync (Pathao bulk send) */}
-            <Button
-              size="sm"
-              className="h-8 gap-1.5 bg-gradient-to-r from-primary to-violet-600 text-primary-foreground shadow-md shadow-primary/30 hover:opacity-90"
-              onClick={() => sendBulkToPathao([...selected])}
-            >
-              <Truck className="h-3.5 w-3.5" />
-              Send Pathao
-            </Button>
-
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 gap-1.5"
-              onClick={runSyncPathao}
-              disabled={syncing}
-              title="Sync Pathao statuses"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
-              Sync
-            </Button>
 
             {/* Packing slips PDF (combined) */}
             <Button

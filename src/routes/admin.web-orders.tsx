@@ -57,7 +57,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { fetchCourierStats } from "@/lib/courier.functions";
+// fetchCourierStats removed — BD Courier integration deleted
+const fetchCourierStats = async (_args: { data: { phone: string; force_refresh?: boolean } }): Promise<{ ok: boolean; error?: string; data?: { overall: { total: number; success: number; cancel: number; success_rate: number }; risk_level: string }; cached?: boolean; stale?: boolean }> => ({ ok: false, error: "Courier integration removed" });
 
 export const Route = createFileRoute("/admin/web-orders")({
   component: WebOrdersPage,
