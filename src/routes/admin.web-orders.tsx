@@ -293,9 +293,9 @@ function WebOrdersPage() {
         setCourierStats((prev) => ({
           ...prev,
           [phone]: {
-            total: res.data!.overall_total,
-            success: res.data!.overall_success,
-            rate: Number(res.data!.overall_success_rate),
+            total: res.data!.overall.total,
+            success: res.data!.overall.success,
+            rate: Number(res.data!.overall.success_rate),
             loading: false,
             stale: res.stale,
             error: res.stale ? res.error : undefined,
