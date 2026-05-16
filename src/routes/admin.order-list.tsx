@@ -711,28 +711,6 @@ function OrderListPage() {
               </SelectContent>
             </Select>
 
-            {/* Courier sync (Pathao bulk send) */}
-            <Button
-              size="sm"
-              className="h-8 gap-1.5 bg-gradient-to-r from-primary to-violet-600 text-primary-foreground shadow-md shadow-primary/30 hover:opacity-90"
-              onClick={() => sendBulkToPathao([...selected])}
-            >
-              <Truck className="h-3.5 w-3.5" />
-              Send Pathao
-            </Button>
-
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 gap-1.5"
-              onClick={runSyncPathao}
-              disabled={syncing}
-              title="Sync Pathao statuses"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
-              Sync
-            </Button>
-
             {/* Packing slips PDF (combined) */}
             <Button
               size="sm"
