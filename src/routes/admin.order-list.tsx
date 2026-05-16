@@ -627,28 +627,6 @@ function OrderListPage() {
                         <div className="flex flex-wrap items-center justify-end gap-1 opacity-80 transition-opacity group-hover:opacity-100">
                           <Button
                             size="sm"
-                            className={`h-7 px-2 text-[11px] ${
-                              o.tracking_number
-                                ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
-                                : "bg-gradient-to-r from-primary to-violet-600 text-primary-foreground hover:opacity-90"
-                            }`}
-                            onClick={() => sendToPathao(o.id)}
-                            disabled={busyId === o.id || !!o.tracking_number}
-                            title={
-                              o.tracking_number
-                                ? `Already booked: ${o.tracking_number}`
-                                : "Send to Pathao courier"
-                            }
-                          >
-                            {o.tracking_number ? (
-                              <CheckCircle2 className="h-3 w-3" />
-                            ) : (
-                              <Truck className="h-3 w-3" />
-                            )}
-                            {o.tracking_number ? "Booked" : "Pathao"}
-                          </Button>
-                          <Button
-                            size="sm"
                             variant="outline"
                             className="h-7 px-2 text-[11px]"
                             onClick={() => openInvoice(o.id)}
