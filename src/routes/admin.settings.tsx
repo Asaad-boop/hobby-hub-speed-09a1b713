@@ -52,9 +52,6 @@ function SettingsPage() {
     <div>
       <PageHeader title="Settings" description="Site configuration and staff roles" />
 
-      <BDCourierIntegration />
-
-
       <Card className="mb-5">
         <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3" style={{ borderBottomWidth: "0.5px" }}>
           <div className="text-sm font-semibold">Site settings</div>
