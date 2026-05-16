@@ -164,6 +164,12 @@ function OrderListPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [invoiceOrderId, setInvoiceOrderId] = useState<string | null>(null);
 
+  // Debounce the input so filtering feels instant without thrashing on every keystroke
+  useEffect(() => {
+    const t = window.setTimeout(() => setDebouncedSearch(search), 120);
+    return () => window.clearTimeout(t);
+  }, [search]);
+
   const { data, isLoading } = useQuery({
     queryKey: ["order-list-confirmed"],
     queryFn: async (): Promise<OrderRow[]> => {
