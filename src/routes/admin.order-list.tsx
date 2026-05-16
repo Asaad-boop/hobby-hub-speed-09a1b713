@@ -248,37 +248,6 @@ function OrderListPage() {
     }
   }
 
-  async function sendToPathao(id: string) {
-    setBusyId(id);
-    const t = toast.loading("Sending to Pathao…");
-    try {
-      const res = await sendToPathaoFn({ data: { order_id: id } });
-      toast.success(`Pathao booked: ${res.consignment_id}`, { id: t });
-      qc.invalidateQueries({ queryKey: ["order-list-confirmed"] });
-    } catch (e) {
-      toast.error("Pathao failed: " + (e as Error).message, { id: t });
-    } finally {
-      setBusyId(null);
-    }
-  }
-
-  async function sendBulkToPathao(ids: string[]) {
-    if (!ids.length) return;
-    const t = toast.loading(`Sending ${ids.length} order(s) to Pathao…`);
-    let ok = 0;
-    let fail = 0;
-    for (const id of ids) {
-      try {
-        await sendToPathaoFn({ data: { order_id: id } });
-        ok++;
-      } catch {
-        fail++;
-      }
-    }
-    toast.success(`Pathao: ${ok} booked, ${fail} failed`, { id: t });
-    setSelected(new Set());
-    qc.invalidateQueries({ queryKey: ["order-list-confirmed"] });
-  }
 
   async function bulkChangeStatus(ids: string[], newStatus: StatusValue) {
     if (!ids.length) return;
