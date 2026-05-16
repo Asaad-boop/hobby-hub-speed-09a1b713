@@ -23,7 +23,7 @@ import {
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { sendOrderToPathao, syncPathaoStatuses } from "@/lib/pathao.functions";
+
 import { Card, Loading, Empty, Input } from "@/components/admin/ui";
 import { Button } from "@/components/ui/button";
 import {
