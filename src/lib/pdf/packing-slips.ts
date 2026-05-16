@@ -148,9 +148,7 @@ export async function generatePackingSlipsPDF(orderIds: string[]) {
     const shipping = Number(order.shipping_fee ?? 0);
     const advance = Number(order.advance_amount ?? 0);
     const total = Number(order.total ?? 0);
-    const codExpected = Number(
-      shipment?.cod_amount_expected ?? Math.max(total - advance, 0),
-    );
+    const codExpected = Math.max(total - advance, 0);
     const cod = isCOD(order.payment_method);
 
     const rightX = pageWidth - 14;
