@@ -12,12 +12,6 @@ type OrderItem = {
   line_total: number | null;
 };
 
-type ShipmentRow = {
-  order_id: string;
-  consignment_id: string | null;
-  tracking_id: string | null;
-  cod_amount_expected: number | null;
-};
 
 function bdt(n: number | null | undefined) {
   return "Tk " + Number(n ?? 0).toLocaleString("en-BD");
