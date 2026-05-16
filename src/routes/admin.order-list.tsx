@@ -391,26 +391,8 @@ function OrderListPage() {
               <ClipboardList className="h-3.5 w-3.5" />
               Picking ({selected.size})
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 gap-1.5 bg-background/70 backdrop-blur"
-              onClick={runSyncPathao}
-              disabled={syncing}
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
-              Sync Pathao
-            </Button>
             {selected.size > 0 && (
               <>
-                <Button
-                  size="sm"
-                  className="h-8 gap-1.5 bg-gradient-to-r from-primary to-violet-600 text-primary-foreground shadow-md shadow-primary/30 hover:opacity-90"
-                  onClick={() => sendBulkToPathao([...selected])}
-                >
-                  <Truck className="h-3.5 w-3.5" />
-                  Send ({selected.size})
-                </Button>
                 <Button
                   size="sm"
                   variant="destructive"
