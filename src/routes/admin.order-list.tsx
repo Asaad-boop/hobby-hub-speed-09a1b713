@@ -163,29 +163,6 @@ function OrderListPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [invoiceOrderId, setInvoiceOrderId] = useState<string | null>(null);
-  const sendToPathaoFn = useServerFn(sendOrderToPathao);
-  const syncPathaoFn = useServerFn(syncPathaoStatuses);
-  const [syncing, setSyncing] = useState(false);
-
-  // Debounce the input so filtering feels instant without thrashing on every keystroke
-  useEffect(() => {
-    const t = window.setTimeout(() => setDebouncedSearch(search), 120);
-    return () => window.clearTimeout(t);
-  }, [search]);
-
-  async function runSyncPathao() {
-    setSyncing(true);
-    const t = toast.loading("Syncing Pathao statuses…");
-    try {
-      const res = await syncPathaoFn({});
-      toast.success(`Synced ${res.updated}/${res.checked} shipments`, { id: t });
-      qc.invalidateQueries({ queryKey: ["order-list-confirmed"] });
-    } catch (e) {
-      toast.error("Sync failed: " + (e as Error).message, { id: t });
-    } finally {
-      setSyncing(false);
-    }
-  }
 
   const { data, isLoading } = useQuery({
     queryKey: ["order-list-confirmed"],
