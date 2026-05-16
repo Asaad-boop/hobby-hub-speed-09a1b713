@@ -199,20 +199,15 @@ export async function generatePackingSlipsPDF(orderIds: string[]) {
     );
     doc.setTextColor(0);
 
-    // Tracking / consignment row
-    if (shipment?.consignment_id || shipment?.tracking_id || order.tracking_number) {
+    // Tracking row
+    if (order.tracking_number) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
       doc.setTextColor(110);
-      const trackParts: string[] = [];
-      if (shipment?.consignment_id) trackParts.push(`Consignment: ${shipment.consignment_id}`);
-      if (shipment?.tracking_id || order.tracking_number)
-        trackParts.push(
-          `Tracking: ${shipment?.tracking_id ?? order.tracking_number}`,
-        );
-      doc.text(trackParts.join("   •   "), 14, finalY + 10);
+      doc.text(`Tracking: ${order.tracking_number}`, 14, finalY + 10);
       doc.setTextColor(0);
     }
+
 
     drawFooter(
       doc,
