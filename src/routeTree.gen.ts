@@ -49,6 +49,7 @@ import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminDiscountsRouteImport } from './routes/admin.discounts'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as ApiPublicWebhooksPathaoRouteImport } from './routes/api/public/webhooks/pathao'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -250,6 +251,11 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicWebhooksPathaoRoute = ApiPublicWebhooksPathaoRouteImport.update({
+  id: '/api/public/webhooks/pathao',
+  path: '/api/public/webhooks/pathao',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -292,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
+  '/api/public/webhooks/pathao': typeof ApiPublicWebhooksPathaoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -333,6 +340,7 @@ export interface FileRoutesByTo {
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin': typeof AdminIndexRoute
   '/track': typeof TrackIndexRoute
+  '/api/public/webhooks/pathao': typeof ApiPublicWebhooksPathaoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -376,6 +384,7 @@ export interface FileRoutesById {
   '/track/$orderId': typeof TrackOrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/track/': typeof TrackIndexRoute
+  '/api/public/webhooks/pathao': typeof ApiPublicWebhooksPathaoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -420,6 +429,7 @@ export interface FileRouteTypes {
     | '/track/$orderId'
     | '/admin/'
     | '/track/'
+    | '/api/public/webhooks/pathao'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -461,6 +471,7 @@ export interface FileRouteTypes {
     | '/track/$orderId'
     | '/admin'
     | '/track'
+    | '/api/public/webhooks/pathao'
   id:
     | '__root__'
     | '/'
@@ -503,6 +514,7 @@ export interface FileRouteTypes {
     | '/track/$orderId'
     | '/admin/'
     | '/track/'
+    | '/api/public/webhooks/pathao'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -532,6 +544,7 @@ export interface RootRouteChildren {
   ProductIdRoute: typeof ProductIdRoute
   TrackOrderIdRoute: typeof TrackOrderIdRoute
   TrackIndexRoute: typeof TrackIndexRoute
+  ApiPublicWebhooksPathaoRoute: typeof ApiPublicWebhooksPathaoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -816,6 +829,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/webhooks/pathao': {
+      id: '/api/public/webhooks/pathao'
+      path: '/api/public/webhooks/pathao'
+      fullPath: '/api/public/webhooks/pathao'
+      preLoaderRoute: typeof ApiPublicWebhooksPathaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -882,6 +902,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductIdRoute: ProductIdRoute,
   TrackOrderIdRoute: TrackOrderIdRoute,
   TrackIndexRoute: TrackIndexRoute,
+  ApiPublicWebhooksPathaoRoute: ApiPublicWebhooksPathaoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
