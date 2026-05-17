@@ -774,6 +774,17 @@ function OrderListPage() {
               Picking
             </Button>
 
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 gap-1.5 border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+              onClick={() => setPathaoOrderIds([...selected])}
+              title="Send selected orders to Pathao"
+            >
+              <Truck className="h-3.5 w-3.5" />
+              Pathao ({selected.size})
+            </Button>
+
             <div className="h-6 w-px bg-border" />
 
             <Button
