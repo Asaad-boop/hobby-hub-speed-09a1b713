@@ -809,11 +809,18 @@ function OrderListPage() {
           </div>
         </div>
       )}
+      <PathaoSendDialog
+        open={!!pathaoOrderIds && pathaoOrderIds.length > 0}
+        orderIds={pathaoOrderIds ?? []}
+        onClose={() => setPathaoOrderIds(null)}
+        onDone={() => {
+          setSelected(new Set());
+          qc.invalidateQueries({ queryKey: ["admin", "order-list"] });
+        }}
+      />
     </div>
   );
 }
-
-function StatCard({
   icon,
   label,
   value,
