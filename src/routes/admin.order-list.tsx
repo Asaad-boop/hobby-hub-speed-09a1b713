@@ -670,6 +670,31 @@ function OrderListPage() {
                             <Printer className="h-3 w-3" />
                             Pick
                           </Button>
+                          {!o.tracking_number || o.tracking_number.startsWith("PENDING_") ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 px-2 text-[11px] border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                              onClick={() => setPathaoOrderIds([o.id])}
+                              disabled={busyId === o.id}
+                              title="Send to Pathao"
+                            >
+                              <Truck className="h-3 w-3" />
+                              Pathao
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 px-2 text-[11px]"
+                              onClick={() => syncPathao(o.id)}
+                              disabled={busyId === o.id}
+                              title="Sync Pathao status"
+                            >
+                              <RefreshCw className="h-3 w-3" />
+                              Sync
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant="outline"
