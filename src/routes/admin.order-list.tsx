@@ -45,6 +45,8 @@ import { generatePickingListPDF } from "@/lib/pdf/picking-list";
 import { generatePackingListPDF } from "@/lib/pdf/packing-list";
 import { generatePackingSlipsPDF } from "@/lib/pdf/packing-slips";
 import { InvoicePreviewDialog } from "@/components/admin/InvoicePreviewDialog";
+import { PathaoSendDialog } from "@/components/admin/PathaoSendDialog";
+import { pathaoSyncOrder } from "@/lib/pathao.functions";
 
 export const Route = createFileRoute("/admin/order-list")({
   component: OrderListPage,
