@@ -1063,6 +1063,95 @@ export type Database = {
         }
         Relationships: []
       }
+      pathao_auth_cache: {
+        Row: {
+          access_token: string
+          expires_at: string
+          id: number
+          refresh_token: string | null
+          token_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          expires_at: string
+          id?: number
+          refresh_token?: string | null
+          token_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          expires_at?: string
+          id?: number
+          refresh_token?: string | null
+          token_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pathao_shipments: {
+        Row: {
+          cod_fee: number | null
+          consignment_id: string | null
+          created_at: string
+          delivery_fee: number | null
+          discount: number | null
+          id: string
+          invoice_id: string | null
+          last_synced_at: string | null
+          merchant_order_id: string
+          order_id: string
+          order_status: string | null
+          payload_sent: Json | null
+          promo_discount: number | null
+          response_raw: Json | null
+          updated_at: string
+        }
+        Insert: {
+          cod_fee?: number | null
+          consignment_id?: string | null
+          created_at?: string
+          delivery_fee?: number | null
+          discount?: number | null
+          id?: string
+          invoice_id?: string | null
+          last_synced_at?: string | null
+          merchant_order_id: string
+          order_id: string
+          order_status?: string | null
+          payload_sent?: Json | null
+          promo_discount?: number | null
+          response_raw?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          cod_fee?: number | null
+          consignment_id?: string | null
+          created_at?: string
+          delivery_fee?: number | null
+          discount?: number | null
+          id?: string
+          invoice_id?: string | null
+          last_synced_at?: string | null
+          merchant_order_id?: string
+          order_id?: string
+          order_status?: string | null
+          payload_sent?: Json | null
+          promo_discount?: number | null
+          response_raw?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pathao_shipments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_option_types: {
         Row: {
           created_at: string

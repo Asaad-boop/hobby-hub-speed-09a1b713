@@ -45,6 +45,8 @@ import { generatePickingListPDF } from "@/lib/pdf/picking-list";
 import { generatePackingListPDF } from "@/lib/pdf/packing-list";
 import { generatePackingSlipsPDF } from "@/lib/pdf/packing-slips";
 import { InvoicePreviewDialog } from "@/components/admin/InvoicePreviewDialog";
+import { PathaoSendDialog } from "@/components/admin/PathaoSendDialog";
+import { pathaoSyncOrder } from "@/lib/pathao.functions";
 
 export const Route = createFileRoute("/admin/order-list")({
   component: OrderListPage,
@@ -163,6 +165,19 @@ function OrderListPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [invoiceOrderId, setInvoiceOrderId] = useState<string | null>(null);
+  const [pathaoOrderIds, setPathaoOrderIds] = useState<string[] | null>(null);
+  const syncPathaoFn = useServerFn(pathaoSyncOrder);
+
+  async function syncPathao(orderId: string) {
+    const t = toast.loading("Syncing Pathao status…");
+    try {
+      const r: any = await syncPathaoFn({ data: { orderId } } as any);
+      toast.success(`Status: ${r.status ?? "updated"}`, { id: t });
+      qc.invalidateQueries({ queryKey: ["admin", "order-list"] });
+    } catch (e: any) {
+      toast.error(e.message || "Sync failed", { id: t });
+    }
+  }
 
   // Debounce the input so filtering feels instant without thrashing on every keystroke
   useEffect(() => {
@@ -655,6 +670,31 @@ function OrderListPage() {
                             <Printer className="h-3 w-3" />
                             Pick
                           </Button>
+                          {!o.tracking_number || o.tracking_number.startsWith("PENDING_") ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 px-2 text-[11px] border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                              onClick={() => setPathaoOrderIds([o.id])}
+                              disabled={busyId === o.id}
+                              title="Send to Pathao"
+                            >
+                              <Truck className="h-3 w-3" />
+                              Pathao
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 px-2 text-[11px]"
+                              onClick={() => syncPathao(o.id)}
+                              disabled={busyId === o.id}
+                              title="Sync Pathao status"
+                            >
+                              <RefreshCw className="h-3 w-3" />
+                              Sync
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant="outline"
@@ -734,6 +774,17 @@ function OrderListPage() {
               Picking
             </Button>
 
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 gap-1.5 border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+              onClick={() => setPathaoOrderIds([...selected])}
+              title="Send selected orders to Pathao"
+            >
+              <Truck className="h-3.5 w-3.5" />
+              Pathao ({selected.size})
+            </Button>
+
             <div className="h-6 w-px bg-border" />
 
             <Button
@@ -758,6 +809,15 @@ function OrderListPage() {
           </div>
         </div>
       )}
+      <PathaoSendDialog
+        open={!!pathaoOrderIds && pathaoOrderIds.length > 0}
+        orderIds={pathaoOrderIds ?? []}
+        onClose={() => setPathaoOrderIds(null)}
+        onDone={() => {
+          setSelected(new Set());
+          qc.invalidateQueries({ queryKey: ["admin", "order-list"] });
+        }}
+      />
     </div>
   );
 }
