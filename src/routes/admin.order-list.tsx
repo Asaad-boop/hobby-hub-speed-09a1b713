@@ -821,6 +821,8 @@ function OrderListPage() {
     </div>
   );
 }
+
+function StatCard({
   icon,
   label,
   value,
