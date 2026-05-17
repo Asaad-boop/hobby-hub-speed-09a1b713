@@ -165,6 +165,19 @@ function OrderListPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [invoiceOrderId, setInvoiceOrderId] = useState<string | null>(null);
+  const [pathaoOrderIds, setPathaoOrderIds] = useState<string[] | null>(null);
+  const syncPathaoFn = useServerFn(pathaoSyncOrder);
+
+  async function syncPathao(orderId: string) {
+    const t = toast.loading("Syncing Pathao status…");
+    try {
+      const r: any = await syncPathaoFn({ data: { orderId } } as any);
+      toast.success(`Status: ${r.status ?? "updated"}`, { id: t });
+      qc.invalidateQueries({ queryKey: ["admin", "order-list"] });
+    } catch (e: any) {
+      toast.error(e.message || "Sync failed", { id: t });
+    }
+  }
 
   // Debounce the input so filtering feels instant without thrashing on every keystroke
   useEffect(() => {
