@@ -729,6 +729,56 @@ function CurtainBuckleLanding() {
                 )}
               </div>
 
+              {/* Cross-sell: Magnetic Curtain Clips */}
+              <div className="rounded-2xl border-2 border-dashed border-[oklch(0.85_0.06_60)] bg-[oklch(0.98_0.02_60)] p-3">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={clipsImg}
+                    alt="Magnetic Curtain Clips"
+                    className="h-16 w-16 shrink-0 rounded-xl border border-[oklch(0.88_0.02_60)] bg-white object-cover"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="rounded-full bg-[oklch(0.45_0.10_45)] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+                        Add-on
+                      </span>
+                      <span className="text-[10px] font-semibold text-[oklch(0.50_0.02_60)]">
+                        Special offer
+                      </span>
+                    </div>
+                    <div className="mt-1 text-sm font-bold text-[oklch(0.25_0.03_50)]">
+                      Magnetic Curtain Clips
+                    </div>
+                    <div className="text-xs text-[oklch(0.45_0.02_60)]">
+                      Porda strong hold · ৳{CLIP_PRICE} / pcs
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold text-[oklch(0.40_0.02_60)]">
+                    Quantity
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setClipQty((q) => Math.max(0, q - 1))}
+                      className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[oklch(0.85_0.04_60)] bg-white text-lg font-bold text-[oklch(0.45_0.10_45)] active:scale-95"
+                    >
+                      −
+                    </button>
+                    <span className="min-w-[2ch] text-center text-base font-extrabold tabular-nums text-[oklch(0.25_0.03_50)]">
+                      {clipQty}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setClipQty((q) => q + 1)}
+                      className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[oklch(0.45_0.10_45)] bg-[oklch(0.45_0.10_45)] text-lg font-bold text-white active:scale-95"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
 
               {/* Name */}
               <div>
