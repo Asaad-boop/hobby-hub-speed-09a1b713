@@ -41,6 +41,10 @@ import handImg from "@/assets/curtain-buckle-hand.webp";
 import brownImg from "@/assets/curtain-buckle-brown.webp";
 import beigeImg from "@/assets/curtain-buckle-beige.webp";
 import heroImg from "@/assets/curtain-buckle-hero.jpg";
+import clipsImg from "@/assets/magnetic-curtain-clips.jpg";
+
+const CLIP_PRICE = 50;
+const CLIP_NAME = "Magnetic Curtain Clips";
 
 const PRODUCT_SLUG = "flower-pearl-curtain-buckle";
 const SHIPPING_INSIDE = 70;
@@ -203,10 +207,12 @@ function CurtainBuckleLanding() {
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", district: "" });
+  const [clipQty, setClipQty] = useState(0);
   const orderRef = useRef<HTMLDivElement | null>(null);
 
   const activePack = PACKS[pack];
-  const subtotal = activePack.price;
+  const clipsTotal = clipQty * CLIP_PRICE;
+  const subtotal = activePack.price + clipsTotal;
   const shippingFee = shipMethod === "inside" ? SHIPPING_INSIDE : SHIPPING_OUTSIDE;
   const totalPay = subtotal + shippingFee;
   const savings = activePack.old - activePack.price;
@@ -278,10 +284,13 @@ function CurtainBuckleLanding() {
       } = await supabase.auth.getSession();
       const isGuest = !session;
 
-      const itemSubtotal = activePack.price;
+      const itemSubtotal = activePack.price + clipsTotal;
       const orderTotal = itemSubtotal + shippingFee;
       const attribution = getOrderAttributionPayload();
       const variantLabel = `${activePack.label} — ${COMBO_LABEL[combo]}`;
+      const notesText = clipQty > 0
+        ? `Variant: ${variantLabel} | Add-on: ${CLIP_NAME} x${clipQty}`
+        : `Variant: ${variantLabel}`;
 
       const baseOrder = {
         status: "new" as const,
@@ -297,7 +306,7 @@ function CurtainBuckleLanding() {
         shipping_city: form.district,
         shipping_district: form.district,
         source_website: "lp/flower-pearl-curtain-buckle",
-        notes: `Variant: ${variantLabel}`,
+        notes: notesText,
         ...attribution,
       };
 
@@ -324,7 +333,7 @@ function CurtainBuckleLanding() {
         return;
       }
 
-      const { error: itemsErr } = await supabase.from("order_items").insert([
+      const orderItems = [
         {
           order_id: order.id,
           user_id: isGuest ? null : session!.user.id,
@@ -336,7 +345,21 @@ function CurtainBuckleLanding() {
           variant_id: null,
           variant_label: variantLabel,
         },
-      ]);
+      ];
+      if (clipQty > 0) {
+        orderItems.push({
+          order_id: order.id,
+          user_id: isGuest ? null : session!.user.id,
+          product_id: product.id,
+          name: CLIP_NAME,
+          image: clipsImg,
+          price: CLIP_PRICE,
+          quantity: clipQty,
+          variant_id: null,
+          variant_label: "Add-on",
+        });
+      }
+      const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
 
       if (itemsErr) {
         console.error("Order items insert failed:", itemsErr);
@@ -706,6 +729,56 @@ function CurtainBuckleLanding() {
                 )}
               </div>
 
+              {/* Cross-sell: Magnetic Curtain Clips */}
+              <div className="rounded-2xl border-2 border-dashed border-[oklch(0.85_0.06_60)] bg-[oklch(0.98_0.02_60)] p-3">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={clipsImg}
+                    alt="Magnetic Curtain Clips"
+                    className="h-16 w-16 shrink-0 rounded-xl border border-[oklch(0.88_0.02_60)] bg-white object-cover"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="rounded-full bg-[oklch(0.45_0.10_45)] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+                        Add-on
+                      </span>
+                      <span className="text-[10px] font-semibold text-[oklch(0.50_0.02_60)]">
+                        Special offer
+                      </span>
+                    </div>
+                    <div className="mt-1 text-sm font-bold text-[oklch(0.25_0.03_50)]">
+                      Magnetic Curtain Clips
+                    </div>
+                    <div className="text-xs text-[oklch(0.45_0.02_60)]">
+                      Porda strong hold · ৳{CLIP_PRICE} / pcs
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold text-[oklch(0.40_0.02_60)]">
+                    Quantity
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setClipQty((q) => Math.max(0, q - 1))}
+                      className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[oklch(0.85_0.04_60)] bg-white text-lg font-bold text-[oklch(0.45_0.10_45)] active:scale-95"
+                    >
+                      −
+                    </button>
+                    <span className="min-w-[2ch] text-center text-base font-extrabold tabular-nums text-[oklch(0.25_0.03_50)]">
+                      {clipQty}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setClipQty((q) => q + 1)}
+                      className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[oklch(0.45_0.10_45)] bg-[oklch(0.45_0.10_45)] text-lg font-bold text-white active:scale-95"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
 
               {/* Name */}
               <div>
@@ -828,8 +901,16 @@ function CurtainBuckleLanding() {
                   <span className="text-[oklch(0.45_0.02_60)]">
                     {activePack.label} · {COMBO_LABEL[combo]}
                   </span>
-                  <span className="font-semibold">৳{subtotal}</span>
+                  <span className="font-semibold">৳{activePack.price}</span>
                 </div>
+                {clipQty > 0 && (
+                  <div className="mt-1 flex items-center justify-between">
+                    <span className="text-[oklch(0.45_0.02_60)]">
+                      Magnetic Clips × {clipQty}
+                    </span>
+                    <span className="font-semibold">৳{clipsTotal}</span>
+                  </div>
+                )}
                 <div className="mt-1 flex items-center justify-between">
                   <span className="text-[oklch(0.45_0.02_60)]">Shipping</span>
                   <span className="font-semibold">৳{shippingFee}</span>
