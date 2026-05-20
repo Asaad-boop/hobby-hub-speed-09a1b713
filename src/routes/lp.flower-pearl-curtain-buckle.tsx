@@ -814,7 +814,10 @@ function CurtainBuckleLanding() {
                       <button
                         key={key}
                         type="button"
-                        onClick={() => setPack(key)}
+                        onClick={() => {
+                          setPack(key);
+                          setCombo(PACK_COMBOS[key][0]);
+                        }}
                         className={`rounded-xl border-2 p-3 text-center text-xs font-semibold transition ${
                           pack === key
                             ? "border-[oklch(0.45_0.10_45)] bg-[oklch(0.97_0.03_60)] text-[oklch(0.30_0.05_50)]"
