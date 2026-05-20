@@ -1007,7 +1007,7 @@ function CurtainBuckleLanding() {
               <div className="rounded-2xl bg-[oklch(0.97_0.02_60)] p-4 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-[oklch(0.45_0.02_60)]">
-                    {activePack.label} · {color === "beige" ? "Beige" : "Brown"}
+                    {activePack.label} · {COMBO_LABEL[combo]}
                   </span>
                   <span className="font-semibold">৳{subtotal}</span>
                 </div>
