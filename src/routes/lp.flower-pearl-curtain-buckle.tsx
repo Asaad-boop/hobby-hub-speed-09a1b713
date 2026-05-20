@@ -207,10 +207,12 @@ function CurtainBuckleLanding() {
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", district: "" });
+  const [clipQty, setClipQty] = useState(0);
   const orderRef = useRef<HTMLDivElement | null>(null);
 
   const activePack = PACKS[pack];
-  const subtotal = activePack.price;
+  const clipsTotal = clipQty * CLIP_PRICE;
+  const subtotal = activePack.price + clipsTotal;
   const shippingFee = shipMethod === "inside" ? SHIPPING_INSIDE : SHIPPING_OUTSIDE;
   const totalPay = subtotal + shippingFee;
   const savings = activePack.old - activePack.price;
