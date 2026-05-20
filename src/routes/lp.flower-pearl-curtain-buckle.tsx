@@ -46,7 +46,7 @@ const SHIPPING_INSIDE = 70;
 const SHIPPING_OUTSIDE = 130;
 
 type PackKey = "p3" | "p4" | "p6";
-type Color = "beige" | "brown";
+type ComboKey = "2b1br" | "1b2br" | "2b2br" | "3b3br";
 
 const PACKS: Record<
   PackKey,
@@ -55,6 +55,19 @@ const PACKS: Record<
   p3: { qty: 3, price: 549, old: 750, label: "3 Pcs Set", perPc: "183 / pc" },
   p4: { qty: 4, price: 699, old: 950, label: "4 Pcs Set", perPc: "175 / pc", badge: "Popular" },
   p6: { qty: 6, price: 899, old: 1290, label: "6 Pcs Set", perPc: "150 / pc", badge: "Best Value" },
+};
+
+const COMBO_LABEL: Record<ComboKey, string> = {
+  "2b1br": "2 Beige + 1 Brown",
+  "1b2br": "1 Beige + 2 Brown",
+  "2b2br": "2 Beige + 2 Brown",
+  "3b3br": "3 Beige + 3 Brown",
+};
+
+const PACK_COMBOS: Record<PackKey, ComboKey[]> = {
+  p3: ["2b1br", "1b2br"],
+  p4: ["2b2br"],
+  p6: ["3b3br"],
 };
 
 export const Route = createFileRoute("/lp/flower-pearl-curtain-buckle")({
