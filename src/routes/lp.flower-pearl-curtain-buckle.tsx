@@ -46,7 +46,7 @@ const SHIPPING_INSIDE = 70;
 const SHIPPING_OUTSIDE = 130;
 
 type PackKey = "p3" | "p4" | "p6";
-type Color = "beige" | "brown";
+type ComboKey = "2b1br" | "1b2br" | "2b2br" | "3b3br";
 
 const PACKS: Record<
   PackKey,
@@ -55,6 +55,19 @@ const PACKS: Record<
   p3: { qty: 3, price: 549, old: 750, label: "3 Pcs Set", perPc: "183 / pc" },
   p4: { qty: 4, price: 699, old: 950, label: "4 Pcs Set", perPc: "175 / pc", badge: "Popular" },
   p6: { qty: 6, price: 899, old: 1290, label: "6 Pcs Set", perPc: "150 / pc", badge: "Best Value" },
+};
+
+const COMBO_LABEL: Record<ComboKey, string> = {
+  "2b1br": "2 Beige + 1 Brown",
+  "1b2br": "1 Beige + 2 Brown",
+  "2b2br": "2 Beige + 2 Brown",
+  "3b3br": "3 Beige + 3 Brown",
+};
+
+const PACK_COMBOS: Record<PackKey, ComboKey[]> = {
+  p3: ["2b1br", "1b2br"],
+  p4: ["2b2br"],
+  p6: ["3b3br"],
 };
 
 export const Route = createFileRoute("/lp/flower-pearl-curtain-buckle")({
@@ -185,7 +198,7 @@ function CurtainBuckleLanding() {
   const navigate = useNavigate();
 
   const [pack, setPack] = useState<PackKey>("p4");
-  const [color, setColor] = useState<Color>("beige");
+  const [combo, setCombo] = useState<ComboKey>(PACK_COMBOS["p4"][0]);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", district: "" });
@@ -267,7 +280,7 @@ function CurtainBuckleLanding() {
       const itemSubtotal = activePack.price;
       const orderTotal = itemSubtotal + shippingFee;
       const attribution = getOrderAttributionPayload();
-      const variantLabel = `${activePack.label} — ${color === "beige" ? "Beige" : "Brown"}`;
+      const variantLabel = `${activePack.label} — ${COMBO_LABEL[combo]}`;
 
       const baseOrder = {
         status: "new" as const,
@@ -355,7 +368,7 @@ function CurtainBuckleLanding() {
     );
   }
 
-  const colorImage = color === "beige" ? beigeImg : brownImg;
+
 
   return (
     <div className="relative min-h-screen bg-[oklch(0.98_0.012_75)] pb-28 text-[oklch(0.22_0.02_60)] md:pb-0">
@@ -483,142 +496,94 @@ function CurtainBuckleLanding() {
           ))}
         </div>
       </section>
-
-      {/* COLOR SHOWCASE */}
+      {/* COLOR SHOWCASE — display only */}
       <section className="bg-gradient-to-b from-[oklch(0.96_0.02_60)] to-[oklch(0.94_0.03_65)] py-14 md:py-20">
         <div className="mx-auto max-w-6xl px-5">
           <div className="text-center">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[oklch(0.45_0.10_45)] shadow-sm ring-1 ring-[oklch(0.85_0.04_60)]">
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[oklch(0.45_0.10_45)] text-[9px] text-white">1</span>
-              Step 1 · Color
+              <Sparkles className="h-3 w-3" /> Available Colors
             </span>
             <h2 className="mt-3 font-serif text-2xl font-bold text-[oklch(0.25_0.03_50)] sm:text-3xl">
-              Apnar Color Beche Niyen
+              Duto Elegant Shade
             </h2>
             <p className="mt-2 text-sm text-[oklch(0.45_0.02_60)]">
-              Interior er sathe match korate 2 ti elegant shade
+              Beige &amp; Brown — checkout-e mix combo select korben
             </p>
           </div>
           <div className="mt-10 grid grid-cols-2 gap-4 md:gap-6">
             {(
               [
-                { key: "beige", label: "Beige", tag: "Warm & Neutral", img: beigeImg, hex: "oklch(0.88 0.05 75)" },
-                { key: "brown", label: "Brown", tag: "Rich & Bold", img: brownImg, hex: "oklch(0.55 0.08 45)" },
+                { label: "Beige", tag: "Warm & Neutral", img: beigeImg, hex: "oklch(0.88 0.05 75)" },
+                { label: "Brown", tag: "Rich & Bold", img: brownImg, hex: "oklch(0.55 0.08 45)" },
               ] as const
-            ).map((c) => {
-              const active = color === c.key;
-              return (
-                <button
-                  key={c.key}
-                  type="button"
-                  onClick={() => setColor(c.key)}
-                  className={`group relative overflow-visible rounded-3xl bg-white pb-10 text-left transition-all duration-300 active:scale-[0.98] ${
-                    active
-                      ? "shadow-[0_20px_40px_-15px_oklch(0.45_0.10_45_/_0.4)] ring-[3px] ring-[oklch(0.45_0.10_45)] -translate-y-1"
-                      : "shadow-md ring-1 ring-[oklch(0.90_0.02_60)] hover:-translate-y-0.5 hover:shadow-lg"
-                  }`}
-                >
-                  <div className="relative overflow-hidden rounded-t-3xl">
-                    <div className="aspect-[4/5] sm:aspect-[4/3]">
-                      <img
-                        src={c.img}
-                        alt={`${c.label} curtain buckle`}
-                        className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
-                        loading="lazy"
-                      />
-                    </div>
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 to-transparent" />
-                  </div>
-                  {/* Floating swatch */}
-                  <div className="absolute left-1/2 top-[calc(100%-2.75rem)] sm:top-auto sm:bottom-14 -translate-x-1/2 sm:translate-x-0 sm:left-5">
-                    <div
-                      className={`relative flex h-14 w-14 items-center justify-center rounded-full shadow-lg ring-4 transition-all duration-300 ${
-                        active ? "ring-white scale-110" : "ring-white/90"
-                      }`}
-                      style={{ backgroundColor: c.hex }}
-                    >
-                      {/* glossy highlight */}
-                      <span className="absolute left-2 top-1.5 h-3 w-4 rounded-full bg-white/40 blur-[2px]" />
-                      {active && (
-                        <CheckCircle2 className="relative h-6 w-6 text-white drop-shadow" strokeWidth={2.5} />
-                      )}
-                    </div>
-                  </div>
-                  <div className="px-5 pt-8 sm:pt-5 sm:pl-24">
-                    <div className="font-serif text-lg font-bold text-[oklch(0.25_0.03_50)]">
+            ).map((c) => (
+              <div
+                key={c.label}
+                className="relative overflow-hidden rounded-3xl bg-white shadow-md ring-1 ring-[oklch(0.90_0.02_60)]"
+              >
+                <div className="aspect-[4/5] sm:aspect-[4/3] overflow-hidden">
+                  <img
+                    src={c.img}
+                    alt={`${c.label} curtain buckle`}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="flex items-center gap-3 p-4">
+                  <span
+                    className="h-8 w-8 flex-shrink-0 rounded-full ring-2 ring-white shadow"
+                    style={{ backgroundColor: c.hex }}
+                  />
+                  <div>
+                    <div className="font-serif text-base font-bold text-[oklch(0.25_0.03_50)]">
                       {c.label}
                     </div>
-                    <div className="text-xs text-[oklch(0.50_0.03_55)]">{c.tag}</div>
+                    <div className="text-[11px] text-[oklch(0.50_0.03_55)]">{c.tag}</div>
                   </div>
-                  {/* Selected pill */}
-                  <div
-                    className={`absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-[oklch(0.45_0.10_45)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white transition-all duration-300 ${
-                      active ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
-                    }`}
-                  >
-                    <CheckCircle2 className="h-3 w-3" /> Selected
-                  </div>
-                </button>
-              );
-            })}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* PRICING / PACKS */}
+      {/* PRICING — display only */}
       <section className="mx-auto max-w-6xl px-5 py-14 md:py-20">
         <div className="text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-[oklch(0.96_0.02_60)] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[oklch(0.45_0.10_45)] ring-1 ring-[oklch(0.85_0.04_60)]">
-            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[oklch(0.45_0.10_45)] text-[9px] text-white">2</span>
-            Step 2 · Package
+            <Gift className="h-3 w-3" /> Packages &amp; Pricing
           </span>
           <h2 className="mt-3 font-serif text-2xl font-bold text-[oklch(0.25_0.03_50)] sm:text-3xl">
-            Apnar Package Beche Niyen
+            Apnar Pack Beche Niyen
           </h2>
           <p className="mt-2 text-sm text-[oklch(0.45_0.02_60)]">
-            Beshi nile beshi savings · 1 porda = 2 pcs lage
+            Beshi nile beshi savings · checkout-e select korben
           </p>
         </div>
-        <div className="mt-10 grid gap-4 md:grid-cols-3 md:items-stretch md:gap-5">
+        <div className="mt-10 grid gap-4 md:grid-cols-3 md:gap-5">
           {(Object.entries(PACKS) as [PackKey, (typeof PACKS)[PackKey]][]).map(([key, p]) => {
-            const active = pack === key;
             const isBest = key === "p6";
-            const isPopular = key === "p4";
             const savings = p.old - p.price;
             return (
-              <button
+              <div
                 key={key}
-                type="button"
-                onClick={() => {
-                  setPack(key);
-                  fbTrack("AddToCart", {
-                    content_ids: [product.id],
-                    value: p.price,
-                    currency: META_CURRENCY,
-                  });
-                }}
-                className={`group relative flex flex-col overflow-hidden rounded-3xl bg-white text-left transition-all duration-300 active:scale-[0.99] ${
-                  active
-                    ? "ring-[3px] ring-[oklch(0.45_0.10_45)] shadow-[0_20px_45px_-18px_oklch(0.45_0.10_45_/_0.5)] -translate-y-1"
-                    : "ring-1 ring-[oklch(0.90_0.02_60)] shadow-sm hover:-translate-y-0.5 hover:shadow-md"
-                } ${isBest ? "md:scale-[1.04]" : ""}`}
+                className={`relative flex flex-col overflow-hidden rounded-3xl bg-white ring-1 ring-[oklch(0.90_0.02_60)] shadow-sm ${
+                  isBest ? "md:scale-[1.03] ring-[2px] ring-[oklch(0.45_0.10_45)]" : ""
+                }`}
               >
-                {/* Top ribbon */}
                 {p.badge && (
                   <div
                     className={`flex items-center justify-center gap-1 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-white ${
                       isBest
-                        ? "bg-gradient-to-r from-[oklch(0.55_0.15_45)] via-[oklch(0.65_0.16_55)] to-[oklch(0.55_0.15_45)]"
+                        ? "bg-gradient-to-r from-[oklch(0.55_0.15_45)] to-[oklch(0.65_0.16_55)]"
                         : "bg-gradient-to-r from-[oklch(0.78_0.16_75)] to-[oklch(0.72_0.18_60)]"
                     }`}
                   >
-                    {isBest ? "⭐ Best Value · Maximum Saving" : "🔥 Most Popular"}
+                    {isBest ? "⭐ Best Value" : "🔥 Most Popular"}
                   </div>
                 )}
                 {!p.badge && <div className="h-[26px]" />}
-
                 <div className="flex flex-1 flex-col p-5">
-                  {/* Icon + label */}
                   <div className="flex items-center gap-3">
                     <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[oklch(0.96_0.03_65)] ring-1 ring-[oklch(0.88_0.04_60)]">
                       <Flower2 className="h-5 w-5 text-[oklch(0.45_0.10_45)]" />
@@ -632,8 +597,6 @@ function CurtainBuckleLanding() {
                       </div>
                     </div>
                   </div>
-
-                  {/* Price block */}
                   <div className="mt-4 flex items-end justify-between">
                     <div className="flex items-baseline gap-1">
                       <span className="text-sm font-semibold text-[oklch(0.45_0.10_45)]">৳</span>
@@ -650,43 +613,21 @@ function CurtainBuckleLanding() {
                       </span>
                     </div>
                   </div>
-
-                  {/* Mini benefits */}
-                  <ul className="mt-4 space-y-1.5 text-[11px] text-[oklch(0.40_0.03_55)]">
-                    {[
-                      isBest ? "Free delivery (whole BD)" : "Cash on Delivery",
-                      "7-day easy return",
-                      isPopular || isBest ? "Both colors available" : "Premium pearl finish",
-                    ].map((b) => (
-                      <li key={b} className="flex items-center gap-1.5">
-                        <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0 text-[oklch(0.60_0.12_150)]" />
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* CTA pill */}
-                  <div
-                    className={`mt-5 flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-bold transition-all ${
-                      active
-                        ? "bg-[oklch(0.45_0.10_45)] text-white shadow-md"
-                        : "bg-[oklch(0.96_0.02_60)] text-[oklch(0.35_0.05_50)] ring-1 ring-[oklch(0.88_0.04_60)] group-hover:bg-[oklch(0.93_0.04_65)]"
-                    }`}
-                  >
-                    {active ? (
-                      <>
-                        <CheckCircle2 className="h-4 w-4" /> Selected
-                      </>
-                    ) : (
-                      "Tap to choose"
-                    )}
-                  </div>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
+        <div className="mt-6 text-center">
+          <button
+            onClick={scrollToOrder}
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[oklch(0.45_0.10_45)] px-8 text-sm font-bold text-white shadow-lg shadow-[oklch(0.45_0.10_45)]/30 transition hover:bg-[oklch(0.40_0.10_45)]"
+          >
+            <Gift className="h-4 w-4" /> Order korte scroll korun
+          </button>
+        </div>
       </section>
+
 
       {/* HOW IT WORKS */}
       <section className="bg-[oklch(0.96_0.02_60)] py-12 md:py-16">
@@ -873,7 +814,10 @@ function CurtainBuckleLanding() {
                       <button
                         key={key}
                         type="button"
-                        onClick={() => setPack(key)}
+                        onClick={() => {
+                          setPack(key);
+                          setCombo(PACK_COMBOS[key][0]);
+                        }}
                         className={`rounded-xl border-2 p-3 text-center text-xs font-semibold transition ${
                           pack === key
                             ? "border-[oklch(0.45_0.10_45)] bg-[oklch(0.97_0.03_60)] text-[oklch(0.30_0.05_50)]"
@@ -890,37 +834,59 @@ function CurtainBuckleLanding() {
                 </div>
               </div>
 
-              {/* Color */}
+              {/* Color combo */}
               <div>
                 <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[oklch(0.40_0.02_60)]">
-                  Color
+                  Color Combo
                 </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {(
-                    [
-                      { key: "beige", label: "Beige", hex: "oklch(0.92 0.04 75)" },
-                      { key: "brown", label: "Brown", hex: "oklch(0.68 0.09 50)" },
-                    ] as const
-                  ).map((c) => (
-                    <button
-                      key={c.key}
-                      type="button"
-                      onClick={() => setColor(c.key)}
-                      className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition ${
-                        color === c.key
-                          ? "border-[oklch(0.45_0.10_45)] bg-[oklch(0.97_0.03_60)] text-[oklch(0.30_0.05_50)]"
-                          : "border-[oklch(0.90_0.02_60)] bg-white text-[oklch(0.45_0.02_60)]"
-                      }`}
-                    >
-                      <span
-                        className="h-4 w-4 rounded-full border border-[oklch(0.85_0.02_60)]"
-                        style={{ backgroundColor: c.hex }}
-                      />
-                      {c.label}
-                    </button>
-                  ))}
+                <div className={`grid gap-2 ${PACK_COMBOS[pack].length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+                  {PACK_COMBOS[pack].map((ck) => {
+                    const active = combo === ck;
+                    const label = COMBO_LABEL[ck];
+                    // parse counts from key for swatch row
+                    const beigeCount =
+                      ck === "2b1br" ? 2 : ck === "1b2br" ? 1 : ck === "2b2br" ? 2 : 3;
+                    const brownCount =
+                      ck === "2b1br" ? 1 : ck === "1b2br" ? 2 : ck === "2b2br" ? 2 : 3;
+                    return (
+                      <button
+                        key={ck}
+                        type="button"
+                        onClick={() => setCombo(ck)}
+                        className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 px-3 py-3 text-sm font-semibold transition ${
+                          active
+                            ? "border-[oklch(0.45_0.10_45)] bg-[oklch(0.97_0.03_60)] text-[oklch(0.30_0.05_50)]"
+                            : "border-[oklch(0.90_0.02_60)] bg-white text-[oklch(0.45_0.02_60)]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: beigeCount }).map((_, i) => (
+                            <span
+                              key={`b${i}`}
+                              className="h-4 w-4 rounded-full border border-[oklch(0.85_0.02_60)]"
+                              style={{ backgroundColor: "oklch(0.92 0.04 75)" }}
+                            />
+                          ))}
+                          {Array.from({ length: brownCount }).map((_, i) => (
+                            <span
+                              key={`br${i}`}
+                              className="h-4 w-4 rounded-full border border-[oklch(0.85_0.02_60)]"
+                              style={{ backgroundColor: "oklch(0.68 0.09 50)" }}
+                            />
+                          ))}
+                        </div>
+                        <span>{label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
+                {PACK_COMBOS[pack].length === 1 && (
+                  <p className="mt-1.5 text-[11px] text-[oklch(0.50_0.03_55)]">
+                    Ei pack-er jonne ekta-i combo available
+                  </p>
+                )}
               </div>
+
 
               {/* Name */}
               <div>
@@ -1041,7 +1007,7 @@ function CurtainBuckleLanding() {
               <div className="rounded-2xl bg-[oklch(0.97_0.02_60)] p-4 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-[oklch(0.45_0.02_60)]">
-                    {activePack.label} · {color === "beige" ? "Beige" : "Brown"}
+                    {activePack.label} · {COMBO_LABEL[combo]}
                   </span>
                   <span className="font-semibold">৳{subtotal}</span>
                 </div>
@@ -1112,8 +1078,6 @@ function CurtainBuckleLanding() {
         </div>
       </div>
 
-      {/* Unused img reference to avoid eslint warning for colorImage variable */}
-      <img src={colorImage} alt="" className="hidden" />
     </div>
   );
 }
