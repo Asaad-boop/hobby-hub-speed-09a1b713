@@ -284,10 +284,13 @@ function CurtainBuckleLanding() {
       } = await supabase.auth.getSession();
       const isGuest = !session;
 
-      const itemSubtotal = activePack.price;
+      const itemSubtotal = activePack.price + clipsTotal;
       const orderTotal = itemSubtotal + shippingFee;
       const attribution = getOrderAttributionPayload();
       const variantLabel = `${activePack.label} — ${COMBO_LABEL[combo]}`;
+      const notesText = clipQty > 0
+        ? `Variant: ${variantLabel} | Add-on: ${CLIP_NAME} x${clipQty}`
+        : `Variant: ${variantLabel}`;
 
       const baseOrder = {
         status: "new" as const,
