@@ -306,7 +306,7 @@ function CurtainBuckleLanding() {
         shipping_city: form.district,
         shipping_district: form.district,
         source_website: "lp/flower-pearl-curtain-buckle",
-        notes: `Variant: ${variantLabel}`,
+        notes: notesText,
         ...attribution,
       };
 
