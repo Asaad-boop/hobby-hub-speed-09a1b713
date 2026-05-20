@@ -471,31 +471,6 @@ function CurtainBuckleLanding() {
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section className="mx-auto max-w-6xl px-5 py-12 md:py-16">
-        <div className="text-center">
-          <h2 className="font-serif text-2xl font-bold text-[oklch(0.25_0.03_50)] sm:text-3xl">
-            Keno এই Curtain Buckle?
-          </h2>
-          <p className="mt-2 text-sm text-[oklch(0.45_0.02_60)]">
-            Sob feature jegula apnar ghor ke ekta vinno look diye
-          </p>
-        </div>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f, i) => (
-            <div
-              key={i}
-              className="group rounded-2xl border border-[oklch(0.92_0.02_60)] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[oklch(0.95_0.04_60)] text-[oklch(0.45_0.10_45)]">
-                {f.icon}
-              </div>
-              <h3 className="mt-3 font-semibold text-[oklch(0.25_0.03_50)]">{f.title}</h3>
-              <p className="mt-1 text-sm text-[oklch(0.45_0.02_60)]">{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
       {/* COLOR SHOWCASE — display only */}
       <section className="bg-gradient-to-b from-[oklch(0.96_0.02_60)] to-[oklch(0.94_0.03_65)] py-14 md:py-20">
         <div className="mx-auto max-w-6xl px-5">
@@ -547,86 +522,6 @@ function CurtainBuckleLanding() {
         </div>
       </section>
 
-      {/* PRICING — display only */}
-      <section className="mx-auto max-w-6xl px-5 py-14 md:py-20">
-        <div className="text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[oklch(0.96_0.02_60)] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[oklch(0.45_0.10_45)] ring-1 ring-[oklch(0.85_0.04_60)]">
-            <Gift className="h-3 w-3" /> Packages &amp; Pricing
-          </span>
-          <h2 className="mt-3 font-serif text-2xl font-bold text-[oklch(0.25_0.03_50)] sm:text-3xl">
-            Apnar Pack Beche Niyen
-          </h2>
-          <p className="mt-2 text-sm text-[oklch(0.45_0.02_60)]">
-            Beshi nile beshi savings · checkout-e select korben
-          </p>
-        </div>
-        <div className="mt-10 grid gap-4 md:grid-cols-3 md:gap-5">
-          {(Object.entries(PACKS) as [PackKey, (typeof PACKS)[PackKey]][]).map(([key, p]) => {
-            const isBest = key === "p6";
-            const savings = p.old - p.price;
-            return (
-              <div
-                key={key}
-                className={`relative flex flex-col overflow-hidden rounded-3xl bg-white ring-1 ring-[oklch(0.90_0.02_60)] shadow-sm ${
-                  isBest ? "md:scale-[1.03] ring-[2px] ring-[oklch(0.45_0.10_45)]" : ""
-                }`}
-              >
-                {p.badge && (
-                  <div
-                    className={`flex items-center justify-center gap-1 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-white ${
-                      isBest
-                        ? "bg-gradient-to-r from-[oklch(0.55_0.15_45)] to-[oklch(0.65_0.16_55)]"
-                        : "bg-gradient-to-r from-[oklch(0.78_0.16_75)] to-[oklch(0.72_0.18_60)]"
-                    }`}
-                  >
-                    {isBest ? "⭐ Best Value" : "🔥 Most Popular"}
-                  </div>
-                )}
-                {!p.badge && <div className="h-[26px]" />}
-                <div className="flex flex-1 flex-col p-5">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[oklch(0.96_0.03_65)] ring-1 ring-[oklch(0.88_0.04_60)]">
-                      <Flower2 className="h-5 w-5 text-[oklch(0.45_0.10_45)]" />
-                    </span>
-                    <div>
-                      <div className="font-serif text-base font-bold text-[oklch(0.25_0.03_50)]">
-                        {p.label}
-                      </div>
-                      <div className="text-[11px] text-[oklch(0.50_0.03_55)]">
-                        {p.qty} pcs · ৳{p.perPc}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex items-end justify-between">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-sm font-semibold text-[oklch(0.45_0.10_45)]">৳</span>
-                      <span className="text-4xl font-extrabold leading-none text-[oklch(0.25_0.03_50)]">
-                        {p.price}
-                      </span>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className="text-xs text-[oklch(0.55_0.02_60)] line-through">
-                        ৳{p.old}
-                      </span>
-                      <span className="mt-0.5 rounded-full bg-[oklch(0.94_0.08_30)] px-2 py-0.5 text-[10px] font-bold text-[oklch(0.45_0.18_30)]">
-                        Save ৳{savings}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div className="mt-6 text-center">
-          <button
-            onClick={scrollToOrder}
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[oklch(0.45_0.10_45)] px-8 text-sm font-bold text-white shadow-lg shadow-[oklch(0.45_0.10_45)]/30 transition hover:bg-[oklch(0.40_0.10_45)]"
-          >
-            <Gift className="h-4 w-4" /> Order korte scroll korun
-          </button>
-        </div>
-      </section>
 
 
       {/* HOW IT WORKS */}
@@ -698,80 +593,6 @@ function CurtainBuckleLanding() {
         </div>
       </section>
 
-      {/* REVIEWS */}
-      <section className="bg-[oklch(0.96_0.02_60)] py-12 md:py-16">
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="text-center">
-            <h2 className="font-serif text-2xl font-bold text-[oklch(0.25_0.03_50)] sm:text-3xl">
-              Customer ra ki bolche?
-            </h2>
-            <div className="mt-2 flex items-center justify-center gap-2 text-sm">
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Star
-                    key={i}
-                    className="h-4 w-4 fill-[oklch(0.78_0.16_75)] text-[oklch(0.78_0.16_75)]"
-                  />
-                ))}
-              </div>
-              <span className="font-semibold">4.9 / 5</span>
-              <span className="text-[oklch(0.50_0.02_60)]">· 248 verified reviews</span>
-            </div>
-          </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {REVIEWS.map((r) => (
-              <div
-                key={r.name}
-                className="rounded-2xl border border-[oklch(0.92_0.02_60)] bg-white p-5 shadow-sm"
-              >
-                <div className="flex items-center gap-1">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star
-                      key={i}
-                      className="h-3.5 w-3.5 fill-[oklch(0.78_0.16_75)] text-[oklch(0.78_0.16_75)]"
-                    />
-                  ))}
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-[oklch(0.30_0.02_60)]">
-                  "{r.text}"
-                </p>
-                <div className="mt-4 flex items-center justify-between text-xs">
-                  <div>
-                    <p className="font-semibold text-[oklch(0.25_0.03_50)]">{r.name}</p>
-                    <p className="text-[oklch(0.50_0.02_60)]">{r.location}</p>
-                  </div>
-                  <span className="text-[oklch(0.50_0.02_60)]">{r.date}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="mx-auto max-w-3xl px-5 py-12 md:py-16">
-        <div className="text-center">
-          <h2 className="font-serif text-2xl font-bold text-[oklch(0.25_0.03_50)] sm:text-3xl">
-            Common prosno
-          </h2>
-        </div>
-        <Accordion type="single" collapsible className="mt-6">
-          {FAQS.map((f, i) => (
-            <AccordionItem
-              key={i}
-              value={`faq-${i}`}
-              className="border-b border-[oklch(0.90_0.02_60)]"
-            >
-              <AccordionTrigger className="text-left font-semibold text-[oklch(0.25_0.03_50)]">
-                {f.q}
-              </AccordionTrigger>
-              <AccordionContent className="text-sm text-[oklch(0.40_0.02_60)]">
-                {f.a}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </section>
 
       {/* ORDER FORM */}
       <section
