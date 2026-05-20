@@ -1,86 +1,80 @@
-# Migration: TanStack Start → Plain Vite + React Router
+## Flower Pearl Curtain Buckle — Landing Page Plan
 
-## Goal
+প্রজেক্টে already `lp.aurora-lamp.tsx`, `lp.origami-combo.tsx`, `lp.scratch-art-hue-board.tsx` এর মতো landing page pattern আছে — সেই same pattern follow করে নতুন route তৈরি করব।
 
-Pura project ke TanStack Start (SSR framework) theke shoraye **plain Vite + React 19 + React Router DOM v6** e migrate kora. Backend Supabase Edge Functions diye replace kora hobe.
+### Route
 
-## Important Trade-offs
+- New file: `src/routes/lp.flower-pearl-curtain-buckle.tsx` → URL: `/lp/flower-pearl-curtain-buckle`
+- SEO meta (title, description, og:*) + canonical
+- Reuses existing checkout/order flow (`placeOrder` server fn) ঠিক aurora-lamp এর মতো
 
-Migration korle eigula chole jabe:
+### Assets (user uploads → `src/assets/`)
 
-- **SSR / SEO**: Pages client-side render hobe, initial HTML khali thakbe. Google indexing weak hobe LP/product pages er jonno.
-- **Per-route meta tags**: `head()` API thakbe na — `react-helmet-async` use korte hobe.
-- **`createServerFn`**: 4 ta file (courier, order-lookup, staff, vercel-deploy) Supabase Edge Functions e port korte hobe.
-- **File-based routing**: Manual route table maintain korte hobe.
-- **Server routes** (`/api/public/*`): Edge Functions e jabe.
-- **Auth middleware** (`requireSupabaseAuth`): Edge Function side e re-implement.
+- `curtain-buckle-before-after.webp` (before/after hero)
+- `curtain-buckle-basket.jpg` (lifestyle in basket)
+- `curtain-buckle-hand.webp` (size/hand reference)
+- `curtain-buckle-brown.webp` (brown pair in use)
+- `curtain-buckle-beige.webp` (beige pair in use)
 
-## Scope
+### Page Sections (top → bottom)
 
-### 1. Build/Config Layer
+1. **Sticky Top Banner** — "🌸 Free Delivery on 6 Pcs Set | Cash on Delivery"
+2. **Hero**
+  - Left: Before/After image, badges (COD, 7-day return, In stock)
+  - Right: Title (Bangla + English), short pitch, rating stars, price range (৳549 – ৳899), "এখনই অর্ডার করুন" CTA → scrolls to order form
+3. **Why You Need It** — 4 icon cards: Clean look, No drilling, Magnetic close, Reusable
+4. **Color Options** — Beige & Brown swatches with lifestyle photo for each
+5. **Variant & Pricing Cards** (3 cards, click-to-select, syncs with order form)
+  - 3 Pcs Set — ৳549
+  - 4 Pcs Set — ৳699
+  - 6 Pcs Set — ৳899 (Best Value badge)
+6. **How It Works** — 3 steps: Wrap around curtain → Magnet snap → Pearl tassel drops elegantly
+7. **Lifestyle Gallery** — 4 image grid (room shots, nursery, hand-held detail)
+8. **Specifications** — Material (fabric flower + braided rope + pearl + magnet), petal size, rope length, weight
+9. **Social Proof** — 3-4 customer review cards (Bangla testimonials, star ratings)
+10. **FAQ Accordion** — Magnet kotota strong? Pordar size matter kore? Wash kora jabe? Delivery koto din?
+11. **Order Form** (the conversion section)
+  - Variant selector (3/4/6 Pcs)
+    - Color selector (Beige / Brown)
+    - Name, Phone, District (BD_DISTRICTS dropdown), Full address, Note
+    - Shipping: Inside Dhaka ৳70 / Outside ৳130
+    - Live order summary (subtotal + shipping + total)
+    - Big "অর্ডার কনফার্ম করুন (Cash on Delivery)" button
+    - Submits via existing `placeOrder` server fn → redirects to `/order-success/$orderId`
+12. **Floating mobile bottom bar** — Price + "Order Now" button (scrolls to form)
 
-- `vite.config.ts` rewrite: TanStack plugin remove, plain `@vitejs/plugin-react` use.
-- `package.json`: `@tanstack/react-start`, `@tanstack/react-router`, `nitro`, `@lovable.dev/vite-tanstack-config` remove. Add `react-router-dom`, `react-helmet-async`.
-- `index.html` create (entry HTML).
-- `src/main.tsx` create (ReactDOM.createRoot entry).
-- `wrangler.jsonc`, `vercel.json` simplify for SPA.
-- `tsconfig.json` adjust.
+### Backend / DB
 
-### 2. Routing Layer
+- কোনো নতুন backend লাগবে না — existing `placeOrder` server fn & `products` table reuse করব
+- প্রোডাক্টটি `products` table এ insert করতে হবে (slug: `flower-pearl-curtain-buckle`) — title, description, base price, image, stock সহ — যাতে order flow valid product ID পায়
+- Variants 3 টি price option হিসেবে landing page UI তে handle হবে; line item হিসেবে quantity/variant note pass করব order এর সাথে
 
-- `src/routes/__root.tsx` → `src/App.tsx` (root layout with providers + Routes).
-- Sob `createFileRoute(...)` files convert to plain components:
-  - `src/routes/index.tsx` → `src/pages/Home.tsx`
-  - `src/routes/admin.*` → `src/pages/admin/*`
-  - `src/routes/lp.*`, `product.$id`, `category.$slug`, `order-success.$orderId`, `track.$orderId`, etc.
-- `<Link to="/foo">` (TanStack) → `<Link to="/foo">` (RR DOM) — API similar but params different.
-- `Route.useParams()` / `Route.useLoaderData()` → `useParams()` + manual fetch in `useEffect` / TanStack Query.
-- `routeTree.gen.ts` delete.
-- `robots.txt`, `sitemap.xml` routes → static files in `public/` ba edge function.
+### Design tokens
 
-### 3. Server Logic Layer
+- Soft, cozy home-decor palette: cream/beige background, warm brown accents, pearl-white highlights — সব semantic tokens (`src/styles.css`) থেকে। কোনো hardcoded color না।
+- Typography: existing site fonts; serif touch headings এ optional।
+- Mobile-first responsive, smooth scroll, subtle fade-in animations।
 
-Migrate to **Supabase Edge Functions** (project already connected):
+### Tracking
 
-- `src/lib/courier.functions.ts` → `supabase/functions/courier-stats/`
-- `src/lib/order-lookup.functions.ts` → `supabase/functions/order-lookup/`
-- `src/lib/staff.functions.ts` → `supabase/functions/staff-mgmt/`
-- `src/lib/vercel-deploy.functions.ts` → `supabase/functions/vercel-deploy/`
-- `src/routes/api/public/*` (jodi thake) → edge functions.
+- `fbTrack("ViewContent")` on mount
+- `fbTrack("AddToCart")` on variant select
+- `fbTrack("InitiateCheckout")` on form focus
+- `fbTrack("Purchase")` after success (existing pattern)
 
-Client side: `useServerFn(...)` calls → `supabase.functions.invoke(...)`.
+### Deliverables
 
-### 4. SEO / Meta Layer
+1. `src/routes/lp.flower-pearl-curtain-buckle.tsx` (new)
+2. 5 image assets copied into `src/assets/`
+3. One migration/insert to add the product row (so order succeeds)
 
-- `react-helmet-async` install kore prottek page e `<Helmet>` diye title/description/og tags set kora.
-- Root level `<HelmetProvider>` wrap.
+Confirm করলে implement শুরু করব।  
+  
+  
+new ekta shundor pattern e koro
 
-### 5. Cleanup
+&nbsp;
 
-- `src/integrations/supabase/auth-middleware.ts` delete (TanStack-specific).
-- `src/lib/server-fn-auth.ts` delete.
-- `src/lib/admin.ts`, `permissions.ts` — review for TanStack imports.
-- `.lovable/plan.md` update.
+&nbsp;
 
-## Migration Order (Implementation Steps)
-
-1. **Setup new shell**: `index.html`, `main.tsx`, new `vite.config.ts`, `package.json` deps swap.
-2. **Create App.tsx with React Router**: All routes mapped, providers wired (QueryClient, Helmet, Cart, Wishlist).
-3. **Convert each route file**: Strip `createFileRoute`, export plain component, fix params/links/loaders.
-4. **Port server functions to Edge Functions**: One by one, with proper auth via JWT verification.
-5. **Update all `useServerFn` callers** to `supabase.functions.invoke`.
-6. **Add Helmet meta tags** to key pages (home, LP, product, category).
-7. **Delete dead files**: routeTree.gen, auth-middleware, server-fn-auth, .functions.ts files.
-8. **Test build**: `bun run build` should pass; preview should serve all routes.
-
-## Estimated Impact
-
-- **Files touched**: ~60+ files (every route file + supporting libs).
-- **Files deleted**: ~10.
-- **New edge functions**: 4.
-- **Build time**: App will be **broken during migration** until all steps complete.
-- **Functionality risk**: High — admin panel, checkout, order tracking, courier integration sob ek shathe re-test korte hobe.
-
-## Recommended Alternative
-
-Bhai, **shotti boli** — current setup TanStack Start + Vite already. "Plain Vite" e jaowar shudhu ekta benefit (simpler mental model), kintu cost onek beshi (SSR loss, SEO loss, sob server fn rewrite). Tumi ki specific kichu problem face kortecho TanStack Start niye? Seta solve kora better hote pare. Plan approve korar age ektu bhabo.
+&nbsp;
