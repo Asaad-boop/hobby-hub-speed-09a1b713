@@ -333,7 +333,7 @@ function CurtainBuckleLanding() {
         return;
       }
 
-      const { error: itemsErr } = await supabase.from("order_items").insert([
+      const orderItems: Array<Record<string, unknown>> = [
         {
           order_id: order.id,
           user_id: isGuest ? null : session!.user.id,
@@ -345,7 +345,21 @@ function CurtainBuckleLanding() {
           variant_id: null,
           variant_label: variantLabel,
         },
-      ]);
+      ];
+      if (clipQty > 0) {
+        orderItems.push({
+          order_id: order.id,
+          user_id: isGuest ? null : session!.user.id,
+          product_id: product.id,
+          name: CLIP_NAME,
+          image: clipsImg,
+          price: CLIP_PRICE,
+          quantity: clipQty,
+          variant_id: null,
+          variant_label: "Add-on",
+        });
+      }
+      const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
 
       if (itemsErr) {
         console.error("Order items insert failed:", itemsErr);
