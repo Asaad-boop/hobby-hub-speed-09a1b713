@@ -834,37 +834,59 @@ function CurtainBuckleLanding() {
                 </div>
               </div>
 
-              {/* Color */}
+              {/* Color combo */}
               <div>
                 <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[oklch(0.40_0.02_60)]">
-                  Color
+                  Color Combo
                 </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {(
-                    [
-                      { key: "beige", label: "Beige", hex: "oklch(0.92 0.04 75)" },
-                      { key: "brown", label: "Brown", hex: "oklch(0.68 0.09 50)" },
-                    ] as const
-                  ).map((c) => (
-                    <button
-                      key={c.key}
-                      type="button"
-                      onClick={() => setColor(c.key)}
-                      className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition ${
-                        color === c.key
-                          ? "border-[oklch(0.45_0.10_45)] bg-[oklch(0.97_0.03_60)] text-[oklch(0.30_0.05_50)]"
-                          : "border-[oklch(0.90_0.02_60)] bg-white text-[oklch(0.45_0.02_60)]"
-                      }`}
-                    >
-                      <span
-                        className="h-4 w-4 rounded-full border border-[oklch(0.85_0.02_60)]"
-                        style={{ backgroundColor: c.hex }}
-                      />
-                      {c.label}
-                    </button>
-                  ))}
+                <div className={`grid gap-2 ${PACK_COMBOS[pack].length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+                  {PACK_COMBOS[pack].map((ck) => {
+                    const active = combo === ck;
+                    const label = COMBO_LABEL[ck];
+                    // parse counts from key for swatch row
+                    const beigeCount =
+                      ck === "2b1br" ? 2 : ck === "1b2br" ? 1 : ck === "2b2br" ? 2 : 3;
+                    const brownCount =
+                      ck === "2b1br" ? 1 : ck === "1b2br" ? 2 : ck === "2b2br" ? 2 : 3;
+                    return (
+                      <button
+                        key={ck}
+                        type="button"
+                        onClick={() => setCombo(ck)}
+                        className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 px-3 py-3 text-sm font-semibold transition ${
+                          active
+                            ? "border-[oklch(0.45_0.10_45)] bg-[oklch(0.97_0.03_60)] text-[oklch(0.30_0.05_50)]"
+                            : "border-[oklch(0.90_0.02_60)] bg-white text-[oklch(0.45_0.02_60)]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: beigeCount }).map((_, i) => (
+                            <span
+                              key={`b${i}`}
+                              className="h-4 w-4 rounded-full border border-[oklch(0.85_0.02_60)]"
+                              style={{ backgroundColor: "oklch(0.92 0.04 75)" }}
+                            />
+                          ))}
+                          {Array.from({ length: brownCount }).map((_, i) => (
+                            <span
+                              key={`br${i}`}
+                              className="h-4 w-4 rounded-full border border-[oklch(0.85_0.02_60)]"
+                              style={{ backgroundColor: "oklch(0.68 0.09 50)" }}
+                            />
+                          ))}
+                        </div>
+                        <span>{label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
+                {PACK_COMBOS[pack].length === 1 && (
+                  <p className="mt-1.5 text-[11px] text-[oklch(0.50_0.03_55)]">
+                    Ei pack-er jonne ekta-i combo available
+                  </p>
+                )}
               </div>
+
 
               {/* Name */}
               <div>
