@@ -901,8 +901,16 @@ function CurtainBuckleLanding() {
                   <span className="text-[oklch(0.45_0.02_60)]">
                     {activePack.label} · {COMBO_LABEL[combo]}
                   </span>
-                  <span className="font-semibold">৳{subtotal}</span>
+                  <span className="font-semibold">৳{activePack.price}</span>
                 </div>
+                {clipQty > 0 && (
+                  <div className="mt-1 flex items-center justify-between">
+                    <span className="text-[oklch(0.45_0.02_60)]">
+                      Magnetic Clips × {clipQty}
+                    </span>
+                    <span className="font-semibold">৳{clipsTotal}</span>
+                  </div>
+                )}
                 <div className="mt-1 flex items-center justify-between">
                   <span className="text-[oklch(0.45_0.02_60)]">Shipping</span>
                   <span className="font-semibold">৳{shippingFee}</span>
