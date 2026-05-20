@@ -47,6 +47,7 @@ import { generatePackingSlipsPDF } from "@/lib/pdf/packing-slips";
 import { InvoicePreviewDialog } from "@/components/admin/InvoicePreviewDialog";
 import { PathaoSendDialog } from "@/components/admin/PathaoSendDialog";
 import { pathaoSyncOrder } from "@/lib/pathao.functions";
+import { syncOrdersToSheet } from "@/lib/google-sheets.functions";
 
 export const Route = createFileRoute("/admin/order-list")({
   component: OrderListPage,
