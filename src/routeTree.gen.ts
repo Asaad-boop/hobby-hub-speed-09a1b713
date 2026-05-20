@@ -34,6 +34,7 @@ import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as OrderSuccessOrderIdRouteImport } from './routes/order-success.$orderId'
 import { Route as LpScratchArtHueBoardRouteImport } from './routes/lp.scratch-art-hue-board'
 import { Route as LpOrigamiComboRouteImport } from './routes/lp.origami-combo'
+import { Route as LpFlowerPearlCurtainBuckleRouteImport } from './routes/lp.flower-pearl-curtain-buckle'
 import { Route as LpAuroraLampRouteImport } from './routes/lp.aurora-lamp'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as AdminWebOrdersRouteImport } from './routes/admin.web-orders'
@@ -176,6 +177,12 @@ const LpOrigamiComboRoute = LpOrigamiComboRouteImport.update({
   path: '/lp/origami-combo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LpFlowerPearlCurtainBuckleRoute =
+  LpFlowerPearlCurtainBuckleRouteImport.update({
+    id: '/lp/flower-pearl-curtain-buckle',
+    path: '/lp/flower-pearl-curtain-buckle',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LpAuroraLampRoute = LpAuroraLampRouteImport.update({
   id: '/lp/aurora-lamp',
   path: '/lp/aurora-lamp',
@@ -291,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/admin/web-orders': typeof AdminWebOrdersRoute
   '/category/$slug': typeof CategorySlugRoute
   '/lp/aurora-lamp': typeof LpAuroraLampRoute
+  '/lp/flower-pearl-curtain-buckle': typeof LpFlowerPearlCurtainBuckleRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
   '/lp/scratch-art-hue-board': typeof LpScratchArtHueBoardRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
@@ -333,6 +341,7 @@ export interface FileRoutesByTo {
   '/admin/web-orders': typeof AdminWebOrdersRoute
   '/category/$slug': typeof CategorySlugRoute
   '/lp/aurora-lamp': typeof LpAuroraLampRoute
+  '/lp/flower-pearl-curtain-buckle': typeof LpFlowerPearlCurtainBuckleRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
   '/lp/scratch-art-hue-board': typeof LpScratchArtHueBoardRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
@@ -377,6 +386,7 @@ export interface FileRoutesById {
   '/admin/web-orders': typeof AdminWebOrdersRoute
   '/category/$slug': typeof CategorySlugRoute
   '/lp/aurora-lamp': typeof LpAuroraLampRoute
+  '/lp/flower-pearl-curtain-buckle': typeof LpFlowerPearlCurtainBuckleRoute
   '/lp/origami-combo': typeof LpOrigamiComboRoute
   '/lp/scratch-art-hue-board': typeof LpScratchArtHueBoardRoute
   '/order-success/$orderId': typeof OrderSuccessOrderIdRoute
@@ -422,6 +432,7 @@ export interface FileRouteTypes {
     | '/admin/web-orders'
     | '/category/$slug'
     | '/lp/aurora-lamp'
+    | '/lp/flower-pearl-curtain-buckle'
     | '/lp/origami-combo'
     | '/lp/scratch-art-hue-board'
     | '/order-success/$orderId'
@@ -464,6 +475,7 @@ export interface FileRouteTypes {
     | '/admin/web-orders'
     | '/category/$slug'
     | '/lp/aurora-lamp'
+    | '/lp/flower-pearl-curtain-buckle'
     | '/lp/origami-combo'
     | '/lp/scratch-art-hue-board'
     | '/order-success/$orderId'
@@ -507,6 +519,7 @@ export interface FileRouteTypes {
     | '/admin/web-orders'
     | '/category/$slug'
     | '/lp/aurora-lamp'
+    | '/lp/flower-pearl-curtain-buckle'
     | '/lp/origami-combo'
     | '/lp/scratch-art-hue-board'
     | '/order-success/$orderId'
@@ -538,6 +551,7 @@ export interface RootRouteChildren {
   WishlistRoute: typeof WishlistRoute
   CategorySlugRoute: typeof CategorySlugRoute
   LpAuroraLampRoute: typeof LpAuroraLampRoute
+  LpFlowerPearlCurtainBuckleRoute: typeof LpFlowerPearlCurtainBuckleRoute
   LpOrigamiComboRoute: typeof LpOrigamiComboRoute
   LpScratchArtHueBoardRoute: typeof LpScratchArtHueBoardRoute
   OrderSuccessOrderIdRoute: typeof OrderSuccessOrderIdRoute
@@ -724,6 +738,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LpOrigamiComboRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lp/flower-pearl-curtain-buckle': {
+      id: '/lp/flower-pearl-curtain-buckle'
+      path: '/lp/flower-pearl-curtain-buckle'
+      fullPath: '/lp/flower-pearl-curtain-buckle'
+      preLoaderRoute: typeof LpFlowerPearlCurtainBuckleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lp/aurora-lamp': {
       id: '/lp/aurora-lamp'
       path: '/lp/aurora-lamp'
@@ -896,6 +917,7 @@ const rootRouteChildren: RootRouteChildren = {
   WishlistRoute: WishlistRoute,
   CategorySlugRoute: CategorySlugRoute,
   LpAuroraLampRoute: LpAuroraLampRoute,
+  LpFlowerPearlCurtainBuckleRoute: LpFlowerPearlCurtainBuckleRoute,
   LpOrigamiComboRoute: LpOrigamiComboRoute,
   LpScratchArtHueBoardRoute: LpScratchArtHueBoardRoute,
   OrderSuccessOrderIdRoute: OrderSuccessOrderIdRoute,
@@ -907,12 +929,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
