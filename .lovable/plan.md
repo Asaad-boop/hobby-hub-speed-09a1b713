@@ -1,80 +1,49 @@
-## Flower Pearl Curtain Buckle — Landing Page Plan
+## Color & Package Selector — Premium Redesign
 
-প্রজেক্টে already `lp.aurora-lamp.tsx`, `lp.origami-combo.tsx`, `lp.scratch-art-hue-board.tsx` এর মতো landing page pattern আছে — সেই same pattern follow করে নতুন route তৈরি করব।
+দুটো selector ke aro premium, conversion-friendly আর tactile feel দেব। শুধু এই দুই section ই touch করব, বাকি page unchanged।
 
-### Route
+### 1. Color Selector (Color Showcase section)
 
-- New file: `src/routes/lp.flower-pearl-curtain-buckle.tsx` → URL: `/lp/flower-pearl-curtain-buckle`
-- SEO meta (title, description, og:*) + canonical
-- Reuses existing checkout/order flow (`placeOrder` server fn) ঠিক aurora-lamp এর মতো
+**Current:** Big 2-column image cards with small swatch + "Selected" badge — feels flat।
 
-### Assets (user uploads → `src/assets/`)
+**New design:**
+- Section heading এ ছোট "Step 1 of 2" pill (visual flow cue)
+- Side-by-side cards with:
+  - Bigger lifestyle image with subtle gradient overlay at bottom
+  - **Floating circular swatch** (overlapping image bottom-edge) — bigger, ring outline, glossy highlight
+  - Active state: thick warm-brown ring + soft glow shadow + tiny "✓" check inside the swatch
+  - Inactive: hover lifts card slightly, swatch ring stays subtle
+  - Color name typography larger + Bangla mini tagline (e.g. "Warm & Neutral" / "Rich & Bold")
+  - Animated "Selected" pill slides in from bottom when active
+- Mobile: 2 columns retained (already small viewport friendly), but card height adjusted so swatch never clips
 
-- `curtain-buckle-before-after.webp` (before/after hero)
-- `curtain-buckle-basket.jpg` (lifestyle in basket)
-- `curtain-buckle-hand.webp` (size/hand reference)
-- `curtain-buckle-brown.webp` (brown pair in use)
-- `curtain-buckle-beige.webp` (beige pair in use)
+### 2. Package Selector (Pricing/Packs section)
 
-### Page Sections (top → bottom)
+**Current:** 3 equal cards, flat layout, badge top-right।
 
-1. **Sticky Top Banner** — "🌸 Free Delivery on 6 Pcs Set | Cash on Delivery"
-2. **Hero**
-  - Left: Before/After image, badges (COD, 7-day return, In stock)
-  - Right: Title (Bangla + English), short pitch, rating stars, price range (৳549 – ৳899), "এখনই অর্ডার করুন" CTA → scrolls to order form
-3. **Why You Need It** — 4 icon cards: Clean look, No drilling, Magnetic close, Reusable
-4. **Color Options** — Beige & Brown swatches with lifestyle photo for each
-5. **Variant & Pricing Cards** (3 cards, click-to-select, syncs with order form)
-  - 3 Pcs Set — ৳549
-  - 4 Pcs Set — ৳699
-  - 6 Pcs Set — ৳899 (Best Value badge)
-6. **How It Works** — 3 steps: Wrap around curtain → Magnet snap → Pearl tassel drops elegantly
-7. **Lifestyle Gallery** — 4 image grid (room shots, nursery, hand-held detail)
-8. **Specifications** — Material (fabric flower + braided rope + pearl + magnet), petal size, rope length, weight
-9. **Social Proof** — 3-4 customer review cards (Bangla testimonials, star ratings)
-10. **FAQ Accordion** — Magnet kotota strong? Pordar size matter kore? Wash kora jabe? Delivery koto din?
-11. **Order Form** (the conversion section)
-  - Variant selector (3/4/6 Pcs)
-    - Color selector (Beige / Brown)
-    - Name, Phone, District (BD_DISTRICTS dropdown), Full address, Note
-    - Shipping: Inside Dhaka ৳70 / Outside ৳130
-    - Live order summary (subtotal + shipping + total)
-    - Big "অর্ডার কনফার্ম করুন (Cash on Delivery)" button
-    - Submits via existing `placeOrder` server fn → redirects to `/order-success/$orderId`
-12. **Floating mobile bottom bar** — Price + "Order Now" button (scrolls to form)
+**New design:**
+- Heading এ "Step 2 of 2" pill
+- 3 cards in grid; **middle/best card scaled up** (md:scale-105) with thicker accent border and a glossy gradient header strip ("⭐ Best Value")
+- Each card structured top→bottom:
+  1. Top ribbon (only on badged packs) — gradient bg, white text
+  2. Big pack icon (Flower2) in a soft circle background
+  3. Pack label (e.g. "4 Pcs Set")
+  4. **Price row redesign**: huge price + small "৳" + old price strikethrough on right with red "Save ৳X" pill below
+  5. Per-pc cost in muted small text
+  6. **Mini benefits list** (3 ticks): "Free gift wrap" / "COD Available" / "7-day return" — subtle
+  7. CTA pill at bottom — when active: filled brown with check + "Selected"; when inactive: outlined "Tap to choose"
+- Active card: thicker border, elevated shadow, subtle warm-tint background, scale-[1.02]
+- Smooth transition (200ms) between states
+- Mobile (390px): stack vertically, badged card still slightly emphasized via border + ribbon (no scale to avoid overflow)
 
-### Backend / DB
+### Microinteractions
 
-- কোনো নতুন backend লাগবে না — existing `placeOrder` server fn & `products` table reuse করব
-- প্রোডাক্টটি `products` table এ insert করতে হবে (slug: `flower-pearl-curtain-buckle`) — title, description, base price, image, stock সহ — যাতে order flow valid product ID পায়
-- Variants 3 টি price option হিসেবে landing page UI তে handle হবে; line item হিসেবে quantity/variant note pass করব order এর সাথে
+- Both selectors: `transition-all duration-200`, active card gets soft glow shadow using existing warm-brown token
+- Tap feedback: brief scale-down on press (`active:scale-[0.98]`)
+- Keep all existing `fbTrack("AddToCart")` and state logic — purely visual upgrade
 
-### Design tokens
+### Files
 
-- Soft, cozy home-decor palette: cream/beige background, warm brown accents, pearl-white highlights — সব semantic tokens (`src/styles.css`) থেকে। কোনো hardcoded color না।
-- Typography: existing site fonts; serif touch headings এ optional।
-- Mobile-first responsive, smooth scroll, subtle fade-in animations।
+- `src/routes/lp.flower-pearl-curtain-buckle.tsx` — only the Color Showcase block (~lines 487–540) and Pricing/Packs block (~lines 542–610)
 
-### Tracking
-
-- `fbTrack("ViewContent")` on mount
-- `fbTrack("AddToCart")` on variant select
-- `fbTrack("InitiateCheckout")` on form focus
-- `fbTrack("Purchase")` after success (existing pattern)
-
-### Deliverables
-
-1. `src/routes/lp.flower-pearl-curtain-buckle.tsx` (new)
-2. 5 image assets copied into `src/assets/`
-3. One migration/insert to add the product row (so order succeeds)
-
-Confirm করলে implement শুরু করব।  
-  
-  
-new ekta shundor pattern e koro
-
-&nbsp;
-
-&nbsp;
-
-&nbsp;
+কোনো backend, state, বা analytics logic change নেই — pure UI polish।

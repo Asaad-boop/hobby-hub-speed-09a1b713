@@ -485,76 +485,110 @@ function CurtainBuckleLanding() {
       </section>
 
       {/* COLOR SHOWCASE */}
-      <section className="bg-[oklch(0.96_0.02_60)] py-12 md:py-16">
+      <section className="bg-gradient-to-b from-[oklch(0.96_0.02_60)] to-[oklch(0.94_0.03_65)] py-14 md:py-20">
         <div className="mx-auto max-w-6xl px-5">
           <div className="text-center">
-            <h2 className="font-serif text-2xl font-bold text-[oklch(0.25_0.03_50)] sm:text-3xl">
-              2 ti Elegant Colors
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[oklch(0.45_0.10_45)] shadow-sm ring-1 ring-[oklch(0.85_0.04_60)]">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[oklch(0.45_0.10_45)] text-[9px] text-white">1</span>
+              Step 1 · Color
+            </span>
+            <h2 className="mt-3 font-serif text-2xl font-bold text-[oklch(0.25_0.03_50)] sm:text-3xl">
+              Apnar Color Beche Niyen
             </h2>
             <p className="mt-2 text-sm text-[oklch(0.45_0.02_60)]">
-              Apnar interior er sathe match korate beche niyen
+              Interior er sathe match korate 2 ti elegant shade
             </p>
           </div>
-          <div className="mt-8 grid gap-5 md:grid-cols-2">
+          <div className="mt-10 grid grid-cols-2 gap-4 md:gap-6">
             {(
               [
-                { key: "beige", label: "Beige", img: beigeImg, hex: "oklch(0.92 0.04 75)" },
-                { key: "brown", label: "Brown", img: brownImg, hex: "oklch(0.68 0.09 50)" },
+                { key: "beige", label: "Beige", tag: "Warm & Neutral", img: beigeImg, hex: "oklch(0.88 0.05 75)" },
+                { key: "brown", label: "Brown", tag: "Rich & Bold", img: brownImg, hex: "oklch(0.55 0.08 45)" },
               ] as const
-            ).map((c) => (
-              <button
-                key={c.key}
-                onClick={() => setColor(c.key)}
-                className={`group overflow-hidden rounded-2xl border-2 bg-white text-left shadow-sm transition ${
-                  color === c.key
-                    ? "border-[oklch(0.45_0.10_45)] shadow-md"
-                    : "border-transparent hover:border-[oklch(0.80_0.04_60)]"
-                }`}
-              >
-                <div className="aspect-[4/3] overflow-hidden">
-                  <img
-                    src={c.img}
-                    alt={`${c.label} curtain buckle`}
-                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="flex items-center justify-between px-5 py-4">
-                  <div className="flex items-center gap-3">
-                    <span
-                      className="inline-block h-6 w-6 rounded-full border border-[oklch(0.85_0.02_60)]"
-                      style={{ backgroundColor: c.hex }}
-                    />
-                    <span className="font-semibold text-[oklch(0.25_0.03_50)]">{c.label}</span>
+            ).map((c) => {
+              const active = color === c.key;
+              return (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => setColor(c.key)}
+                  className={`group relative overflow-visible rounded-3xl bg-white pb-10 text-left transition-all duration-300 active:scale-[0.98] ${
+                    active
+                      ? "shadow-[0_20px_40px_-15px_oklch(0.45_0.10_45_/_0.4)] ring-[3px] ring-[oklch(0.45_0.10_45)] -translate-y-1"
+                      : "shadow-md ring-1 ring-[oklch(0.90_0.02_60)] hover:-translate-y-0.5 hover:shadow-lg"
+                  }`}
+                >
+                  <div className="relative overflow-hidden rounded-t-3xl">
+                    <div className="aspect-[4/5] sm:aspect-[4/3]">
+                      <img
+                        src={c.img}
+                        alt={`${c.label} curtain buckle`}
+                        className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 to-transparent" />
                   </div>
-                  {color === c.key && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[oklch(0.45_0.10_45)] px-2.5 py-1 text-xs font-bold text-white">
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Selected
-                    </span>
-                  )}
-                </div>
-              </button>
-            ))}
+                  {/* Floating swatch */}
+                  <div className="absolute left-1/2 top-[calc(100%-2.75rem)] sm:top-auto sm:bottom-14 -translate-x-1/2 sm:translate-x-0 sm:left-5">
+                    <div
+                      className={`relative flex h-14 w-14 items-center justify-center rounded-full shadow-lg ring-4 transition-all duration-300 ${
+                        active ? "ring-white scale-110" : "ring-white/90"
+                      }`}
+                      style={{ backgroundColor: c.hex }}
+                    >
+                      {/* glossy highlight */}
+                      <span className="absolute left-2 top-1.5 h-3 w-4 rounded-full bg-white/40 blur-[2px]" />
+                      {active && (
+                        <CheckCircle2 className="relative h-6 w-6 text-white drop-shadow" strokeWidth={2.5} />
+                      )}
+                    </div>
+                  </div>
+                  <div className="px-5 pt-8 sm:pt-5 sm:pl-24">
+                    <div className="font-serif text-lg font-bold text-[oklch(0.25_0.03_50)]">
+                      {c.label}
+                    </div>
+                    <div className="text-xs text-[oklch(0.50_0.03_55)]">{c.tag}</div>
+                  </div>
+                  {/* Selected pill */}
+                  <div
+                    className={`absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-[oklch(0.45_0.10_45)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white transition-all duration-300 ${
+                      active ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+                    }`}
+                  >
+                    <CheckCircle2 className="h-3 w-3" /> Selected
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* PRICING / PACKS */}
-      <section className="mx-auto max-w-6xl px-5 py-12 md:py-16">
+      <section className="mx-auto max-w-6xl px-5 py-14 md:py-20">
         <div className="text-center">
-          <h2 className="font-serif text-2xl font-bold text-[oklch(0.25_0.03_50)] sm:text-3xl">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[oklch(0.96_0.02_60)] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[oklch(0.45_0.10_45)] ring-1 ring-[oklch(0.85_0.04_60)]">
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[oklch(0.45_0.10_45)] text-[9px] text-white">2</span>
+            Step 2 · Package
+          </span>
+          <h2 className="mt-3 font-serif text-2xl font-bold text-[oklch(0.25_0.03_50)] sm:text-3xl">
             Apnar Package Beche Niyen
           </h2>
           <p className="mt-2 text-sm text-[oklch(0.45_0.02_60)]">
             Beshi nile beshi savings · 1 porda = 2 pcs lage
           </p>
         </div>
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
+        <div className="mt-10 grid gap-4 md:grid-cols-3 md:items-stretch md:gap-5">
           {(Object.entries(PACKS) as [PackKey, (typeof PACKS)[PackKey]][]).map(([key, p]) => {
             const active = pack === key;
+            const isBest = key === "p6";
+            const isPopular = key === "p4";
+            const savings = p.old - p.price;
             return (
               <button
                 key={key}
+                type="button"
                 onClick={() => {
                   setPack(key);
                   fbTrack("AddToCart", {
@@ -563,42 +597,90 @@ function CurtainBuckleLanding() {
                     currency: META_CURRENCY,
                   });
                 }}
-                className={`relative overflow-hidden rounded-2xl border-2 bg-white p-5 text-left transition ${
+                className={`group relative flex flex-col overflow-hidden rounded-3xl bg-white text-left transition-all duration-300 active:scale-[0.99] ${
                   active
-                    ? "border-[oklch(0.45_0.10_45)] shadow-lg shadow-[oklch(0.45_0.10_45)]/20"
-                    : "border-[oklch(0.92_0.02_60)] hover:border-[oklch(0.80_0.04_60)]"
-                }`}
+                    ? "ring-[3px] ring-[oklch(0.45_0.10_45)] shadow-[0_20px_45px_-18px_oklch(0.45_0.10_45_/_0.5)] -translate-y-1"
+                    : "ring-1 ring-[oklch(0.90_0.02_60)] shadow-sm hover:-translate-y-0.5 hover:shadow-md"
+                } ${isBest ? "md:scale-[1.04]" : ""}`}
               >
+                {/* Top ribbon */}
                 {p.badge && (
-                  <span className="absolute right-3 top-3 rounded-full bg-[oklch(0.78_0.16_75)] px-2.5 py-1 text-[10px] font-extrabold uppercase text-white">
-                    {p.badge}
-                  </span>
+                  <div
+                    className={`flex items-center justify-center gap-1 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-white ${
+                      isBest
+                        ? "bg-gradient-to-r from-[oklch(0.55_0.15_45)] via-[oklch(0.65_0.16_55)] to-[oklch(0.55_0.15_45)]"
+                        : "bg-gradient-to-r from-[oklch(0.78_0.16_75)] to-[oklch(0.72_0.18_60)]"
+                    }`}
+                  >
+                    {isBest ? "⭐ Best Value · Maximum Saving" : "🔥 Most Popular"}
+                  </div>
                 )}
-                <div className="flex items-center gap-2 text-xs font-semibold text-[oklch(0.45_0.10_45)]">
-                  <Flower2 className="h-4 w-4" />
-                  {p.label}
-                </div>
-                <div className="mt-3 flex items-baseline gap-2">
-                  <span className="text-3xl font-extrabold text-[oklch(0.25_0.03_50)]">
-                    ৳{p.price}
-                  </span>
-                  <span className="text-sm text-[oklch(0.55_0.02_60)] line-through">৳{p.old}</span>
-                </div>
-                <p className="mt-1 text-xs text-[oklch(0.45_0.02_60)]">৳{p.perPc}</p>
-                <div
-                  className={`mt-4 flex items-center justify-center gap-1.5 rounded-full py-2 text-xs font-bold transition ${
-                    active
-                      ? "bg-[oklch(0.45_0.10_45)] text-white"
-                      : "bg-[oklch(0.95_0.02_60)] text-[oklch(0.35_0.05_50)]"
-                  }`}
-                >
-                  {active ? (
-                    <>
-                      <CheckCircle2 className="h-4 w-4" /> Selected
-                    </>
-                  ) : (
-                    "Beche niyen"
-                  )}
+                {!p.badge && <div className="h-[26px]" />}
+
+                <div className="flex flex-1 flex-col p-5">
+                  {/* Icon + label */}
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[oklch(0.96_0.03_65)] ring-1 ring-[oklch(0.88_0.04_60)]">
+                      <Flower2 className="h-5 w-5 text-[oklch(0.45_0.10_45)]" />
+                    </span>
+                    <div>
+                      <div className="font-serif text-base font-bold text-[oklch(0.25_0.03_50)]">
+                        {p.label}
+                      </div>
+                      <div className="text-[11px] text-[oklch(0.50_0.03_55)]">
+                        {p.qty} pcs · ৳{p.perPc}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Price block */}
+                  <div className="mt-4 flex items-end justify-between">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-sm font-semibold text-[oklch(0.45_0.10_45)]">৳</span>
+                      <span className="text-4xl font-extrabold leading-none text-[oklch(0.25_0.03_50)]">
+                        {p.price}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="text-xs text-[oklch(0.55_0.02_60)] line-through">
+                        ৳{p.old}
+                      </span>
+                      <span className="mt-0.5 rounded-full bg-[oklch(0.94_0.08_30)] px-2 py-0.5 text-[10px] font-bold text-[oklch(0.45_0.18_30)]">
+                        Save ৳{savings}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Mini benefits */}
+                  <ul className="mt-4 space-y-1.5 text-[11px] text-[oklch(0.40_0.03_55)]">
+                    {[
+                      isBest ? "Free delivery (whole BD)" : "Cash on Delivery",
+                      "7-day easy return",
+                      isPopular || isBest ? "Both colors available" : "Premium pearl finish",
+                    ].map((b) => (
+                      <li key={b} className="flex items-center gap-1.5">
+                        <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0 text-[oklch(0.60_0.12_150)]" />
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* CTA pill */}
+                  <div
+                    className={`mt-5 flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-bold transition-all ${
+                      active
+                        ? "bg-[oklch(0.45_0.10_45)] text-white shadow-md"
+                        : "bg-[oklch(0.96_0.02_60)] text-[oklch(0.35_0.05_50)] ring-1 ring-[oklch(0.88_0.04_60)] group-hover:bg-[oklch(0.93_0.04_65)]"
+                    }`}
+                  >
+                    {active ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4" /> Selected
+                      </>
+                    ) : (
+                      "Tap to choose"
+                    )}
+                  </div>
                 </div>
               </button>
             );
