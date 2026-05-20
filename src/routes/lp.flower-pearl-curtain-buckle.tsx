@@ -21,7 +21,6 @@ import {
   User as UserIcon,
   Truck,
   ShieldCheck,
-  Star,
   Sparkles,
   Wrench,
   Wind,
@@ -435,41 +434,13 @@ function CurtainBuckleLanding() {
               Flower Pearl <br className="hidden sm:block" />
               <span className="text-[oklch(0.45_0.10_45)]">Curtain Buckle</span>
             </h1>
-            <p className="mt-3 text-base text-[oklch(0.40_0.02_60)] sm:text-lg">
-              Pordar stylish tieback — braided rope tie, no drilling. Ghor ke instantly clean,
-              organized & beautiful banao.
-            </p>
-
-            <div className="mt-4 flex items-center justify-center gap-2 md:justify-start">
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Star
-                    key={i}
-                    className="h-4 w-4 fill-[oklch(0.78_0.16_75)] text-[oklch(0.78_0.16_75)]"
-                  />
-                ))}
-              </div>
-              <span className="text-sm font-semibold">4.9</span>
-              <span className="text-sm text-[oklch(0.50_0.02_60)]">(248 reviews)</span>
-            </div>
-
-            <div className="mt-5 flex items-baseline justify-center gap-3 md:justify-start">
-              <span className="text-4xl font-extrabold text-[oklch(0.45_0.10_45)] sm:text-5xl">
-                ৳549
-              </span>
-              <span className="text-xl text-[oklch(0.55_0.02_60)] line-through">৳750</span>
-              <span className="rounded-full bg-[oklch(0.92_0.08_70)] px-2.5 py-1 text-xs font-bold text-[oklch(0.40_0.10_45)]">
-                Save up to 30%
-              </span>
-            </div>
-
             <div className="mt-7 flex flex-col items-center gap-3 md:flex-row md:justify-start">
               <button
                 onClick={scrollToOrder}
                 className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[oklch(0.45_0.10_45)] px-8 text-base font-bold text-white shadow-lg shadow-[oklch(0.45_0.10_45)]/30 transition hover:bg-[oklch(0.40_0.10_45)] active:scale-[0.98] md:w-auto"
               >
                 <Gift className="h-5 w-5" />
-                এখনই অর্ডার করুন
+                অর্ডার করুন
               </button>
               <div className="flex items-center gap-1.5 text-xs text-[oklch(0.40_0.02_60)]">
                 <ShieldCheck className="h-4 w-4 text-[oklch(0.55_0.12_140)]" />
