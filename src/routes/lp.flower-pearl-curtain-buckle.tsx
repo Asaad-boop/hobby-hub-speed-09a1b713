@@ -280,7 +280,7 @@ function CurtainBuckleLanding() {
       const itemSubtotal = activePack.price;
       const orderTotal = itemSubtotal + shippingFee;
       const attribution = getOrderAttributionPayload();
-      const variantLabel = `${activePack.label} — ${color === "beige" ? "Beige" : "Brown"}`;
+      const variantLabel = `${activePack.label} — ${COMBO_LABEL[combo]}`;
 
       const baseOrder = {
         status: "new" as const,
