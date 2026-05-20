@@ -22,7 +22,6 @@ import {
   Truck,
   ShieldCheck,
   Sparkles,
-  Sparkles,
   Wrench,
   Wind,
   Recycle,
