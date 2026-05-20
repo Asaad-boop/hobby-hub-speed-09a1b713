@@ -891,8 +891,8 @@ function CurtainBuckleLanding() {
                   >
                     <option value="">Select korun…</option>
                     {BD_DISTRICTS.map((d) => (
-                      <option key={d} value={d}>
-                        {d}
+                      <option key={d.name} value={d.name}>
+                        {d.name}
                       </option>
                     ))}
                   </select>
