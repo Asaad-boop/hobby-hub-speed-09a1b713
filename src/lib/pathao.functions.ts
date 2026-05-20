@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { supabaseAdmin as _supabaseAdmin } from "@/integrations/supabase/client.server";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const supabaseAdmin: any = _supabaseAdmin;
 
 const PATHAO_BASE = "https://api-hermes.pathao.com";
 

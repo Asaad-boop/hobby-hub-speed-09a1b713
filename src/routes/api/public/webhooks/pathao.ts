@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { supabaseAdmin as _supabaseAdmin } from "@/integrations/supabase/client.server";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const supabaseAdmin: any = _supabaseAdmin;
 
 // Pathao webhook events — see https://merchant.pathao.com/courier/developer-api
 // Pathao sends POST with header `X-PATHAO-Signature-Key` containing the

@@ -47,6 +47,7 @@ import { generatePackingSlipsPDF } from "@/lib/pdf/packing-slips";
 import { InvoicePreviewDialog } from "@/components/admin/InvoicePreviewDialog";
 import { PathaoSendDialog } from "@/components/admin/PathaoSendDialog";
 import { pathaoSyncOrder } from "@/lib/pathao.functions";
+import { syncOrdersToSheet } from "@/lib/google-sheets.functions";
 
 export const Route = createFileRoute("/admin/order-list")({
   component: OrderListPage,
@@ -167,6 +168,18 @@ function OrderListPage() {
   const [invoiceOrderId, setInvoiceOrderId] = useState<string | null>(null);
   const [pathaoOrderIds, setPathaoOrderIds] = useState<string[] | null>(null);
   const syncPathaoFn = useServerFn(pathaoSyncOrder);
+  const syncSheetFn = useServerFn(syncOrdersToSheet);
+
+  async function handleSyncSheet() {
+    const t = toast.loading("Syncing orders to Google Sheet…");
+    try {
+      const res = await syncSheetFn({ data: {} });
+      if (res.ok) toast.success(`Synced ${res.appended} orders to Sheet`, { id: t });
+      else toast.error(res.error || "Sync failed", { id: t });
+    } catch (e: any) {
+      toast.error(e?.message || "Sync failed", { id: t });
+    }
+  }
 
   async function syncPathao(orderId: string) {
     const t = toast.loading("Syncing Pathao status…");
@@ -477,30 +490,41 @@ function OrderListPage() {
               />
             ))}
           </div>
-          <div className="relative w-full max-w-sm">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search order ID, phone, tracking, name…"
-              className="pl-9 pr-20 shadow-sm"
-            />
-            {search && (
-              <div className="absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-1">
-                <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground">
-                  {filtered.length}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setSearch("")}
-                  className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
-                  title="Clear search"
-                  aria-label="Clear search"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            )}
+          <div className="flex items-center gap-2 w-full max-w-md">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSyncSheet}
+              className="gap-1.5 shrink-0"
+              title="Re-sync all orders to Google Sheet"
+            >
+              <RefreshCw className="h-3.5 w-3.5" /> Sync Sheet
+            </Button>
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search order ID, phone, tracking, name…"
+                className="pl-9 pr-20 shadow-sm"
+              />
+              {search && (
+                <div className="absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-1">
+                  <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground">
+                    {filtered.length}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+                    title="Clear search"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

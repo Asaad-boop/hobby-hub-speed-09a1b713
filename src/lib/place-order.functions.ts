@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { appendOrderToSheet } from "./google-sheets.functions";
+
 
 type OrderItemInput = {
   product_id: string;
@@ -73,6 +75,11 @@ export const placeOrder = createServerFn({ method: "POST" })
           error: `Could not save your items: ${itemsErr.message}`,
         };
       }
+
+      // Fire-and-forget: append to Google Sheet (don't block order success)
+      appendOrderToSheet({ data: { orderId: order.id as string } }).catch((e) => {
+        console.error("[placeOrder] sheet append failed:", e);
+      });
 
       return { ok: true as const, orderId: order.id as string };
     } catch (e) {
