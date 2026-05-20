@@ -76,6 +76,11 @@ export const placeOrder = createServerFn({ method: "POST" })
         };
       }
 
+      // Fire-and-forget: append to Google Sheet (don't block order success)
+      appendOrderToSheet({ data: { orderId: order.id as string } }).catch((e) => {
+        console.error("[placeOrder] sheet append failed:", e);
+      });
+
       return { ok: true as const, orderId: order.id as string };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
