@@ -168,6 +168,18 @@ function OrderListPage() {
   const [invoiceOrderId, setInvoiceOrderId] = useState<string | null>(null);
   const [pathaoOrderIds, setPathaoOrderIds] = useState<string[] | null>(null);
   const syncPathaoFn = useServerFn(pathaoSyncOrder);
+  const syncSheetFn = useServerFn(syncOrdersToSheet);
+
+  async function handleSyncSheet() {
+    const t = toast.loading("Syncing orders to Google Sheet…");
+    try {
+      const res = await syncSheetFn({ data: {} });
+      if (res.ok) toast.success(`Synced ${res.appended} orders to Sheet`, { id: t });
+      else toast.error(res.error || "Sync failed", { id: t });
+    } catch (e: any) {
+      toast.error(e?.message || "Sync failed", { id: t });
+    }
+  }
 
   async function syncPathao(orderId: string) {
     const t = toast.loading("Syncing Pathao status…");
