@@ -299,6 +299,27 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: string | null
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: string | null
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: string | null
+        }
+        Relationships: []
+      }
       bd_areas: {
         Row: {
           created_at: string | null
@@ -555,6 +576,105 @@ export type Database = {
         }
         Relationships: []
       }
+      courier_credentials: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          notes: string | null
+          provider: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          provider: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          provider?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      courier_history_cache: {
+        Row: {
+          data: Json
+          fetched_at: string
+          phone: string
+        }
+        Insert: {
+          data: Json
+          fetched_at?: string
+          phone: string
+        }
+        Update: {
+          data?: Json
+          fetched_at?: string
+          phone?: string
+        }
+        Relationships: []
+      }
+      courier_shipments: {
+        Row: {
+          consignment_id: string | null
+          created_at: string
+          created_by: string | null
+          delivery_fee: number | null
+          id: string
+          merchant_order_id: string | null
+          order_id: string
+          provider: string
+          request_payload: Json
+          response_payload: Json
+          status: string | null
+          tracking_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          consignment_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivery_fee?: number | null
+          id?: string
+          merchant_order_id?: string | null
+          order_id: string
+          provider: string
+          request_payload?: Json
+          response_payload?: Json
+          status?: string | null
+          tracking_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          consignment_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivery_fee?: number | null
+          id?: string
+          merchant_order_id?: string | null
+          order_id?: string
+          provider?: string
+          request_payload?: Json
+          response_payload?: Json
+          status?: string | null
+          tracking_code?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       homepage_versions: {
         Row: {
           created_at: string
@@ -687,6 +807,30 @@ export type Database = {
           },
         ]
       }
+      order_locks: {
+        Row: {
+          acquired_at: string
+          last_heartbeat_at: string
+          order_id: string
+          user_id: string
+          user_name: string | null
+        }
+        Insert: {
+          acquired_at?: string
+          last_heartbeat_at?: string
+          order_id: string
+          user_id: string
+          user_name?: string | null
+        }
+        Update: {
+          acquired_at?: string
+          last_heartbeat_at?: string
+          order_id?: string
+          user_id?: string
+          user_name?: string | null
+        }
+        Relationships: []
+      }
       order_notes: {
         Row: {
           body: string
@@ -800,6 +944,7 @@ export type Database = {
           packaged_by: string | null
           partial_amount: number | null
           payment_method: string | null
+          payment_source: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           pipeline_log: Json
           priority: Database["public"]["Enums"]["order_priority"]
@@ -828,6 +973,7 @@ export type Database = {
           tags: string[] | null
           total: number
           tracking_number: string | null
+          transaction_id: string | null
           updated_at: string
           user_id: string | null
           verified_at: string | null
@@ -882,6 +1028,7 @@ export type Database = {
           packaged_by?: string | null
           partial_amount?: number | null
           payment_method?: string | null
+          payment_source?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           pipeline_log?: Json
           priority?: Database["public"]["Enums"]["order_priority"]
@@ -910,6 +1057,7 @@ export type Database = {
           tags?: string[] | null
           total?: number
           tracking_number?: string | null
+          transaction_id?: string | null
           updated_at?: string
           user_id?: string | null
           verified_at?: string | null
@@ -964,6 +1112,7 @@ export type Database = {
           packaged_by?: string | null
           partial_amount?: number | null
           payment_method?: string | null
+          payment_source?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           pipeline_log?: Json
           priority?: Database["public"]["Enums"]["order_priority"]
@@ -992,6 +1141,7 @@ export type Database = {
           tags?: string[] | null
           total?: number
           tracking_number?: string | null
+          transaction_id?: string | null
           updated_at?: string
           user_id?: string | null
           verified_at?: string | null
@@ -1062,95 +1212,6 @@ export type Database = {
           utm_source?: string | null
         }
         Relationships: []
-      }
-      pathao_auth_cache: {
-        Row: {
-          access_token: string
-          expires_at: string
-          id: number
-          refresh_token: string | null
-          token_type: string | null
-          updated_at: string
-        }
-        Insert: {
-          access_token: string
-          expires_at: string
-          id?: number
-          refresh_token?: string | null
-          token_type?: string | null
-          updated_at?: string
-        }
-        Update: {
-          access_token?: string
-          expires_at?: string
-          id?: number
-          refresh_token?: string | null
-          token_type?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      pathao_shipments: {
-        Row: {
-          cod_fee: number | null
-          consignment_id: string | null
-          created_at: string
-          delivery_fee: number | null
-          discount: number | null
-          id: string
-          invoice_id: string | null
-          last_synced_at: string | null
-          merchant_order_id: string
-          order_id: string
-          order_status: string | null
-          payload_sent: Json | null
-          promo_discount: number | null
-          response_raw: Json | null
-          updated_at: string
-        }
-        Insert: {
-          cod_fee?: number | null
-          consignment_id?: string | null
-          created_at?: string
-          delivery_fee?: number | null
-          discount?: number | null
-          id?: string
-          invoice_id?: string | null
-          last_synced_at?: string | null
-          merchant_order_id: string
-          order_id: string
-          order_status?: string | null
-          payload_sent?: Json | null
-          promo_discount?: number | null
-          response_raw?: Json | null
-          updated_at?: string
-        }
-        Update: {
-          cod_fee?: number | null
-          consignment_id?: string | null
-          created_at?: string
-          delivery_fee?: number | null
-          discount?: number | null
-          id?: string
-          invoice_id?: string | null
-          last_synced_at?: string | null
-          merchant_order_id?: string
-          order_id?: string
-          order_status?: string | null
-          payload_sent?: Json | null
-          promo_discount?: number | null
-          response_raw?: Json | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pathao_shipments_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: true
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       product_option_types: {
         Row: {
@@ -1687,6 +1748,17 @@ export type Database = {
       }
     }
     Functions: {
+      acquire_order_lock: {
+        Args: { _force?: boolean; _order_id: string }
+        Returns: {
+          o_acquired: boolean
+          o_acquired_at: string
+          o_last_heartbeat_at: string
+          o_order_id: string
+          o_user_id: string
+          o_user_name: string
+        }[]
+      }
       add_order_note: {
         Args: { _body: string; _is_internal?: boolean; _order_id: string }
         Returns: string
@@ -1725,6 +1797,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      heartbeat_order_lock: { Args: { _order_id: string }; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
       is_guest_order: { Args: { _order_id: string }; Returns: boolean }
       log_order_view: { Args: { p_order_id: string }; Returns: undefined }
@@ -1736,6 +1809,7 @@ export type Database = {
         Args: { _product_id: string }
         Returns: undefined
       }
+      release_order_lock: { Args: { _order_id: string }; Returns: undefined }
       release_stock: { Args: { _order_id: string }; Returns: undefined }
       reserve_stock: { Args: { _order_id: string }; Returns: undefined }
       transition_order_status: {
@@ -1764,6 +1838,21 @@ export type Database = {
         }
         Returns: string
       }
+      validate_coupon: {
+        Args: { _code: string }
+        Returns: {
+          applicable_categories: Json
+          applicable_products: Json
+          code: string
+          id: string
+          max_discount: number
+          min_order_amount: number
+          type: string
+          valid_from: string
+          valid_until: string
+          value: number
+        }[]
+      }
     }
     Enums: {
       app_role:
@@ -1774,6 +1863,8 @@ export type Database = {
         | "operations"
         | "packer"
         | "accountant"
+        | "marketing_manager"
+        | "warehouse_staff"
       call_status:
         | "not_called"
         | "attempting"
@@ -1964,6 +2055,8 @@ export const Constants = {
         "operations",
         "packer",
         "accountant",
+        "marketing_manager",
+        "warehouse_staff",
       ],
       call_status: [
         "not_called",
