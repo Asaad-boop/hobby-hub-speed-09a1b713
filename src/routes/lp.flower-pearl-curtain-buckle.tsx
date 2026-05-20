@@ -26,7 +26,7 @@ import {
   Wrench,
   Wind,
   Recycle,
-  Magnet,
+  Link2,
   CheckCircle2,
   Clock,
   Flame,
@@ -66,13 +66,13 @@ export const Route = createFileRoute("/lp/flower-pearl-curtain-buckle")({
       {
         name: "description",
         content:
-          "Flower Pearl Curtain Buckle — magnetic close, no drilling, soft fabric flower + pearl tassel. Beige & Brown. 3/4/6 Pcs Set. ৳549 theke shuru. COD all over BD.",
+          "Flower Pearl Curtain Buckle — braided rope tieback, no drilling, soft fabric flower + pearl tassel. Beige & Brown. 3/4/6 Pcs Set. ৳549 theke shuru. COD all over BD.",
       },
       { property: "og:title", content: "Flower Pearl Curtain Buckle — Pordar Stylish Tieback" },
       {
         property: "og:description",
         content:
-          "Magnetic tieback · No drilling · Soft fabric flower · Pearl tassel. Cash on Delivery sara Bangladesh.",
+          "Braided rope tieback · No drilling · Soft fabric flower · Pearl tassel. Cash on Delivery sara Bangladesh.",
       },
       { property: "og:image", content: "/curtain-buckle-cover.webp" },
     ],
@@ -92,9 +92,9 @@ export const Route = createFileRoute("/lp/flower-pearl-curtain-buckle")({
 
 const FEATURES = [
   {
-    icon: <Magnet className="h-5 w-5" />,
-    title: "Magnetic Close",
-    desc: "Ek tane snap — 1 second-e porda bandha",
+    icon: <Link2 className="h-5 w-5" />,
+    title: "Braided Rope Tie",
+    desc: "Hath diye easily wrap & knot — second-er kaaj",
   },
   {
     icon: <Wrench className="h-5 w-5" />,
@@ -129,7 +129,7 @@ const STEPS = [
     title: "Pordar pichone wrap korun",
     desc: "Braided rope ta pordar peche niye anun",
   },
-  { n: "2", title: "Magnet snap kore din", desc: "Du-pash er magnet ek tane close hoye jabe" },
+  { n: "2", title: "Rope diye knot din", desc: "Braided rope duto matha cross kore tie kore din" },
   { n: "3", title: "Flower + Pearl drop", desc: "Decorative flower samne, pearl tassel niche" },
 ];
 
@@ -138,7 +138,7 @@ const REVIEWS = [
     name: "Nusrat Jahan",
     location: "Dhanmondi, Dhaka",
     rating: 5,
-    text: "Ghorer pordar look puro change hoye geche! Magnet ta strong, kichu drilling lage nai. Friend ra ese poriche jiggesh kore.",
+    text: "Ghorer pordar look puro change hoye geche! Rope ta strong, kichu drilling lage nai. Friend ra ese poriche jiggesh kore.",
     date: "2 days ago",
   },
   {
@@ -159,8 +159,8 @@ const REVIEWS = [
 
 const FAQS = [
   {
-    q: "Magnet ta koto strong? Porda kheye jay?",
-    a: "Magnet quite strong — normal sheer ba cotton porda easily hold kore. Heavy velvet porda hole 2 ta buckle use korle better.",
+    q: "Rope ta koto strong? Porda hold kore?",
+    a: "Braided rope ta thick & sturdy — normal sheer, cotton ba medium-weight porda easily hold kore. Heavy velvet porda hole 2 ta buckle use korle better.",
   },
   {
     q: "Pordar size matter kore?",
@@ -399,7 +399,7 @@ function CurtainBuckleLanding() {
               <span className="text-[oklch(0.45_0.10_45)]">Curtain Buckle</span>
             </h1>
             <p className="mt-3 text-base text-[oklch(0.40_0.02_60)] sm:text-lg">
-              Pordar stylish tieback — magnetic close, no drilling. Ghor ke instantly clean,
+              Pordar stylish tieback — braided rope tie, no drilling. Ghor ke instantly clean,
               organized & beautiful banao.
             </p>
 
