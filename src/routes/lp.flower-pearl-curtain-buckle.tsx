@@ -394,7 +394,7 @@ function CurtainBuckleLanding() {
 
 
   return (
-    <div className="relative min-h-screen bg-[oklch(0.98_0.012_75)] pb-28 text-[oklch(0.22_0.02_60)] md:pb-0">
+    <div className="relative min-h-screen bg-[oklch(0.98_0.012_75)] text-[oklch(0.22_0.02_60)]">
       {/* TOP URGENCY BAR */}
       <div className="bg-[oklch(0.45_0.07_45)] text-white">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 py-2 text-[12px] font-semibold sm:text-sm">
