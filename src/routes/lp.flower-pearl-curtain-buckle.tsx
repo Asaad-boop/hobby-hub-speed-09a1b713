@@ -333,7 +333,7 @@ function CurtainBuckleLanding() {
         return;
       }
 
-      const orderItems: Array<Record<string, unknown>> = [
+      const orderItems = [
         {
           order_id: order.id,
           user_id: isGuest ? null : session!.user.id,
