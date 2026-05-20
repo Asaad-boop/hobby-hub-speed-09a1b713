@@ -41,6 +41,10 @@ import handImg from "@/assets/curtain-buckle-hand.webp";
 import brownImg from "@/assets/curtain-buckle-brown.webp";
 import beigeImg from "@/assets/curtain-buckle-beige.webp";
 import heroImg from "@/assets/curtain-buckle-hero.jpg";
+import clipsImg from "@/assets/magnetic-curtain-clips.jpg";
+
+const CLIP_PRICE = 50;
+const CLIP_NAME = "Magnetic Curtain Clips";
 
 const PRODUCT_SLUG = "flower-pearl-curtain-buckle";
 const SHIPPING_INSIDE = 70;
