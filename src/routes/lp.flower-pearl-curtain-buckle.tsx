@@ -198,7 +198,7 @@ function CurtainBuckleLanding() {
   const navigate = useNavigate();
 
   const [pack, setPack] = useState<PackKey>("p4");
-  const [color, setColor] = useState<Color>("beige");
+  const [combo, setCombo] = useState<ComboKey>(PACK_COMBOS["p4"][0]);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", district: "" });
