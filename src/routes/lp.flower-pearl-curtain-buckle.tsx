@@ -924,30 +924,6 @@ function CurtainBuckleLanding() {
         </div>
       </section>
 
-      {/* MOBILE STICKY CTA */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[oklch(0.90_0.02_60)] bg-white/95 px-4 py-3 shadow-2xl backdrop-blur md:hidden">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <div className="text-[10px] font-semibold uppercase tracking-wide text-[oklch(0.50_0.02_60)]">
-              {activePack.label}
-            </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-lg font-extrabold text-[oklch(0.45_0.10_45)]">
-                ৳{activePack.price}
-              </span>
-              <span className="text-xs text-[oklch(0.55_0.02_60)] line-through">
-                ৳{activePack.old}
-              </span>
-            </div>
-          </div>
-          <button
-            onClick={scrollToOrder}
-            className="inline-flex h-12 flex-1 max-w-[200px] items-center justify-center gap-1.5 rounded-full bg-[oklch(0.45_0.10_45)] text-sm font-bold text-white shadow-lg"
-          >
-            <Gift className="h-4 w-4" /> Order Now
-          </button>
-        </div>
-      </div>
 
     </div>
   );
