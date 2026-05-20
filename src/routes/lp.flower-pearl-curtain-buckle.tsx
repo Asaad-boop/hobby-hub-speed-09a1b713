@@ -40,6 +40,7 @@ import basketImg from "@/assets/curtain-buckle-basket.jpg";
 import handImg from "@/assets/curtain-buckle-hand.webp";
 import brownImg from "@/assets/curtain-buckle-brown.webp";
 import beigeImg from "@/assets/curtain-buckle-beige.webp";
+import heroImg from "@/assets/curtain-buckle-hero.jpg";
 
 const PRODUCT_SLUG = "flower-pearl-curtain-buckle";
 const SHIPPING_INSIDE = 70;
@@ -458,14 +459,11 @@ function CurtainBuckleLanding() {
             <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-[oklch(0.92_0.06_60)] to-[oklch(0.88_0.08_30)] blur-2xl opacity-60" />
             <div className="relative overflow-hidden rounded-3xl border border-white bg-white shadow-2xl shadow-[oklch(0.45_0.10_45)]/15">
               <img
-                src={beforeAfter}
-                alt="Curtain before and after using flower pearl buckle"
+                src={heroImg}
+                alt="Flower pearl curtain buckle holding sheer white curtain in elegant living room"
                 className="block aspect-square w-full object-cover"
                 loading="eager"
               />
-            </div>
-            <div className="absolute -bottom-3 -left-3 rotate-[-4deg] rounded-xl bg-white px-3 py-2 text-xs font-bold text-[oklch(0.25_0.03_50)] shadow-lg">
-              <span className="text-[oklch(0.45_0.10_45)]">10,000+</span> happy homes 🏠
             </div>
           </div>
         </div>
