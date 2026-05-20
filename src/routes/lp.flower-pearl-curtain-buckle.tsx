@@ -1125,8 +1125,6 @@ function CurtainBuckleLanding() {
         </div>
       </div>
 
-      {/* Unused img reference to avoid eslint warning for colorImage variable */}
-      <img src={colorImage} alt="" className="hidden" />
     </div>
   );
 }
