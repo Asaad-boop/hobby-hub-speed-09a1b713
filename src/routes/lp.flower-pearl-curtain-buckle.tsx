@@ -368,7 +368,7 @@ function CurtainBuckleLanding() {
     );
   }
 
-  const colorImage = color === "beige" ? beigeImg : brownImg;
+
 
   return (
     <div className="relative min-h-screen bg-[oklch(0.98_0.012_75)] pb-28 text-[oklch(0.22_0.02_60)] md:pb-0">
