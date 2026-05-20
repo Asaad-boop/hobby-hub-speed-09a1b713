@@ -21,7 +21,7 @@ import {
   User as UserIcon,
   Truck,
   ShieldCheck,
-  Star,
+  Sparkles,
   Sparkles,
   Wrench,
   Wind,
