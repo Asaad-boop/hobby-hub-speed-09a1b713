@@ -252,6 +252,60 @@ function CurtainBuckleLanding() {
     trackViewItem({ id: product.id, title: product.title, price: activePack.price });
   }, [product, activePack.price, pack]);
 
+  // Persist partial info as an abandoned cart so admins can see "Incomplete" orders.
+  useEffect(() => {
+    if (typeof window === "undefined" || !product) return;
+    const hasInfo = form.name.trim() || form.phone.trim() || form.address.trim();
+    if (!hasInfo) return;
+    const variantLabel = `${activePack.label} — ${COMBO_LABEL[combo]}`;
+    const cartItems: Array<Record<string, unknown>> = [
+      {
+        product_id: product.id,
+        name: `${product.title} — ${variantLabel}`,
+        image: product.image,
+        price: activePack.price / activePack.qty,
+        qty: activePack.qty,
+        variant_id: null,
+        variant_label: variantLabel,
+      },
+    ];
+    if (clipQty > 0) {
+      cartItems.push({
+        product_id: product.id,
+        name: CLIP_NAME,
+        image: clipsImg,
+        price: CLIP_PRICE,
+        qty: clipQty,
+        variant_id: null,
+        variant_label: "Add-on",
+      });
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const sid = getClientSessionId();
+        const { data, error } = await supabase.rpc("upsert_abandoned_cart", {
+          _id: abandonedId,
+          _session_id: sid,
+          _customer_name: form.name.trim() || null,
+          _customer_phone: form.phone.trim() || null,
+          _customer_email: null,
+          _shipping_address: form.address.trim() || null,
+          _shipping_city: form.district || null,
+          _shipping_district: form.district || null,
+          _shipping_thana: null,
+          _subtotal: subtotal,
+          _cart_items: cartItems,
+          _last_step: "lp/flower-pearl-curtain-buckle",
+        } as never);
+        if (!error && data && !abandonedId) setAbandonedId(data as string);
+      } catch {
+        /* best-effort */
+      }
+    }, 1200);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.name, form.phone, form.address, form.district, pack, combo, clipQty]);
+
   const scrollToOrder = () => {
     orderRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
