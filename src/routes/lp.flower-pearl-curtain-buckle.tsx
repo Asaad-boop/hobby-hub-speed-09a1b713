@@ -49,16 +49,16 @@ const PRODUCT_SLUG = "flower-pearl-curtain-buckle";
 const SHIPPING_INSIDE = 70;
 const SHIPPING_OUTSIDE = 130;
 
-type PackKey = "p3" | "p4" | "p6";
-type ComboKey = "2b1br" | "1b2br" | "2b2br" | "3b3br";
+type PackKey = "p2" | "p3" | "p4";
+type ComboKey = "1b1br" | "2b1br" | "1b2br" | "2b2br";
 
 const PACKS: Record<
   PackKey,
   { qty: number; price: number; old: number; label: string; perPc: string; badge?: string }
 > = {
-  p3: { qty: 3, price: 549, old: 750, label: "3 Pcs Set", perPc: "183 / pc" },
-  p4: { qty: 4, price: 699, old: 950, label: "4 Pcs Set", perPc: "175 / pc", badge: "Popular" },
-  p6: { qty: 6, price: 899, old: 1290, label: "6 Pcs Set", perPc: "150 / pc", badge: "Best Value" },
+  p2: { qty: 2, price: 349, old: 500, label: "2 Pcs Set", perPc: "175 / pc" },
+  p3: { qty: 3, price: 469, old: 650, label: "3 Pcs Set", perPc: "156 / pc", badge: "Best Deal" },
+  p4: { qty: 4, price: 599, old: 850, label: "4 Pcs Set", perPc: "150 / pc" },
 };
 
 const COMBO_LABEL: Record<ComboKey, string> = {
