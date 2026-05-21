@@ -162,7 +162,7 @@ const REVIEWS = [
     name: "Sumaiya Akter",
     location: "Chattogram",
     rating: 5,
-    text: "Baby room er jonne beige niyechilam — sotti onek cute lagche. 6 pcs set niye 3 ta room shaja korechi. Pearl drop ta khub elegant 💕",
+    text: "Baby room er jonne beige niyechilam — sotti onek cute lagche. 4 pcs set niye 2 ta room shaja korechi. Pearl drop ta khub elegant 💕",
     date: "1 week ago",
   },
   {
