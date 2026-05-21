@@ -377,23 +377,16 @@ function CurtainBuckleLanding() {
           }
         : { ...baseOrder, user_id: session!.user.id };
 
-      const { data: order, error: orderErr } = await supabase
-        .from("orders")
-        .insert(orderInsert)
-        .select("id")
-        .single();
-
-      if (orderErr || !order) {
-        console.error("Order insert failed:", orderErr);
-        toast.error(orderErr?.message ?? "Order place hocche na, abar try korun.");
-        setSubmitting(false);
-        return;
-      }
-
-      const orderItems = [
+      const orderItemsPayload: Array<{
+        product_id: string;
+        name: string;
+        image: string | null;
+        price: number;
+        quantity: number;
+        variant_id: string | null;
+        variant_label: string | null;
+      }> = [
         {
-          order_id: order.id,
-          user_id: isGuest ? null : session!.user.id,
           product_id: product.id,
           name: `${product.title} — ${variantLabel}`,
           image: product.image,
@@ -404,9 +397,7 @@ function CurtainBuckleLanding() {
         },
       ];
       if (clipQty > 0) {
-        orderItems.push({
-          order_id: order.id,
-          user_id: isGuest ? null : session!.user.id,
+        orderItemsPayload.push({
           product_id: product.id,
           name: CLIP_NAME,
           image: clipsImg,
@@ -416,18 +407,35 @@ function CurtainBuckleLanding() {
           variant_label: "Add-on",
         });
       }
-      const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
 
-      if (itemsErr) {
-        console.error("Order items insert failed:", itemsErr);
-        if (!isGuest) await supabase.from("orders").delete().eq("id", order.id);
-        toast.error(`Items save hoy ni: ${itemsErr.message}`);
+      const placeRes = await placeOrderFn({
+        data: { order: orderInsert, items: orderItemsPayload },
+      }).catch((e: unknown) => ({
+        ok: false as const,
+        error: e instanceof Error ? e.message : "Network error",
+      }));
+
+      if (!placeRes.ok) {
+        console.error("LP order place failed:", placeRes.error);
+        toast.error(
+          placeRes.error
+            ? `Order place hocche na: ${placeRes.error}`
+            : "Order place hocche na, abar try korun.",
+        );
         setSubmitting(false);
         return;
       }
 
+      // Mark abandoned cart as converted so it disappears from "Incomplete".
+      if (abandonedId) {
+        await supabase.rpc("mark_abandoned_cart_converted", {
+          _id: abandonedId,
+          _order_id: placeRes.orderId,
+        } as never);
+      }
+
       toast.success("Order place hoyeche! Confirm korte call korbo.");
-      navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
+      navigate({ to: "/order-success/$orderId", params: { orderId: placeRes.orderId } });
     } catch (err: any) {
       console.error("LP checkout exception:", err);
       toast.error(err?.message ?? "Kichu ekta vul hoyeche, abar try korun.");
