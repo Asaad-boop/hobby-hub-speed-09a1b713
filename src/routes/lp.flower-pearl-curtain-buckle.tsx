@@ -49,29 +49,29 @@ const PRODUCT_SLUG = "flower-pearl-curtain-buckle";
 const SHIPPING_INSIDE = 70;
 const SHIPPING_OUTSIDE = 130;
 
-type PackKey = "p3" | "p4" | "p6";
-type ComboKey = "2b1br" | "1b2br" | "2b2br" | "3b3br";
+type PackKey = "p2" | "p3" | "p4";
+type ComboKey = "1b1br" | "2b1br" | "1b2br" | "2b2br";
 
 const PACKS: Record<
   PackKey,
   { qty: number; price: number; old: number; label: string; perPc: string; badge?: string }
 > = {
-  p3: { qty: 3, price: 549, old: 750, label: "3 Pcs Set", perPc: "183 / pc" },
-  p4: { qty: 4, price: 699, old: 950, label: "4 Pcs Set", perPc: "175 / pc", badge: "Popular" },
-  p6: { qty: 6, price: 899, old: 1290, label: "6 Pcs Set", perPc: "150 / pc", badge: "Best Value" },
+  p2: { qty: 2, price: 349, old: 500, label: "2 Pcs Set", perPc: "175 / pc" },
+  p3: { qty: 3, price: 469, old: 650, label: "3 Pcs Set", perPc: "156 / pc", badge: "Best Deal" },
+  p4: { qty: 4, price: 599, old: 850, label: "4 Pcs Set", perPc: "150 / pc" },
 };
 
 const COMBO_LABEL: Record<ComboKey, string> = {
+  "1b1br": "1 Beige + 1 Brown",
   "2b1br": "2 Beige + 1 Brown",
   "1b2br": "1 Beige + 2 Brown",
   "2b2br": "2 Beige + 2 Brown",
-  "3b3br": "3 Beige + 3 Brown",
 };
 
 const PACK_COMBOS: Record<PackKey, ComboKey[]> = {
+  p2: ["1b1br"],
   p3: ["2b1br", "1b2br"],
   p4: ["2b2br"],
-  p6: ["3b3br"],
 };
 
 export const Route = createFileRoute("/lp/flower-pearl-curtain-buckle")({
@@ -83,7 +83,7 @@ export const Route = createFileRoute("/lp/flower-pearl-curtain-buckle")({
       {
         name: "description",
         content:
-          "Flower Pearl Curtain Buckle — braided rope tieback, no drilling, soft fabric flower + pearl tassel. Beige & Brown. 3/4/6 Pcs Set. ৳549 theke shuru. COD all over BD.",
+          "Flower Pearl Curtain Buckle — braided rope tieback, no drilling, soft fabric flower + pearl tassel. Beige & Brown. 2/3/4 Pcs Set. ৳349 theke shuru. COD all over BD.",
       },
       { property: "og:title", content: "Flower Pearl Curtain Buckle — Pordar Stylish Tieback" },
       {
@@ -162,7 +162,7 @@ const REVIEWS = [
     name: "Sumaiya Akter",
     location: "Chattogram",
     rating: 5,
-    text: "Baby room er jonne beige niyechilam — sotti onek cute lagche. 6 pcs set niye 3 ta room shaja korechi. Pearl drop ta khub elegant 💕",
+    text: "Baby room er jonne beige niyechilam — sotti onek cute lagche. 4 pcs set niye 2 ta room shaja korechi. Pearl drop ta khub elegant 💕",
     date: "1 week ago",
   },
   {
@@ -189,7 +189,7 @@ const FAQS = [
   },
   {
     q: "1 jora-e koto ta thake?",
-    a: "1 buckle = 1 pis (1 side er jonne). 1 ta porda er jonne 2 pis lage. 3 pcs set = 1.5 jora, 4 pcs = 2 jora, 6 pcs = 3 jora.",
+    a: "1 buckle = 1 pis (1 side er jonne). 1 ta porda er jonne 2 pis lage. 2 pcs set = 1 jora, 3 pcs = 1.5 jora, 4 pcs = 2 jora.",
   },
   {
     q: "Delivery koto din-e pabo?",
@@ -201,8 +201,8 @@ function CurtainBuckleLanding() {
   const { product } = Route.useLoaderData() as { product: Product | null };
   const navigate = useNavigate();
 
-  const [pack, setPack] = useState<PackKey>("p4");
-  const [combo, setCombo] = useState<ComboKey>(PACK_COMBOS["p4"][0]);
+  const [pack, setPack] = useState<PackKey>("p3");
+  const [combo, setCombo] = useState<ComboKey>(PACK_COMBOS["p3"][0]);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", district: "" });
