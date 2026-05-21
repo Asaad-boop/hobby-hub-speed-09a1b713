@@ -41,6 +41,9 @@ import brownImg from "@/assets/curtain-buckle-brown.webp";
 import beigeImg from "@/assets/curtain-buckle-beige.webp";
 import heroImg from "@/assets/curtain-buckle-hero.jpg";
 import clipsImg from "@/assets/magnetic-curtain-clips.jpg";
+import pack2Img from "@/assets/curtain-buckle-pack-2.jpg";
+import pack3Img from "@/assets/curtain-buckle-pack-3.jpg";
+import pack4Img from "@/assets/curtain-buckle-pack-4.jpg";
 
 const CLIP_PRICE = 50;
 const CLIP_NAME = "Magnetic Curtain Clips";
@@ -54,11 +57,11 @@ type ComboKey = "1b1br" | "2b1br" | "1b2br" | "2b2br";
 
 const PACKS: Record<
   PackKey,
-  { qty: number; price: number; old: number; label: string; perPc: string; badge?: string }
+  { qty: number; price: number; old: number; label: string; perPc: string; image: string; badge?: string }
 > = {
-  p2: { qty: 2, price: 349, old: 500, label: "2 Pcs Set", perPc: "175 / pc" },
-  p3: { qty: 3, price: 469, old: 650, label: "3 Pcs Set", perPc: "156 / pc", badge: "Best Deal" },
-  p4: { qty: 4, price: 599, old: 850, label: "4 Pcs Set", perPc: "150 / pc" },
+  p2: { qty: 2, price: 349, old: 500, label: "2 Pcs Set", perPc: "175 / pc", image: pack2Img },
+  p3: { qty: 3, price: 469, old: 650, label: "3 Pcs Set", perPc: "156 / pc", image: pack3Img, badge: "Best Deal" },
+  p4: { qty: 4, price: 599, old: 850, label: "4 Pcs Set", perPc: "150 / pc", image: pack4Img },
 };
 
 const COMBO_LABEL: Record<ComboKey, string> = {
@@ -569,14 +572,14 @@ function CurtainBuckleLanding() {
           </p>
         </div>
         <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
-          {[beforeAfter, beigeImg, brownImg, basketImg].map((img, i) => (
+          {[pack3Img, beigeImg, brownImg, beforeAfter, pack4Img, handImg, pack2Img, basketImg].map((img, i) => (
             <div
               key={i}
               className="aspect-square overflow-hidden rounded-2xl border border-[oklch(0.92_0.02_60)] bg-white shadow-sm"
             >
               <img
                 src={img}
-                alt={`Gallery image ${i + 1}`}
+                alt={`Flower pearl curtain buckle gallery ${i + 1}`}
                 className="h-full w-full object-cover transition duration-500 hover:scale-105"
                 loading="lazy"
               />
@@ -616,33 +619,68 @@ function CurtainBuckleLanding() {
               }}
               className="mt-6 space-y-5"
             >
-              {/* Pack selector mini */}
+              {/* Pack selector with images */}
               <div>
-                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[oklch(0.40_0.02_60)]">
-                  Package
-                </p>
+                <div className="mb-2 flex items-baseline justify-between">
+                  <p className="text-xs font-bold uppercase tracking-wide text-[oklch(0.40_0.02_60)]">
+                    Package Choose Korun
+                  </p>
+                  <span className="text-[10px] font-semibold text-[oklch(0.50_0.03_55)]">
+                    Save up to 30%
+                  </span>
+                </div>
                 <div className="grid grid-cols-3 gap-2">
                   {(Object.entries(PACKS) as [PackKey, (typeof PACKS)[PackKey]][]).map(
-                    ([key, p]) => (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => {
-                          setPack(key);
-                          setCombo(PACK_COMBOS[key][0]);
-                        }}
-                        className={`rounded-xl border-2 p-3 text-center text-xs font-semibold transition ${
-                          pack === key
-                            ? "border-[oklch(0.45_0.10_45)] bg-[oklch(0.97_0.03_60)] text-[oklch(0.30_0.05_50)]"
-                            : "border-[oklch(0.90_0.02_60)] bg-white text-[oklch(0.45_0.02_60)]"
-                        }`}
-                      >
-                        <div>{p.label}</div>
-                        <div className="mt-1 text-base font-extrabold text-[oklch(0.45_0.10_45)]">
-                          ৳{p.price}
-                        </div>
-                      </button>
-                    ),
+                    ([key, p]) => {
+                      const active = pack === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                            setPack(key);
+                            setCombo(PACK_COMBOS[key][0]);
+                          }}
+                          className={`relative overflow-hidden rounded-2xl border-2 bg-white text-center transition ${
+                            active
+                              ? "border-[oklch(0.45_0.10_45)] shadow-md ring-2 ring-[oklch(0.45_0.10_45)]/20"
+                              : "border-[oklch(0.90_0.02_60)]"
+                          }`}
+                        >
+                          {p.badge && (
+                            <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-[oklch(0.45_0.10_45)] px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white shadow">
+                              {p.badge}
+                            </span>
+                          )}
+                          {active && (
+                            <span className="absolute right-1.5 top-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-[oklch(0.45_0.10_45)] text-white shadow">
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                            </span>
+                          )}
+                          <div className="aspect-square overflow-hidden bg-[oklch(0.97_0.02_60)]">
+                            <img
+                              src={p.image}
+                              alt={p.label}
+                              width={400}
+                              height={400}
+                              loading="lazy"
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div className="px-1.5 py-2">
+                            <div className="text-[11px] font-bold text-[oklch(0.25_0.03_50)]">
+                              {p.label}
+                            </div>
+                            <div className="mt-0.5 text-sm font-extrabold leading-none text-[oklch(0.45_0.10_45)]">
+                              ৳{p.price}
+                            </div>
+                            <div className="mt-0.5 text-[9.5px] text-[oklch(0.50_0.03_55)] line-through">
+                              ৳{p.old}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    },
                   )}
                 </div>
               </div>
