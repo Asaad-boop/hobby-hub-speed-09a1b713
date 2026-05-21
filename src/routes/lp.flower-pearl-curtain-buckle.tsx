@@ -201,8 +201,8 @@ function CurtainBuckleLanding() {
   const { product } = Route.useLoaderData() as { product: Product | null };
   const navigate = useNavigate();
 
-  const [pack, setPack] = useState<PackKey>("p4");
-  const [combo, setCombo] = useState<ComboKey>(PACK_COMBOS["p4"][0]);
+  const [pack, setPack] = useState<PackKey>("p3");
+  const [combo, setCombo] = useState<ComboKey>(PACK_COMBOS["p3"][0]);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", district: "" });
