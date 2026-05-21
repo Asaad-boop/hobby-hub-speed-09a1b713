@@ -41,6 +41,9 @@ import brownImg from "@/assets/curtain-buckle-brown.webp";
 import beigeImg from "@/assets/curtain-buckle-beige.webp";
 import heroImg from "@/assets/curtain-buckle-hero.jpg";
 import clipsImg from "@/assets/magnetic-curtain-clips.jpg";
+import pack2Img from "@/assets/curtain-buckle-pack-2.jpg";
+import pack3Img from "@/assets/curtain-buckle-pack-3.jpg";
+import pack4Img from "@/assets/curtain-buckle-pack-4.jpg";
 
 const CLIP_PRICE = 50;
 const CLIP_NAME = "Magnetic Curtain Clips";
@@ -54,11 +57,11 @@ type ComboKey = "1b1br" | "2b1br" | "1b2br" | "2b2br";
 
 const PACKS: Record<
   PackKey,
-  { qty: number; price: number; old: number; label: string; perPc: string; badge?: string }
+  { qty: number; price: number; old: number; label: string; perPc: string; image: string; badge?: string }
 > = {
-  p2: { qty: 2, price: 349, old: 500, label: "2 Pcs Set", perPc: "175 / pc" },
-  p3: { qty: 3, price: 469, old: 650, label: "3 Pcs Set", perPc: "156 / pc", badge: "Best Deal" },
-  p4: { qty: 4, price: 599, old: 850, label: "4 Pcs Set", perPc: "150 / pc" },
+  p2: { qty: 2, price: 349, old: 500, label: "2 Pcs Set", perPc: "175 / pc", image: pack2Img },
+  p3: { qty: 3, price: 469, old: 650, label: "3 Pcs Set", perPc: "156 / pc", image: pack3Img, badge: "Best Deal" },
+  p4: { qty: 4, price: 599, old: 850, label: "4 Pcs Set", perPc: "150 / pc", image: pack4Img },
 };
 
 const COMBO_LABEL: Record<ComboKey, string> = {
