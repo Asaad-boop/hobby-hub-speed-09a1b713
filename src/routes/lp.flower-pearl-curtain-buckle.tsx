@@ -210,6 +210,8 @@ function CurtainBuckleLanding() {
   const [form, setForm] = useState({ name: "", phone: "", address: "", district: "" });
   const [clipQty, setClipQty] = useState(0);
   const orderRef = useRef<HTMLDivElement | null>(null);
+  const placeOrderFn = useServerFn(placeOrder);
+  const [abandonedId, setAbandonedId] = useState<string | null>(null);
 
   const activePack = PACKS[pack];
   const clipsTotal = clipQty * CLIP_PRICE;
