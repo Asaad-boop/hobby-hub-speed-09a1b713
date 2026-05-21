@@ -83,7 +83,7 @@ export const Route = createFileRoute("/lp/flower-pearl-curtain-buckle")({
       {
         name: "description",
         content:
-          "Flower Pearl Curtain Buckle — braided rope tieback, no drilling, soft fabric flower + pearl tassel. Beige & Brown. 3/4/6 Pcs Set. ৳549 theke shuru. COD all over BD.",
+          "Flower Pearl Curtain Buckle — braided rope tieback, no drilling, soft fabric flower + pearl tassel. Beige & Brown. 2/3/4 Pcs Set. ৳349 theke shuru. COD all over BD.",
       },
       { property: "og:title", content: "Flower Pearl Curtain Buckle — Pordar Stylish Tieback" },
       {
