@@ -1,12 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { supabase, getClientSessionId } from "@/integrations/supabase/client";
 import { fetchProductByIdOrSlug, type Product } from "@/lib/products";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { getOrderAttributionPayload } from "@/lib/session-tracking";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
 import { trackViewItem } from "@/lib/analytics-events";
 import { clarityTag } from "@/lib/clarity";
+import { placeOrder } from "@/lib/place-order.functions";
 import { toast } from "sonner";
 import {
   Accordion,
@@ -208,6 +210,8 @@ function CurtainBuckleLanding() {
   const [form, setForm] = useState({ name: "", phone: "", address: "", district: "" });
   const [clipQty, setClipQty] = useState(0);
   const orderRef = useRef<HTMLDivElement | null>(null);
+  const placeOrderFn = useServerFn(placeOrder);
+  const [abandonedId, setAbandonedId] = useState<string | null>(null);
 
   const activePack = PACKS[pack];
   const clipsTotal = clipQty * CLIP_PRICE;
@@ -247,6 +251,60 @@ function CurtainBuckleLanding() {
     clarityTag("lp_pack_selected", pack);
     trackViewItem({ id: product.id, title: product.title, price: activePack.price });
   }, [product, activePack.price, pack]);
+
+  // Persist partial info as an abandoned cart so admins can see "Incomplete" orders.
+  useEffect(() => {
+    if (typeof window === "undefined" || !product) return;
+    const hasInfo = form.name.trim() || form.phone.trim() || form.address.trim();
+    if (!hasInfo) return;
+    const variantLabel = `${activePack.label} — ${COMBO_LABEL[combo]}`;
+    const cartItems: Array<Record<string, unknown>> = [
+      {
+        product_id: product.id,
+        name: `${product.title} — ${variantLabel}`,
+        image: product.image,
+        price: activePack.price / activePack.qty,
+        qty: activePack.qty,
+        variant_id: null,
+        variant_label: variantLabel,
+      },
+    ];
+    if (clipQty > 0) {
+      cartItems.push({
+        product_id: product.id,
+        name: CLIP_NAME,
+        image: clipsImg,
+        price: CLIP_PRICE,
+        qty: clipQty,
+        variant_id: null,
+        variant_label: "Add-on",
+      });
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const sid = getClientSessionId();
+        const { data, error } = await supabase.rpc("upsert_abandoned_cart", {
+          _id: abandonedId,
+          _session_id: sid,
+          _customer_name: form.name.trim() || null,
+          _customer_phone: form.phone.trim() || null,
+          _customer_email: null,
+          _shipping_address: form.address.trim() || null,
+          _shipping_city: form.district || null,
+          _shipping_district: form.district || null,
+          _shipping_thana: null,
+          _subtotal: subtotal,
+          _cart_items: cartItems,
+          _last_step: "lp/flower-pearl-curtain-buckle",
+        } as never);
+        if (!error && data && !abandonedId) setAbandonedId(data as string);
+      } catch {
+        /* best-effort */
+      }
+    }, 1200);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.name, form.phone, form.address, form.district, pack, combo, clipQty]);
 
   const scrollToOrder = () => {
     orderRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -319,23 +377,16 @@ function CurtainBuckleLanding() {
           }
         : { ...baseOrder, user_id: session!.user.id };
 
-      const { data: order, error: orderErr } = await supabase
-        .from("orders")
-        .insert(orderInsert)
-        .select("id")
-        .single();
-
-      if (orderErr || !order) {
-        console.error("Order insert failed:", orderErr);
-        toast.error(orderErr?.message ?? "Order place hocche na, abar try korun.");
-        setSubmitting(false);
-        return;
-      }
-
-      const orderItems = [
+      const orderItemsPayload: Array<{
+        product_id: string;
+        name: string;
+        image: string | null;
+        price: number;
+        quantity: number;
+        variant_id: string | null;
+        variant_label: string | null;
+      }> = [
         {
-          order_id: order.id,
-          user_id: isGuest ? null : session!.user.id,
           product_id: product.id,
           name: `${product.title} — ${variantLabel}`,
           image: product.image,
@@ -346,9 +397,7 @@ function CurtainBuckleLanding() {
         },
       ];
       if (clipQty > 0) {
-        orderItems.push({
-          order_id: order.id,
-          user_id: isGuest ? null : session!.user.id,
+        orderItemsPayload.push({
           product_id: product.id,
           name: CLIP_NAME,
           image: clipsImg,
@@ -358,18 +407,35 @@ function CurtainBuckleLanding() {
           variant_label: "Add-on",
         });
       }
-      const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
 
-      if (itemsErr) {
-        console.error("Order items insert failed:", itemsErr);
-        if (!isGuest) await supabase.from("orders").delete().eq("id", order.id);
-        toast.error(`Items save hoy ni: ${itemsErr.message}`);
+      const placeRes = await placeOrderFn({
+        data: { order: orderInsert, items: orderItemsPayload },
+      }).catch((e: unknown) => ({
+        ok: false as const,
+        error: e instanceof Error ? e.message : "Network error",
+      }));
+
+      if (!placeRes.ok) {
+        console.error("LP order place failed:", placeRes.error);
+        toast.error(
+          placeRes.error
+            ? `Order place hocche na: ${placeRes.error}`
+            : "Order place hocche na, abar try korun.",
+        );
         setSubmitting(false);
         return;
       }
 
+      // Mark abandoned cart as converted so it disappears from "Incomplete".
+      if (abandonedId) {
+        await supabase.rpc("mark_abandoned_cart_converted", {
+          _id: abandonedId,
+          _order_id: placeRes.orderId,
+        } as never);
+      }
+
       toast.success("Order place hoyeche! Confirm korte call korbo.");
-      navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
+      navigate({ to: "/order-success/$orderId", params: { orderId: placeRes.orderId } });
     } catch (err: any) {
       console.error("LP checkout exception:", err);
       toast.error(err?.message ?? "Kichu ekta vul hoyeche, abar try korun.");
