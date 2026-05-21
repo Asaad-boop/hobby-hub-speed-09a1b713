@@ -189,7 +189,7 @@ const FAQS = [
   },
   {
     q: "1 jora-e koto ta thake?",
-    a: "1 buckle = 1 pis (1 side er jonne). 1 ta porda er jonne 2 pis lage. 3 pcs set = 1.5 jora, 4 pcs = 2 jora, 6 pcs = 3 jora.",
+    a: "1 buckle = 1 pis (1 side er jonne). 1 ta porda er jonne 2 pis lage. 2 pcs set = 1 jora, 3 pcs = 1.5 jora, 4 pcs = 2 jora.",
   },
   {
     q: "Delivery koto din-e pabo?",
