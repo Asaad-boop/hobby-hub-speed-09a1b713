@@ -62,16 +62,16 @@ const PACKS: Record<
 };
 
 const COMBO_LABEL: Record<ComboKey, string> = {
+  "1b1br": "1 Beige + 1 Brown",
   "2b1br": "2 Beige + 1 Brown",
   "1b2br": "1 Beige + 2 Brown",
   "2b2br": "2 Beige + 2 Brown",
-  "3b3br": "3 Beige + 3 Brown",
 };
 
 const PACK_COMBOS: Record<PackKey, ComboKey[]> = {
+  p2: ["1b1br"],
   p3: ["2b1br", "1b2br"],
   p4: ["2b2br"],
-  p6: ["3b3br"],
 };
 
 export const Route = createFileRoute("/lp/flower-pearl-curtain-buckle")({
