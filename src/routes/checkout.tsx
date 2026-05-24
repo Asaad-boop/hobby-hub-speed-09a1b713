@@ -754,6 +754,46 @@ function Checkout() {
               <p className="mt-1 text-[10px] text-muted-foreground">Have a code? Apply it above.</p>
             </div>
 
+            {showBump && bumpItem && (
+              <button
+                type="button"
+                onClick={() => setBump((v) => !v)}
+                className={`flex w-full items-center gap-2.5 rounded-xl border-2 border-dashed p-2.5 text-left transition ${
+                  bumpActive
+                    ? "border-primary bg-primary/5"
+                    : "border-amber-400 bg-amber-50 hover:border-amber-500 dark:bg-amber-950/20"
+                }`}
+              >
+                <div
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 ${
+                    bumpActive ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground bg-background"
+                  }`}
+                >
+                  {bumpActive && <CheckCircle2 className="h-4 w-4" />}
+                </div>
+                <img
+                  src={bumpItem.image}
+                  alt={bumpItem.title}
+                  className="h-12 w-12 shrink-0 rounded-md object-cover"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="mb-0.5 inline-flex items-center gap-1 rounded-full bg-amber-500 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+                    <Gift className="h-2.5 w-2.5" /> Special offer
+                  </div>
+                  <div className="line-clamp-2 text-[11px] font-bold leading-tight">
+                    Add {bumpItem.title}
+                  </div>
+                  <div className="mt-0.5 flex items-baseline gap-1.5">
+                    <span className="text-[13px] font-extrabold text-primary">৳{bumpPrice}</span>
+                    {bumpItem.oldPrice > bumpPrice && (
+                      <span className="text-[10px] text-muted-foreground line-through">৳{bumpItem.oldPrice}</span>
+                    )}
+                  </div>
+                </div>
+              </button>
+            )}
+
+
             <div className="mt-3 space-y-1 border-t border-border pt-3 text-xs">
               <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>৳{total}</span></div>
               {bumpActive && <div className="flex justify-between"><span className="text-muted-foreground">Bonus item</span><span>৳{bumpPrice}</span></div>}
