@@ -45,7 +45,7 @@ function Checkout() {
   const { data: allProducts = [] } = useProducts();
   const navigate = useNavigate();
   const placeOrderFn = useServerFn(placeOrder);
-  const [bump] = useState(false);
+  const [bump, setBump] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [payMethod, setPayMethod] = useState<"cod" | "bkash">("cod");
@@ -160,8 +160,12 @@ function Checkout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.name, form.phone, form.address, form.city, form.district, items, total]);
 
-  const bumpItem = allProducts[1] ?? allProducts[0];
-  const bumpPrice = 199;
+  const BUMP_SLUG = "compressed-travel-towel-disposable-face-towel";
+  const bumpItem = allProducts.find((p) => p.slug === BUMP_SLUG) ?? null;
+  const bumpPrice = bumpItem?.price ?? 199;
+  const bumpAlreadyInCart = bumpItem ? items.some((i) => i.product.id === bumpItem.id) : false;
+  const showBump = !!bumpItem && !bumpAlreadyInCart;
+  const bumpActive = showBump && bump;
   const defaultShippingFee = shipMethod === "inside" ? 60 : 130;
   const perItemFees = items.map((i) => {
     const override = shipMethod === "inside" ? i.product.shippingFeeInside : i.product.shippingFeeOutside;
