@@ -45,7 +45,7 @@ function Checkout() {
   const { data: allProducts = [] } = useProducts();
   const navigate = useNavigate();
   const placeOrderFn = useServerFn(placeOrder);
-  const [bump] = useState(false);
+  const [bump, setBump] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [payMethod, setPayMethod] = useState<"cod" | "bkash">("cod");
@@ -160,15 +160,19 @@ function Checkout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.name, form.phone, form.address, form.city, form.district, items, total]);
 
-  const bumpItem = allProducts[1] ?? allProducts[0];
-  const bumpPrice = 199;
+  const BUMP_SLUG = "compressed-travel-towel-disposable-face-towel";
+  const bumpItem = allProducts.find((p) => p.slug === BUMP_SLUG) ?? null;
+  const bumpPrice = bumpItem?.price ?? 199;
+  const bumpAlreadyInCart = bumpItem ? items.some((i) => i.product.id === bumpItem.id) : false;
+  const showBump = !!bumpItem && !bumpAlreadyInCart;
+  const bumpActive = showBump && bump;
   const defaultShippingFee = shipMethod === "inside" ? 60 : 130;
   const perItemFees = items.map((i) => {
     const override = shipMethod === "inside" ? i.product.shippingFeeInside : i.product.shippingFeeOutside;
     return typeof override === "number" && !Number.isNaN(override) ? override : defaultShippingFee;
   });
   const shippingFee = perItemFees.length ? Math.max(...perItemFees) : defaultShippingFee;
-  const subtotalWithBump = total + (bump ? bumpPrice : 0);
+  const subtotalWithBump = total + (bumpActive ? bumpPrice : 0);
   // Auto bundle discount: 2 of the same line = 10% off, 3+ of the same line = 15% off.
   // Computed per cart line so it shows up as a real "Discount" in billing & saves to the order.
   const bundleDiscount = items.reduce((sum, i) => {
@@ -245,7 +249,7 @@ function Checkout() {
       const { data: { session } } = await supabase.auth.getSession();
       const isGuest = !session;
 
-      const allItems = bump ? [...items, { product: bumpItem, qty: 1 }] : items;
+      const allItems = bumpActive && bumpItem ? [...items, { product: bumpItem, qty: 1, variantId: null, variantLabel: null }] : items;
       // Guard: every item must have a valid product id and price.
       const invalidItem = allItems.find(
         (i) => !i?.product?.id || typeof i.product.price !== "number" || i.qty < 1,
@@ -750,9 +754,49 @@ function Checkout() {
               <p className="mt-1 text-[10px] text-muted-foreground">Have a code? Apply it above.</p>
             </div>
 
+            {showBump && bumpItem && (
+              <button
+                type="button"
+                onClick={() => setBump((v) => !v)}
+                className={`flex w-full items-center gap-2.5 rounded-xl border-2 border-dashed p-2.5 text-left transition ${
+                  bumpActive
+                    ? "border-primary bg-primary/5"
+                    : "border-amber-400 bg-amber-50 hover:border-amber-500 dark:bg-amber-950/20"
+                }`}
+              >
+                <div
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 ${
+                    bumpActive ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground bg-background"
+                  }`}
+                >
+                  {bumpActive && <CheckCircle2 className="h-4 w-4" />}
+                </div>
+                <img
+                  src={bumpItem.image}
+                  alt={bumpItem.title}
+                  className="h-12 w-12 shrink-0 rounded-md object-cover"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="mb-0.5 inline-flex items-center gap-1 rounded-full bg-amber-500 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+                    <Gift className="h-2.5 w-2.5" /> Special offer
+                  </div>
+                  <div className="line-clamp-2 text-[11px] font-bold leading-tight">
+                    Add {bumpItem.title}
+                  </div>
+                  <div className="mt-0.5 flex items-baseline gap-1.5">
+                    <span className="text-[13px] font-extrabold text-primary">৳{bumpPrice}</span>
+                    {bumpItem.oldPrice > bumpPrice && (
+                      <span className="text-[10px] text-muted-foreground line-through">৳{bumpItem.oldPrice}</span>
+                    )}
+                  </div>
+                </div>
+              </button>
+            )}
+
+
             <div className="mt-3 space-y-1 border-t border-border pt-3 text-xs">
               <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>৳{total}</span></div>
-              {bump && <div className="flex justify-between"><span className="text-muted-foreground">Bonus item</span><span>৳{bumpPrice}</span></div>}
+              {bumpActive && <div className="flex justify-between"><span className="text-muted-foreground">Bonus item</span><span>৳{bumpPrice}</span></div>}
               <div className="flex justify-between"><span className="text-muted-foreground">Delivery</span><span>৳{shippingFee}</span></div>
               {bundleDiscount > 0 && (
                 <div className="flex justify-between text-primary"><span>Bundle discount</span><span>-৳{bundleDiscount}</span></div>
