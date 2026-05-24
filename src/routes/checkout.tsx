@@ -172,7 +172,7 @@ function Checkout() {
     return typeof override === "number" && !Number.isNaN(override) ? override : defaultShippingFee;
   });
   const shippingFee = perItemFees.length ? Math.max(...perItemFees) : defaultShippingFee;
-  const subtotalWithBump = total + (bump ? bumpPrice : 0);
+  const subtotalWithBump = total + (bumpActive ? bumpPrice : 0);
   // Auto bundle discount: 2 of the same line = 10% off, 3+ of the same line = 15% off.
   // Computed per cart line so it shows up as a real "Discount" in billing & saves to the order.
   const bundleDiscount = items.reduce((sum, i) => {
@@ -249,7 +249,7 @@ function Checkout() {
       const { data: { session } } = await supabase.auth.getSession();
       const isGuest = !session;
 
-      const allItems = bump ? [...items, { product: bumpItem, qty: 1 }] : items;
+      const allItems = bumpActive && bumpItem ? [...items, { product: bumpItem, qty: 1, variantId: null, variantLabel: null }] : items;
       // Guard: every item must have a valid product id and price.
       const invalidItem = allItems.find(
         (i) => !i?.product?.id || typeof i.product.price !== "number" || i.qty < 1,
@@ -756,7 +756,7 @@ function Checkout() {
 
             <div className="mt-3 space-y-1 border-t border-border pt-3 text-xs">
               <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>৳{total}</span></div>
-              {bump && <div className="flex justify-between"><span className="text-muted-foreground">Bonus item</span><span>৳{bumpPrice}</span></div>}
+              {bumpActive && <div className="flex justify-between"><span className="text-muted-foreground">Bonus item</span><span>৳{bumpPrice}</span></div>}
               <div className="flex justify-between"><span className="text-muted-foreground">Delivery</span><span>৳{shippingFee}</span></div>
               {bundleDiscount > 0 && (
                 <div className="flex justify-between text-primary"><span>Bundle discount</span><span>-৳{bundleDiscount}</span></div>
