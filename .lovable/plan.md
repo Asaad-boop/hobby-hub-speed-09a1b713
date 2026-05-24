@@ -1,49 +1,33 @@
-## Color & Package Selector — Premium Redesign
+# Checkout Order Bump — Compressed Travel Towel
 
-দুটো selector ke aro premium, conversion-friendly আর tactile feel দেব। শুধু এই দুই section ই touch করব, বাকি page unchanged।
+## Goal
+Checkout page e ekta "Add this to your order" bump checkbox dekhabe — **Compressed Travel Towel (10pcs) — ৳199**. User check korle eta cart subtotal e jog hobe and order e ekta extra line item hisebe save hobe.
 
-### 1. Color Selector (Color Showcase section)
+## Current State
+`src/routes/checkout.tsx` te ager scaffolding ache kintu kaaj korche na:
+- `const [bump] = useState(false)` — setter nei, toggle kora jay na
+- `bumpItem = allProducts[1]` — random product, specific na
+- `bumpPrice = 199` hardcoded
+- Submission e include hoy (`allItems = bump ? [...items, bumpItem]`)
+- Kintu UI te kono checkbox nei
 
-**Current:** Big 2-column image cards with small swatch + "Selected" badge — feels flat।
+## Changes
 
-**New design:**
-- Section heading এ ছোট "Step 1 of 2" pill (visual flow cue)
-- Side-by-side cards with:
-  - Bigger lifestyle image with subtle gradient overlay at bottom
-  - **Floating circular swatch** (overlapping image bottom-edge) — bigger, ring outline, glossy highlight
-  - Active state: thick warm-brown ring + soft glow shadow + tiny "✓" check inside the swatch
-  - Inactive: hover lifts card slightly, swatch ring stays subtle
-  - Color name typography larger + Bangla mini tagline (e.g. "Warm & Neutral" / "Rich & Bold")
-  - Animated "Selected" pill slides in from bottom when active
-- Mobile: 2 columns retained (already small viewport friendly), but card height adjusted so swatch never clips
+**File: `src/routes/checkout.tsx`**
 
-### 2. Package Selector (Pricing/Packs section)
+1. `useState` — `[bump, setBump]` korbo (setter expose)
+2. `bumpItem` — `allProducts` theke specifically slug `compressed-travel-towel-disposable-face-towel` find korbo (fallback null)
+3. `bumpPrice` — `bumpItem?.price ?? 199` (DB price respect korbe)
+4. Bump card render — only jodi `bumpItem` exist kore **and** already cart e na thake. Order summary er upore ba payment section er age, ekta highlighted card:
+   - Product image (small thumb)
+   - Title + "Only ৳199" + old price strikethrough
+   - "🎁 Special offer — Add to your order" label
+   - Checkbox / toggle button → `setBump(!bump)`
+   - Selected hole green border + checkmark
+5. Existing `{bump && ...}` summary line ta thakbe (already wired)
+6. Submission flow already correct — kichu change lagbe na
 
-**Current:** 3 equal cards, flat layout, badge top-right।
-
-**New design:**
-- Heading এ "Step 2 of 2" pill
-- 3 cards in grid; **middle/best card scaled up** (md:scale-105) with thicker accent border and a glossy gradient header strip ("⭐ Best Value")
-- Each card structured top→bottom:
-  1. Top ribbon (only on badged packs) — gradient bg, white text
-  2. Big pack icon (Flower2) in a soft circle background
-  3. Pack label (e.g. "4 Pcs Set")
-  4. **Price row redesign**: huge price + small "৳" + old price strikethrough on right with red "Save ৳X" pill below
-  5. Per-pc cost in muted small text
-  6. **Mini benefits list** (3 ticks): "Free gift wrap" / "COD Available" / "7-day return" — subtle
-  7. CTA pill at bottom — when active: filled brown with check + "Selected"; when inactive: outlined "Tap to choose"
-- Active card: thicker border, elevated shadow, subtle warm-tint background, scale-[1.02]
-- Smooth transition (200ms) between states
-- Mobile (390px): stack vertically, badged card still slightly emphasized via border + ribbon (no scale to avoid overflow)
-
-### Microinteractions
-
-- Both selectors: `transition-all duration-200`, active card gets soft glow shadow using existing warm-brown token
-- Tap feedback: brief scale-down on press (`active:scale-[0.98]`)
-- Keep all existing `fbTrack("AddToCart")` and state logic — purely visual upgrade
-
-### Files
-
-- `src/routes/lp.flower-pearl-curtain-buckle.tsx` — only the Color Showcase block (~lines 487–540) and Pricing/Packs block (~lines 542–610)
-
-কোনো backend, state, বা analytics logic change নেই — pure UI polish।
+## Out of Scope
+- DB te new product add (already exists)
+- Other pages e cross-sell
+- Bump analytics tracking (future)
