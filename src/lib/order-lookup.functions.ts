@@ -89,17 +89,17 @@ export const lookupOrder = createServerFn({ method: "POST" })
 
     const baseSelect = "*, order_items(id,name,image,price,quantity)";
 
-    // Lookup by full Order ID
+    // Lookup by full Order ID — UUID acts as unguessable token, safe for guests
     if (isOrderId) {
       let q = supabaseAdmin.from("orders").select(baseSelect).eq("id", query);
-      if (!isStaff) q = q.eq("user_id", userId);
+      if (userId && !isStaff) q = q.eq("user_id", userId);
       const { data: orders } = await q.limit(1);
       if (orders && orders.length > 0)
         return { ok: true as const, order: orders[0] };
       return { ok: false as const, error: "No order found with that Order ID" };
     }
 
-    // Lookup by phone — server-side filter, scoped to caller unless staff
+    // Lookup by phone — phone itself is the credential the guest has
     if (isPhone) {
       let q = supabaseAdmin
         .from("orders")
@@ -107,7 +107,7 @@ export const lookupOrder = createServerFn({ method: "POST" })
         .ilike("shipping_phone", `%${digits}`)
         .order("created_at", { ascending: false })
         .limit(1);
-      if (!isStaff) q = q.eq("user_id", userId);
+      if (userId && !isStaff) q = q.eq("user_id", userId);
       const { data: orders } = await q;
       if (orders && orders.length > 0)
         return { ok: true as const, order: orders[0] };
@@ -117,12 +117,17 @@ export const lookupOrder = createServerFn({ method: "POST" })
       };
     }
 
-    // Lookup by email — only staff can lookup arbitrary emails;
-    // regular users can only look up their own email implicitly via user_id.
+    // Lookup by email — requires sign-in (we can't verify ownership otherwise)
     if (isEmail) {
+      if (!userId) {
+        return {
+          ok: false as const,
+          code: "unauthorized" as const,
+          error: "Please sign in to track by email, or use your Order ID / phone number.",
+        };
+      }
       const email = query.toLowerCase();
       if (!isStaff) {
-        // Regular user: just return their own latest order
         const { data: orders } = await supabaseAdmin
           .from("orders")
           .select(baseSelect)
@@ -133,7 +138,6 @@ export const lookupOrder = createServerFn({ method: "POST" })
           return { ok: true as const, order: orders[0] };
         return { ok: false as const, error: "No order found for your account" };
       }
-      // Staff path: direct user lookup by email
       const { data: usersData } = await supabaseAdmin.auth.admin.listUsers({
         perPage: 1000,
       });
