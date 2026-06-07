@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { useCart } from "@/lib/cart";
+import { useCart, cartLineKey } from "@/lib/cart";
 import { useProducts } from "@/lib/products";
 import { supabase, getClientSessionId } from "@/integrations/supabase/client";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
@@ -672,8 +672,11 @@ function Checkout() {
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
             <h2 className="mb-3 text-sm font-bold">Order Summary ({items.length})</h2>
             <ul className="space-y-2.5">
-              {items.map(({ product, qty }) => (
-                <li key={product.id} className="flex gap-2.5">
+              {items.map((item) => {
+                const { product, qty, variantLabel } = item;
+                const key = cartLineKey(item);
+                return (
+                <li key={key} className="flex gap-2.5">
                   <div className="relative">
                     <img src={product.image} alt="" className="h-14 w-14 rounded-md object-cover" />
                     <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-foreground px-1 text-[9px] font-extrabold text-background">
@@ -682,10 +685,11 @@ function Checkout() {
                   </div>
                   <div className="flex-1 text-xs">
                     <p className="line-clamp-2 font-semibold leading-snug">{product.title}</p>
+                    {variantLabel && <p className="text-[10px] text-muted-foreground">{variantLabel}</p>}
                     <div className="mt-1 flex items-center gap-1">
                       <button
                         type="button"
-                        onClick={() => (qty > 1 ? setQty(product.id, qty - 1) : remove(product.id))}
+                        onClick={() => (qty > 1 ? setQty(key, qty - 1) : remove(key))}
                         className="inline-flex h-5 w-5 items-center justify-center rounded border border-border hover:bg-muted"
                         aria-label="Decrease"
                       >
@@ -694,7 +698,7 @@ function Checkout() {
                       <span className="w-5 text-center text-[11px] font-bold">{qty}</span>
                       <button
                         type="button"
-                        onClick={() => setQty(product.id, qty + 1)}
+                        onClick={() => setQty(key, qty + 1)}
                         className="inline-flex h-5 w-5 items-center justify-center rounded border border-border hover:bg-muted"
                         aria-label="Increase"
                       >
@@ -702,7 +706,7 @@ function Checkout() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => remove(product.id)}
+                        onClick={() => remove(key)}
                         className="ml-0.5 inline-flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:text-destructive"
                         aria-label="Remove"
                       >
@@ -712,7 +716,8 @@ function Checkout() {
                   </div>
                   <p className="text-xs font-bold">৳{product.price * qty}</p>
                 </li>
-              ))}
+                );
+              })}
             </ul>
 
             {/* Coupon */}
