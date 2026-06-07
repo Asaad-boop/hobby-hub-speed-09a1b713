@@ -108,15 +108,11 @@ function TrackOrderPage() {
       } catch {}
 
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        // Not logged in and no cached lookup → send to public tracker
-        navigate({ to: "/track" });
-        return;
-      }
       const res = await getOrderByFullId({ data: { orderId } }).catch(() => null);
       const o = res && res.ok ? (res.order as Order) : null;
-      // Only allow signed-in user to view their own order via this path.
-      if (o && (o as { user_id?: string }).user_id && session.user.id !== (o as { user_id?: string }).user_id) {
+      // If the order belongs to a registered user, only that user (or staff) may view via this path.
+      const ownerId = (o as { user_id?: string | null } | null)?.user_id ?? null;
+      if (o && ownerId && (!session || session.user.id !== ownerId)) {
         setOrder(null);
       } else {
         setOrder(o);
