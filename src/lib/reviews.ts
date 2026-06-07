@@ -93,10 +93,12 @@ export async function fetchEligibleOrderId(productId: string): Promise<string | 
 }
 
 export async function uploadReviewImages(files: File[]): Promise<string[]> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Please sign in to upload review images.");
   const urls: string[] = [];
   for (const file of files) {
     const ext = file.name.split(".").pop() || "jpg";
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
+    const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
     const { error } = await supabase.storage.from("review-images").upload(path, file, {
       cacheControl: "3600",
       upsert: false,
@@ -109,10 +111,12 @@ export async function uploadReviewImages(files: File[]): Promise<string[]> {
 }
 
 export async function uploadReviewVideos(files: File[]): Promise<string[]> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Please sign in to upload review videos.");
   const urls: string[] = [];
   for (const file of files) {
     const ext = file.name.split(".").pop() || "mp4";
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
+    const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
     const { error } = await supabase.storage.from("review-videos").upload(path, file, {
       cacheControl: "3600",
       upsert: false,
