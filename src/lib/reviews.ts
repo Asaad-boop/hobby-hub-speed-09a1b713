@@ -48,6 +48,7 @@ export async function fetchProductReviews(productId: string): Promise<ReviewWith
 
   return list.map((r) => ({
     ...r,
+    images: Array.isArray((r as any).images) ? (r as any).images.map((u: string) => cdnImage(u)) : (r as any).images,
     display_name: r.guest_name ?? (r.user_id ? nameMap.get(r.user_id) ?? null : null),
   }));
 }
