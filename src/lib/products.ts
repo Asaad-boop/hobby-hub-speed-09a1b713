@@ -60,8 +60,10 @@ const toProduct = (r: ProductRow): Product => {
   const benefits = Array.isArray(r.benefits)
     ? (r.benefits as unknown[]).filter((b): b is string => typeof b === "string")
     : [];
-  const image = r.image && r.image.trim() ? r.image : FALLBACK_IMAGE;
-  const mergedGallery = gallery.includes(image) ? gallery : [image, ...gallery];
+  const rawImage = r.image && r.image.trim() ? r.image : FALLBACK_IMAGE;
+  const image = cdnImage(rawImage);
+  const proxiedGallery = cdnImages(gallery);
+  const mergedGallery = proxiedGallery.includes(image) ? proxiedGallery : [image, ...proxiedGallery];
   return {
     id: r.id, // canonical: use UUID
     slug: r.slug,
