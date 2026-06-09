@@ -926,7 +926,7 @@ function BrandLogosSection({ section }: { section: HomepageSection }) {
         {items.map((it, i) => {
           const img = (
             <img
-              src={it.image_url}
+              src={cdnImage(it.image_url)}
               alt={it.alt || `Brand ${i + 1}`}
               loading="lazy"
               className={`h-8 w-auto object-contain opacity-70 transition hover:opacity-100 md:h-10 ${grayscale ? "grayscale hover:grayscale-0" : ""}`}
