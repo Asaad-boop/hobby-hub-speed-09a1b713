@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { cdnImage } from "@/lib/cdn-image";
 
 export type ReviewRow = {
   id: string;
