@@ -1,3 +1,4 @@
+import { cdnImage } from "@/lib/cdn-image";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";
@@ -315,7 +316,7 @@ function BannerSection({ section }: { section: HomepageSection }) {
   if (!url) return null;
   const inner = (
     <div className="overflow-hidden rounded-2xl shadow-[var(--shadow-card)]">
-      <img src={url} alt="Promotional banner" className="h-auto w-full object-cover" loading="lazy" />
+      <img src={cdnImage(url)} alt="Promotional banner" className="h-auto w-full object-cover" loading="lazy" />
     </div>
   );
   return (
@@ -498,7 +499,7 @@ function ImageWithTextSection({ section }: { section: HomepageSection }) {
       <div className={`grid items-center gap-6 md:gap-10 md:grid-cols-2 ${position === "right" ? "md:[&>*:first-child]:order-2" : ""}`}>
         <div className="overflow-hidden rounded-2xl bg-muted shadow-[var(--shadow-card)]">
           {image ? (
-            <img src={image} alt={heading || "Feature"} loading="lazy" className="h-full w-full object-cover" />
+            <img src={cdnImage(image)} alt={heading || "Feature"} loading="lazy" className="h-full w-full object-cover" />
           ) : (
             <div className="aspect-[4/3] w-full" />
           )}
@@ -530,7 +531,7 @@ function CategoryGridSection({ section }: { section: HomepageSection }) {
           <a key={i} href={it.link || "#"} className="group relative block overflow-hidden rounded-2xl">
             <div className="aspect-[4/5] w-full bg-muted">
               {it.image_url && (
-                <img src={it.image_url} alt={it.label} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
+                <img src={cdnImage(it.image_url)} alt={it.label} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
               )}
             </div>
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
