@@ -79,6 +79,35 @@ function asUuid(v: string | null | undefined): string | null {
   return v && UUID_RE.test(v) ? v : null;
 }
 
+type Gtag = (...args: unknown[]) => void;
+function gtag(): Gtag | null {
+  if (typeof window === "undefined") return null;
+  const fn = (window as unknown as { gtag?: Gtag }).gtag;
+  return typeof fn === "function" ? fn : null;
+}
+
+function gaItems(items: AnalyticsItem[] | undefined) {
+  return (items ?? []).map((i) => ({
+    item_id: i.item_id,
+    item_name: i.item_name ?? undefined,
+    price: i.price ?? undefined,
+    quantity: i.quantity ?? undefined,
+    item_variant: i.variant ?? undefined,
+    item_category: i.category ?? undefined,
+  }));
+}
+
+/** Send a GA4 event via gtag if available. No-op otherwise. */
+export function gaEvent(name: string, params: Record<string, unknown>) {
+  const g = gtag();
+  if (!g) return;
+  try {
+    g("event", name, params);
+  } catch {
+    // never break UX on analytics failure
+  }
+}
+
 /**
  * Fire-and-forget. Failures are swallowed so analytics never breaks the UX.
  * Safe to call on the server (it short-circuits when sessionStorage is absent).
@@ -176,22 +205,25 @@ export function trackAddToCart(p: {
   quantity: number;
   variant?: string | null;
 }) {
+  const items: AnalyticsItem[] = [
+    {
+      item_id: p.id,
+      item_name: p.title ?? null,
+      price: p.price ?? null,
+      quantity: p.quantity,
+      variant: p.variant ?? null,
+    },
+  ];
+  const value = (p.price ?? 0) * p.quantity;
   trackEvent({
     event: "add_to_cart",
     product_id: p.id,
     product_name: p.title ?? null,
     quantity: p.quantity,
-    value: (p.price ?? 0) * p.quantity,
-    items: [
-      {
-        item_id: p.id,
-        item_name: p.title ?? null,
-        price: p.price ?? null,
-        quantity: p.quantity,
-        variant: p.variant ?? null,
-      },
-    ],
+    value,
+    items,
   });
+  gaEvent("add_to_cart", { currency: "BDT", value, items: gaItems(items) });
 }
 
 export function trackBeginCheckout(opts: {
@@ -203,6 +235,11 @@ export function trackBeginCheckout(opts: {
     page_type: "checkout",
     value: opts.value,
     items: opts.items,
+  });
+  gaEvent("begin_checkout", {
+    currency: "BDT",
+    value: opts.value,
+    items: gaItems(opts.items),
   });
 }
 
@@ -240,4 +277,14 @@ export function trackPurchase(opts: {
       transaction_id: opts.order_id,
     },
   });
+  gaEvent("purchase", {
+    transaction_id: opts.order_id,
+    currency: "BDT",
+    value: opts.value,
+    shipping: opts.shipping ?? 0,
+    tax: opts.tax ?? 0,
+    coupon: opts.coupon ?? undefined,
+    items: gaItems(opts.items),
+  });
 }
+
