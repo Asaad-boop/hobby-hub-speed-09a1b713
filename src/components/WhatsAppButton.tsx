@@ -36,6 +36,24 @@ export default function WhatsAppButton() {
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
+  /** Force-open external chat links in the real top-level window. Inside the
+   *  Lovable preview iframe, plain target="_blank" anchors are sometimes
+   *  blocked (api.whatsapp.com refuses to render inside an iframe). Calling
+   *  window.open with _blank explicitly, and falling back to top-level
+   *  navigation, sidesteps that. */
+  const openExternal = (url: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    setOpen(false);
+    const w = window.open(url, "_blank", "noopener,noreferrer");
+    if (!w) {
+      try {
+        (window.top ?? window).location.href = url;
+      } catch {
+        window.location.href = url;
+      }
+    }
+  };
+
 
   return (
     <div
