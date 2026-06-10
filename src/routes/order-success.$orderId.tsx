@@ -33,7 +33,9 @@ type Order = {
   shipping_address: string | null;
   shipping_city: string | null;
   shipping_district: string | null;
-  order_items: { id: string; name: string; image: string | null; price: number; quantity: number }[];
+  discount_amount?: number | null;
+  coupon_code?: string | null;
+  order_items: { id: string; product_id: string | null; name: string; image: string | null; price: number; quantity: number; variant_label: string | null }[];
 };
 
 // Module-level guard prevents double-fire from React StrictMode / fast remounts
