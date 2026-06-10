@@ -25,7 +25,7 @@ export const getOrderByFullId = createServerFn({ method: "POST" })
     }
     const { data: order } = await supabaseAdmin
       .from("orders")
-      .select("*, order_items(id,name,image,price,quantity)")
+      .select("*, order_items(id,product_id,name,image,price,quantity,variant_label)")
       .eq("id", data.orderId)
       .maybeSingle();
     if (!order) return { ok: false as const, error: "Order not found" };
