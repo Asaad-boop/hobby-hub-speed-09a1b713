@@ -33,7 +33,9 @@ type Order = {
   shipping_address: string | null;
   shipping_city: string | null;
   shipping_district: string | null;
-  order_items: { id: string; name: string; image: string | null; price: number; quantity: number }[];
+  discount_amount?: number | null;
+  coupon_code?: string | null;
+  order_items: { id: string; product_id: string | null; name: string; image: string | null; price: number; quantity: number; variant_label: string | null }[];
 };
 
 // Module-level guard prevents double-fire from React StrictMode / fast remounts
@@ -80,11 +82,14 @@ function OrderSuccessPage() {
         trackPurchase({
           order_id: o.id,
           value: Number(o.total),
+          shipping: Number(o.shipping_fee ?? 0),
+          coupon: o.coupon_code ?? null,
           items: o.order_items.map((it) => ({
-            item_id: it.id,
+            item_id: it.product_id ?? it.id,
             item_name: it.name,
             price: Number(it.price),
             quantity: it.quantity,
+            variant: it.variant_label ?? null,
           })),
         });
       }
