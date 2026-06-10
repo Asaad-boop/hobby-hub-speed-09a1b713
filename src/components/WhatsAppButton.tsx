@@ -109,7 +109,7 @@ export default function WhatsAppButton() {
           rel="noopener noreferrer"
           aria-label="Visit our Facebook page"
           className="rounded-full bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm ring-1 ring-border hover:text-foreground"
-          onClick={() => setOpen(false)}
+          onClick={openExternal(FACEBOOK_PAGE_URL)}
         >
           Visit FB Page →
         </a>
