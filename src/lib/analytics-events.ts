@@ -205,22 +205,25 @@ export function trackAddToCart(p: {
   quantity: number;
   variant?: string | null;
 }) {
+  const items: AnalyticsItem[] = [
+    {
+      item_id: p.id,
+      item_name: p.title ?? null,
+      price: p.price ?? null,
+      quantity: p.quantity,
+      variant: p.variant ?? null,
+    },
+  ];
+  const value = (p.price ?? 0) * p.quantity;
   trackEvent({
     event: "add_to_cart",
     product_id: p.id,
     product_name: p.title ?? null,
     quantity: p.quantity,
-    value: (p.price ?? 0) * p.quantity,
-    items: [
-      {
-        item_id: p.id,
-        item_name: p.title ?? null,
-        price: p.price ?? null,
-        quantity: p.quantity,
-        variant: p.variant ?? null,
-      },
-    ],
+    value,
+    items,
   });
+  gaEvent("add_to_cart", { currency: "BDT", value, items: gaItems(items) });
 }
 
 export function trackBeginCheckout(opts: {
@@ -232,6 +235,11 @@ export function trackBeginCheckout(opts: {
     page_type: "checkout",
     value: opts.value,
     items: opts.items,
+  });
+  gaEvent("begin_checkout", {
+    currency: "BDT",
+    value: opts.value,
+    items: gaItems(opts.items),
   });
 }
 
@@ -269,4 +277,14 @@ export function trackPurchase(opts: {
       transaction_id: opts.order_id,
     },
   });
+  gaEvent("purchase", {
+    transaction_id: opts.order_id,
+    currency: "BDT",
+    value: opts.value,
+    shipping: opts.shipping ?? 0,
+    tax: opts.tax ?? 0,
+    coupon: opts.coupon ?? undefined,
+    items: gaItems(opts.items),
+  });
 }
+
