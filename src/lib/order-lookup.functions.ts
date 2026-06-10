@@ -87,7 +87,7 @@ export const lookupOrder = createServerFn({ method: "POST" })
     // Order ID lookups must use full UUID (36 chars) — prefix enumeration removed.
     const isOrderId = !isEmail && !isPhone && query.length === 36;
 
-    const baseSelect = "*, order_items(id,name,image,price,quantity)";
+    const baseSelect = "*, order_items(id,product_id,name,image,price,quantity,variant_label)";
 
     // Lookup by full Order ID — UUID acts as unguessable token, safe for guests
     if (isOrderId) {
