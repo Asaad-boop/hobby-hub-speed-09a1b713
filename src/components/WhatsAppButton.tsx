@@ -92,7 +92,7 @@ export default function WhatsAppButton() {
           rel="noopener noreferrer"
           aria-label="Chat with us on WhatsApp"
           className="group flex items-center gap-2"
-          onClick={() => setOpen(false)}
+          onClick={openExternal(whatsappHref)}
         >
           <span className="rounded-full bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-md ring-1 ring-border">
             WhatsApp
