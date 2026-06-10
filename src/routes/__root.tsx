@@ -66,6 +66,15 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         children: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${META_PIXEL_ID}');fbq('track','PageView');`,
       },
       {
+        // Google Analytics 4 (GA4) — gtag.js loader.
+        src: "https://www.googletagmanager.com/gtag/js?id=G-Q17CKC2FG1",
+        async: true,
+      },
+      {
+        // GA4 init + initial page_view.
+        children: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('js',new Date());gtag('config','G-Q17CKC2FG1',{send_page_view:true});`,
+      },
+      {
         // Microsoft Clarity — session recordings & heatmaps. Tiny defer so
         // it never blocks LCP, but small enough that short visits are still
         // captured. Clarity itself is async after this point.
@@ -149,6 +158,14 @@ function RootComponent() {
     }
     fbTrack("PageView");
     clarityEvent("spa_navigation");
+    // GA4 SPA page_view
+    if (typeof window !== "undefined" && typeof (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag === "function") {
+      (window as unknown as { gtag: (...args: unknown[]) => void }).gtag("event", "page_view", {
+        page_path: pathname,
+        page_location: window.location.href,
+        page_title: document.title,
+      });
+    }
   }, [pathname]);
 
   return (
