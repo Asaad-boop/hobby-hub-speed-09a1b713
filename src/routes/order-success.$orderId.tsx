@@ -82,11 +82,14 @@ function OrderSuccessPage() {
         trackPurchase({
           order_id: o.id,
           value: Number(o.total),
+          shipping: Number(o.shipping_fee ?? 0),
+          coupon: o.coupon_code ?? null,
           items: o.order_items.map((it) => ({
-            item_id: it.id,
+            item_id: it.product_id ?? it.id,
             item_name: it.name,
             price: Number(it.price),
             quantity: it.quantity,
+            variant: it.variant_label ?? null,
           })),
         });
       }
