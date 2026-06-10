@@ -158,6 +158,14 @@ function RootComponent() {
     }
     fbTrack("PageView");
     clarityEvent("spa_navigation");
+    // GA4 SPA page_view
+    if (typeof window !== "undefined" && typeof (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag === "function") {
+      (window as unknown as { gtag: (...args: unknown[]) => void }).gtag("event", "page_view", {
+        page_path: pathname,
+        page_location: window.location.href,
+        page_title: document.title,
+      });
+    }
   }, [pathname]);
 
   return (
