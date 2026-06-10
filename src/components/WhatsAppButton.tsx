@@ -36,6 +36,24 @@ export default function WhatsAppButton() {
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
+  /** Force-open external chat links in the real top-level window. Inside the
+   *  Lovable preview iframe, plain target="_blank" anchors are sometimes
+   *  blocked (api.whatsapp.com refuses to render inside an iframe). Calling
+   *  window.open with _blank explicitly, and falling back to top-level
+   *  navigation, sidesteps that. */
+  const openExternal = (url: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    setOpen(false);
+    const w = window.open(url, "_blank", "noopener,noreferrer");
+    if (!w) {
+      try {
+        (window.top ?? window).location.href = url;
+      } catch {
+        window.location.href = url;
+      }
+    }
+  };
+
 
   return (
     <div
@@ -57,7 +75,7 @@ export default function WhatsAppButton() {
           rel="noopener noreferrer"
           aria-label="Message us on Facebook"
           className="group flex items-center gap-2"
-          onClick={() => setOpen(false)}
+          onClick={openExternal(MESSENGER_URL)}
         >
           <span className="rounded-full bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-md ring-1 ring-border">
             Facebook Page
@@ -74,7 +92,7 @@ export default function WhatsAppButton() {
           rel="noopener noreferrer"
           aria-label="Chat with us on WhatsApp"
           className="group flex items-center gap-2"
-          onClick={() => setOpen(false)}
+          onClick={openExternal(whatsappHref)}
         >
           <span className="rounded-full bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-md ring-1 ring-border">
             WhatsApp
@@ -91,7 +109,7 @@ export default function WhatsAppButton() {
           rel="noopener noreferrer"
           aria-label="Visit our Facebook page"
           className="rounded-full bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm ring-1 ring-border hover:text-foreground"
-          onClick={() => setOpen(false)}
+          onClick={openExternal(FACEBOOK_PAGE_URL)}
         >
           Visit FB Page →
         </a>
