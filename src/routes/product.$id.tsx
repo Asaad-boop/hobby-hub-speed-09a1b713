@@ -18,6 +18,7 @@ import {
   buildVariantLabel,
   variantPrice,
 } from "@/lib/variants";
+import { cdnImage, handleImgError } from "@/lib/cdn-image";
 import {
   Star,
   Truck,
@@ -393,10 +394,13 @@ function ProductPage() {
                         {imgs.map((src: string, i: number) => (
                           <img
                             key={i}
-                            src={src}
+                            src={cdnImage(src, 1024)}
                             alt={product.title}
+                            loading={i === 0 ? "eager" : "lazy"}
+                            decoding="async"
                             width={1024}
                             height={1024}
+                            onError={handleImgError}
                             className="aspect-square h-full w-full shrink-0 object-cover"
                             draggable={false}
                           />
@@ -448,7 +452,7 @@ function ProductPage() {
                   activeImg === src ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"
                 }`}
               >
-                <img src={src} alt="" className="aspect-square w-full object-cover" />
+                <img src={cdnImage(src, 200)} alt="" loading="lazy" decoding="async" onError={handleImgError} className="aspect-square w-full object-cover" />
               </button>
             ))}
           </div>

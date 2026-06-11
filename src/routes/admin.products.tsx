@@ -347,6 +347,9 @@ function ProductEditor({ product, categories, onClose, onSaved }: {
 
             {tab === "media" && (
               <>
+                <div className="mb-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-[12px] text-amber-900">
+                  <strong>Recommended:</strong> Paste an external image URL (Cloudinary, Cloudflare R2, ImgBB, imgur, etc.) instead of uploading to Supabase. This avoids Supabase Storage egress limits. Uploaded images are still cached on a free image CDN, but external hosts are preferred for new products.
+                </div>
                 <Section title="Main image" icon={ImageIcon} description="The primary image shown on listings and the product page">
                   <div className="flex flex-col items-start gap-4 sm:flex-row">
                     <div className="relative h-40 w-40 shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-gray-100">

@@ -12,6 +12,7 @@ import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
 import { clarityEvent, clarityTag, clarityUpgrade } from "@/lib/clarity";
 import { trackBeginCheckout } from "@/lib/analytics-events";
 import { toast } from "sonner";
+import { cdnImage, handleImgError } from "@/lib/cdn-image";
 import {
   Truck,
   ShieldCheck,
@@ -678,7 +679,7 @@ function Checkout() {
                 return (
                 <li key={key} className="flex gap-2.5">
                   <div className="relative">
-                    <img src={product.image} alt="" className="h-14 w-14 rounded-md object-cover" />
+                    <img src={cdnImage(product.image, 200)} alt="" loading="lazy" decoding="async" onError={handleImgError} className="h-14 w-14 rounded-md object-cover" />
                     <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-foreground px-1 text-[9px] font-extrabold text-background">
                       {qty}
                     </span>
@@ -777,8 +778,11 @@ function Checkout() {
                   {bumpActive && <CheckCircle2 className="h-4 w-4" />}
                 </div>
                 <img
-                  src={bumpItem.image}
+                  src={cdnImage(bumpItem.image, 200)}
                   alt={bumpItem.title}
+                  loading="lazy"
+                  decoding="async"
+                  onError={handleImgError}
                   className="h-12 w-12 shrink-0 rounded-md object-cover"
                 />
                 <div className="min-w-0 flex-1">

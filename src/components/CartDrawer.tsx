@@ -2,6 +2,7 @@ import { X, Minus, Plus, Trash2 } from "lucide-react";
 import { useCart, cartLineKey } from "@/lib/cart";
 import { Link } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { cdnImage, handleImgError } from "@/lib/cdn-image";
 
 export default function CartDrawer() {
   const { open, setOpen, items, total, setQty, remove } = useCart();
@@ -51,7 +52,7 @@ export default function CartDrawer() {
                 const key = cartLineKey(item);
                 return (
                   <li key={key} className="flex gap-3">
-                    <img src={product.image} alt={product.title} className="h-20 w-20 rounded-lg object-cover" />
+                    <img src={cdnImage(product.image, 200)} alt={product.title} loading="lazy" decoding="async" onError={handleImgError} className="h-20 w-20 rounded-lg object-cover" />
                     <div className="flex-1">
                       <p className="line-clamp-2 text-sm font-semibold">{product.title}</p>
                       {variantLabel && (
