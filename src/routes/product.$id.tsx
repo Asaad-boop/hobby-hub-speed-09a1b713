@@ -394,10 +394,13 @@ function ProductPage() {
                         {imgs.map((src: string, i: number) => (
                           <img
                             key={i}
-                            src={src}
+                            src={cdnImage(src, 1024)}
                             alt={product.title}
+                            loading={i === 0 ? "eager" : "lazy"}
+                            decoding="async"
                             width={1024}
                             height={1024}
+                            onError={handleImgError}
                             className="aspect-square h-full w-full shrink-0 object-cover"
                             draggable={false}
                           />
