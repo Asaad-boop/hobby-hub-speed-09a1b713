@@ -84,18 +84,41 @@ export const lookupOrder = createServerFn({ method: "POST" })
     const isEmail = query.includes("@");
     const digits = normalizePhone(query);
     const isPhone = !isEmail && digits.length >= 10;
-    // Order ID lookups must use full UUID (36 chars) — prefix enumeration removed.
-    const isOrderId = !isEmail && !isPhone && query.length === 36;
+    // Order ID: accept full UUID (36) OR a hex prefix of at least 8 chars.
+    // 8 hex chars = ~4 billion combinations — safe against enumeration, and matches
+    // the short ID we display to customers in the UI/emails.
+    const hexQuery = query.toLowerCase().replace(/[^0-9a-f]/g, "");
+    const isFullUuid = query.length === 36 && UUID_RE.test(query);
+    const isShortId =
+      !isEmail && !isPhone && !isFullUuid && hexQuery.length >= 8 && /^[0-9a-f]+$/.test(hexQuery);
 
     const baseSelect = "*, order_items(id,product_id,name,image,price,quantity,variant_label)";
 
     // Lookup by full Order ID — UUID acts as unguessable token, safe for guests
-    if (isOrderId) {
+    if (isFullUuid) {
       let q = supabaseAdmin.from("orders").select(baseSelect).eq("id", query);
       if (userId && !isStaff) q = q.eq("user_id", userId);
       const { data: orders } = await q.limit(1);
       if (orders && orders.length > 0)
         return { ok: true as const, order: orders[0] };
+      return { ok: false as const, error: "No order found with that Order ID" };
+    }
+
+    // Lookup by short Order ID prefix — must be unique to return.
+    if (isShortId) {
+      let q = supabaseAdmin
+        .from("orders")
+        .select(baseSelect)
+        .or(`id::text.like.${hexQuery}%`);
+      if (userId && !isStaff) q = q.eq("user_id", userId);
+      const { data: orders } = await q.limit(2);
+      if (orders && orders.length === 1)
+        return { ok: true as const, order: orders[0] };
+      if (orders && orders.length > 1)
+        return {
+          ok: false as const,
+          error: "Multiple orders match that ID. Please enter the full Order ID.",
+        };
       return { ok: false as const, error: "No order found with that Order ID" };
     }
 
