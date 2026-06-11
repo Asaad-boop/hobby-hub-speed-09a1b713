@@ -18,6 +18,7 @@ import {
   buildVariantLabel,
   variantPrice,
 } from "@/lib/variants";
+import { cdnImage, handleImgError } from "@/lib/cdn-image";
 import {
   Star,
   Truck,
