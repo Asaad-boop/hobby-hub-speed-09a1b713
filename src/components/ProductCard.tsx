@@ -23,11 +23,13 @@ export default function ProductCard({ product }: { product: Product }) {
         className="relative block aspect-square overflow-hidden bg-muted"
       >
         <img
-          src={product.image}
+          src={cdnImage(product.image, 400)}
           alt={product.title}
           loading="lazy"
-          width={1024}
-          height={1024}
+          decoding="async"
+          width={400}
+          height={400}
+          onError={handleImgError}
           className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         />
 
