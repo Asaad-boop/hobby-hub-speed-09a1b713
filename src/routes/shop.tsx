@@ -146,7 +146,23 @@ function ShopPage() {
         </div>
       </div>
 
-      {isLoading ? (
+      {error ? (
+        <div className="mt-10 rounded-2xl border-2 border-destructive/40 bg-destructive/5 p-6 text-center">
+          <p className="text-lg font-bold text-destructive">Unable to load products</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Our database is temporarily unreachable. This is usually a Supabase billing/quota issue, not a bug on the site.
+          </p>
+          <p className="mt-1 break-all text-[11px] text-muted-foreground/80">
+            {(error as Error)?.message || String(error)}
+          </p>
+          <button
+            onClick={() => refetch()}
+            className="mt-4 inline-flex items-center rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-md transition hover:scale-105"
+          >
+            Retry
+          </button>
+        </div>
+      ) : isLoading ? (
         <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <ProductCardSkeleton key={i} />
