@@ -109,7 +109,7 @@ export const lookupOrder = createServerFn({ method: "POST" })
       let q = supabaseAdmin
         .from("orders")
         .select(baseSelect)
-        .ilike("id", `${hexQuery}%`);
+        .filter("id::text", "ilike", `${hexQuery}%`);
       if (userId && !isStaff) q = q.eq("user_id", userId);
       const { data: orders } = await q.limit(2);
       if (orders && orders.length === 1)
