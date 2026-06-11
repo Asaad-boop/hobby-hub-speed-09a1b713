@@ -778,8 +778,11 @@ function Checkout() {
                   {bumpActive && <CheckCircle2 className="h-4 w-4" />}
                 </div>
                 <img
-                  src={bumpItem.image}
+                  src={cdnImage(bumpItem.image, 200)}
                   alt={bumpItem.title}
+                  loading="lazy"
+                  decoding="async"
+                  onError={handleImgError}
                   className="h-12 w-12 shrink-0 rounded-md object-cover"
                 />
                 <div className="min-w-0 flex-1">
