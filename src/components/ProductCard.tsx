@@ -3,6 +3,7 @@ import { Star, ShoppingBag, Zap, Heart } from "lucide-react";
 import type { Product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
+import { cdnImage, handleImgError } from "@/lib/cdn-image";
 import { toast } from "sonner";
 
 export default function ProductCard({ product }: { product: Product }) {
