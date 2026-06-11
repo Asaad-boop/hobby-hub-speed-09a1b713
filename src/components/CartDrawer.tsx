@@ -2,6 +2,7 @@ import { X, Minus, Plus, Trash2 } from "lucide-react";
 import { useCart, cartLineKey } from "@/lib/cart";
 import { Link } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { cdnImage, handleImgError } from "@/lib/cdn-image";
 
 export default function CartDrawer() {
   const { open, setOpen, items, total, setQty, remove } = useCart();
