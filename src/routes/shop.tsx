@@ -40,7 +40,11 @@ function ShopPage() {
   const sort: SortKey = search.sort ?? "popular";
   const q = search.q;
   const navigate = useNavigate({ from: "/shop" });
-  const { data: allProducts = [], isLoading } = useProducts();
+  const { data: allProducts = [], isLoading, error, refetch } = useProducts();
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
+    console.log("[shop] products fetched:", allProducts.length, "error:", error);
+  }
 
   const categories = useMemo(
     () => ["All", ...Array.from(new Set(allProducts.map((p) => p.category)))],
