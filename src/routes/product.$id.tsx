@@ -452,7 +452,7 @@ function ProductPage() {
                   activeImg === src ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"
                 }`}
               >
-                <img src={src} alt="" className="aspect-square w-full object-cover" />
+                <img src={cdnImage(src, 200)} alt="" loading="lazy" decoding="async" onError={handleImgError} className="aspect-square w-full object-cover" />
               </button>
             ))}
           </div>
