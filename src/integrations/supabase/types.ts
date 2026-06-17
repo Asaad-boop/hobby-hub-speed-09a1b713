@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       abandoned_carts: {
         Row: {
+          brand_id: string | null
           cart_items: Json
           converted_order_id: string | null
           created_at: string
@@ -35,6 +36,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          brand_id?: string | null
           cart_items?: Json
           converted_order_id?: string | null
           created_at?: string
@@ -54,6 +56,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          brand_id?: string | null
           cart_items?: Json
           converted_order_id?: string | null
           created_at?: string
@@ -72,7 +75,15 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "abandoned_carts_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       active_sessions: {
         Row: {
@@ -441,8 +452,42 @@ export type Database = {
           },
         ]
       }
+      brands: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          settings: Json
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          settings?: Json
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          settings?: Json
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
+          brand_id: string | null
           created_at: string
           description: string | null
           display_order: number
@@ -454,6 +499,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          brand_id?: string | null
           created_at?: string
           description?: string | null
           display_order?: number
@@ -465,6 +511,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          brand_id?: string | null
           created_at?: string
           description?: string | null
           display_order?: number
@@ -475,7 +522,15 @@ export type Database = {
           slug?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "categories_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       coupon_usage: {
         Row: {
@@ -517,12 +572,20 @@ export type Database = {
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "coupon_usage_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_ar_outstanding"
+            referencedColumns: ["order_id"]
+          },
         ]
       }
       coupons: {
         Row: {
           applicable_categories: Json | null
           applicable_products: Json | null
+          brand_id: string | null
           code: string
           created_at: string
           description: string | null
@@ -541,6 +604,7 @@ export type Database = {
         Insert: {
           applicable_categories?: Json | null
           applicable_products?: Json | null
+          brand_id?: string | null
           code: string
           created_at?: string
           description?: string | null
@@ -559,6 +623,7 @@ export type Database = {
         Update: {
           applicable_categories?: Json | null
           applicable_products?: Json | null
+          brand_id?: string | null
           code?: string
           created_at?: string
           description?: string | null
@@ -574,7 +639,15 @@ export type Database = {
           valid_until?: string | null
           value?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "coupons_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       courier_credentials: {
         Row: {
@@ -629,6 +702,7 @@ export type Database = {
       }
       courier_shipments: {
         Row: {
+          brand_id: string | null
           consignment_id: string | null
           created_at: string
           created_by: string | null
@@ -644,6 +718,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          brand_id?: string | null
           consignment_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -659,6 +734,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          brand_id?: string | null
           consignment_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -673,7 +749,1796 @@ export type Database = {
           tracking_code?: string | null
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "courier_shipments_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_accounts: {
+        Row: {
+          account_number: string | null
+          account_type: string
+          brand_id: string
+          created_at: string
+          current_balance: number
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          opening_balance: number
+          updated_at: string
+          wallet_type: string
+        }
+        Insert: {
+          account_number?: string | null
+          account_type: string
+          brand_id: string
+          created_at?: string
+          current_balance?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          opening_balance?: number
+          updated_at?: string
+          wallet_type?: string
+        }
+        Update: {
+          account_number?: string | null
+          account_type?: string
+          brand_id?: string
+          created_at?: string
+          current_balance?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          opening_balance?: number
+          updated_at?: string
+          wallet_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_accounts_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_ar_payments: {
+        Row: {
+          amount: number
+          ar_account_id: string | null
+          brand_id: string
+          cash_account_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          journal_entry_id: string | null
+          notes: string | null
+          order_id: string
+          payment_date: string
+          reference_no: string | null
+        }
+        Insert: {
+          amount: number
+          ar_account_id?: string | null
+          brand_id: string
+          cash_account_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          notes?: string | null
+          order_id: string
+          payment_date?: string
+          reference_no?: string | null
+        }
+        Update: {
+          amount?: number
+          ar_account_id?: string | null
+          brand_id?: string
+          cash_account_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          notes?: string | null
+          order_id?: string
+          payment_date?: string
+          reference_no?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_ar_payments_ar_account_id_fkey"
+            columns: ["ar_account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_chart_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_ar_payments_cash_account_id_fkey"
+            columns: ["cash_account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_chart_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_ar_payments_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "erp_journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_ar_payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_ar_payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_ar_outstanding"
+            referencedColumns: ["order_id"]
+          },
+        ]
+      }
+      erp_bill_payments: {
+        Row: {
+          amount: number
+          bill_id: string
+          brand_id: string
+          cash_account_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          journal_entry_id: string | null
+          notes: string | null
+          payment_date: string
+          reference_no: string | null
+        }
+        Insert: {
+          amount: number
+          bill_id: string
+          brand_id: string
+          cash_account_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          notes?: string | null
+          payment_date?: string
+          reference_no?: string | null
+        }
+        Update: {
+          amount?: number
+          bill_id?: string
+          brand_id?: string
+          cash_account_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          notes?: string | null
+          payment_date?: string
+          reference_no?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_bill_payments_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "erp_bills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_bill_payments_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "v_ap_outstanding"
+            referencedColumns: ["bill_id"]
+          },
+          {
+            foreignKeyName: "erp_bill_payments_cash_account_id_fkey"
+            columns: ["cash_account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_chart_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_bill_payments_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "erp_journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_bills: {
+        Row: {
+          amount: number
+          ap_account_id: string | null
+          bill_date: string
+          bill_no: string
+          brand_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          expense_account_id: string | null
+          id: string
+          journal_entry_id: string | null
+          paid_amount: number
+          source_id: string | null
+          source_type: string | null
+          status: string
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          ap_account_id?: string | null
+          bill_date?: string
+          bill_no: string
+          brand_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          expense_account_id?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          paid_amount?: number
+          source_id?: string | null
+          source_type?: string | null
+          status?: string
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          ap_account_id?: string | null
+          bill_date?: string
+          bill_no?: string
+          brand_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          expense_account_id?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          paid_amount?: number
+          source_id?: string | null
+          source_type?: string | null
+          status?: string
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_bills_ap_account_id_fkey"
+            columns: ["ap_account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_chart_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_bills_expense_account_id_fkey"
+            columns: ["expense_account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_chart_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_bills_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "erp_journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_bills_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "erp_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_budgets: {
+        Row: {
+          account_id: string
+          amount: number
+          brand_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          month: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          amount?: number
+          brand_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          month: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          brand_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          month?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_budgets_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_chart_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_chart_accounts: {
+        Row: {
+          account_type: string
+          brand_id: string
+          code: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_archived: boolean
+          name: string
+          normal_balance: string
+          opening_balance: number
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_type: string
+          brand_id: string
+          code: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_archived?: boolean
+          name: string
+          normal_balance: string
+          opening_balance?: number
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_type?: string
+          brand_id?: string
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_archived?: boolean
+          name?: string
+          normal_balance?: string
+          opening_balance?: number
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_chart_accounts_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_chart_accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "erp_chart_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_courier_settings: {
+        Row: {
+          base_url: string | null
+          brand_id: string
+          client_id: string | null
+          client_secret: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          password: string | null
+          provider: string
+          store_id: string | null
+          updated_at: string
+          username: string | null
+          wallet_id: string | null
+        }
+        Insert: {
+          base_url?: string | null
+          brand_id: string
+          client_id?: string | null
+          client_secret?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          password?: string | null
+          provider?: string
+          store_id?: string | null
+          updated_at?: string
+          username?: string | null
+          wallet_id?: string | null
+        }
+        Update: {
+          base_url?: string | null
+          brand_id?: string
+          client_id?: string | null
+          client_secret?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          password?: string | null
+          provider?: string
+          store_id?: string | null
+          updated_at?: string
+          username?: string | null
+          wallet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_courier_settings_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_courier_settings_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "erp_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_exchange_cases: {
+        Row: {
+          brand_id: string
+          created_at: string
+          created_by: string | null
+          exchange_charge_collected: number
+          exchange_type: string
+          id: string
+          note: string | null
+          old_item_condition: string
+          original_order_id: string
+          original_order_item_id: string | null
+          original_product_id: string | null
+          original_sku: string | null
+          original_variant_id: string | null
+          product_cost_loss: number
+          refund_amount: number
+          replacement_delivery_cost: number
+          replacement_order_id: string | null
+          replacement_product_id: string | null
+          replacement_qty: number
+          replacement_sku: string | null
+          replacement_variant_id: string | null
+          resolved_at: string | null
+          return_delivery_cost: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          created_by?: string | null
+          exchange_charge_collected?: number
+          exchange_type: string
+          id?: string
+          note?: string | null
+          old_item_condition: string
+          original_order_id: string
+          original_order_item_id?: string | null
+          original_product_id?: string | null
+          original_sku?: string | null
+          original_variant_id?: string | null
+          product_cost_loss?: number
+          refund_amount?: number
+          replacement_delivery_cost?: number
+          replacement_order_id?: string | null
+          replacement_product_id?: string | null
+          replacement_qty?: number
+          replacement_sku?: string | null
+          replacement_variant_id?: string | null
+          resolved_at?: string | null
+          return_delivery_cost?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          created_by?: string | null
+          exchange_charge_collected?: number
+          exchange_type?: string
+          id?: string
+          note?: string | null
+          old_item_condition?: string
+          original_order_id?: string
+          original_order_item_id?: string | null
+          original_product_id?: string | null
+          original_sku?: string | null
+          original_variant_id?: string | null
+          product_cost_loss?: number
+          refund_amount?: number
+          replacement_delivery_cost?: number
+          replacement_order_id?: string | null
+          replacement_product_id?: string | null
+          replacement_qty?: number
+          replacement_sku?: string | null
+          replacement_variant_id?: string | null
+          resolved_at?: string | null
+          return_delivery_cost?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_exchange_cases_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_exchange_cases_original_order_id_fkey"
+            columns: ["original_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_exchange_cases_original_order_id_fkey"
+            columns: ["original_order_id"]
+            isOneToOne: false
+            referencedRelation: "v_ar_outstanding"
+            referencedColumns: ["order_id"]
+          },
+          {
+            foreignKeyName: "erp_exchange_cases_original_order_item_id_fkey"
+            columns: ["original_order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_exchange_cases_original_product_id_fkey"
+            columns: ["original_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_exchange_cases_original_variant_id_fkey"
+            columns: ["original_variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_exchange_cases_replacement_order_id_fkey"
+            columns: ["replacement_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_exchange_cases_replacement_order_id_fkey"
+            columns: ["replacement_order_id"]
+            isOneToOne: false
+            referencedRelation: "v_ar_outstanding"
+            referencedColumns: ["order_id"]
+          },
+          {
+            foreignKeyName: "erp_exchange_cases_replacement_product_id_fkey"
+            columns: ["replacement_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_exchange_cases_replacement_variant_id_fkey"
+            columns: ["replacement_variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_expense_categories: {
+        Row: {
+          brand_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: string
+          name: string
+        }
+        Insert: {
+          brand_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          name: string
+        }
+        Update: {
+          brand_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_expense_categories_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_finance_attachments: {
+        Row: {
+          brand_id: string
+          created_at: string
+          file_name: string | null
+          id: string
+          journal_entry_id: string | null
+          mime_type: string | null
+          size_bytes: number | null
+          storage_path: string
+          transaction_id: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          file_name?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path: string
+          transaction_id?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          file_name?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path?: string
+          transaction_id?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_finance_attachments_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_finance_attachments_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "erp_journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_finance_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          after_data: Json | null
+          before_data: Json | null
+          brand_id: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          brand_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          brand_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+        }
         Relationships: []
+      }
+      erp_fx_rates: {
+        Row: {
+          brand_id: string
+          created_at: string
+          from_ccy: string
+          id: string
+          rate: number
+          rate_date: string
+          to_ccy: string
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          from_ccy: string
+          id?: string
+          rate: number
+          rate_date: string
+          to_ccy: string
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          from_ccy?: string
+          id?: string
+          rate?: number
+          rate_date?: string
+          to_ccy?: string
+        }
+        Relationships: []
+      }
+      erp_journal_entries: {
+        Row: {
+          brand_id: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          description: string | null
+          entry_date: string
+          entry_no: string
+          id: string
+          is_locked: boolean
+          source_id: string | null
+          source_type: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          entry_date: string
+          entry_no: string
+          id?: string
+          is_locked?: boolean
+          source_id?: string | null
+          source_type?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          entry_date?: string
+          entry_no?: string
+          id?: string
+          is_locked?: boolean
+          source_id?: string | null
+          source_type?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_journal_entries_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_journal_lines: {
+        Row: {
+          account_id: string
+          brand_id: string
+          created_at: string
+          credit: number
+          debit: number
+          description: string | null
+          id: string
+          journal_entry_id: string
+          line_order: number
+        }
+        Insert: {
+          account_id: string
+          brand_id: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          description?: string | null
+          id?: string
+          journal_entry_id: string
+          line_order?: number
+        }
+        Update: {
+          account_id?: string
+          brand_id?: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          description?: string | null
+          id?: string
+          journal_entry_id?: string
+          line_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_journal_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_chart_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_journal_lines_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_journal_lines_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "erp_journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_period_locks: {
+        Row: {
+          brand_id: string
+          created_at: string
+          id: string
+          locked_by: string | null
+          locked_until: string
+          reason: string | null
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          id?: string
+          locked_by?: string | null
+          locked_until: string
+          reason?: string | null
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          id?: string
+          locked_by?: string | null
+          locked_until?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_period_locks_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: true
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_product_expense_allocations: {
+        Row: {
+          allocation_date: string | null
+          allocation_method: string
+          amount: number
+          brand_id: string
+          campaign_id: string | null
+          created_at: string
+          created_by: string | null
+          expense_transaction_id: string | null
+          expense_type: string
+          id: string
+          journal_entry_id: string | null
+          mkt_ad_account_id: string | null
+          note: string | null
+          product_id: string
+          sku: string | null
+          source: string
+          variant_id: string | null
+        }
+        Insert: {
+          allocation_date?: string | null
+          allocation_method?: string
+          amount?: number
+          brand_id: string
+          campaign_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expense_transaction_id?: string | null
+          expense_type: string
+          id?: string
+          journal_entry_id?: string | null
+          mkt_ad_account_id?: string | null
+          note?: string | null
+          product_id: string
+          sku?: string | null
+          source?: string
+          variant_id?: string | null
+        }
+        Update: {
+          allocation_date?: string | null
+          allocation_method?: string
+          amount?: number
+          brand_id?: string
+          campaign_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expense_transaction_id?: string | null
+          expense_type?: string
+          id?: string
+          journal_entry_id?: string | null
+          mkt_ad_account_id?: string | null
+          note?: string | null
+          product_id?: string
+          sku?: string | null
+          source?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_product_expense_allocations_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_product_expense_allocations_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_product_expense_allocations_expense_transaction_id_fkey"
+            columns: ["expense_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "erp_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_product_expense_allocations_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "erp_journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_product_expense_allocations_mkt_ad_account_id_fkey"
+            columns: ["mkt_ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_ad_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_product_expense_allocations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_product_expense_allocations_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_recurring_rules: {
+        Row: {
+          amount: number
+          auto_post: boolean
+          brand_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          frequency: string
+          id: string
+          interval_n: number
+          is_active: boolean
+          last_run_at: string | null
+          lines: Json
+          name: string
+          next_run_date: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          auto_post?: boolean
+          brand_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          frequency: string
+          id?: string
+          interval_n?: number
+          is_active?: boolean
+          last_run_at?: string | null
+          lines: Json
+          name: string
+          next_run_date: string
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          auto_post?: boolean
+          brand_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          interval_n?: number
+          is_active?: boolean
+          last_run_at?: string | null
+          lines?: Json
+          name?: string
+          next_run_date?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      erp_recurring_runs: {
+        Row: {
+          brand_id: string
+          created_at: string
+          error: string | null
+          id: string
+          journal_entry_id: string | null
+          rule_id: string
+          run_date: string
+          status: string
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          rule_id: string
+          run_date: string
+          status?: string
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          rule_id?: string
+          run_date?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_recurring_runs_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "erp_journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_recurring_runs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "erp_recurring_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_return_cases: {
+        Row: {
+          brand_id: string
+          created_at: string
+          created_by: string | null
+          customer_paid_delivery: number
+          id: string
+          item_condition: string
+          note: string | null
+          order_id: string
+          order_item_id: string | null
+          outbound_delivery_cost: number
+          packaging_loss: number
+          product_cost_loss: number
+          product_id: string | null
+          qty: number
+          refund_amount: number
+          resolved_at: string | null
+          return_delivery_cost: number
+          return_type: string
+          sku: string | null
+          status: string
+          updated_at: string
+          variant_id: string | null
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_paid_delivery?: number
+          id?: string
+          item_condition: string
+          note?: string | null
+          order_id: string
+          order_item_id?: string | null
+          outbound_delivery_cost?: number
+          packaging_loss?: number
+          product_cost_loss?: number
+          product_id?: string | null
+          qty?: number
+          refund_amount?: number
+          resolved_at?: string | null
+          return_delivery_cost?: number
+          return_type: string
+          sku?: string | null
+          status?: string
+          updated_at?: string
+          variant_id?: string | null
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_paid_delivery?: number
+          id?: string
+          item_condition?: string
+          note?: string | null
+          order_id?: string
+          order_item_id?: string | null
+          outbound_delivery_cost?: number
+          packaging_loss?: number
+          product_cost_loss?: number
+          product_id?: string | null
+          qty?: number
+          refund_amount?: number
+          resolved_at?: string | null
+          return_delivery_cost?: number
+          return_type?: string
+          sku?: string | null
+          status?: string
+          updated_at?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_return_cases_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_return_cases_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_return_cases_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_ar_outstanding"
+            referencedColumns: ["order_id"]
+          },
+          {
+            foreignKeyName: "erp_return_cases_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_return_cases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_return_cases_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_settings: {
+        Row: {
+          brand_id: string
+          config: Json
+          created_at: string
+          default_courier: string | null
+          id: string
+          invoice_footer: string | null
+          invoice_pad: number
+          invoice_prefix: string | null
+          invoice_seq: number
+          updated_at: string
+        }
+        Insert: {
+          brand_id: string
+          config?: Json
+          created_at?: string
+          default_courier?: string | null
+          id?: string
+          invoice_footer?: string | null
+          invoice_pad?: number
+          invoice_prefix?: string | null
+          invoice_seq?: number
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string
+          config?: Json
+          created_at?: string
+          default_courier?: string | null
+          id?: string
+          invoice_footer?: string | null
+          invoice_pad?: number
+          invoice_prefix?: string | null
+          invoice_seq?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_settings_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: true
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_statement_imports: {
+        Row: {
+          account_id: string
+          brand_id: string
+          created_by: string | null
+          id: string
+          imported_at: string
+          matched_lines: number
+          period_end: string | null
+          period_start: string | null
+          source: string
+          total_lines: number
+        }
+        Insert: {
+          account_id: string
+          brand_id: string
+          created_by?: string | null
+          id?: string
+          imported_at?: string
+          matched_lines?: number
+          period_end?: string | null
+          period_start?: string | null
+          source: string
+          total_lines?: number
+        }
+        Update: {
+          account_id?: string
+          brand_id?: string
+          created_by?: string | null
+          id?: string
+          imported_at?: string
+          matched_lines?: number
+          period_end?: string | null
+          period_start?: string | null
+          source?: string
+          total_lines?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_statement_imports_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_chart_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_statement_lines: {
+        Row: {
+          account_id: string
+          brand_id: string
+          created_at: string
+          credit: number
+          debit: number
+          description: string | null
+          id: string
+          import_id: string
+          matched_at: string | null
+          matched_by: string | null
+          matched_line_id: string | null
+          reference_no: string | null
+          txn_date: string
+        }
+        Insert: {
+          account_id: string
+          brand_id: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          description?: string | null
+          id?: string
+          import_id: string
+          matched_at?: string | null
+          matched_by?: string | null
+          matched_line_id?: string | null
+          reference_no?: string | null
+          txn_date: string
+        }
+        Update: {
+          account_id?: string
+          brand_id?: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          description?: string | null
+          id?: string
+          import_id?: string
+          matched_at?: string | null
+          matched_by?: string | null
+          matched_line_id?: string | null
+          reference_no?: string | null
+          txn_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_statement_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_chart_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_statement_lines_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "erp_statement_imports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_statement_lines_matched_line_id_fkey"
+            columns: ["matched_line_id"]
+            isOneToOne: false
+            referencedRelation: "erp_journal_lines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_supplier_payments: {
+        Row: {
+          account_id: string | null
+          amount: number
+          brand_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          payment_date: string
+          reference_no: string | null
+          supplier_id: string
+          transaction_id: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          amount: number
+          brand_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          reference_no?: string | null
+          supplier_id: string
+          transaction_id?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number
+          brand_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          reference_no?: string | null
+          supplier_id?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_supplier_payments_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_supplier_payments_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_supplier_payments_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "erp_suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_supplier_payments_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "erp_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_suppliers: {
+        Row: {
+          address: string | null
+          brand_id: string
+          contact_person: string | null
+          country: string
+          created_at: string
+          credit_limit_bdt: number
+          currency: string
+          current_due: number
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          opening_balance: number
+          payment_terms_days: number
+          phone: string | null
+          source_link: string | null
+          supplier_type: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          brand_id: string
+          contact_person?: string | null
+          country?: string
+          created_at?: string
+          credit_limit_bdt?: number
+          currency?: string
+          current_due?: number
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          opening_balance?: number
+          payment_terms_days?: number
+          phone?: string | null
+          source_link?: string | null
+          supplier_type?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          brand_id?: string
+          contact_person?: string | null
+          country?: string
+          created_at?: string
+          credit_limit_bdt?: number
+          currency?: string
+          current_due?: number
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          opening_balance?: number
+          payment_terms_days?: number
+          phone?: string | null
+          source_link?: string | null
+          supplier_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_suppliers_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_tax_entries: {
+        Row: {
+          brand_id: string
+          created_at: string
+          direction: string
+          entry_date: string
+          id: string
+          journal_entry_id: string | null
+          note: string | null
+          tax_amount: number
+          tax_rate_id: string
+          taxable_amount: number
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          direction: string
+          entry_date: string
+          id?: string
+          journal_entry_id?: string | null
+          note?: string | null
+          tax_amount: number
+          tax_rate_id: string
+          taxable_amount: number
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          direction?: string
+          entry_date?: string
+          id?: string
+          journal_entry_id?: string | null
+          note?: string | null
+          tax_amount?: number
+          tax_rate_id?: string
+          taxable_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_tax_entries_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "erp_journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_tax_entries_tax_rate_id_fkey"
+            columns: ["tax_rate_id"]
+            isOneToOne: false
+            referencedRelation: "erp_tax_rates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_tax_rates: {
+        Row: {
+          brand_id: string
+          code: string
+          created_at: string
+          id: string
+          input_account_id: string | null
+          is_active: boolean
+          kind: string
+          name: string
+          output_account_id: string | null
+          rate: number
+          updated_at: string
+        }
+        Insert: {
+          brand_id: string
+          code: string
+          created_at?: string
+          id?: string
+          input_account_id?: string | null
+          is_active?: boolean
+          kind: string
+          name: string
+          output_account_id?: string | null
+          rate: number
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string
+          code?: string
+          created_at?: string
+          id?: string
+          input_account_id?: string | null
+          is_active?: boolean
+          kind?: string
+          name?: string
+          output_account_id?: string | null
+          rate?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_tax_rates_input_account_id_fkey"
+            columns: ["input_account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_chart_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_tax_rates_output_account_id_fkey"
+            columns: ["output_account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_chart_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_transactions: {
+        Row: {
+          account_id: string | null
+          amount: number
+          attachment_url: string | null
+          brand_id: string
+          category_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          reference_id: string | null
+          reference_type: string | null
+          supplier_id: string | null
+          to_account_id: string | null
+          transaction_date: string
+          txn_type: string
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          amount: number
+          attachment_url?: string | null
+          brand_id: string
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          supplier_id?: string | null
+          to_account_id?: string | null
+          transaction_date?: string
+          txn_type: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number
+          attachment_url?: string | null
+          brand_id?: string
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          supplier_id?: string | null
+          to_account_id?: string | null
+          transaction_date?: string
+          txn_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_transactions_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_transactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "erp_expense_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_transactions_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "erp_suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_transactions_to_account_id_fkey"
+            columns: ["to_account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       homepage_versions: {
         Row: {
@@ -699,8 +2564,706 @@ export type Database = {
         }
         Relationships: []
       }
+      imp_cargo_agent_ledger: {
+        Row: {
+          agent_id: string
+          amount_bdt: number
+          brand_id: string | null
+          carton_id: string | null
+          created_at: string
+          created_by: string | null
+          direction: Database["public"]["Enums"]["imp_agent_ledger_dir"]
+          entry_date: string
+          entry_type: Database["public"]["Enums"]["imp_agent_ledger_kind"]
+          id: string
+          note: string | null
+          po_id: string | null
+          reference: string | null
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          amount_bdt: number
+          brand_id?: string | null
+          carton_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          direction: Database["public"]["Enums"]["imp_agent_ledger_dir"]
+          entry_date?: string
+          entry_type?: Database["public"]["Enums"]["imp_agent_ledger_kind"]
+          id?: string
+          note?: string | null
+          po_id?: string | null
+          reference?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          amount_bdt?: number
+          brand_id?: string | null
+          carton_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          direction?: Database["public"]["Enums"]["imp_agent_ledger_dir"]
+          entry_date?: string
+          entry_type?: Database["public"]["Enums"]["imp_agent_ledger_kind"]
+          id?: string
+          note?: string | null
+          po_id?: string | null
+          reference?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imp_cargo_agent_ledger_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "imp_cargo_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_cargo_agent_ledger_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_cargo_agent_ledger_carton_id_fkey"
+            columns: ["carton_id"]
+            isOneToOne: false
+            referencedRelation: "imp_cartons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_cargo_agent_ledger_po_id_fkey"
+            columns: ["po_id"]
+            isOneToOne: false
+            referencedRelation: "imp_purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      imp_cargo_agent_rates: {
+        Row: {
+          agent_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          fx_rate: number
+          id: string
+          note: string | null
+          rate_date: string
+          shipping_rate_per_kg_bdt: number
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          fx_rate: number
+          id?: string
+          note?: string | null
+          rate_date?: string
+          shipping_rate_per_kg_bdt: number
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          fx_rate?: number
+          id?: string
+          note?: string | null
+          rate_date?: string
+          shipping_rate_per_kg_bdt?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imp_cargo_agent_rates_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "imp_cargo_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      imp_cargo_agents: {
+        Row: {
+          address: string | null
+          brand_id: string
+          created_at: string
+          created_by: string | null
+          default_currency: string
+          default_fx_rate: number
+          default_shipping_rate_per_kg_bdt: number
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          brand_id: string
+          created_at?: string
+          created_by?: string | null
+          default_currency?: string
+          default_fx_rate?: number
+          default_shipping_rate_per_kg_bdt?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          brand_id?: string
+          created_at?: string
+          created_by?: string | null
+          default_currency?: string
+          default_fx_rate?: number
+          default_shipping_rate_per_kg_bdt?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imp_cargo_agents_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      imp_carton_items: {
+        Row: {
+          carton_id: string
+          created_at: string
+          id: string
+          po_item_id: string
+          product_id: string | null
+          quantity_damaged: number
+          quantity_expected: number
+          quantity_missing: number
+          quantity_ok: number
+          sku_snapshot: string | null
+          supplier_cost_portion_bdt: number
+          variant_id: string | null
+        }
+        Insert: {
+          carton_id: string
+          created_at?: string
+          id?: string
+          po_item_id: string
+          product_id?: string | null
+          quantity_damaged?: number
+          quantity_expected: number
+          quantity_missing?: number
+          quantity_ok?: number
+          sku_snapshot?: string | null
+          supplier_cost_portion_bdt?: number
+          variant_id?: string | null
+        }
+        Update: {
+          carton_id?: string
+          created_at?: string
+          id?: string
+          po_item_id?: string
+          product_id?: string | null
+          quantity_damaged?: number
+          quantity_expected?: number
+          quantity_missing?: number
+          quantity_ok?: number
+          sku_snapshot?: string | null
+          supplier_cost_portion_bdt?: number
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imp_carton_items_carton_id_fkey"
+            columns: ["carton_id"]
+            isOneToOne: false
+            referencedRelation: "imp_cartons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_carton_items_po_item_id_fkey"
+            columns: ["po_item_id"]
+            isOneToOne: false
+            referencedRelation: "imp_po_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_carton_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_carton_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      imp_cartons: {
+        Row: {
+          barcode: string
+          carton_number: number
+          created_at: string
+          expected_quantity: number
+          id: string
+          local_courier_bdt: number
+          notes: string | null
+          po_id: string
+          posted_at: string | null
+          qc_at: string | null
+          received_at: string | null
+          release_request_note: string | null
+          release_requested_at: string | null
+          release_requested_by: string | null
+          released_at: string | null
+          shipping_charge_bdt: number
+          status: Database["public"]["Enums"]["imp_carton_status"]
+          supplier_cost_bdt: number
+          total_landed_bdt: number
+          updated_at: string
+          warehouse_id: string | null
+          weight_kg: number | null
+        }
+        Insert: {
+          barcode: string
+          carton_number: number
+          created_at?: string
+          expected_quantity?: number
+          id?: string
+          local_courier_bdt?: number
+          notes?: string | null
+          po_id: string
+          posted_at?: string | null
+          qc_at?: string | null
+          received_at?: string | null
+          release_request_note?: string | null
+          release_requested_at?: string | null
+          release_requested_by?: string | null
+          released_at?: string | null
+          shipping_charge_bdt?: number
+          status?: Database["public"]["Enums"]["imp_carton_status"]
+          supplier_cost_bdt?: number
+          total_landed_bdt?: number
+          updated_at?: string
+          warehouse_id?: string | null
+          weight_kg?: number | null
+        }
+        Update: {
+          barcode?: string
+          carton_number?: number
+          created_at?: string
+          expected_quantity?: number
+          id?: string
+          local_courier_bdt?: number
+          notes?: string | null
+          po_id?: string
+          posted_at?: string | null
+          qc_at?: string | null
+          received_at?: string | null
+          release_request_note?: string | null
+          release_requested_at?: string | null
+          release_requested_by?: string | null
+          released_at?: string | null
+          shipping_charge_bdt?: number
+          status?: Database["public"]["Enums"]["imp_carton_status"]
+          supplier_cost_bdt?: number
+          total_landed_bdt?: number
+          updated_at?: string
+          warehouse_id?: string | null
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imp_cartons_po_id_fkey"
+            columns: ["po_id"]
+            isOneToOne: false
+            referencedRelation: "imp_purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_cartons_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      imp_payments: {
+        Row: {
+          amount_bdt: number
+          brand_id: string
+          carton_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          idempotency_key: string
+          is_reversed: boolean
+          journal_entry_id: string | null
+          notes: string | null
+          payment_date: string
+          payment_type: Database["public"]["Enums"]["imp_payment_type"]
+          po_id: string
+          reference: string | null
+          reversed_at: string | null
+          reverses_id: string | null
+          wallet_id: string
+        }
+        Insert: {
+          amount_bdt: number
+          brand_id: string
+          carton_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          idempotency_key: string
+          is_reversed?: boolean
+          journal_entry_id?: string | null
+          notes?: string | null
+          payment_date?: string
+          payment_type: Database["public"]["Enums"]["imp_payment_type"]
+          po_id: string
+          reference?: string | null
+          reversed_at?: string | null
+          reverses_id?: string | null
+          wallet_id: string
+        }
+        Update: {
+          amount_bdt?: number
+          brand_id?: string
+          carton_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          idempotency_key?: string
+          is_reversed?: boolean
+          journal_entry_id?: string | null
+          notes?: string | null
+          payment_date?: string
+          payment_type?: Database["public"]["Enums"]["imp_payment_type"]
+          po_id?: string
+          reference?: string | null
+          reversed_at?: string | null
+          reverses_id?: string | null
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imp_payments_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_payments_carton_id_fkey"
+            columns: ["carton_id"]
+            isOneToOne: false
+            referencedRelation: "imp_cartons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_payments_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "erp_journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_payments_po_id_fkey"
+            columns: ["po_id"]
+            isOneToOne: false
+            referencedRelation: "imp_purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_payments_reverses_id_fkey"
+            columns: ["reverses_id"]
+            isOneToOne: false
+            referencedRelation: "imp_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_payments_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "erp_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      imp_po_items: {
+        Row: {
+          created_at: string
+          id: string
+          image_snapshot: string | null
+          name_snapshot: string
+          po_id: string
+          product_id: string | null
+          quantity: number
+          sku_snapshot: string | null
+          subtotal_bdt: number
+          unit_cost_bdt: number
+          unit_cost_foreign: number
+          variant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_snapshot?: string | null
+          name_snapshot: string
+          po_id: string
+          product_id?: string | null
+          quantity: number
+          sku_snapshot?: string | null
+          subtotal_bdt?: number
+          unit_cost_bdt?: number
+          unit_cost_foreign?: number
+          variant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_snapshot?: string | null
+          name_snapshot?: string
+          po_id?: string
+          product_id?: string | null
+          quantity?: number
+          sku_snapshot?: string | null
+          subtotal_bdt?: number
+          unit_cost_bdt?: number
+          unit_cost_foreign?: number
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imp_po_items_po_id_fkey"
+            columns: ["po_id"]
+            isOneToOne: false
+            referencedRelation: "imp_purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_po_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_po_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      imp_po_sequences: {
+        Row: {
+          brand_id: string
+          last_number: number
+          updated_at: string
+        }
+        Insert: {
+          brand_id: string
+          last_number?: number
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string
+          last_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imp_po_sequences_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: true
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      imp_purchase_orders: {
+        Row: {
+          brand_id: string
+          cargo_agent_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          due_bdt: number
+          fx_rate: number
+          grand_total_bdt: number
+          id: string
+          local_courier_total_bdt: number
+          notes: string | null
+          order_date: string
+          paid_bdt: number
+          po_number: string
+          product_subtotal_bdt: number
+          shipping_total_bdt: number
+          status: Database["public"]["Enums"]["imp_po_status"]
+          submitted_by_agent_id: string | null
+          supplier_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          brand_id: string
+          cargo_agent_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          due_bdt?: number
+          fx_rate?: number
+          grand_total_bdt?: number
+          id?: string
+          local_courier_total_bdt?: number
+          notes?: string | null
+          order_date?: string
+          paid_bdt?: number
+          po_number: string
+          product_subtotal_bdt?: number
+          shipping_total_bdt?: number
+          status?: Database["public"]["Enums"]["imp_po_status"]
+          submitted_by_agent_id?: string | null
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string
+          cargo_agent_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          due_bdt?: number
+          fx_rate?: number
+          grand_total_bdt?: number
+          id?: string
+          local_courier_total_bdt?: number
+          notes?: string | null
+          order_date?: string
+          paid_bdt?: number
+          po_number?: string
+          product_subtotal_bdt?: number
+          shipping_total_bdt?: number
+          status?: Database["public"]["Enums"]["imp_po_status"]
+          submitted_by_agent_id?: string | null
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imp_purchase_orders_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_purchase_orders_cargo_agent_id_fkey"
+            columns: ["cargo_agent_id"]
+            isOneToOne: false
+            referencedRelation: "imp_cargo_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_purchase_orders_submitted_by_agent_id_fkey"
+            columns: ["submitted_by_agent_id"]
+            isOneToOne: false
+            referencedRelation: "imp_cargo_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_purchase_orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "erp_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      imp_status_history: {
+        Row: {
+          action: string | null
+          after_data: Json | null
+          before_data: Json | null
+          brand_id: string
+          changed_by: string | null
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          new_status: string | null
+          notes: string | null
+          previous_status: string | null
+        }
+        Insert: {
+          action?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          brand_id: string
+          changed_by?: string | null
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          previous_status?: string | null
+        }
+        Update: {
+          action?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          brand_id?: string
+          changed_by?: string | null
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          previous_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imp_status_history_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       low_stock_alerts: {
         Row: {
+          brand_id: string | null
           created_at: string
           current_stock: number
           id: string
@@ -711,6 +3274,7 @@ export type Database = {
           variant_id: string | null
         }
         Insert: {
+          brand_id?: string | null
           created_at?: string
           current_stock: number
           id?: string
@@ -721,6 +3285,7 @@ export type Database = {
           variant_id?: string | null
         }
         Update: {
+          brand_id?: string | null
           created_at?: string
           current_stock?: number
           id?: string
@@ -730,23 +3295,872 @@ export type Database = {
           threshold?: number
           variant_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "low_stock_alerts_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mkt_ad_accounts: {
+        Row: {
+          access_token: string | null
+          app_id: string | null
+          app_secret: string | null
+          auto_post_to_finance: boolean
+          brand_id: string
+          business_id: string | null
+          created_at: string
+          currency: string | null
+          external_id: string
+          finance_wallet_id: string | null
+          id: string
+          last_error: string | null
+          last_insights_sync_at: string | null
+          last_structure_sync_at: string | null
+          name: string
+          status: Database["public"]["Enums"]["mkt_account_status"]
+          timezone: string | null
+          updated_at: string
+          usd_to_bdt_rate: number
+        }
+        Insert: {
+          access_token?: string | null
+          app_id?: string | null
+          app_secret?: string | null
+          auto_post_to_finance?: boolean
+          brand_id: string
+          business_id?: string | null
+          created_at?: string
+          currency?: string | null
+          external_id: string
+          finance_wallet_id?: string | null
+          id?: string
+          last_error?: string | null
+          last_insights_sync_at?: string | null
+          last_structure_sync_at?: string | null
+          name: string
+          status?: Database["public"]["Enums"]["mkt_account_status"]
+          timezone?: string | null
+          updated_at?: string
+          usd_to_bdt_rate?: number
+        }
+        Update: {
+          access_token?: string | null
+          app_id?: string | null
+          app_secret?: string | null
+          auto_post_to_finance?: boolean
+          brand_id?: string
+          business_id?: string | null
+          created_at?: string
+          currency?: string | null
+          external_id?: string
+          finance_wallet_id?: string | null
+          id?: string
+          last_error?: string | null
+          last_insights_sync_at?: string | null
+          last_structure_sync_at?: string | null
+          name?: string
+          status?: Database["public"]["Enums"]["mkt_account_status"]
+          timezone?: string | null
+          updated_at?: string
+          usd_to_bdt_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mkt_ad_accounts_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_ad_accounts_finance_wallet_id_fkey"
+            columns: ["finance_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "erp_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mkt_ads: {
+        Row: {
+          account_id: string
+          adset_id: string
+          brand_id: string
+          campaign_id: string
+          created_at: string
+          creative_body: string | null
+          creative_thumbnail: string | null
+          effective_status: string | null
+          external_id: string
+          id: string
+          name: string
+          raw: Json | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          adset_id: string
+          brand_id: string
+          campaign_id: string
+          created_at?: string
+          creative_body?: string | null
+          creative_thumbnail?: string | null
+          effective_status?: string | null
+          external_id: string
+          id?: string
+          name: string
+          raw?: Json | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          adset_id?: string
+          brand_id?: string
+          campaign_id?: string
+          created_at?: string
+          creative_body?: string | null
+          creative_thumbnail?: string | null
+          effective_status?: string | null
+          external_id?: string
+          id?: string
+          name?: string
+          raw?: Json | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mkt_ads_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_ad_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_ads_adset_id_fkey"
+            columns: ["adset_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_adsets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_ads_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_ads_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mkt_adsets: {
+        Row: {
+          account_id: string
+          brand_id: string
+          campaign_id: string
+          created_at: string
+          daily_budget: number | null
+          effective_status: string | null
+          external_id: string
+          id: string
+          lifetime_budget: number | null
+          name: string
+          raw: Json | null
+          status: string | null
+          targeting_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          brand_id: string
+          campaign_id: string
+          created_at?: string
+          daily_budget?: number | null
+          effective_status?: string | null
+          external_id: string
+          id?: string
+          lifetime_budget?: number | null
+          name: string
+          raw?: Json | null
+          status?: string | null
+          targeting_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          brand_id?: string
+          campaign_id?: string
+          created_at?: string
+          daily_budget?: number | null
+          effective_status?: string | null
+          external_id?: string
+          id?: string
+          lifetime_budget?: number | null
+          name?: string
+          raw?: Json | null
+          status?: string | null
+          targeting_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mkt_adsets_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_ad_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_adsets_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_adsets_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mkt_campaign_products: {
+        Row: {
+          brand_id: string
+          campaign_id: string
+          created_at: string
+          id: string
+          note: string | null
+          product_id: string
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          brand_id: string
+          campaign_id: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          product_id: string
+          updated_at?: string
+          weight?: number
+        }
+        Update: {
+          brand_id?: string
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          product_id?: string
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mkt_campaign_products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_campaign_products_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_campaign_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mkt_campaigns: {
+        Row: {
+          account_id: string
+          brand_id: string
+          created_at: string
+          daily_budget: number | null
+          effective_status: string | null
+          external_id: string
+          id: string
+          lifetime_budget: number | null
+          name: string
+          objective: string | null
+          raw: Json | null
+          start_time: string | null
+          status: string | null
+          stop_time: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          brand_id: string
+          created_at?: string
+          daily_budget?: number | null
+          effective_status?: string | null
+          external_id: string
+          id?: string
+          lifetime_budget?: number | null
+          name: string
+          objective?: string | null
+          raw?: Json | null
+          start_time?: string | null
+          status?: string | null
+          stop_time?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          brand_id?: string
+          created_at?: string
+          daily_budget?: number | null
+          effective_status?: string | null
+          external_id?: string
+          id?: string
+          lifetime_budget?: number | null
+          name?: string
+          objective?: string | null
+          raw?: Json | null
+          start_time?: string | null
+          status?: string | null
+          stop_time?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mkt_campaigns_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_ad_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_campaigns_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mkt_insights_daily: {
+        Row: {
+          account_id: string
+          ad_id: string | null
+          adset_id: string | null
+          brand_id: string
+          campaign_id: string | null
+          clicks: number
+          cpc: number | null
+          cpm: number | null
+          created_at: string
+          ctr: number | null
+          date: string
+          id: string
+          impressions: number
+          meta_add_to_cart: number
+          meta_initiate_checkout: number
+          meta_leads: number
+          meta_purchase_value: number
+          meta_purchases: number
+          raw: Json | null
+          reach: number
+          spend: number
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          ad_id?: string | null
+          adset_id?: string | null
+          brand_id: string
+          campaign_id?: string | null
+          clicks?: number
+          cpc?: number | null
+          cpm?: number | null
+          created_at?: string
+          ctr?: number | null
+          date: string
+          id?: string
+          impressions?: number
+          meta_add_to_cart?: number
+          meta_initiate_checkout?: number
+          meta_leads?: number
+          meta_purchase_value?: number
+          meta_purchases?: number
+          raw?: Json | null
+          reach?: number
+          spend?: number
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          ad_id?: string | null
+          adset_id?: string | null
+          brand_id?: string
+          campaign_id?: string | null
+          clicks?: number
+          cpc?: number | null
+          cpm?: number | null
+          created_at?: string
+          ctr?: number | null
+          date?: string
+          id?: string
+          impressions?: number
+          meta_add_to_cart?: number
+          meta_initiate_checkout?: number
+          meta_leads?: number
+          meta_purchase_value?: number
+          meta_purchases?: number
+          raw?: Json | null
+          reach?: number
+          spend?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mkt_insights_daily_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_ad_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_insights_daily_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_ads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_insights_daily_adset_id_fkey"
+            columns: ["adset_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_adsets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_insights_daily_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_insights_daily_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mkt_manual_expenses: {
+        Row: {
+          account_id: string | null
+          amount: number
+          attachment_url: string | null
+          brand_id: string
+          campaign_id: string | null
+          category: Database["public"]["Enums"]["mkt_expense_category"]
+          created_at: string
+          created_by: string | null
+          currency: string
+          date: string
+          id: string
+          mkt_ad_account_id: string | null
+          note: string | null
+          product_id: string | null
+          source: string
+          transaction_id: string | null
+          updated_at: string
+          vendor: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          amount: number
+          attachment_url?: string | null
+          brand_id: string
+          campaign_id?: string | null
+          category?: Database["public"]["Enums"]["mkt_expense_category"]
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          date?: string
+          id?: string
+          mkt_ad_account_id?: string | null
+          note?: string | null
+          product_id?: string | null
+          source?: string
+          transaction_id?: string | null
+          updated_at?: string
+          vendor?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number
+          attachment_url?: string | null
+          brand_id?: string
+          campaign_id?: string | null
+          category?: Database["public"]["Enums"]["mkt_expense_category"]
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          date?: string
+          id?: string
+          mkt_ad_account_id?: string | null
+          note?: string | null
+          product_id?: string | null
+          source?: string
+          transaction_id?: string | null
+          updated_at?: string
+          vendor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mkt_manual_expenses_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_manual_expenses_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_manual_expenses_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_manual_expenses_mkt_ad_account_id_fkey"
+            columns: ["mkt_ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_ad_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_manual_expenses_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_manual_expenses_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "erp_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mkt_order_attributions: {
+        Row: {
+          ad_id: string | null
+          adset_id: string | null
+          brand_id: string
+          campaign_id: string | null
+          confidence: number
+          created_at: string
+          fbclid: string | null
+          id: string
+          note: string | null
+          order_id: string
+          source: Database["public"]["Enums"]["mkt_attribution_source"]
+          updated_at: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          ad_id?: string | null
+          adset_id?: string | null
+          brand_id: string
+          campaign_id?: string | null
+          confidence?: number
+          created_at?: string
+          fbclid?: string | null
+          id?: string
+          note?: string | null
+          order_id: string
+          source: Database["public"]["Enums"]["mkt_attribution_source"]
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          ad_id?: string | null
+          adset_id?: string | null
+          brand_id?: string
+          campaign_id?: string | null
+          confidence?: number
+          created_at?: string
+          fbclid?: string | null
+          id?: string
+          note?: string | null
+          order_id?: string
+          source?: Database["public"]["Enums"]["mkt_attribution_source"]
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mkt_order_attributions_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_ads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_order_attributions_adset_id_fkey"
+            columns: ["adset_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_adsets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_order_attributions_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_order_attributions_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_order_attributions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_order_attributions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "v_ar_outstanding"
+            referencedColumns: ["order_id"]
+          },
+        ]
+      }
+      mkt_sync_log: {
+        Row: {
+          account_id: string | null
+          brand_id: string | null
+          created_at: string
+          error: string | null
+          finished_at: string | null
+          id: string
+          kind: Database["public"]["Enums"]["mkt_sync_kind"]
+          meta: Json | null
+          rows_processed: number
+          started_at: string
+          status: Database["public"]["Enums"]["mkt_sync_status"]
+        }
+        Insert: {
+          account_id?: string | null
+          brand_id?: string | null
+          created_at?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["mkt_sync_kind"]
+          meta?: Json | null
+          rows_processed?: number
+          started_at?: string
+          status?: Database["public"]["Enums"]["mkt_sync_status"]
+        }
+        Update: {
+          account_id?: string | null
+          brand_id?: string | null
+          created_at?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["mkt_sync_kind"]
+          meta?: Json | null
+          rows_processed?: number
+          started_at?: string
+          status?: Database["public"]["Enums"]["mkt_sync_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mkt_sync_log_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_ad_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_sync_log_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mkt_tracking_events: {
+        Row: {
+          brand_id: string | null
+          created_at: string
+          event_type: string
+          fbclid: string | null
+          id: string
+          ip_hash: string | null
+          order_id: string | null
+          phone: string | null
+          product_id: string | null
+          raw: Json | null
+          referrer: string | null
+          session_id: string | null
+          url: string | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          brand_id?: string | null
+          created_at?: string
+          event_type: string
+          fbclid?: string | null
+          id?: string
+          ip_hash?: string | null
+          order_id?: string | null
+          phone?: string | null
+          product_id?: string | null
+          raw?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          url?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          brand_id?: string | null
+          created_at?: string
+          event_type?: string
+          fbclid?: string | null
+          id?: string
+          ip_hash?: string | null
+          order_id?: string | null
+          phone?: string | null
+          product_id?: string | null
+          raw?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          url?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mkt_tracking_events_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_tracking_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_tracking_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_ar_outstanding"
+            referencedColumns: ["order_id"]
+          },
+          {
+            foreignKeyName: "mkt_tracking_events_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_items: {
         Row: {
           cost_price: number | null
+          courier_cost_allocated: number
           created_at: string
+          delivery_charge_allocated: number
           discount_amount: number
           discount_type: Database["public"]["Enums"]["discount_type"] | null
           id: string
           image: string | null
+          line_discount_allocated: number
           line_total: number | null
           name: string
           order_id: string
+          packaging_cost_allocated: number
           price: number
           product_id: string
           quantity: number
+          refund_amount_allocated: number
+          source_type: string | null
+          status_snapshot: string | null
           tax_amount: number
+          unit_cost_snapshot: number | null
           unit_price: number | null
           user_id: string | null
           variant_id: string | null
@@ -754,18 +4168,26 @@ export type Database = {
         }
         Insert: {
           cost_price?: number | null
+          courier_cost_allocated?: number
           created_at?: string
+          delivery_charge_allocated?: number
           discount_amount?: number
           discount_type?: Database["public"]["Enums"]["discount_type"] | null
           id?: string
           image?: string | null
+          line_discount_allocated?: number
           line_total?: number | null
           name: string
           order_id: string
+          packaging_cost_allocated?: number
           price: number
           product_id: string
           quantity?: number
+          refund_amount_allocated?: number
+          source_type?: string | null
+          status_snapshot?: string | null
           tax_amount?: number
+          unit_cost_snapshot?: number | null
           unit_price?: number | null
           user_id?: string | null
           variant_id?: string | null
@@ -773,18 +4195,26 @@ export type Database = {
         }
         Update: {
           cost_price?: number | null
+          courier_cost_allocated?: number
           created_at?: string
+          delivery_charge_allocated?: number
           discount_amount?: number
           discount_type?: Database["public"]["Enums"]["discount_type"] | null
           id?: string
           image?: string | null
+          line_discount_allocated?: number
           line_total?: number | null
           name?: string
           order_id?: string
+          packaging_cost_allocated?: number
           price?: number
           product_id?: string
           quantity?: number
+          refund_amount_allocated?: number
+          source_type?: string | null
+          status_snapshot?: string | null
           tax_amount?: number
+          unit_cost_snapshot?: number | null
           unit_price?: number | null
           user_id?: string | null
           variant_id?: string | null
@@ -797,6 +4227,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "orders"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_ar_outstanding"
+            referencedColumns: ["order_id"]
           },
           {
             foreignKeyName: "order_items_product_id_fkey"
@@ -896,11 +4333,19 @@ export type Database = {
       }
       orders: {
         Row: {
+          actual_shipping_breakdown: Json | null
+          actual_shipping_cost: number | null
+          actual_shipping_recorded_at: string | null
+          actual_shipping_source: string | null
           admin_notes: string | null
           advance_amount: number
+          advance_payment_number: string | null
+          advance_source: string | null
+          advance_txn_id: string | null
           alternate_phone: string | null
           assigned_to: string | null
           auto_call_enabled: boolean | null
+          brand_id: string | null
           call_attempt_count: number
           call_status: Database["public"]["Enums"]["call_status"]
           cancel_reason: string | null
@@ -932,6 +4377,7 @@ export type Database = {
           id: string
           in_transit_at: string | null
           internal_note: string | null
+          invoice_no: string | null
           is_cross_sale: boolean
           is_guest_order: boolean
           is_preorder: boolean
@@ -942,7 +4388,14 @@ export type Database = {
           order_tags: string[]
           packaged_at: string | null
           packaged_by: string | null
+          paid_at: string | null
           partial_amount: number | null
+          pathao_area_id: number | null
+          pathao_area_name: string | null
+          pathao_city_id: number | null
+          pathao_city_name: string | null
+          pathao_zone_id: number | null
+          pathao_zone_name: string | null
           payment_method: string | null
           payment_source: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
@@ -980,11 +4433,19 @@ export type Database = {
           web_status: Database["public"]["Enums"]["web_order_status"] | null
         }
         Insert: {
+          actual_shipping_breakdown?: Json | null
+          actual_shipping_cost?: number | null
+          actual_shipping_recorded_at?: string | null
+          actual_shipping_source?: string | null
           admin_notes?: string | null
           advance_amount?: number
+          advance_payment_number?: string | null
+          advance_source?: string | null
+          advance_txn_id?: string | null
           alternate_phone?: string | null
           assigned_to?: string | null
           auto_call_enabled?: boolean | null
+          brand_id?: string | null
           call_attempt_count?: number
           call_status?: Database["public"]["Enums"]["call_status"]
           cancel_reason?: string | null
@@ -1016,6 +4477,7 @@ export type Database = {
           id?: string
           in_transit_at?: string | null
           internal_note?: string | null
+          invoice_no?: string | null
           is_cross_sale?: boolean
           is_guest_order?: boolean
           is_preorder?: boolean
@@ -1026,7 +4488,14 @@ export type Database = {
           order_tags?: string[]
           packaged_at?: string | null
           packaged_by?: string | null
+          paid_at?: string | null
           partial_amount?: number | null
+          pathao_area_id?: number | null
+          pathao_area_name?: string | null
+          pathao_city_id?: number | null
+          pathao_city_name?: string | null
+          pathao_zone_id?: number | null
+          pathao_zone_name?: string | null
           payment_method?: string | null
           payment_source?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
@@ -1064,11 +4533,19 @@ export type Database = {
           web_status?: Database["public"]["Enums"]["web_order_status"] | null
         }
         Update: {
+          actual_shipping_breakdown?: Json | null
+          actual_shipping_cost?: number | null
+          actual_shipping_recorded_at?: string | null
+          actual_shipping_source?: string | null
           admin_notes?: string | null
           advance_amount?: number
+          advance_payment_number?: string | null
+          advance_source?: string | null
+          advance_txn_id?: string | null
           alternate_phone?: string | null
           assigned_to?: string | null
           auto_call_enabled?: boolean | null
+          brand_id?: string | null
           call_attempt_count?: number
           call_status?: Database["public"]["Enums"]["call_status"]
           cancel_reason?: string | null
@@ -1100,6 +4577,7 @@ export type Database = {
           id?: string
           in_transit_at?: string | null
           internal_note?: string | null
+          invoice_no?: string | null
           is_cross_sale?: boolean
           is_guest_order?: boolean
           is_preorder?: boolean
@@ -1110,7 +4588,14 @@ export type Database = {
           order_tags?: string[]
           packaged_at?: string | null
           packaged_by?: string | null
+          paid_at?: string | null
           partial_amount?: number | null
+          pathao_area_id?: number | null
+          pathao_area_name?: string | null
+          pathao_city_id?: number | null
+          pathao_city_name?: string | null
+          pathao_zone_id?: number | null
+          pathao_zone_name?: string | null
           payment_method?: string | null
           payment_source?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
@@ -1148,6 +4633,13 @@ export type Database = {
           web_status?: Database["public"]["Enums"]["web_order_status"] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_delivery_area_id_fkey"
             columns: ["delivery_area_id"]
@@ -1359,8 +4851,11 @@ export type Database = {
       }
       products: {
         Row: {
+          barcode: string | null
           benefits: Json
+          brand_id: string | null
           category_id: string | null
+          cost_price: number
           created_at: string
           description: string
           display_order: number
@@ -1374,9 +4869,11 @@ export type Database = {
           old_price: number | null
           price: number
           rating: number
+          reorder_point: number | null
           reviews: number
           shipping_fee_inside: number | null
           shipping_fee_outside: number | null
+          sku: string | null
           slug: string
           specs: Json
           stock: number
@@ -1384,8 +4881,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          barcode?: string | null
           benefits?: Json
+          brand_id?: string | null
           category_id?: string | null
+          cost_price?: number
           created_at?: string
           description?: string
           display_order?: number
@@ -1399,9 +4899,11 @@ export type Database = {
           old_price?: number | null
           price: number
           rating?: number
+          reorder_point?: number | null
           reviews?: number
           shipping_fee_inside?: number | null
           shipping_fee_outside?: number | null
+          sku?: string | null
           slug: string
           specs?: Json
           stock?: number
@@ -1409,8 +4911,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          barcode?: string | null
           benefits?: Json
+          brand_id?: string | null
           category_id?: string | null
+          cost_price?: number
           created_at?: string
           description?: string
           display_order?: number
@@ -1424,9 +4929,11 @@ export type Database = {
           old_price?: number | null
           price?: number
           rating?: number
+          reorder_point?: number | null
           reviews?: number
           shipping_fee_inside?: number | null
           shipping_fee_outside?: number | null
+          sku?: string | null
           slug?: string
           specs?: Json
           stock?: number
@@ -1434,6 +4941,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "products_category_id_fkey"
             columns: ["category_id"]
@@ -1549,6 +5063,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_ar_outstanding"
+            referencedColumns: ["order_id"]
+          },
+          {
             foreignKeyName: "reviews_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
@@ -1604,44 +5125,89 @@ export type Database = {
       }
       stock_movements: {
         Row: {
+          brand_id: string | null
           created_at: string
           delta: number
           id: string
+          idempotency_key: string | null
           note: string | null
           product_id: string
           reason: string
+          reference_id: string | null
+          reference_type: string | null
           stock_after: number
           stock_before: number
+          total_cost_bdt: number | null
+          unit_cost_bdt: number | null
           user_id: string
+          variant_id: string | null
+          warehouse_id: string | null
         }
         Insert: {
+          brand_id?: string | null
           created_at?: string
           delta: number
           id?: string
+          idempotency_key?: string | null
           note?: string | null
           product_id: string
           reason?: string
+          reference_id?: string | null
+          reference_type?: string | null
           stock_after: number
           stock_before: number
+          total_cost_bdt?: number | null
+          unit_cost_bdt?: number | null
           user_id: string
+          variant_id?: string | null
+          warehouse_id?: string | null
         }
         Update: {
+          brand_id?: string | null
           created_at?: string
           delta?: number
           id?: string
+          idempotency_key?: string | null
           note?: string | null
           product_id?: string
           reason?: string
+          reference_id?: string | null
+          reference_type?: string | null
           stock_after?: number
           stock_before?: number
+          total_cost_bdt?: number | null
+          unit_cost_bdt?: number | null
           user_id?: string
+          variant_id?: string | null
+          warehouse_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "stock_movements_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "stock_movements_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
             referencedColumns: ["id"]
           },
         ]
@@ -1666,6 +5232,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      warehouses: {
+        Row: {
+          address: string | null
+          brand_id: string
+          code: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          brand_id: string
+          code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          brand_id?: string
+          code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "warehouses_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -1738,6 +5348,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_ar_outstanding"
+            referencedColumns: ["order_id"]
+          },
+          {
             foreignKeyName: "reviews_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
@@ -1746,8 +5363,168 @@ export type Database = {
           },
         ]
       }
+      v_ap_outstanding: {
+        Row: {
+          age_days: number | null
+          amount: number | null
+          bill_date: string | null
+          bill_id: string | null
+          bill_no: string | null
+          brand_id: string | null
+          due_date: string | null
+          outstanding: number | null
+          paid_amount: number | null
+          status: string | null
+          supplier_id: string | null
+          supplier_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_bills_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "erp_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_ar_outstanding: {
+        Row: {
+          age_days: number | null
+          brand_id: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          invoice_amount: number | null
+          invoice_date: string | null
+          order_id: string | null
+          order_status: string | null
+          outstanding: number | null
+          paid: number | null
+          payment_method: string | null
+          payment_status: Database["public"]["Enums"]["payment_status"] | null
+          prepaid: number | null
+        }
+        Insert: {
+          age_days?: never
+          brand_id?: string | null
+          customer_name?: never
+          customer_phone?: never
+          invoice_amount?: number | null
+          invoice_date?: never
+          order_id?: string | null
+          order_status?: never
+          outstanding?: never
+          paid?: never
+          payment_method?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
+          prepaid?: never
+        }
+        Update: {
+          age_days?: never
+          brand_id?: string | null
+          customer_name?: never
+          customer_phone?: never
+          invoice_amount?: number | null
+          invoice_date?: never
+          order_id?: string | null
+          order_status?: never
+          outstanding?: never
+          paid?: never
+          payment_method?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
+          prepaid?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_product_incoming: {
+        Row: {
+          brand_id: string | null
+          incoming: number | null
+          product_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imp_po_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_purchase_orders_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      _advance_date: {
+        Args: { _d: string; _freq: string; _n: number }
+        Returns: string
+      }
+      _imp_has_any_role: {
+        Args: { _roles: string[]; _user: string }
+        Returns: boolean
+      }
+      _imp_log: {
+        Args: {
+          _action: string
+          _after?: Json
+          _before?: Json
+          _brand: string
+          _entity_id: string
+          _entity_type: string
+          _new: string
+          _notes: string
+          _prev: string
+          _user: string
+        }
+        Returns: undefined
+      }
+      _imp_post_journal: {
+        Args: {
+          _brand_id: string
+          _description: string
+          _entry_date: string
+          _lines: Json
+          _source_id: string
+          _source_type: string
+          _user: string
+        }
+        Returns: string
+      }
+      _imp_record_payment: {
+        Args: {
+          _amount: number
+          _brand: string
+          _carton: string
+          _cr_account: string
+          _date: string
+          _dr_account: string
+          _idem: string
+          _notes: string
+          _po: string
+          _ptype: Database["public"]["Enums"]["imp_payment_type"]
+          _ref: string
+          _user: string
+          _wallet: string
+        }
+        Returns: string
+      }
+      _imp_refresh_po_status: { Args: { _po: string }; Returns: undefined }
+      _imp_refresh_po_totals: { Args: { _po: string }; Returns: undefined }
+      _mkt_require_staff: { Args: never; Returns: undefined }
       acquire_order_lock: {
         Args: { _force?: boolean; _order_id: string }
         Returns: {
@@ -1762,6 +5539,19 @@ export type Database = {
       add_order_note: {
         Args: { _body: string; _is_internal?: boolean; _order_id: string }
         Returns: string
+      }
+      adjust_account_balance: {
+        Args: { _account_id: string; _delta: number; _reason: string }
+        Returns: string
+      }
+      adjust_product_stock: {
+        Args: {
+          _delta: number
+          _note?: string
+          _product_id: string
+          _reason: string
+        }
+        Returns: Json
       }
       admin_rls_audit: {
         Args: never
@@ -1780,12 +5570,264 @@ export type Database = {
         Args: { _entry: Json; _log_field: string; _order_id: string }
         Returns: undefined
       }
+      backfill_order_profit_snapshots: {
+        Args: { p_brand_id: string }
+        Returns: number
+      }
+      create_bill: {
+        Args: {
+          _amount: number
+          _ap_account_id: string
+          _bill_date: string
+          _bill_no: string
+          _brand_id: string
+          _description?: string
+          _due_date: string
+          _expense_account_id: string
+          _supplier_id: string
+        }
+        Returns: string
+      }
+      create_journal_entry: {
+        Args: {
+          _brand_id: string
+          _description: string
+          _entry_date: string
+          _lines: Json
+          _source_id?: string
+          _source_type?: string
+          _status?: string
+        }
+        Returns: string
+      }
+      current_cargo_agent_id: { Args: never; Returns: string }
+      erp_profit_loss: {
+        Args: { _brand_id: string; _from: string; _to: string }
+        Returns: Json
+      }
       finalize_order_on_confirm: {
         Args: { _order_id: string }
         Returns: undefined
       }
+      get_actual_roas_daily: {
+        Args: { p_brand_id: string; p_from: string; p_to: string }
+        Returns: {
+          actual_roas: number
+          attributed_orders: number
+          collected: number
+          day: string
+          delivered_orders: number
+          meta_roas: number
+          net_profit: number
+          poas: number
+          revenue: number
+          spend: number
+        }[]
+      }
+      get_ad_report: {
+        Args: { p_brand_id: string; p_from: string; p_to: string }
+        Returns: {
+          actual_roas: number
+          ad_id: string
+          ad_name: string
+          attributed_orders: number
+          campaign_name: string
+          clicks: number
+          delivered_orders: number
+          external_ad_id: string
+          impressions: number
+          net_profit: number
+          poas: number
+          revenue: number
+          spend: number
+          thumbnail_url: string
+        }[]
+      }
+      get_adset_report: {
+        Args: { p_brand_id: string; p_from: string; p_to: string }
+        Returns: {
+          actual_roas: number
+          adset_id: string
+          adset_name: string
+          attributed_orders: number
+          campaign_name: string
+          clicks: number
+          delivered_orders: number
+          external_adset_id: string
+          impressions: number
+          net_profit: number
+          poas: number
+          revenue: number
+          spend: number
+        }[]
+      }
+      get_balance_sheet: {
+        Args: { _as_of: string; _brand_id: string }
+        Returns: Json
+      }
+      get_brand_profitability_rollup: {
+        Args: {
+          p_brand_id: string
+          p_date_basis?: string
+          p_date_from?: string
+          p_date_to?: string
+        }
+        Returns: {
+          cogs: number
+          confirmed_qty: number
+          courier_cost: number
+          current_stock: number
+          delivered_qty: number
+          exchange_loss: number
+          gross_profit: number
+          image: string
+          marketing_content: number
+          meta_ads: number
+          name: string
+          net_profit: number
+          product_id: string
+          profit_per_unit: number
+          return_loss: number
+          returned_qty: number
+          revenue: number
+          roi_percent: number
+          sku: string
+        }[]
+      }
+      get_campaign_report: {
+        Args: { p_brand_id: string; p_from: string; p_to: string }
+        Returns: {
+          actual_roas: number
+          attributed_orders: number
+          campaign_id: string
+          campaign_name: string
+          clicks: number
+          collected: number
+          delivered_orders: number
+          delivery_rate: number
+          external_campaign_id: string
+          health: string
+          impressions: number
+          meta_purchases: number
+          meta_roas: number
+          meta_value: number
+          net_profit: number
+          poas: number
+          product_cost: number
+          return_rate: number
+          returned_orders: number
+          revenue: number
+          spend: number
+          status: string
+        }[]
+      }
+      get_cargo_agent_balance: { Args: { _agent_id: string }; Returns: number }
+      get_courier_campaign_report: {
+        Args: { p_brand_id: string; p_from: string; p_to: string }
+        Returns: {
+          attributed_orders: number
+          campaign_id: string
+          campaign_name: string
+          courier_cost: number
+          delivered_orders: number
+          delivery_rate: number
+          provider: string
+          return_rate: number
+          returned_orders: number
+        }[]
+      }
       get_customer_stats: { Args: { p_user_id: string }; Returns: Json }
+      get_finance_dashboard: {
+        Args: { _brand_id: string; _from: string; _to: string }
+        Returns: Json
+      }
+      get_fx_rate: {
+        Args: { p_brand: string; p_date: string; p_from: string; p_to: string }
+        Returns: number
+      }
+      get_general_ledger: {
+        Args: {
+          _account_id: string
+          _brand_id: string
+          _from: string
+          _to: string
+        }
+        Returns: {
+          credit: number
+          debit: number
+          description: string
+          entry_date: string
+          entry_no: string
+          running_balance: number
+        }[]
+      }
+      get_marketing_overview: {
+        Args: { p_brand_id: string; p_from: string; p_to: string }
+        Returns: Json
+      }
+      get_order_courier_cost: { Args: { _order_id: string }; Returns: number }
+      get_pl_v2: {
+        Args: { _brand_id: string; _from: string; _to: string }
+        Returns: Json
+      }
+      get_product_campaign_report: {
+        Args: { p_brand_id: string; p_from: string; p_to: string }
+        Returns: {
+          attributed_orders: number
+          campaign_id: string
+          campaign_name: string
+          delivered_orders: number
+          product_cost: number
+          product_id: string
+          product_name: string
+          revenue: number
+          units_sold: number
+        }[]
+      }
+      get_product_profitability_report: {
+        Args: {
+          p_brand_id: string
+          p_couriers?: string[]
+          p_date_basis?: string
+          p_date_from?: string
+          p_date_to?: string
+          p_product_id: string
+          p_sources?: string[]
+          p_variant_id?: string
+        }
+        Returns: Json
+      }
+      get_trial_balance: {
+        Args: { _as_of: string; _brand_id: string }
+        Returns: {
+          account_id: string
+          account_type: string
+          balance: number
+          code: string
+          name: string
+          normal_balance: string
+          total_credit: number
+          total_debit: number
+        }[]
+      }
+      get_vat_summary: {
+        Args: { p_brand: string; p_from: string; p_to: string }
+        Returns: {
+          input_tax: number
+          input_taxable: number
+          net_payable: number
+          output_tax: number
+          output_taxable: number
+          rate: number
+          tax_code: string
+          tax_name: string
+        }[]
+      }
       hard_delete_order: { Args: { _order_id: string }; Returns: undefined }
+      has_brand_access: {
+        Args: { _brand_id: string; _user_id?: string }
+        Returns: boolean
+      }
       has_permission: {
         Args: { _permission: string; _user_id: string }
         Returns: boolean
@@ -1798,27 +5840,351 @@ export type Database = {
         Returns: boolean
       }
       heartbeat_order_lock: { Args: { _order_id: string }; Returns: undefined }
+      imp_create_po: { Args: { _payload: Json }; Returns: Json }
+      imp_get_or_create_account: {
+        Args: {
+          _brand: string
+          _code: string
+          _name: string
+          _normal: string
+          _type: string
+        }
+        Returns: string
+      }
+      imp_mark_arrived: { Args: { _payload: Json }; Returns: Json }
+      imp_next_po_number: { Args: { _brand: string }; Returns: string }
+      imp_post_to_inventory: { Args: { _payload: Json }; Returns: Json }
+      imp_quick_create_product: {
+        Args: { _brand: string; _image?: string; _sku?: string; _title: string }
+        Returns: Json
+      }
+      imp_record_payment_rpc: { Args: { _payload: Json }; Returns: Json }
+      imp_release_carton: { Args: { _payload: Json }; Returns: Json }
+      imp_update_carton_stage: {
+        Args: { _carton: string; _new_stage: string; _notes?: string }
+        Returns: undefined
+      }
       is_admin: { Args: never; Returns: boolean }
+      is_finance_staff: { Args: { _uid: string }; Returns: boolean }
       is_guest_order: { Args: { _order_id: string }; Returns: boolean }
+      is_marketing_staff: { Args: { _uid: string }; Returns: boolean }
       is_recent_guest_order: { Args: { _order_id: string }; Returns: boolean }
       log_order_view: { Args: { p_order_id: string }; Returns: undefined }
       mark_abandoned_cart_converted: {
         Args: { _id: string; _order_id: string }
         Returns: undefined
       }
+      match_statement_line: {
+        Args: { _journal_line_id: string; _line_id: string }
+        Returns: undefined
+      }
+      mkt_attribution_explorer: {
+        Args: {
+          p_brand_id: string
+          p_campaign_id?: string
+          p_from: string
+          p_limit?: number
+          p_source?: string
+          p_to: string
+        }
+        Returns: {
+          ad_id: string
+          ad_name: string
+          adset_id: string
+          adset_name: string
+          allocated_ad_spend: number
+          campaign_id: string
+          campaign_name: string
+          is_delivered: boolean
+          is_returned: boolean
+          medium: string
+          net_profit: number
+          net_sales: number
+          order_created_at: string
+          order_id: string
+          order_status: string
+          source: string
+        }[]
+      }
+      mkt_campaign_summary: {
+        Args: {
+          p_brand_id: string
+          p_campaign_id: string
+          p_from: string
+          p_to: string
+        }
+        Returns: Json
+      }
+      mkt_courier_campaign_report: {
+        Args: { p_brand_id: string; p_from: string; p_to: string }
+        Returns: {
+          campaign_id: string
+          campaign_name: string
+          courier_provider: string
+          delivered_orders: number
+          delivery_rate: number
+          net_profit: number
+          net_revenue: number
+          return_rate: number
+          returned_orders: number
+          total_orders: number
+        }[]
+      }
+      mkt_get_campaign_daily_rollup: {
+        Args: { p_brand_id: string; p_from: string; p_to: string }
+        Returns: {
+          ad_spend: number
+          campaign_id: string
+          campaign_name: string
+          cancelled_orders: number
+          clicks: number
+          day: string
+          delivered_orders: number
+          delivery_rate: number
+          external_campaign_id: string
+          gross_revenue: number
+          health: string
+          impressions: number
+          net_profit: number
+          net_revenue: number
+          orders_attributed: number
+          poas: number
+          real_roas: number
+          return_rate: number
+          returned_orders: number
+        }[]
+      }
+      mkt_get_overview_kpis: {
+        Args: { p_brand_id: string; p_from: string; p_to: string }
+        Returns: Json
+      }
+      mkt_health_checks: {
+        Args: { p_brand_id: string; p_from: string; p_to: string }
+        Returns: {
+          category: string
+          detail: string
+          metric: number
+          ref_id: string
+          ref_label: string
+          severity: string
+          title: string
+        }[]
+      }
+      mkt_ingest_track: {
+        Args: {
+          p_event_name: string
+          p_origin: string
+          p_payload: Json
+          p_session_id: string
+          p_site_key: string
+        }
+        Returns: Json
+      }
+      mkt_list_ads: {
+        Args: {
+          p_adset_id: string
+          p_brand_id: string
+          p_from: string
+          p_to: string
+        }
+        Returns: {
+          ad_id: string
+          ad_spend: number
+          clicks: number
+          creative_name: string
+          delivered_orders: number
+          effective_status: string
+          external_ad_id: string
+          impressions: number
+          name: string
+          net_profit: number
+          net_revenue: number
+          orders_attributed: number
+          poas: number
+          preview_url: string
+          real_roas: number
+          status: string
+          thumbnail_url: string
+        }[]
+      }
+      mkt_list_adsets: {
+        Args: {
+          p_brand_id: string
+          p_campaign_id: string
+          p_from: string
+          p_to: string
+        }
+        Returns: {
+          ad_spend: number
+          adset_id: string
+          clicks: number
+          daily_budget: number
+          delivered_orders: number
+          effective_status: string
+          external_adset_id: string
+          impressions: number
+          lifetime_budget: number
+          name: string
+          net_profit: number
+          net_revenue: number
+          orders_attributed: number
+          poas: number
+          real_roas: number
+          status: string
+        }[]
+      }
+      mkt_list_campaigns: {
+        Args: { p_brand_id: string; p_from: string; p_to: string }
+        Returns: {
+          ad_spend: number
+          campaign_id: string
+          clicks: number
+          delivered_orders: number
+          effective_status: string
+          external_campaign_id: string
+          impressions: number
+          name: string
+          net_profit: number
+          net_revenue: number
+          objective: string
+          orders_attributed: number
+          poas: number
+          real_roas: number
+          returned_orders: number
+          status: string
+        }[]
+      }
+      mkt_post_meta_spend_day: {
+        Args: { p_brand_id: string; p_day: string; p_force?: boolean }
+        Returns: Json
+      }
+      mkt_post_meta_spend_window: {
+        Args: { p_brand_id: string; p_days?: number; p_force?: boolean }
+        Returns: Json
+      }
+      mkt_product_campaign_report: {
+        Args: { p_brand_id: string; p_from: string; p_to: string }
+        Returns: {
+          campaign_id: string
+          campaign_name: string
+          delivered_units: number
+          gross_revenue: number
+          product_cost: number
+          product_id: string
+          product_name: string
+          returned_units: number
+          units_sold: number
+        }[]
+      }
+      mkt_rebuild_window: {
+        Args: { p_brand_id: string; p_days?: number; p_trigger?: string }
+        Returns: Json
+      }
+      next_invoice_no: { Args: { _brand_id: string }; Returns: string }
+      normalize_mobile_bd: { Args: { p_phone: string }; Returns: string }
+      reapply_invoice_prefix: { Args: { _brand_id: string }; Returns: number }
+      rebuild_all_marketing_attributions: {
+        Args: { p_brand_id: string; p_from: string; p_to: string }
+        Returns: number
+      }
+      rebuild_marketing_profit_snapshot: {
+        Args: { p_order_id: string }
+        Returns: string
+      }
+      rebuild_marketing_profit_snapshots: {
+        Args: { p_brand_id: string; p_from: string; p_to: string }
+        Returns: number
+      }
+      rebuild_meta_product_allocations_for_campaign: {
+        Args: { p_campaign_id: string; p_since?: string; p_until?: string }
+        Returns: undefined
+      }
+      rebuild_order_attribution: {
+        Args: { p_order_id: string }
+        Returns: string
+      }
       recalc_product_rating: {
         Args: { _product_id: string }
         Returns: undefined
       }
+      record_ar_payment: {
+        Args: {
+          _amount: number
+          _ar_account_id: string
+          _cash_account_id: string
+          _notes?: string
+          _order_id: string
+          _payment_date?: string
+          _reference_no?: string
+        }
+        Returns: string
+      }
+      record_bill_payment: {
+        Args: {
+          _amount: number
+          _bill_id: string
+          _cash_account_id: string
+          _notes?: string
+          _payment_date?: string
+          _reference_no?: string
+        }
+        Returns: string
+      }
+      record_courier_expense: {
+        Args: { _account_id?: string; _amount: number; _shipment_id: string }
+        Returns: string
+      }
+      record_order_courier_expense: {
+        Args: { _account_id?: string; _amount: number; _order_id: string }
+        Returns: string
+      }
+      record_supplier_payment: {
+        Args: {
+          _account_id: string
+          _amount: number
+          _notes?: string
+          _payment_date: string
+          _reference_no?: string
+          _supplier_id: string
+        }
+        Returns: string
+      }
       release_order_lock: { Args: { _order_id: string }; Returns: undefined }
       release_stock: { Args: { _order_id: string }; Returns: undefined }
       reserve_stock: { Args: { _order_id: string }; Returns: undefined }
+      run_recurring_rules: { Args: { _brand_id?: string }; Returns: Json }
+      seed_default_coa: { Args: { _brand_id: string }; Returns: number }
+      set_product_stock: {
+        Args: {
+          _new_qty: number
+          _note?: string
+          _product_id: string
+          _reason?: string
+        }
+        Returns: Json
+      }
+      snapshot_order_item_profit_fields: {
+        Args: { _order_id: string }
+        Returns: undefined
+      }
       transition_order_status: {
         Args: {
           _new_status: Database["public"]["Enums"]["order_status"]
           _note?: string
           _order_id: string
           _reason?: string
+        }
+        Returns: undefined
+      }
+      unmatch_statement_line: { Args: { _line_id: string }; Returns: undefined }
+      update_product_inventory_fields: {
+        Args: {
+          _barcode?: string
+          _cost_price?: number
+          _low_stock_threshold?: number
+          _product_id: string
+          _reorder_point?: number
+          _sku?: string
         }
         Returns: undefined
       }
@@ -1854,6 +6220,10 @@ export type Database = {
           value: number
         }[]
       }
+      void_journal_entry: {
+        Args: { _entry_id: string; _reason: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role:
@@ -1866,6 +6236,7 @@ export type Database = {
         | "accountant"
         | "marketing_manager"
         | "warehouse_staff"
+        | "cargo_agent"
       call_status:
         | "not_called"
         | "attempting"
@@ -1884,6 +6255,55 @@ export type Database = {
         | "advance_pending"
       coupon_type: "percentage" | "fixed"
       discount_type: "flat" | "percent"
+      imp_agent_ledger_dir: "credit" | "debit"
+      imp_agent_ledger_kind:
+        | "deposit"
+        | "payment"
+        | "adjustment"
+        | "refund"
+        | "opening_balance"
+      imp_carton_status:
+        | "ordered"
+        | "at_china_warehouse"
+        | "in_transit"
+        | "arrived_bd"
+        | "released"
+        | "in_stock"
+        | "cancelled"
+      imp_payment_type:
+        | "supplier_advance"
+        | "supplier_payment"
+        | "shipping"
+        | "carton_release"
+        | "supplier_balance"
+        | "local_courier"
+        | "adjustment"
+      imp_po_status:
+        | "pending_review"
+        | "ordered"
+        | "at_china_warehouse"
+        | "in_transit"
+        | "arrived_bd"
+        | "partially_received"
+        | "completed"
+        | "cancelled"
+      mkt_account_status: "active" | "paused" | "error" | "disconnected"
+      mkt_attribution_source:
+        | "utm"
+        | "pixel"
+        | "manual"
+        | "product_link"
+        | "phone_match"
+      mkt_expense_category:
+        | "influencer"
+        | "content"
+        | "photoshoot"
+        | "agency"
+        | "boost"
+        | "other"
+        | "meta_ads"
+      mkt_sync_kind: "structure" | "insights" | "attribution" | "finance_post"
+      mkt_sync_status: "running" | "success" | "error"
       order_priority: "low" | "normal" | "high" | "urgent"
       order_source: "website" | "facebook" | "manual" | "phone"
       order_status:
@@ -1911,6 +6331,7 @@ export type Database = {
         | "unpaid_return"
         | "partial_return"
         | "pending_return"
+        | "paid"
       payment_status: "unpaid" | "partial" | "paid" | "refunded"
       web_order_status:
         | "processing"
@@ -2058,6 +6479,7 @@ export const Constants = {
         "accountant",
         "marketing_manager",
         "warehouse_staff",
+        "cargo_agent",
       ],
       call_status: [
         "not_called",
@@ -2079,6 +6501,61 @@ export const Constants = {
       ],
       coupon_type: ["percentage", "fixed"],
       discount_type: ["flat", "percent"],
+      imp_agent_ledger_dir: ["credit", "debit"],
+      imp_agent_ledger_kind: [
+        "deposit",
+        "payment",
+        "adjustment",
+        "refund",
+        "opening_balance",
+      ],
+      imp_carton_status: [
+        "ordered",
+        "at_china_warehouse",
+        "in_transit",
+        "arrived_bd",
+        "released",
+        "in_stock",
+        "cancelled",
+      ],
+      imp_payment_type: [
+        "supplier_advance",
+        "supplier_payment",
+        "shipping",
+        "carton_release",
+        "supplier_balance",
+        "local_courier",
+        "adjustment",
+      ],
+      imp_po_status: [
+        "pending_review",
+        "ordered",
+        "at_china_warehouse",
+        "in_transit",
+        "arrived_bd",
+        "partially_received",
+        "completed",
+        "cancelled",
+      ],
+      mkt_account_status: ["active", "paused", "error", "disconnected"],
+      mkt_attribution_source: [
+        "utm",
+        "pixel",
+        "manual",
+        "product_link",
+        "phone_match",
+      ],
+      mkt_expense_category: [
+        "influencer",
+        "content",
+        "photoshoot",
+        "agency",
+        "boost",
+        "other",
+        "meta_ads",
+      ],
+      mkt_sync_kind: ["structure", "insights", "attribution", "finance_post"],
+      mkt_sync_status: ["running", "success", "error"],
       order_priority: ["low", "normal", "high", "urgent"],
       order_source: ["website", "facebook", "manual", "phone"],
       order_status: [
@@ -2106,6 +6583,7 @@ export const Constants = {
         "unpaid_return",
         "partial_return",
         "pending_return",
+        "paid",
       ],
       payment_status: ["unpaid", "partial", "paid", "refunded"],
       web_order_status: [
