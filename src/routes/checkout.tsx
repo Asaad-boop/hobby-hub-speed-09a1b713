@@ -362,6 +362,8 @@ function Checkout() {
         name: i.product.title,
         image: i.product.image,
         price: i.product.price,
+        unit_price: i.product.price,
+        line_total: i.product.price * i.qty,
         quantity: i.qty,
         variant_id: i.variantId ?? null,
         variant_label: i.variantLabel ?? null,

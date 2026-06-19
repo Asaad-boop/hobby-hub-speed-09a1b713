@@ -10,6 +10,8 @@ type OrderItemInput = {
   name: string;
   image: string | null;
   price: number;
+  unit_price?: number;
+  line_total?: number;
   quantity: number;
   variant_id?: string | null;
   variant_label?: string | null;

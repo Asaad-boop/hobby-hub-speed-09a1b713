@@ -12,7 +12,8 @@ export default function ProductCard({ product }: { product: Product }) {
   const navigate = useNavigate();
   const liked = has(product.id);
   const off = Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100);
-  const lowStock = product.stock <= 8;
+  const outOfStock = product.stock <= 0;
+  const lowStock = !outOfStock && product.stock <= 8;
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-elevated)] md:rounded-2xl">
@@ -48,6 +49,16 @@ export default function ProductCard({ product }: { product: Product }) {
           <span className="absolute left-2 bottom-2 rounded-md bg-amber-500/95 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white shadow-md backdrop-blur md:left-3 md:bottom-3 md:rounded-full">
             Only {product.stock} left
           </span>
+        )}
+
+        {/* Out of stock overlay */}
+        {outOfStock && (
+          <>
+            <div className="pointer-events-none absolute inset-0 bg-background/60 backdrop-blur-[1px]" />
+            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-destructive px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide text-destructive-foreground shadow-lg">
+              Out of Stock
+            </span>
+          </>
         )}
 
         {/* Wishlist */}
@@ -101,8 +112,9 @@ export default function ProductCard({ product }: { product: Product }) {
               add(product);
               toast.success("Added to cart");
             }}
+            disabled={outOfStock}
             aria-label="Add to cart"
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground transition active:scale-95 hover:border-foreground hover:bg-muted md:h-10 md:w-10"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground transition active:scale-95 hover:border-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-border disabled:hover:bg-background md:h-10 md:w-10"
           >
             <ShoppingBag className="h-3.5 w-3.5 md:h-4 md:w-4" />
           </button>
@@ -111,9 +123,10 @@ export default function ProductCard({ product }: { product: Product }) {
               add(product);
               navigate({ to: "/checkout" });
             }}
-            className="inline-flex h-8 flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-full bg-gradient-to-r from-primary to-primary/85 px-2.5 text-[11.5px] font-bold text-primary-foreground shadow-md transition active:scale-[0.98] hover:opacity-95 hover:shadow-lg md:h-10 md:px-3 md:text-sm"
+            disabled={outOfStock}
+            className="inline-flex h-8 flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-full bg-gradient-to-r from-primary to-primary/85 px-2.5 text-[11.5px] font-bold text-primary-foreground shadow-md transition active:scale-[0.98] hover:opacity-95 hover:shadow-lg disabled:cursor-not-allowed disabled:from-muted disabled:to-muted disabled:text-muted-foreground disabled:shadow-none disabled:hover:opacity-100 md:h-10 md:px-3 md:text-sm"
           >
-            <Zap className="h-3 w-3 md:h-4 md:w-4" /> Buy Now
+            {outOfStock ? "Sold Out" : (<><Zap className="h-3 w-3 md:h-4 md:w-4" /> Buy Now</>)}
           </button>
         </div>
       </div>
