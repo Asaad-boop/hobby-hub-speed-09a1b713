@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProductByIdOrSlug, type Product } from "@/lib/products";
+import { placeOrder } from "@/lib/place-order.functions";
 import reviewPhoto1 from "@/assets/review-customer-1.webp";
 import reviewPhoto2 from "@/assets/review-customer-2.webp";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
@@ -193,6 +195,7 @@ const FAQS = [
 function LandingPage() {
   const { car, plane } = Route.useLoaderData() as { car: Product | null; plane: Product | null };
   const navigate = useNavigate();
+  const placeOrderFn = useServerFn(placeOrder);
 
   const [variant, setVariant] = useState<"single" | "combo">("combo");
   const [qty, setQty] = useState(1);
@@ -302,19 +305,6 @@ function LandingPage() {
           }
         : { ...baseOrder, user_id: session!.user.id };
 
-      const { data: order, error: orderErr } = await supabase
-        .from("orders")
-        .insert(orderInsert)
-        .select("id")
-        .single();
-
-      if (orderErr || !order) {
-        console.error("Order insert failed:", orderErr);
-        toast.error(orderErr?.message ? `Order falure: ${orderErr.message}` : "Order place hocche na, abar try korun.");
-        setSubmitting(false);
-        return;
-      }
-
       // Combo => 2 line items (Car + Plane), each at half-combo-price so total matches.
       // Single => 1 line item (Car) at single price.
       const userId = isGuest ? null : session!.user.id;
@@ -322,7 +312,6 @@ function LandingPage() {
         variant === "combo" && plane
           ? [
               {
-                order_id: order.id,
                 user_id: userId,
                 product_id: activeProduct.id,
                 name: `${activeProduct.title} — Combo (Car part)`,
@@ -333,7 +322,6 @@ function LandingPage() {
                 variant_label: variantLabel,
               },
               {
-                order_id: order.id,
                 user_id: userId,
                 product_id: plane.id,
                 name: `${plane.title} — Combo (Plane part)`,
@@ -346,7 +334,6 @@ function LandingPage() {
             ]
           : [
               {
-                order_id: order.id,
                 user_id: userId,
                 product_id: activeProduct.id,
                 name: `${activeProduct.title} — ${variantLabel}`,
@@ -358,20 +345,18 @@ function LandingPage() {
               },
             ];
 
-      const { error: itemsErr } = await supabase.from("order_items").insert(items);
-
-      if (itemsErr) {
-        console.error("Order items insert failed:", itemsErr);
-        if (!isGuest) await supabase.from("orders").delete().eq("id", order.id);
-        toast.error(`Items save hoy ni: ${itemsErr.message}`);
+      const placeRes = await placeOrderFn({ data: { order: orderInsert, items } });
+      if (!placeRes.ok) {
+        console.error("Order error:", placeRes.error, "payload:", orderInsert);
+        toast.error(placeRes.error ? `Order falure: ${placeRes.error}` : "Order place hocche na, abar try korun.");
         setSubmitting(false);
         return;
       }
 
       toast.success("Order place hoyeche! Confirm korar jonno call korbo.");
-      navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
+      navigate({ to: "/order-success/$orderId", params: { orderId: placeRes.orderId } });
     } catch (err: any) {
-      console.error("LP checkout exception:", err);
+      console.error("Order error:", err);
       toast.error(err?.message ?? "Kichu ekta vul hoyeche, abar try korun.");
       setSubmitting(false);
     }
