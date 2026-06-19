@@ -68,15 +68,16 @@ function OrderSuccessPage() {
       // Meta Pixel: Purchase — guarded above to prevent any double-fire.
       if (o && typeof window !== "undefined" && !alreadyFired) {
         fbTrack("Purchase", {
-          content_ids: o.order_items.map((it) => it.id),
+          content_ids: o.order_items.map((it) => it.product_id ?? it.id),
           contents: o.order_items.map((it) => ({
-            id: it.id,
+            id: it.product_id ?? it.id,
             quantity: it.quantity,
             item_price: it.price,
           })),
           num_items: o.order_items.reduce((s, it) => s + it.quantity, 0),
           value: o.total,
           currency: META_CURRENCY,
+          content_type: "product",
           order_id: o.id,
         });
         trackPurchase({
