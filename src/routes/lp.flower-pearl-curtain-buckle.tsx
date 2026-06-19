@@ -416,7 +416,7 @@ function CurtainBuckleLanding() {
       }));
 
       if (!placeRes.ok) {
-        console.error("LP order place failed:", placeRes.error);
+        console.error("Order error:", placeRes.error, "payload:", orderInsert);
         toast.error(
           placeRes.error
             ? `Order place hocche na: ${placeRes.error}`
@@ -428,16 +428,18 @@ function CurtainBuckleLanding() {
 
       // Mark abandoned cart as converted so it disappears from "Incomplete".
       if (abandonedId) {
-        await supabase.rpc("mark_abandoned_cart_converted", {
+        void supabase.rpc("mark_abandoned_cart_converted", {
           _id: abandonedId,
           _order_id: placeRes.orderId,
-        } as never);
+        } as never).then(({ error }) => {
+          if (error) console.warn("Abandoned cart mark failed (non-fatal):", error);
+        });
       }
 
       toast.success("Order place hoyeche! Confirm korte call korbo.");
       navigate({ to: "/order-success/$orderId", params: { orderId: placeRes.orderId } });
     } catch (err: any) {
-      console.error("LP checkout exception:", err);
+      console.error("Order error:", err);
       toast.error(err?.message ?? "Kichu ekta vul hoyeche, abar try korun.");
       setSubmitting(false);
     }
