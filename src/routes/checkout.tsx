@@ -388,28 +388,9 @@ function Checkout() {
         });
       }
 
-      // Fire Meta Pixel Purchase here (most reliable — we have all data and
-      // the user hasn't navigated yet). Mark sessionStorage so the
-      // order-success page's effect skips a duplicate fire.
-      try {
-        if (typeof window !== "undefined") {
-          sessionStorage.setItem(`fb_purchase_fired_${order.id}`, "1");
-        }
-        fbTrack("Purchase", {
-          content_ids: allItems.map((i) => i.product.id),
-          contents: allItems.map((i) => ({
-            id: i.product.id,
-            quantity: i.qty,
-            item_price: i.product.price,
-          })),
-          num_items: allItems.reduce((s, i) => s + i.qty, 0),
-          value: orderTotal,
-          currency: META_CURRENCY,
-          order_id: order.id,
-        });
-      } catch (e) {
-        console.warn("Pixel Purchase fire failed:", e);
-      }
+      // Meta Pixel Purchase fires on /order-success page (single source of
+      // truth, deduped per order). Firing here would race with navigation
+      // and the fbq request often gets cancelled before reaching Meta.
 
       try {
         clear();
