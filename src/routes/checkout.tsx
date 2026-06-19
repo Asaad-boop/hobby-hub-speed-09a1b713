@@ -404,12 +404,12 @@ function Checkout() {
       // and the fbq request often gets cancelled before reaching Meta.
 
       toast.success("Order placed! We'll call you to confirm soon.");
-      await goToOrderSuccess(order.id);
+      goToOrderSuccess(order.id);
     } catch (err: any) {
       console.error("Checkout exception:", err, "createdOrderId:", createdOrderId);
       // Order was actually created — send the user to the thank-you page anyway.
       if (createdOrderId) {
-        await goToOrderSuccess(createdOrderId);
+        goToOrderSuccess(createdOrderId);
         return;
       }
       toast.error(
