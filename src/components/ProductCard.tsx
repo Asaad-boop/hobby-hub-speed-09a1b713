@@ -51,6 +51,16 @@ export default function ProductCard({ product }: { product: Product }) {
           </span>
         )}
 
+        {/* Out of stock overlay */}
+        {outOfStock && (
+          <>
+            <div className="pointer-events-none absolute inset-0 bg-background/60 backdrop-blur-[1px]" />
+            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-destructive px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide text-destructive-foreground shadow-lg">
+              Out of Stock
+            </span>
+          </>
+        )}
+
         {/* Wishlist */}
         <div className="absolute right-2 top-2 md:right-3 md:top-3">
           <button
