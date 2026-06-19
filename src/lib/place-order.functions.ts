@@ -41,7 +41,7 @@ export const placeOrder = createServerFn({ method: "POST" })
     try {
       const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.ADMIN_SERVICE_ROLE_KEY;
       const orderId = typeof data.order.id === "string" ? data.order.id : crypto.randomUUID();
-      const orderPayload = { ...data.order, id: orderId };
+      const orderPayload: Record<string, unknown> = { ...data.order, id: orderId };
       const isGuestOrder = orderPayload.is_guest_order === true && orderPayload.user_id == null;
       const supabase = serviceKey
         ? (await import("@/integrations/supabase/client.server")).supabaseAdmin
