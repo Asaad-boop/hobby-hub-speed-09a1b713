@@ -5,6 +5,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 
 type OrderItemInput = {
+  user_id?: string | null;
   product_id: string;
   name: string;
   image: string | null;
