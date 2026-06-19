@@ -230,7 +230,11 @@ function Checkout() {
       } catch {
         // ignore storage failures — navigation is the priority
       }
-      window.location.assign(successPath);
+      try {
+        window.location.assign(successPath);
+      } catch {
+        window.location.href = successPath;
+      }
       window.setTimeout(() => {
         if (!window.location.pathname.includes(`/order-success/${orderId}`)) {
           window.location.href = successPath;
@@ -408,11 +412,6 @@ function Checkout() {
 
       toast.success("Order placed! We'll call you to confirm soon.");
       await goToOrderSuccess(order.id);
-      try {
-        clear();
-      } catch (clearErr) {
-        console.warn("Cart clear failed after order placement:", clearErr);
-      }
     } catch (err: any) {
       console.error("Checkout exception:", err, "createdOrderId:", createdOrderId);
       // Order was actually created — send the user to the thank-you page anyway.
