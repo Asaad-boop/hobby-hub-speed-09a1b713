@@ -112,8 +112,9 @@ export default function ProductCard({ product }: { product: Product }) {
               add(product);
               toast.success("Added to cart");
             }}
+            disabled={outOfStock}
             aria-label="Add to cart"
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground transition active:scale-95 hover:border-foreground hover:bg-muted md:h-10 md:w-10"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground transition active:scale-95 hover:border-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-border disabled:hover:bg-background md:h-10 md:w-10"
           >
             <ShoppingBag className="h-3.5 w-3.5 md:h-4 md:w-4" />
           </button>
@@ -122,9 +123,10 @@ export default function ProductCard({ product }: { product: Product }) {
               add(product);
               navigate({ to: "/checkout" });
             }}
-            className="inline-flex h-8 flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-full bg-gradient-to-r from-primary to-primary/85 px-2.5 text-[11.5px] font-bold text-primary-foreground shadow-md transition active:scale-[0.98] hover:opacity-95 hover:shadow-lg md:h-10 md:px-3 md:text-sm"
+            disabled={outOfStock}
+            className="inline-flex h-8 flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-full bg-gradient-to-r from-primary to-primary/85 px-2.5 text-[11.5px] font-bold text-primary-foreground shadow-md transition active:scale-[0.98] hover:opacity-95 hover:shadow-lg disabled:cursor-not-allowed disabled:from-muted disabled:to-muted disabled:text-muted-foreground disabled:shadow-none disabled:hover:opacity-100 md:h-10 md:px-3 md:text-sm"
           >
-            <Zap className="h-3 w-3 md:h-4 md:w-4" /> Buy Now
+            {outOfStock ? "Sold Out" : (<><Zap className="h-3 w-3 md:h-4 md:w-4" /> Buy Now</>)}
           </button>
         </div>
       </div>
