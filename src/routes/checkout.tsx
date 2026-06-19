@@ -221,6 +221,17 @@ function Checkout() {
   const normalizedPhone = normalizePhone(form.phone);
   const phoneValid = /^01[3-9]\d{8}$/.test(normalizedPhone);
 
+  const goToOrderSuccess = async (orderId: string) => {
+    try {
+      await navigate({ to: "/order-success/$orderId", params: { orderId } });
+    } catch (navErr) {
+      console.error("Order success navigation failed:", navErr);
+      if (typeof window !== "undefined") {
+        window.location.assign(`/order-success/${orderId}`);
+      }
+    }
+  };
+
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (submitting) return;
@@ -400,14 +411,18 @@ function Checkout() {
         console.warn("Pixel Purchase fire failed:", e);
       }
 
-      clear();
+      try {
+        clear();
+      } catch (clearErr) {
+        console.warn("Cart clear failed after order placement:", clearErr);
+      }
       toast.success("Order placed! We'll call you to confirm soon.");
-      navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
+      await goToOrderSuccess(order.id);
     } catch (err: any) {
       console.error("Checkout exception:", err, "createdOrderId:", createdOrderId);
       // Order was actually created — send the user to the thank-you page anyway.
       if (createdOrderId) {
-        navigate({ to: "/order-success/$orderId", params: { orderId: createdOrderId } });
+        await goToOrderSuccess(createdOrderId);
         return;
       }
       toast.error(
