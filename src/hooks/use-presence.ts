@@ -17,12 +17,15 @@ function getSessionId(): string {
 }
 
 /**
- * Sends a heartbeat every 20s so the live dashboard can count active visitors.
- * Considered "active" if last_seen_at within the last 60s.
+ * Records the visitor once per app load for the live dashboard.
  */
+let presenceRecorded = false;
+
 export function usePresenceHeartbeat() {
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (presenceRecorded) return;
+    presenceRecorded = true;
 
     const sid = getSessionId();
     let cancelled = false;
@@ -46,16 +49,9 @@ export function usePresenceHeartbeat() {
     };
 
     ping();
-    const interval = setInterval(ping, 10_000);
-    const onVisible = () => {
-      if (document.visibilityState === "visible") ping();
-    };
-    document.addEventListener("visibilitychange", onVisible);
 
     return () => {
       cancelled = true;
-      clearInterval(interval);
-      document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
 }
