@@ -367,12 +367,14 @@ function Checkout() {
 
       // Telegram notification is sent automatically by the DB trigger (notify_telegram_on_new_order)
 
-      // Mark the abandoned cart as converted so it disappears from "Incomplete".
+      // Mark the abandoned cart as converted (fire-and-forget — must not block navigation).
       if (abandonedId) {
-        await supabase.rpc("mark_abandoned_cart_converted", {
+        void supabase.rpc("mark_abandoned_cart_converted", {
           _id: abandonedId,
           _order_id: order.id,
-        } as never);
+        } as never).then(({ error }) => {
+          if (error) console.warn("Abandoned cart mark failed (non-fatal):", error);
+        });
       }
 
       // Fire Meta Pixel Purchase here (most reliable — we have all data and
@@ -403,6 +405,11 @@ function Checkout() {
       navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
     } catch (err: any) {
       console.error("Checkout exception:", err, "createdOrderId:", createdOrderId);
+      // Order was actually created — send the user to the thank-you page anyway.
+      if (createdOrderId) {
+        navigate({ to: "/order-success/$orderId", params: { orderId: createdOrderId } });
+        return;
+      }
       toast.error(
         err?.message
           ? `Order failed: ${err.message}`
