@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { createClient } from "@supabase/supabase-js";
 import { appendOrderToSheet } from "./google-sheets.functions";
+import type { Database } from "@/integrations/supabase/types";
 
 
 type OrderItemInput = {
@@ -38,19 +39,33 @@ export const placeOrder = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.ADMIN_SERVICE_ROLE_KEY) {
-        return { ok: false as const, error: "Order service temporarily unavailable" };
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.ADMIN_SERVICE_ROLE_KEY;
+      const orderId = typeof data.order.id === "string" ? data.order.id : crypto.randomUUID();
+      const orderPayload = { ...data.order, id: orderId };
+      const isGuestOrder = orderPayload.is_guest_order === true && orderPayload.user_id == null;
+      const supabase = serviceKey
+        ? (await import("@/integrations/supabase/client.server")).supabaseAdmin
+        : isGuestOrder
+          ? createClient<Database>(
+              process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "https://bgsspipkjeuceftuatue.supabase.co",
+              process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || "",
+              { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
+            )
+          : null;
+
+      if (!supabase) {
+        const error = new Error("Missing Supabase server credentials for authenticated order placement");
+        console.error("Order error:", error);
+        return { ok: false as const, error: error.message };
       }
 
-      const { data: order, error: orderErr } = await supabaseAdmin
+      const { error: orderErr } = await supabase
         .from("orders")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .insert(data.order as any)
-        .select("id")
-        .single();
+        .insert(orderPayload as any);
 
-      if (orderErr || !order) {
-        console.error("[placeOrder] order insert failed", orderErr);
+      if (orderErr) {
+        console.error("Order error:", orderErr);
         return {
           ok: false as const,
           error: orderErr?.message || "Could not place order",
@@ -59,17 +74,17 @@ export const placeOrder = createServerFn({ method: "POST" })
 
       const itemsPayload = data.items.map((it) => ({
         ...it,
-        order_id: order.id,
+        order_id: orderId,
       }));
 
-      const { error: itemsErr } = await supabaseAdmin
+      const { error: itemsErr } = await supabase
         .from("order_items")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert(itemsPayload as any);
 
       if (itemsErr) {
-        console.error("[placeOrder] items insert failed", itemsErr);
-        await supabaseAdmin.from("orders").delete().eq("id", order.id);
+        console.error("Order error:", itemsErr);
+        await supabase.from("orders").delete().eq("id", orderId);
         return {
           ok: false as const,
           error: `Could not save your items: ${itemsErr.message}`,
@@ -77,14 +92,14 @@ export const placeOrder = createServerFn({ method: "POST" })
       }
 
       // Fire-and-forget: append to Google Sheet (don't block order success)
-      appendOrderToSheet({ data: { orderId: order.id as string } }).catch((e) => {
+      appendOrderToSheet({ data: { orderId } }).catch((e) => {
         console.error("[placeOrder] sheet append failed:", e);
       });
 
-      return { ok: true as const, orderId: order.id as string };
+      return { ok: true as const, orderId };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      console.error("[placeOrder] unhandled exception:", msg, e);
+      console.error("Order error:", e);
       return { ok: false as const, error: `Server error: ${msg}` };
     }
   });
