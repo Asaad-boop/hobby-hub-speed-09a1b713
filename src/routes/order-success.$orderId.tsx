@@ -54,10 +54,7 @@ function OrderSuccessPage() {
       PURCHASE_FIRED.has(orderId) ||
       (typeof window !== "undefined" &&
         sessionStorage.getItem(`fb_purchase_fired_${orderId}`) === "1");
-    PURCHASE_FIRED.add(orderId);
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem(`fb_purchase_fired_${orderId}`, "1");
-    }
+    if (!alreadyFired) PURCHASE_FIRED.add(orderId);
 
     (async () => {
       const res = await getOrderByFullId({ data: { orderId } }).catch(() => null);
@@ -67,18 +64,20 @@ function OrderSuccessPage() {
 
       // Meta Pixel: Purchase — guarded above to prevent any double-fire.
       if (o && typeof window !== "undefined" && !alreadyFired) {
-        fbTrack("Purchase", {
-          content_ids: o.order_items.map((it) => it.id),
+        const eventId = fbTrack("Purchase", {
+          content_ids: o.order_items.map((it) => it.product_id ?? it.id),
           contents: o.order_items.map((it) => ({
-            id: it.id,
+            id: it.product_id ?? it.id,
             quantity: it.quantity,
             item_price: it.price,
           })),
           num_items: o.order_items.reduce((s, it) => s + it.quantity, 0),
           value: o.total,
           currency: META_CURRENCY,
+          content_type: "product",
           order_id: o.id,
         });
+        if (eventId) sessionStorage.setItem(`fb_purchase_fired_${orderId}`, "1");
         trackPurchase({
           order_id: o.id,
           value: Number(o.total),

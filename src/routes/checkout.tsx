@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart, cartLineKey } from "@/lib/cart";
 import { useProducts } from "@/lib/products";
 import { supabase, getClientSessionId } from "@/integrations/supabase/client";
@@ -48,6 +48,8 @@ function Checkout() {
   const placeOrderFn = useServerFn(placeOrder);
   const [bump, setBump] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const submitGuardRef = useRef(false);
+  const redirectingRef = useRef(false);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [payMethod, setPayMethod] = useState<"cod" | "bkash">("cod");
   const [payNumber, setPayNumber] = useState("");
@@ -221,7 +223,9 @@ function Checkout() {
   const normalizedPhone = normalizePhone(form.phone);
   const phoneValid = /^01[3-9]\d{8}$/.test(normalizedPhone);
 
-  const goToOrderSuccess = (orderId: string) => {
+  const goToOrderSuccess = async (orderId: string) => {
+    if (redirectingRef.current) return;
+    redirectingRef.current = true;
     const successPath = `/order-success/${encodeURIComponent(orderId)}`;
     if (typeof window !== "undefined") {
       try {
@@ -230,42 +234,62 @@ function Checkout() {
       } catch {
         // ignore storage failures — navigation is the priority
       }
-      // Hard replace — prevents back-button returning to checkout and
-      // guarantees a fresh page load that re-reads the cleared cart.
-      try {
-        window.location.replace(successPath);
-      } catch {
-        window.location.href = successPath;
-      }
-      return;
     }
-    // SSR fallback (should not be reached — handleSubmit runs in browser)
-    void navigate({ to: "/order-success/$orderId", params: { orderId } });
+
+    clear();
+
+    try {
+      await navigate({ to: "/order-success/$orderId", params: { orderId }, replace: true });
+    } catch (navErr) {
+      console.error("Order success navigation failed:", navErr);
+    }
+
+    // Fallback for any router/navigation interruption. Preserve Lovable preview
+    // token query if present so the success route can still open in preview.
+    if (typeof window !== "undefined") {
+      window.setTimeout(() => {
+        if (window.location.pathname !== successPath) {
+          const previewSearch = window.location.search.includes("__lovable_token")
+            ? window.location.search
+            : "";
+          window.location.assign(`${successPath}${previewSearch}`);
+        }
+      }, 150);
+    }
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (submitting) return;
+    if (submitGuardRef.current) return;
+    submitGuardRef.current = true;
+    setSubmitting(true);
+
+    const releaseSubmit = () => {
+      submitGuardRef.current = false;
+      setSubmitting(false);
+    };
 
     // ---- Pre-flight validation ----
     if (items.length === 0) {
       toast.error("Your cart is empty.");
+      releaseSubmit();
       return;
     }
     const trimmedName = form.name.trim();
     const trimmedAddress = form.address.trim();
     if (!trimmedName || !form.phone || !trimmedAddress) {
       toast.error("Please fill in name, phone and address.");
+      releaseSubmit();
       return;
     }
     if (!phoneValid) {
       toast.error("Please enter a valid Bangladeshi phone number (e.g. 01712345678).");
+      releaseSubmit();
       return;
     }
     const deliveryDistrict = form.district || (shipMethod === "inside" ? "Dhaka" : "Outside Dhaka");
     const deliveryCity = form.city.trim() || deliveryDistrict;
 
-    setSubmitting(true);
     let createdOrderId: string | null = null;
 
     try {
@@ -279,7 +303,7 @@ function Checkout() {
       );
       if (invalidItem) {
         toast.error("One of the items in your cart is invalid. Please refresh and try again.");
-        setSubmitting(false);
+        releaseSubmit();
         return;
       }
 
@@ -350,30 +374,17 @@ function Checkout() {
         error: e instanceof Error ? e.message : "Network error",
       }));
 
-      let fallbackOrderId: string | null = null;
       if (!placeRes.ok) {
-        const directOrderId = crypto.randomUUID();
-        const { error: directOrderErr } = await supabase
-          .from("orders")
-          .insert({ ...orderInsert, id: directOrderId } as never);
-        if (!directOrderErr) {
-          const directItems = orderItemsPayload.map((it) => ({ ...it, order_id: directOrderId }));
-          const { error: directItemsErr } = await supabase.from("order_items").insert(directItems as never);
-          if (!directItemsErr) fallbackOrderId = directOrderId;
-        }
-      }
-
-      if (!placeRes.ok && !fallbackOrderId) {
         console.error("Order insert failed:", placeRes.error, "payload:", orderInsert);
         toast.error(
           placeRes.error
             ? `Could not place order: ${placeRes.error}`
             : "Could not place order. Please check your connection and try again.",
         );
-        setSubmitting(false);
+        releaseSubmit();
         return;
       }
-      const order = { id: placeRes.ok ? placeRes.orderId : fallbackOrderId! };
+      const order = { id: placeRes.orderId };
       createdOrderId = order.id;
 
       if (!isGuest && appliedCoupon && finalCouponDiscount > 0) {
@@ -404,12 +415,12 @@ function Checkout() {
       // and the fbq request often gets cancelled before reaching Meta.
 
       toast.success("Order placed! We'll call you to confirm soon.");
-      goToOrderSuccess(order.id);
+      await goToOrderSuccess(order.id);
     } catch (err: any) {
       console.error("Checkout exception:", err, "createdOrderId:", createdOrderId);
       // Order was actually created — send the user to the thank-you page anyway.
       if (createdOrderId) {
-        goToOrderSuccess(createdOrderId);
+        await goToOrderSuccess(createdOrderId);
         return;
       }
       toast.error(
@@ -417,7 +428,7 @@ function Checkout() {
           ? `Order failed: ${err.message}`
           : "Something went wrong. Please check your internet and try again.",
       );
-      setSubmitting(false);
+      releaseSubmit();
     }
   };
 
