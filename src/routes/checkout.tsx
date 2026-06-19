@@ -221,7 +221,7 @@ function Checkout() {
   const normalizedPhone = normalizePhone(form.phone);
   const phoneValid = /^01[3-9]\d{8}$/.test(normalizedPhone);
 
-  const goToOrderSuccess = async (orderId: string) => {
+  const goToOrderSuccess = (orderId: string) => {
     const successPath = `/order-success/${encodeURIComponent(orderId)}`;
     if (typeof window !== "undefined") {
       try {
@@ -230,24 +230,17 @@ function Checkout() {
       } catch {
         // ignore storage failures — navigation is the priority
       }
+      // Hard replace — prevents back-button returning to checkout and
+      // guarantees a fresh page load that re-reads the cleared cart.
       try {
-        window.location.assign(successPath);
+        window.location.replace(successPath);
       } catch {
         window.location.href = successPath;
       }
-      window.setTimeout(() => {
-        if (!window.location.pathname.includes(`/order-success/${orderId}`)) {
-          window.location.href = successPath;
-        }
-      }, 250);
       return;
     }
-
-    try {
-      await navigate({ to: "/order-success/$orderId", params: { orderId } });
-    } catch (navErr) {
-      console.error("Order success navigation failed:", navErr);
-    }
+    // SSR fallback (should not be reached — handleSubmit runs in browser)
+    void navigate({ to: "/order-success/$orderId", params: { orderId } });
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
