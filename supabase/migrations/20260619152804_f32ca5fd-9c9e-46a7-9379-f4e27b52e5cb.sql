@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.is_recent_guest_order(uuid) TO anon;
