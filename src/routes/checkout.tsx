@@ -222,13 +222,31 @@ function Checkout() {
   const phoneValid = /^01[3-9]\d{8}$/.test(normalizedPhone);
 
   const goToOrderSuccess = async (orderId: string) => {
+    const successPath = `/order-success/${encodeURIComponent(orderId)}`;
+    if (typeof window !== "undefined") {
+      try {
+        window.sessionStorage.setItem("hh_last_confirmed_order_id", orderId);
+        window.localStorage.removeItem("hh_cart_v1");
+      } catch {
+        // ignore storage failures — navigation is the priority
+      }
+      try {
+        window.location.assign(successPath);
+      } catch {
+        window.location.href = successPath;
+      }
+      window.setTimeout(() => {
+        if (!window.location.pathname.includes(`/order-success/${orderId}`)) {
+          window.location.href = successPath;
+        }
+      }, 250);
+      return;
+    }
+
     try {
       await navigate({ to: "/order-success/$orderId", params: { orderId } });
     } catch (navErr) {
       console.error("Order success navigation failed:", navErr);
-      if (typeof window !== "undefined") {
-        window.location.assign(`/order-success/${orderId}`);
-      }
     }
   };
 
@@ -392,11 +410,6 @@ function Checkout() {
       // truth, deduped per order). Firing here would race with navigation
       // and the fbq request often gets cancelled before reaching Meta.
 
-      try {
-        clear();
-      } catch (clearErr) {
-        console.warn("Cart clear failed after order placement:", clearErr);
-      }
       toast.success("Order placed! We'll call you to confirm soon.");
       await goToOrderSuccess(order.id);
     } catch (err: any) {
