@@ -405,6 +405,11 @@ function Checkout() {
       navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
     } catch (err: any) {
       console.error("Checkout exception:", err, "createdOrderId:", createdOrderId);
+      // Order was actually created — send the user to the thank-you page anyway.
+      if (createdOrderId) {
+        navigate({ to: "/order-success/$orderId", params: { orderId: createdOrderId } });
+        return;
+      }
       toast.error(
         err?.message
           ? `Order failed: ${err.message}`
