@@ -12,7 +12,8 @@ export default function ProductCard({ product }: { product: Product }) {
   const navigate = useNavigate();
   const liked = has(product.id);
   const off = Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100);
-  const lowStock = product.stock <= 8;
+  const outOfStock = product.stock <= 0;
+  const lowStock = !outOfStock && product.stock <= 8;
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-elevated)] md:rounded-2xl">
