@@ -30,18 +30,25 @@ export function usePresenceHeartbeat() {
     const ping = async () => {
       if (cancelled) return;
       try {
-        await supabase.from("active_sessions").upsert(
-          {
-            session_id: sid,
-            path: window.location.pathname,
-            user_agent: navigator.userAgent,
-            referrer: document.referrer || null,
-            last_seen_at: new Date().toISOString(),
-          },
-          { onConflict: "session_id" },
-        );
-      } catch {
-        // ignore
+        const payload = {
+          session_id: sid,
+          path: window.location.pathname,
+          user_agent: navigator.userAgent,
+          referrer: document.referrer || null,
+          last_seen_at: new Date().toISOString(),
+        };
+        const { error } = await supabase.from("active_sessions").insert(payload);
+        if (error?.code === "23505") {
+          const { error: updateError } = await supabase
+            .from("active_sessions")
+            .update({ path: payload.path, user_agent: payload.user_agent, referrer: payload.referrer, last_seen_at: payload.last_seen_at })
+            .eq("session_id", sid);
+          if (updateError) console.warn("Presence heartbeat failed (non-fatal):", updateError);
+        } else if (error) {
+          console.warn("Presence heartbeat failed (non-fatal):", error);
+        }
+      } catch (error) {
+        console.warn("Presence heartbeat failed (non-fatal):", error);
       }
     };
 

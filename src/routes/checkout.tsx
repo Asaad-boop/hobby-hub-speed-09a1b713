@@ -375,7 +375,7 @@ function Checkout() {
       }));
 
       if (!placeRes.ok) {
-        console.error("Order insert failed:", placeRes.error, "payload:", orderInsert);
+        console.error("Order error:", placeRes.error, "payload:", orderInsert);
         toast.error(
           placeRes.error
             ? `Could not place order: ${placeRes.error}`
@@ -417,7 +417,7 @@ function Checkout() {
       toast.success("Order placed! We'll call you to confirm soon.");
       await goToOrderSuccess(order.id);
     } catch (err: any) {
-      console.error("Checkout exception:", err, "createdOrderId:", createdOrderId);
+      console.error("Order error:", err, "createdOrderId:", createdOrderId);
       // Order was actually created — send the user to the thank-you page anyway.
       if (createdOrderId) {
         await goToOrderSuccess(createdOrderId);

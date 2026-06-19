@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProductByIdOrSlug, type Product } from "@/lib/products";
+import { placeOrder } from "@/lib/place-order.functions";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { getOrderAttributionPayload } from "@/lib/session-tracking";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
@@ -218,6 +220,7 @@ const FAQS = [
 function AuroraLampLanding() {
   const { product } = Route.useLoaderData() as { product: Product | null };
   const navigate = useNavigate();
+  const placeOrderFn = useServerFn(placeOrder);
 
   const [pack, setPack] = useState<"single" | "double" | "triple">("single");
   const [qty, setQty] = useState(1);
@@ -392,27 +395,9 @@ function AuroraLampLanding() {
           }
         : { ...baseOrder, user_id: session!.user.id };
 
-      const { data: order, error: orderErr } = await supabase
-        .from("orders")
-        .insert(orderInsert)
-        .select("id")
-        .single();
-
-      if (orderErr || !order) {
-        console.error("Order insert failed:", orderErr);
-        toast.error(
-          orderErr?.message
-            ? `Order falure: ${orderErr.message}`
-            : "Order place hocche na, abar try korun.",
-        );
-        setSubmitting(false);
-        return;
-      }
-
       const totalUnits = activePack.qty * qty;
-      const { error: itemsErr } = await supabase.from("order_items").insert([
+      const placeRes = await placeOrderFn({ data: { order: orderInsert, items: [
         {
-          order_id: order.id,
           user_id: isGuest ? null : session!.user.id,
           product_id: product.id,
           name: `${product.title} — ${variantLabel}`,
@@ -422,12 +407,11 @@ function AuroraLampLanding() {
           variant_id: null,
           variant_label: variantLabel,
         },
-      ]);
+      ] } });
 
-      if (itemsErr) {
-        console.error("Order items insert failed:", itemsErr);
-        if (!isGuest) await supabase.from("orders").delete().eq("id", order.id);
-        toast.error(`Items save hoy ni: ${itemsErr.message}`);
+      if (!placeRes.ok) {
+        console.error("Order error:", placeRes.error, "payload:", orderInsert);
+        toast.error(placeRes.error ? `Order falure: ${placeRes.error}` : "Order place hocche na, abar try korun.");
         setSubmitting(false);
         return;
       }
@@ -435,9 +419,9 @@ function AuroraLampLanding() {
       // Purchase event fires on /order-success page (single source of truth, deduped per order)
 
       toast.success("Order place hoyeche! Confirm korar jonno call korbo.");
-      navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
+      navigate({ to: "/order-success/$orderId", params: { orderId: placeRes.orderId } });
     } catch (err: any) {
-      console.error("LP checkout exception:", err);
+      console.error("Order error:", err);
       toast.error(err?.message ?? "Kichu ekta vul hoyeche, abar try korun.");
       setSubmitting(false);
     }

@@ -1,8 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { getOrderAttributionPayload } from "@/lib/session-tracking";
+import { placeOrder } from "@/lib/place-order.functions";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -125,6 +127,7 @@ function SectionTitle({
 // -------------------------------------------------------------------------
 function LP() {
   const navigate = useNavigate();
+  const placeOrderFn = useServerFn(placeOrder);
   const orderRef = useRef<HTMLDivElement | null>(null);
 
   const [variant, setVariant] = useState<"single" | "combo">("single");
@@ -224,22 +227,9 @@ function LP() {
           }
         : { ...baseOrder, user_id: session!.user.id };
 
-      const { data: order, error: orderErr } = await supabase
-        .from("orders")
-        .insert(orderInsert)
-        .select("id")
-        .single();
-
-      if (orderErr || !order) {
-        toast.error(orderErr?.message ?? "Order place hocche na, abar try korun.");
-        setSubmitting(false);
-        return;
-      }
-
       const userId = isGuest ? null : session!.user.id;
       const items = [
         {
-          order_id: order.id,
           user_id: userId,
           product_id: TARGET_PRODUCT_ID,
           name: `Scratch Art Hue Board — ${variantLabel}`,
@@ -251,17 +241,18 @@ function LP() {
         },
       ];
 
-      const { error: itemsErr } = await supabase.from("order_items").insert(items);
-      if (itemsErr) {
-        if (!isGuest) await supabase.from("orders").delete().eq("id", order.id);
-        toast.error(`Items save hoy ni: ${itemsErr.message}`);
+      const placeRes = await placeOrderFn({ data: { order: orderInsert, items } });
+      if (!placeRes.ok) {
+        console.error("Order error:", placeRes.error, "payload:", orderInsert);
+        toast.error(placeRes.error ?? "Order place hocche na, abar try korun.");
         setSubmitting(false);
         return;
       }
 
       toast.success("Order place hoyeche! Confirm korar jonno call korbo.");
-      navigate({ to: "/order-success/$orderId", params: { orderId: order.id } });
+      navigate({ to: "/order-success/$orderId", params: { orderId: placeRes.orderId } });
     } catch (err: any) {
+      console.error("Order error:", err);
       toast.error(err?.message ?? "Kichu ekta vul hoyeche, abar try korun.");
       setSubmitting(false);
     }
