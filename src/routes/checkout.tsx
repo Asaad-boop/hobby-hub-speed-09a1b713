@@ -47,6 +47,7 @@ function Checkout() {
   const { data: allProducts = [] } = useProducts();
   const navigate = useNavigate();
   const placeOrderFn = useServerFn(placeOrder);
+  const capiFn = useServerFn(sendMetaCapiEvent);
   const [bump, setBump] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const submitGuardRef = useRef(false);
