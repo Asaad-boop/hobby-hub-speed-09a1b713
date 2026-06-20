@@ -412,9 +412,51 @@ function Checkout() {
         });
       }
 
-      // Meta Pixel Purchase fires on /order-success page (single source of
-      // truth, deduped per order). Firing here would race with navigation
-      // and the fbq request often gets cancelled before reaching Meta.
+      // Meta Pixel Purchase — fire HERE (we have full cart data and the
+      // order is confirmed). The order-success page also tries to fire it as
+      // a fallback, but it depends on a server fetch that can fail, leaving
+      // Meta with no Purchase event. We dedupe via sessionStorage so
+      // order-success skips when this one already fired.
+      try {
+        const purchaseItems = [
+          ...items.map((i) => ({
+            id: i.product.id,
+            quantity: i.qty,
+            item_price: i.product.price,
+            name: i.product.title,
+          })),
+          ...(bumpActive && bumpItem
+            ? [{ id: bumpItem.id, quantity: 1, item_price: bumpPrice, name: bumpItem.title }]
+            : []),
+        ];
+        const eventId = fbTrack("Purchase", {
+          content_ids: purchaseItems.map((p) => p.id),
+          contents: purchaseItems.map((p) => ({ id: p.id, quantity: p.quantity, item_price: p.item_price })),
+          num_items: purchaseItems.reduce((s, p) => s + p.quantity, 0),
+          value: grand,
+          currency: META_CURRENCY,
+          content_type: "product",
+          order_id: order.id,
+        });
+        if (eventId && typeof window !== "undefined") {
+          sessionStorage.setItem(`fb_purchase_fired_${order.id}`, "1");
+        }
+        trackPurchase({
+          order_id: order.id,
+          value: grand,
+          shipping: shippingFee,
+          coupon: appliedCoupon?.code ?? null,
+          items: purchaseItems.map((p) => ({
+            item_id: p.id,
+            item_name: p.name,
+            price: p.item_price,
+            quantity: p.quantity,
+            variant: null,
+          })),
+        });
+      } catch (e) {
+        console.warn("Purchase pixel fire failed (non-fatal):", e);
+      }
 
       toast.success("Order placed! We'll call you to confirm soon.");
       await goToOrderSuccess(order.id);
