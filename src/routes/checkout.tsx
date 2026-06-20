@@ -464,6 +464,30 @@ function Checkout() {
         if (eventId && typeof window !== "undefined") {
           sessionStorage.setItem(`fb_purchase_fired_${order.id}`, "1");
         }
+        // Meta CAPI Purchase — server-side mirror, deduped by eventId.
+        if (eventId) {
+          const fb = getFbAttribution();
+          capiFn({
+            data: {
+              eventName: "Purchase",
+              eventId,
+              eventSourceUrl: typeof window !== "undefined" ? window.location.href : null,
+              userData: {
+                phone: normalizedPhone,
+                fbclid: fb?.fbclid ?? null,
+                client_user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+              },
+              customData: {
+                value: grand,
+                currency: META_CURRENCY,
+                order_id: order.id,
+                content_ids: purchaseItems.map((p) => p.id),
+                content_type: "product",
+                num_items: purchaseItems.reduce((s, p) => s + p.quantity, 0),
+              },
+            },
+          }).catch(() => {});
+        }
         trackPurchase({
           order_id: order.id,
           value: grand,
