@@ -10,7 +10,7 @@ import { getOrderAttributionPayload } from "@/lib/session-tracking";
 import { placeOrder } from "@/lib/place-order.functions";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
 import { clarityEvent, clarityTag, clarityUpgrade } from "@/lib/clarity";
-import { trackBeginCheckout } from "@/lib/analytics-events";
+import { trackBeginCheckout, trackPurchase } from "@/lib/analytics-events";
 import { toast } from "sonner";
 import { cdnImage, handleImgError } from "@/lib/cdn-image";
 import {
