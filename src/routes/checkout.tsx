@@ -6,8 +6,9 @@ import { useProducts } from "@/lib/products";
 import { supabase, getClientSessionId } from "@/integrations/supabase/client";
 import { BD_DISTRICTS } from "@/lib/bd-locations";
 import { validateCoupon, type Coupon } from "@/lib/coupons";
-import { getOrderAttributionPayload } from "@/lib/session-tracking";
+import { getOrderAttributionPayload, getFbAttribution } from "@/lib/session-tracking";
 import { placeOrder } from "@/lib/place-order.functions";
+import { sendMetaCapiEvent } from "@/lib/meta-capi.functions";
 import { fbTrack, META_CURRENCY } from "@/lib/meta-pixel";
 import { clarityEvent, clarityTag, clarityUpgrade } from "@/lib/clarity";
 import { trackBeginCheckout, trackPurchase } from "@/lib/analytics-events";
@@ -46,6 +47,7 @@ function Checkout() {
   const { data: allProducts = [] } = useProducts();
   const navigate = useNavigate();
   const placeOrderFn = useServerFn(placeOrder);
+  const capiFn = useServerFn(sendMetaCapiEvent);
   const [bump, setBump] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const submitGuardRef = useRef(false);
@@ -62,7 +64,7 @@ function Checkout() {
   // Meta Pixel: InitiateCheckout (fires once on mount when cart has items)
   useEffect(() => {
     if (items.length === 0) return;
-    fbTrack("InitiateCheckout", {
+    const eventId = fbTrack("InitiateCheckout", {
       content_ids: items.map((i) => i.product.id),
       contents: items.map((i) => ({
         id: i.product.id,
@@ -73,6 +75,27 @@ function Checkout() {
       value: total,
       currency: META_CURRENCY,
     });
+    // Mirror to CAPI for server-side dedup (best-effort, never blocks).
+    if (eventId) {
+      const fb = getFbAttribution();
+      capiFn({
+        data: {
+          eventName: "InitiateCheckout",
+          eventId,
+          eventSourceUrl: typeof window !== "undefined" ? window.location.href : null,
+          userData: {
+            fbclid: fb?.fbclid ?? null,
+            client_user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+          },
+          customData: {
+            value: total,
+            currency: META_CURRENCY,
+            content_ids: items.map((i) => i.product.id),
+            num_items: items.reduce((s, i) => s + i.qty, 0),
+          },
+        },
+      }).catch(() => {});
+    }
     // Clarity: high-intent — upgrade and tag the session for funnel filtering.
     clarityEvent("initiate_checkout");
     clarityTag("reached_checkout", "true");
@@ -440,6 +463,30 @@ function Checkout() {
         });
         if (eventId && typeof window !== "undefined") {
           sessionStorage.setItem(`fb_purchase_fired_${order.id}`, "1");
+        }
+        // Meta CAPI Purchase — server-side mirror, deduped by eventId.
+        if (eventId) {
+          const fb = getFbAttribution();
+          capiFn({
+            data: {
+              eventName: "Purchase",
+              eventId,
+              eventSourceUrl: typeof window !== "undefined" ? window.location.href : null,
+              userData: {
+                phone: normalizedPhone,
+                fbclid: fb?.fbclid ?? null,
+                client_user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+              },
+              customData: {
+                value: grand,
+                currency: META_CURRENCY,
+                order_id: order.id,
+                content_ids: purchaseItems.map((p) => p.id),
+                content_type: "product",
+                num_items: purchaseItems.reduce((s, p) => s + p.quantity, 0),
+              },
+            },
+          }).catch(() => {});
         }
         trackPurchase({
           order_id: order.id,

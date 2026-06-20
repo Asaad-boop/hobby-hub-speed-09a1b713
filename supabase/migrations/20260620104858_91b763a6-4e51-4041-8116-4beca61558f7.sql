@@ -1,0 +1,12 @@
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS fbclid text;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS utm_source text;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS utm_medium text;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS utm_campaign text;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS utm_content text;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS utm_term text;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS fb_campaign_id text;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS fb_adset_id text;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS fb_ad_id text;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS attribution_landing_page text;
+CREATE INDEX IF NOT EXISTS idx_orders_fbclid ON public.orders(fbclid) WHERE fbclid IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_orders_fb_campaign_id ON public.orders(fb_campaign_id) WHERE fb_campaign_id IS NOT NULL;
