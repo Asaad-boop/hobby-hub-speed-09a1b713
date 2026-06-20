@@ -143,7 +143,7 @@ export function trackEvent(payload: AnalyticsEventPayload): void {
     utm_content: attr?.utm_content ?? null,
     utm_term: attr?.utm_term ?? null,
     referrer: attr?.referrer_url ?? document.referrer ?? null,
-    fb_click_id: attr?.fb_click_id ?? null,
+    fb_click_id: attr?.fbclid ?? null,
     fb_browser_pixel: attr?.fb_browser_pixel ?? null,
     device_type: attr?.device_type ?? null,
     user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
