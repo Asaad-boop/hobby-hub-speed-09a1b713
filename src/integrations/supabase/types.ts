@@ -1077,6 +1077,7 @@ export type Database = {
       erp_accounts: {
         Row: {
           account_number: string | null
+          account_subtype: string | null
           account_type: string
           brand_id: string
           created_at: string
@@ -1091,6 +1092,7 @@ export type Database = {
         }
         Insert: {
           account_number?: string | null
+          account_subtype?: string | null
           account_type: string
           brand_id: string
           created_at?: string
@@ -1105,6 +1107,7 @@ export type Database = {
         }
         Update: {
           account_number?: string | null
+          account_subtype?: string | null
           account_type?: string
           brand_id?: string
           created_at?: string
@@ -1480,6 +1483,75 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "erp_chart_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_cod_remittances: {
+        Row: {
+          amount: number
+          brand_id: string
+          courier: string
+          created_at: string
+          created_by: string | null
+          expected_amount: number | null
+          id: string
+          journal_entry_id: string | null
+          notes: string | null
+          received_date: string | null
+          received_to: string | null
+          reference_no: string | null
+          remittance_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          brand_id: string
+          courier: string
+          created_at?: string
+          created_by?: string | null
+          expected_amount?: number | null
+          id?: string
+          journal_entry_id?: string | null
+          notes?: string | null
+          received_date?: string | null
+          received_to?: string | null
+          reference_no?: string | null
+          remittance_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          brand_id?: string
+          courier?: string
+          created_at?: string
+          created_by?: string | null
+          expected_amount?: number | null
+          id?: string
+          journal_entry_id?: string | null
+          notes?: string | null
+          received_date?: string | null
+          received_to?: string | null
+          reference_no?: string | null
+          remittance_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_cod_remittances_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "erp_journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_cod_remittances_received_to_fkey"
+            columns: ["received_to"]
+            isOneToOne: false
+            referencedRelation: "erp_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -4133,10 +4205,61 @@ export type Database = {
           },
         ]
       }
+      imp_cargo_agents: {
+        Row: {
+          address: string | null
+          brand_id: string
+          contact_person: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          brand_id: string
+          contact_person?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          brand_id?: string
+          contact_person?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imp_cargo_agents_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       imp_carton_items: {
         Row: {
           carton_id: string
           created_at: string
+          damaged_qty: number
           id: string
           po_item_id: string
           product_id: string | null
@@ -4144,13 +4267,16 @@ export type Database = {
           quantity_expected: number
           quantity_missing: number
           quantity_ok: number
+          received_qty: number | null
           sku_snapshot: string | null
           supplier_cost_portion_bdt: number
+          usable_qty: number | null
           variant_id: string | null
         }
         Insert: {
           carton_id: string
           created_at?: string
+          damaged_qty?: number
           id?: string
           po_item_id: string
           product_id?: string | null
@@ -4158,13 +4284,16 @@ export type Database = {
           quantity_expected: number
           quantity_missing?: number
           quantity_ok?: number
+          received_qty?: number | null
           sku_snapshot?: string | null
           supplier_cost_portion_bdt?: number
+          usable_qty?: number | null
           variant_id?: string | null
         }
         Update: {
           carton_id?: string
           created_at?: string
+          damaged_qty?: number
           id?: string
           po_item_id?: string
           product_id?: string | null
@@ -4172,8 +4301,10 @@ export type Database = {
           quantity_expected?: number
           quantity_missing?: number
           quantity_ok?: number
+          received_qty?: number | null
           sku_snapshot?: string | null
           supplier_cost_portion_bdt?: number
+          usable_qty?: number | null
           variant_id?: string | null
         }
         Relationships: [
@@ -4211,6 +4342,7 @@ export type Database = {
         Row: {
           barcode: string
           carton_number: number
+          cost_share_bdt: number | null
           created_at: string
           expected_quantity: number
           id: string
@@ -4232,6 +4364,7 @@ export type Database = {
         Insert: {
           barcode: string
           carton_number: number
+          cost_share_bdt?: number | null
           created_at?: string
           expected_quantity?: number
           id?: string
@@ -4253,6 +4386,7 @@ export type Database = {
         Update: {
           barcode?: string
           carton_number?: number
+          cost_share_bdt?: number | null
           created_at?: string
           expected_quantity?: number
           id?: string
@@ -4396,6 +4530,7 @@ export type Database = {
           created_at: string
           id: string
           image_snapshot: string | null
+          landed_cost_bdt: number | null
           name_snapshot: string
           po_id: string
           product_id: string | null
@@ -4403,6 +4538,7 @@ export type Database = {
           sku_snapshot: string | null
           subtotal_bdt: number
           unit_cost_bdt: number
+          unit_cost_cny: number | null
           unit_cost_foreign: number
           variant_id: string | null
         }
@@ -4410,6 +4546,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_snapshot?: string | null
+          landed_cost_bdt?: number | null
           name_snapshot: string
           po_id: string
           product_id?: string | null
@@ -4417,6 +4554,7 @@ export type Database = {
           sku_snapshot?: string | null
           subtotal_bdt?: number
           unit_cost_bdt?: number
+          unit_cost_cny?: number | null
           unit_cost_foreign?: number
           variant_id?: string | null
         }
@@ -4424,6 +4562,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_snapshot?: string | null
+          landed_cost_bdt?: number | null
           name_snapshot?: string
           po_id?: string
           product_id?: string | null
@@ -4431,6 +4570,7 @@ export type Database = {
           sku_snapshot?: string | null
           subtotal_bdt?: number
           unit_cost_bdt?: number
+          unit_cost_cny?: number | null
           unit_cost_foreign?: number
           variant_id?: string | null
         }
@@ -4486,71 +4626,116 @@ export type Database = {
       }
       imp_purchase_orders: {
         Row: {
+          agent_commission_cny: number
+          agent_commission_per_unit_bdt: number | null
+          agent_commission_total_bdt: number | null
           brand_id: string
+          cargo_agent_id: string | null
           created_at: string
           created_by: string | null
           currency: string
+          customs_duty_bdt: number
           due_bdt: number
+          freight_cost_bdt: number
           fx_rate: number
+          fx_rate_cny_bdt: number | null
+          fx_rate_locked_at: string | null
+          fx_rate_source: string | null
           grand_total_bdt: number
           id: string
+          landed_cost_per_unit_bdt: number | null
           local_courier_total_bdt: number
           notes: string | null
           order_date: string
+          other_charges_bdt: number
           paid_bdt: number
           po_number: string
           product_subtotal_bdt: number
           shipped_at: string | null
+          shipping_cost_bdt: number | null
+          shipping_rate_per_kg: number | null
           shipping_total_bdt: number
+          shipping_weight_kg: number | null
           status: Database["public"]["Enums"]["imp_po_status"]
           submitted_by_agent_id: string | null
           supplier_id: string | null
+          total_units: number | null
           total_weight_kg: number | null
           updated_at: string
         }
         Insert: {
+          agent_commission_cny?: number
+          agent_commission_per_unit_bdt?: number | null
+          agent_commission_total_bdt?: number | null
           brand_id: string
+          cargo_agent_id?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
+          customs_duty_bdt?: number
           due_bdt?: number
+          freight_cost_bdt?: number
           fx_rate?: number
+          fx_rate_cny_bdt?: number | null
+          fx_rate_locked_at?: string | null
+          fx_rate_source?: string | null
           grand_total_bdt?: number
           id?: string
+          landed_cost_per_unit_bdt?: number | null
           local_courier_total_bdt?: number
           notes?: string | null
           order_date?: string
+          other_charges_bdt?: number
           paid_bdt?: number
           po_number: string
           product_subtotal_bdt?: number
           shipped_at?: string | null
+          shipping_cost_bdt?: number | null
+          shipping_rate_per_kg?: number | null
           shipping_total_bdt?: number
+          shipping_weight_kg?: number | null
           status?: Database["public"]["Enums"]["imp_po_status"]
           submitted_by_agent_id?: string | null
           supplier_id?: string | null
+          total_units?: number | null
           total_weight_kg?: number | null
           updated_at?: string
         }
         Update: {
+          agent_commission_cny?: number
+          agent_commission_per_unit_bdt?: number | null
+          agent_commission_total_bdt?: number | null
           brand_id?: string
+          cargo_agent_id?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
+          customs_duty_bdt?: number
           due_bdt?: number
+          freight_cost_bdt?: number
           fx_rate?: number
+          fx_rate_cny_bdt?: number | null
+          fx_rate_locked_at?: string | null
+          fx_rate_source?: string | null
           grand_total_bdt?: number
           id?: string
+          landed_cost_per_unit_bdt?: number | null
           local_courier_total_bdt?: number
           notes?: string | null
           order_date?: string
+          other_charges_bdt?: number
           paid_bdt?: number
           po_number?: string
           product_subtotal_bdt?: number
           shipped_at?: string | null
+          shipping_cost_bdt?: number | null
+          shipping_rate_per_kg?: number | null
           shipping_total_bdt?: number
+          shipping_weight_kg?: number | null
           status?: Database["public"]["Enums"]["imp_po_status"]
           submitted_by_agent_id?: string | null
           supplier_id?: string | null
+          total_units?: number | null
           total_weight_kg?: number | null
           updated_at?: string
         }
@@ -4560,6 +4745,13 @@ export type Database = {
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_purchase_orders_cargo_agent_id_fkey"
+            columns: ["cargo_agent_id"]
+            isOneToOne: false
+            referencedRelation: "imp_cargo_agents"
             referencedColumns: ["id"]
           },
           {
@@ -8250,6 +8442,9 @@ export type Database = {
         | "boost"
         | "other"
         | "meta_ads"
+        | "print_design"
+        | "event"
+        | "sms_email"
       mkt_sync_kind: "structure" | "insights" | "attribution" | "finance_post"
       mkt_sync_status: "running" | "success" | "error"
       order_priority: "low" | "normal" | "high" | "urgent"
@@ -8504,6 +8699,9 @@ export const Constants = {
         "boost",
         "other",
         "meta_ads",
+        "print_design",
+        "event",
+        "sms_email",
       ],
       mkt_sync_kind: ["structure", "insights", "attribution", "finance_post"],
       mkt_sync_status: ["running", "success", "error"],
