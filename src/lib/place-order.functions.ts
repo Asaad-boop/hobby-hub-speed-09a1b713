@@ -42,25 +42,30 @@ export const placeOrder = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.ADMIN_SERVICE_ROLE_KEY;
       const orderId = typeof data.order.id === "string" ? data.order.id : crypto.randomUUID();
       const orderPayload: Record<string, unknown> = { ...data.order, id: orderId };
-      const isGuestOrder = orderPayload.is_guest_order === true && orderPayload.user_id == null;
-      const supabase = serviceKey
-        ? (await import("@/integrations/supabase/client.server")).supabaseAdmin
-        : isGuestOrder
-          ? createClient<Database>(
-              process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "https://bgsspipkjeuceftuatue.supabase.co",
-              process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || "",
-              { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-            )
-          : null;
 
-      if (!supabase) {
-        const error = new Error("Missing Supabase server credentials for authenticated order placement");
-        console.error("Order error:", error);
-        return { ok: false as const, error: error.message };
+      const supabaseUrl =
+        process.env.SUPABASE_URL ||
+        process.env.VITE_SUPABASE_URL ||
+        "https://bgsspipkjeuceftuatue.supabase.co";
+      const serviceKey =
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.ADMIN_SERVICE_ROLE_KEY;
+      const publishableKey =
+        process.env.SUPABASE_PUBLISHABLE_KEY ||
+        process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+        process.env.VITE_SUPABASE_ANON_KEY;
+
+      const key = serviceKey || publishableKey;
+      if (!key) {
+        const msg = "Missing Supabase server credentials (service role or publishable key)";
+        console.error("Order error:", msg);
+        return { ok: false as const, error: msg };
       }
+
+      const supabase = createClient<Database>(supabaseUrl, key, {
+        auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+      });
 
       const { error: orderErr } = await supabase
         .from("orders")
@@ -94,10 +99,16 @@ export const placeOrder = createServerFn({ method: "POST" })
         };
       }
 
-      // Fire-and-forget: append to Google Sheet (don't block order success)
-      appendOrderToSheet({ data: { orderId } }).catch((e) => {
-        console.error("[placeOrder] sheet append failed:", e);
-      });
+      // Fire-and-forget: append to Google Sheet (don't block order success).
+      // Wrapped in try so a sync throw (e.g. server-fn invoked inside server-fn)
+      // never breaks the order response.
+      try {
+        appendOrderToSheet({ data: { orderId } })?.catch?.((e: unknown) => {
+          console.error("[placeOrder] sheet append failed:", e);
+        });
+      } catch (e) {
+        console.error("[placeOrder] sheet append threw:", e);
+      }
 
       return { ok: true as const, orderId };
     } catch (e) {
