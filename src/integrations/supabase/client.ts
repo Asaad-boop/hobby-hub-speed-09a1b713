@@ -15,3 +15,19 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: typeof window !== "undefined",
   }
 });
+
+const CLIENT_SESSION_KEY = "hs_client_sid";
+
+export function getClientSessionId(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    let sid = window.sessionStorage.getItem(CLIENT_SESSION_KEY);
+    if (!sid) {
+      sid = crypto.randomUUID();
+      window.sessionStorage.setItem(CLIENT_SESSION_KEY, sid);
+    }
+    return sid;
+  } catch {
+    return crypto.randomUUID();
+  }
+}
