@@ -117,13 +117,26 @@ export const lookupOrder = createServerFn({ method: "POST" })
 
       const baseSelect = "*, order_items(id,product_id,name,image,price,quantity,variant_label)";
 
+      const attachItems = async (order: any) => {
+        const { data: items } = await supabase
+          .from("order_items")
+          .select("id,product_id,name,image,price,quantity,variant_label")
+          .eq("order_id", order.id);
+        return { ...order, order_items: items ?? [] };
+      };
+
       if (isFullUuid) {
-        let q = supabase.from("orders").select(baseSelect).eq("id", query);
-        if (userId && !isStaff) q = q.eq("user_id", userId);
-        const { data: orders, error } = await q.limit(1);
+        // Use security-definer RPC so guests can look up by full UUID without RLS
+        const { data: rows, error } = await supabase.rpc("lookup_order_by_id", {
+          _order_id: query,
+        });
         if (error) return { ok: false as const, error: error.message };
-        if (orders && orders.length > 0) return { ok: true as const, order: orders[0] };
-        return { ok: false as const, error: "No order found with that Order ID" };
+        const order = Array.isArray(rows) ? rows[0] : rows;
+        if (!order) return { ok: false as const, error: "No order found with that Order ID" };
+        if (userId && !isStaff && order.user_id && order.user_id !== userId) {
+          return { ok: false as const, error: "No order found with that Order ID" };
+        }
+        return { ok: true as const, order: await attachItems(order) };
       }
 
       if (isShortId) {
@@ -144,18 +157,16 @@ export const lookupOrder = createServerFn({ method: "POST" })
       }
 
       if (isPhone) {
-        let q = supabase
-          .from("orders")
-          .select(baseSelect)
-          .ilike("shipping_phone", `%${digits}`)
-          .order("created_at", { ascending: false })
-          .limit(1);
-        if (userId && !isStaff) q = q.eq("user_id", userId);
-        const { data: orders, error } = await q;
+        // Guests can't SELECT orders directly (RLS). Use security-definer RPC.
+        const { data: rows, error } = await supabase.rpc("lookup_order_by_phone", {
+          _phone_tail: digits,
+        });
         if (error) return { ok: false as const, error: error.message };
-        if (orders && orders.length > 0) return { ok: true as const, order: orders[0] };
-        return { ok: false as const, error: "No order found with that phone number" };
+        const order = Array.isArray(rows) ? rows[0] : rows;
+        if (!order) return { ok: false as const, error: "No order found with that phone number" };
+        return { ok: true as const, order: await attachItems(order) };
       }
+
 
       if (isEmail) {
         if (!userId) {
