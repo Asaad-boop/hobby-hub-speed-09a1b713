@@ -99,10 +99,16 @@ export const placeOrder = createServerFn({ method: "POST" })
         };
       }
 
-      // Fire-and-forget: append to Google Sheet (don't block order success)
-      appendOrderToSheet({ data: { orderId } }).catch((e) => {
-        console.error("[placeOrder] sheet append failed:", e);
-      });
+      // Fire-and-forget: append to Google Sheet (don't block order success).
+      // Wrapped in try so a sync throw (e.g. server-fn invoked inside server-fn)
+      // never breaks the order response.
+      try {
+        appendOrderToSheet({ data: { orderId } })?.catch?.((e: unknown) => {
+          console.error("[placeOrder] sheet append failed:", e);
+        });
+      } catch (e) {
+        console.error("[placeOrder] sheet append threw:", e);
+      }
 
       return { ok: true as const, orderId };
     } catch (e) {
