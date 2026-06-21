@@ -41,17 +41,19 @@ export const getOrderByFullId = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     try {
       const supabase = getServerClient();
-      const { data: order, error } = await supabase
-        .from("orders")
-        .select("*, order_items(id,product_id,name,image,price,quantity,variant_label)")
-        .eq("id", data.orderId)
-        .maybeSingle();
+      const { data: rows, error } = await supabase
+        .rpc("lookup_order_by_id", { _order_id: data.orderId });
       if (error) {
         console.error("[getOrderByFullId]", error);
         return { ok: false as const, error: error.message };
       }
+      const order = Array.isArray(rows) ? rows[0] : rows;
       if (!order) return { ok: false as const, error: "Order not found" };
-      return { ok: true as const, order };
+      const { data: items } = await supabase
+        .from("order_items")
+        .select("id,product_id,name,image,price,quantity,variant_label")
+        .eq("order_id", order.id);
+      return { ok: true as const, order: { ...order, order_items: items ?? [] } };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.error("[getOrderByFullId] server error:", e);
