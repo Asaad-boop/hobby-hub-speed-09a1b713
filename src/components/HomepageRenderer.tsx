@@ -315,8 +315,18 @@ function BannerSection({ section }: { section: HomepageSection }) {
   const link = cfg(section, "link", "") || settings?.homepage_banner_link || "";
   if (!url) return null;
   const inner = (
-    <div className="overflow-hidden rounded-2xl shadow-[var(--shadow-card)]">
-      <img src={cdnImage(url)} alt="Promotional banner" className="h-auto w-full object-cover" loading="lazy" />
+    <div className="overflow-hidden rounded-2xl shadow-[var(--shadow-card)]" style={{ aspectRatio: "16 / 9" }}>
+      <img
+        src={cdnImage(url, 1200)}
+        alt="Promotional banner"
+        width={1200}
+        height={675}
+        className="h-full w-full object-cover"
+        loading="eager"
+        // @ts-expect-error - valid HTML attribute
+        fetchpriority="high"
+        decoding="async"
+      />
     </div>
   );
   return (

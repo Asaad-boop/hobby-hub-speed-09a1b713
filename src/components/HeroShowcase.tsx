@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, ChevronLeft, ChevronRight, Flame, Star, Truck, Zap } from "lucide-react";
 import { useProducts, type Product } from "@/lib/products";
 import { useSiteSettings } from "@/lib/site-settings";
+import { cdnImage } from "@/lib/cdn-image";
 
 function useCountdown(targetMs: number) {
   const [now, setNow] = useState(() => Date.now());
@@ -157,11 +158,17 @@ export default function HeroShowcase() {
                       }`}
                     >
                       <img
-                        src={p.image}
+                        src={cdnImage(p.image, 600)}
                         alt={p.title}
+                        width={600}
+                        height={600}
                         className="absolute inset-0 h-full w-full object-cover"
                         loading={i === 0 ? "eager" : "lazy"}
+                        decoding="async"
+                        // @ts-expect-error - valid HTML attribute
+                        fetchpriority={i === 0 ? "high" : "low"}
                       />
+
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.18),transparent_55%)]" />
                     </div>
                   ))}

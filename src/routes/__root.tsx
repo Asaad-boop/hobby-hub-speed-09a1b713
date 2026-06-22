@@ -60,25 +60,50 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         }),
       },
       {
-        // Meta (Facebook) Pixel base code — initializes fbq and fires the
-        // initial PageView. Subsequent SPA navigations fire PageView from
-        // the router subscription in RootComponent (see below).
-        children: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${META_PIXEL_ID}');fbq('track','PageView');`,
-      },
-      {
-        // Google Analytics 4 (GA4) — gtag.js loader.
-        src: "https://www.googletagmanager.com/gtag/js?id=G-Q17CKC2FG1",
-        async: true,
-      },
-      {
-        // GA4 init + initial page_view.
-        children: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('js',new Date());gtag('config','G-Q17CKC2FG1',{send_page_view:true});`,
-      },
-      {
-        // Microsoft Clarity — session recordings & heatmaps. Tiny defer so
-        // it never blocks LCP, but small enough that short visits are still
-        // captured. Clarity itself is async after this point.
-        children: `setTimeout(function(){(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","wh5255b06h");},200);`,
+        // All 3rd-party trackers (Meta Pixel, GA4, Clarity) are deferred until
+        // after `load` + an idle window, so they never block LCP/TBT on mobile.
+        // Stubs are installed immediately so app code can safely call fbq/gtag
+        // before the real scripts arrive — calls are queued and replayed.
+        children: `(function(){
+          // ---- stubs (queue early calls) ----
+          window.dataLayer=window.dataLayer||[];
+          window.gtag=function(){dataLayer.push(arguments);};
+          window.fbq=window.fbq||function(){(window.fbq.q=window.fbq.q||[]).push(arguments);};
+          window.fbq.loaded=true;window.fbq.version='2.0';window.fbq.queue=window.fbq.queue||[];
+          window.gtag('js',new Date());
+          window.gtag('config','G-Q17CKC2FG1',{send_page_view:true});
+          window.fbq('init','${META_PIXEL_ID}');
+          window.fbq('track','PageView');
+
+          // ---- defer real loaders until idle ----
+          var loaded=false;
+          function load(){
+            if(loaded)return;loaded=true;
+            // Meta Pixel
+            var p=document.createElement('script');p.async=true;
+            p.src='https://connect.facebook.net/en_US/fbevents.js';
+            document.head.appendChild(p);
+            // GA4
+            var g=document.createElement('script');g.async=true;
+            g.src='https://www.googletagmanager.com/gtag/js?id=G-Q17CKC2FG1';
+            document.head.appendChild(g);
+            // Clarity
+            (function(c,l,a,r,i){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+              var t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;
+              var y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window,document,'clarity','script','wh5255b06h');
+          }
+          function schedule(){
+            if('requestIdleCallback' in window){requestIdleCallback(load,{timeout:3500});}
+            else{setTimeout(load,2500);}
+          }
+          // Also load on first user interaction (covers very short visits)
+          ['pointerdown','keydown','scroll','touchstart'].forEach(function(ev){
+            window.addEventListener(ev,load,{once:true,passive:true});
+          });
+          if(document.readyState==='complete')schedule();
+          else window.addEventListener('load',schedule,{once:true});
+        })();`,
       },
     ],
   }),
