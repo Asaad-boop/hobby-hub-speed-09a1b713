@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, ChevronLeft, ChevronRight, Flame, Star, Truck, Zap } from "lucide-react";
 import { useProducts, type Product } from "@/lib/products";
 import { useSiteSettings } from "@/lib/site-settings";
+import { cdnImage } from "@/lib/cdn-image";
 
 function useCountdown(targetMs: number) {
   const [now, setNow] = useState(() => Date.now());
