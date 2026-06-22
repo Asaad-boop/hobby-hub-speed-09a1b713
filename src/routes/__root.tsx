@@ -44,7 +44,19 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0e703ae1-ccad-42b5-8441-24b5fd4f0c49/id-preview-c3c60a59--2c26f5f9-694d-40ad-b719-1afc69bb0a15.lovable.app-1776579424457.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0e703ae1-ccad-42b5-8441-24b5fd4f0c49/id-preview-c3c60a59--2c26f5f9-694d-40ad-b719-1afc69bb0a15.lovable.app-1776579424457.png" },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      // Preconnect to image CDN + Supabase origin so the LCP image starts
+      // downloading in parallel with the HTML/JS — saves ~150-300ms on mobile.
+      { rel: "preconnect", href: "https://wsrv.nl", crossOrigin: "" },
+      { rel: "dns-prefetch", href: "https://wsrv.nl" },
+      { rel: "preconnect", href: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev", crossOrigin: "" },
+      { rel: "dns-prefetch", href: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev" },
+      // Defer 3rd-party origins until after first paint.
+      { rel: "dns-prefetch", href: "https://connect.facebook.net" },
+      { rel: "dns-prefetch", href: "https://www.googletagmanager.com" },
+      { rel: "dns-prefetch", href: "https://www.clarity.ms" },
+    ],
     scripts: [
       {
         type: "application/ld+json",
