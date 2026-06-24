@@ -23,16 +23,37 @@ export default function ProductCard({ product }: { product: Product }) {
         params={{ id: product.slug || product.id }}
         className="relative block aspect-square overflow-hidden bg-muted"
       >
-        <img
-          src={cdnImage(product.image, 400)}
-          alt={product.title}
-          loading="lazy"
-          decoding="async"
-          width={400}
-          height={400}
-          onError={handleImgError}
-          className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-        />
+        {product.video ? (
+          <video
+            src={product.video}
+            poster={cdnImage(product.image, 400)}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            onError={(e) => {
+              const v = e.currentTarget;
+              const img = document.createElement("img");
+              img.src = cdnImage(product.image, 400);
+              img.alt = product.title;
+              img.className = v.className;
+              v.replaceWith(img);
+            }}
+            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+          />
+        ) : (
+          <img
+            src={cdnImage(product.image, 400)}
+            alt={product.title}
+            loading="lazy"
+            decoding="async"
+            width={400}
+            height={400}
+            onError={handleImgError}
+            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+          />
+        )}
 
         {/* gradient overlay on hover */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />

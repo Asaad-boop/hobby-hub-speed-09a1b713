@@ -25,6 +25,7 @@ export type Product = {
   isFeatured?: boolean;
   shippingFeeInside?: number | null;
   shippingFeeOutside?: number | null;
+  video?: string | null;
 };
 
 type ProductRow = {
@@ -47,6 +48,7 @@ type ProductRow = {
   category_id: string | null;
   shipping_fee_inside?: number | string | null;
   shipping_fee_outside?: number | string | null;
+  video_url?: string | null;
   categories?: { name: string; slug: string } | null;
 };
 
@@ -83,11 +85,12 @@ const toProduct = (r: ProductRow): Product => {
     isFeatured: r.is_featured,
     shippingFeeInside: r.shipping_fee_inside != null ? Number(r.shipping_fee_inside) : null,
     shippingFeeOutside: r.shipping_fee_outside != null ? Number(r.shipping_fee_outside) : null,
+    video: r.video_url ?? null,
   };
 };
 
 const SELECT_COLS =
-  "id,slug,title,description,price,old_price,image,gallery,benefits,rating,reviews,stock,is_new_arrival,is_featured,is_active,display_order,category_id,shipping_fee_inside,shipping_fee_outside,categories(name,slug)";
+  "id,slug,title,description,price,old_price,image,gallery,benefits,rating,reviews,stock,is_new_arrival,is_featured,is_active,display_order,category_id,shipping_fee_inside,shipping_fee_outside,video_url,categories(name,slug)";
 
 const HOBBYSHOP_BRAND_ID = "1f1f366d-ad85-4513-85ab-2dbb6b23c513";
 
