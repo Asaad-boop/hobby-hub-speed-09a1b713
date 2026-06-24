@@ -89,11 +89,14 @@ const toProduct = (r: ProductRow): Product => {
 const SELECT_COLS =
   "id,slug,title,description,price,old_price,image,gallery,benefits,rating,reviews,stock,is_new_arrival,is_featured,is_active,display_order,category_id,shipping_fee_inside,shipping_fee_outside,categories(name,slug)";
 
+const HOBBYSHOP_BRAND_ID = "1f1f366d-ad85-4513-85ab-2dbb6b23c513";
+
 async function fetchProducts(): Promise<Product[]> {
   const { data, error } = await supabase
     .from("products")
     .select(SELECT_COLS)
     .eq("is_active", true)
+    .eq("brand_id", HOBBYSHOP_BRAND_ID)
     .order("display_order", { ascending: true })
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -123,6 +126,7 @@ export function useProduct(id: string | undefined) {
         .from("products")
         .select(SELECT_COLS)
         .eq("is_active", true)
+        .eq("brand_id", HOBBYSHOP_BRAND_ID)
         .or(filter)
         .maybeSingle();
       if (error) throw error;
@@ -144,10 +148,12 @@ export async function fetchProductByIdOrSlug(idOrSlug: string): Promise<Product 
     .from("products")
     .select(SELECT_COLS)
     .eq("is_active", true)
+    .eq("brand_id", HOBBYSHOP_BRAND_ID)
     .or(filter)
     .maybeSingle();
   if (error) throw error;
   return data ? toProduct(data as unknown as ProductRow) : null;
+
 }
 
 // Hardcoded testimonials — match products by slug fragments (best effort).
