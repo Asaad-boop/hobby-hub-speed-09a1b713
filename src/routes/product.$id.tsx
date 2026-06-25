@@ -137,7 +137,7 @@ function CountdownTimer() {
 
 function ProductPage() {
   const { product, all } = Route.useLoaderData();
-  const { add } = useCart();
+  const { add, setOpen } = useCart();
   const { has: wishHas, toggle: wishToggle } = useWishlist();
   const navigate = useNavigate();
   const [activeImg, setActiveImg] = useState(product.image);
@@ -288,6 +288,7 @@ function ProductPage() {
   const related = allOthers.slice(0, 4);
   const handleBuyNow = () => {
     add(product, qty, { silent: true });
+    setOpen(false);
     navigate({ to: "/checkout" });
   };
 
@@ -620,6 +621,7 @@ function ProductPage() {
                 return;
               }
               add(product, qty, { silent: true, ...(variantOpts ?? {}) });
+              setOpen(false);
               navigate({ to: "/checkout" });
             };
             return (
@@ -788,13 +790,23 @@ function ProductPage() {
         const discount = qty === 3 ? 15 : qty === 2 ? 10 : 0;
         const unitPrice = Math.round(product.price * (1 - discount / 100));
         const totalPrice = unitPrice * qty;
+        const variantOpts = selectedVariant
+          ? { variantId: selectedVariant.id, variantLabel: variantSelectionLabel }
+          : undefined;
         const stickyAdd = () => {
-          const discounted: typeof product = { ...product, price: unitPrice };
-          add(discounted, qty);
+          if (variantBlocksAddToCart) {
+            toast.error(hasVariants && !allTypesSelected ? "Select all options first" : "Out of stock");
+            return;
+          }
+          add(product, qty, variantOpts);
         };
         const stickyBuy = () => {
-          const discounted: typeof product = { ...product, price: unitPrice };
-          add(discounted, qty, { silent: true });
+          if (variantBlocksAddToCart) {
+            toast.error(hasVariants && !allTypesSelected ? "Select all options first" : "Out of stock");
+            return;
+          }
+          add(product, qty, { silent: true, ...(variantOpts ?? {}) });
+          setOpen(false);
           navigate({ to: "/checkout" });
         };
         return (
@@ -825,12 +837,14 @@ function ProductPage() {
               </button>
               <button
                 onClick={stickyAdd}
+                disabled={variantBlocksAddToCart}
                 className="flex-1 rounded-full border-2 border-foreground py-3 text-sm font-extrabold"
               >
                 Add to Cart
               </button>
               <button
                 onClick={stickyBuy}
+                disabled={variantBlocksAddToCart}
                 className="buy-jiggle relative flex-[1.3] rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground"
               >
                 <Zap className="mr-1 inline-block h-4 w-4 fill-current align-[-2px]" />

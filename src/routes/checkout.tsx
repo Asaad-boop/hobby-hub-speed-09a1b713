@@ -52,6 +52,7 @@ function Checkout() {
   const [submitting, setSubmitting] = useState(false);
   const submitGuardRef = useRef(false);
   const redirectingRef = useRef(false);
+  const clientOrderIdRef = useRef<string | null>(null);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [payMethod, setPayMethod] = useState<"cod" | "bkash">("cod");
   const [payNumber, setPayNumber] = useState("");
@@ -250,6 +251,24 @@ function Checkout() {
   const normalizedPhone = normalizePhone(form.phone);
   const phoneValid = /^01[3-9]\d{8}$/.test(normalizedPhone);
 
+  const getClientOrderId = () => {
+    if (!clientOrderIdRef.current) {
+      clientOrderIdRef.current =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+              const r = (Math.random() * 16) | 0;
+              const v = c === "x" ? r : (r & 0x3) | 0x8;
+              return v.toString(16);
+            });
+    }
+    return clientOrderIdRef.current;
+  };
+
+  const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+  const shouldRetryOrder = (message?: string) => /network|fetch|timeout|failed to fetch|load failed/i.test(message ?? "");
+
   const goToOrderSuccess = async (orderId: string) => {
     if (redirectingRef.current) return;
     redirectingRef.current = true;
@@ -290,6 +309,7 @@ function Checkout() {
     if (submitGuardRef.current) return;
     submitGuardRef.current = true;
     setSubmitting(true);
+    setOpen(false);
 
     const releaseSubmit = () => {
       submitGuardRef.current = false;
@@ -373,6 +393,8 @@ function Checkout() {
       const orderInsert = isGuest
         ? {
             ...baseOrder,
+            id: getClientOrderId(),
+            brand_id: "1f1f366d-ad85-4513-85ab-2dbb6b23c513",
             user_id: null,
             is_guest_order: true,
             guest_name: trimmedName,
@@ -380,6 +402,8 @@ function Checkout() {
           }
         : {
             ...baseOrder,
+            id: getClientOrderId(),
+            brand_id: "1f1f366d-ad85-4513-85ab-2dbb6b23c513",
             user_id: session!.user.id,
           };
 
@@ -396,12 +420,22 @@ function Checkout() {
         variant_label: i.variantLabel ?? null,
       }));
 
-      const placeRes = await placeOrderFn({
+      let placeRes = await placeOrderFn({
         data: { order: orderInsert, items: orderItemsPayload },
       }).catch((e: unknown) => ({
         ok: false as const,
         error: e instanceof Error ? e.message : "Network error",
       }));
+
+      if (!placeRes.ok && shouldRetryOrder(placeRes.error)) {
+        await wait(700);
+        placeRes = await placeOrderFn({
+          data: { order: orderInsert, items: orderItemsPayload },
+        }).catch((e: unknown) => ({
+          ok: false as const,
+          error: e instanceof Error ? e.message : "Network error",
+        }));
+      }
 
       if (!placeRes.ok) {
         console.error("Order error:", placeRes.error, "payload:", orderInsert);
@@ -415,6 +449,7 @@ function Checkout() {
       }
       const order = { id: placeRes.orderId };
       createdOrderId = order.id;
+      clientOrderIdRef.current = null;
 
       if (!isGuest && appliedCoupon && finalCouponDiscount > 0) {
         // Best-effort — failure here should not block the order.

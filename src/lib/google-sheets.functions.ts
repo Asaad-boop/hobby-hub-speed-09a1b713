@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_sheets/v4";
 const SPREADSHEET_ID = "1MG2swEO4rZYZxUV8btM0U6UDQGQKx2mRS_iOVn86wF0";
@@ -127,6 +126,7 @@ function rowFromOrder(o: OrderForSheet, itemsSummary: string, totalQty: number):
 
 async function fetchOrderRows(orderIds: string[]): Promise<(string | number)[][]> {
   if (orderIds.length === 0) return [];
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: orders, error } = await supabaseAdmin
     .from("orders")
     .select(
@@ -154,6 +154,11 @@ async function fetchOrderRows(orderIds: string[]): Promise<(string | number)[][]
   });
 }
 
+export async function appendOrderToSheetById(orderId: string) {
+  const rows = await fetchOrderRows([orderId]);
+  return appendRows(rows);
+}
+
 async function appendRows(rows: (string | number)[][]) {
   if (rows.length === 0) return { appended: 0 };
   await ensureHeader();
@@ -177,8 +182,7 @@ export const appendOrderToSheet = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ orderId: z.string().uuid() }).parse(input))
   .handler(async ({ data }) => {
     try {
-      const rows = await fetchOrderRows([data.orderId]);
-      const result = await appendRows(rows);
+      const result = await appendOrderToSheetById(data.orderId);
       return { ok: true as const, ...result };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -192,6 +196,7 @@ export const syncOrdersToSheet = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ limit: z.number().min(1).max(2000).optional() }).parse(input ?? {}))
   .handler(async ({ data }) => {
     try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const limit = data.limit ?? 500;
       const { data: orders, error } = await supabaseAdmin
         .from("orders")
