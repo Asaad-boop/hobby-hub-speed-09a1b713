@@ -152,6 +152,7 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isAdmin = pathname.startsWith("/admin");
   const isLanding = pathname.startsWith("/lp/");
+  const isCheckout = pathname.startsWith("/checkout");
 
   // Capture marketing attribution on the first page of the visit.
   useEffect(() => {
@@ -214,7 +215,7 @@ function RootComponent() {
           ) : isLanding ? (
             <div className="min-h-screen">
               <Outlet />
-              <CartDrawer />
+              {!isCheckout && <CartDrawer />}
             </div>
           ) : (
             <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
@@ -223,7 +224,7 @@ function RootComponent() {
                 <Outlet />
               </main>
               <Footer />
-              <CartDrawer />
+              {!isCheckout && <CartDrawer />}
               <WhatsAppButton />
               <MobileBottomNav />
             </div>

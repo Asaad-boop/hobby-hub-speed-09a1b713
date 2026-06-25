@@ -1,18 +1,26 @@
 import { X, Minus, Plus, Trash2 } from "lucide-react";
 import { useCart, cartLineKey } from "@/lib/cart";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { cdnImage, handleImgError } from "@/lib/cdn-image";
 
 export default function CartDrawer() {
   const { open, setOpen, items, total, setQty, remove } = useCart();
+  const { pathname } = useLocation();
+  const isCheckout = pathname.startsWith("/checkout");
 
   useEffect(() => {
+    if (isCheckout) {
+      document.body.style.overflow = "";
+      return;
+    }
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [open]);
+  }, [isCheckout, open]);
+
+  if (isCheckout) return null;
 
   return (
     <>
