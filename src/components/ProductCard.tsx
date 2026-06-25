@@ -7,7 +7,7 @@ import { cdnImage, handleImgError } from "@/lib/cdn-image";
 import { toast } from "sonner";
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { add } = useCart();
+  const { add, setOpen } = useCart();
   const { has, toggle } = useWishlist();
   const navigate = useNavigate();
   const liked = has(product.id);
@@ -141,7 +141,8 @@ export default function ProductCard({ product }: { product: Product }) {
           </button>
           <button
             onClick={() => {
-              add(product);
+              add(product, 1, { silent: true });
+              setOpen(false);
               navigate({ to: "/checkout" });
             }}
             disabled={outOfStock}
