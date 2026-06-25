@@ -43,7 +43,7 @@ export const Route = createFileRoute("/checkout")({
 });
 
 function Checkout() {
-  const { items, total, clear, add, setQty, remove } = useCart();
+  const { items, total, clear, add, setQty, remove, setOpen } = useCart();
   const { data: allProducts = [] } = useProducts();
   const navigate = useNavigate();
   const placeOrderFn = useServerFn(placeOrder);
@@ -60,6 +60,10 @@ function Checkout() {
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", city: "", district: "" });
+
+  useEffect(() => {
+    setOpen(false);
+  }, [setOpen]);
 
   // Meta Pixel: InitiateCheckout (fires once on mount when cart has items)
   useEffect(() => {
