@@ -229,6 +229,48 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_audit_log: {
+        Row: {
+          action: string
+          after_data: Json | null
+          before_data: Json | null
+          brand_id: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          after_data?: Json | null
+          before_data?: Json | null
+          brand_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          after_data?: Json | null
+          before_data?: Json | null
+          brand_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           created_at: string
@@ -1085,7 +1127,7 @@ export type Database = {
           account_number: string | null
           account_subtype: string | null
           account_type: string
-          brand_id: string
+          brand_id: string | null
           created_at: string
           current_balance: number
           id: string
@@ -1100,7 +1142,7 @@ export type Database = {
           account_number?: string | null
           account_subtype?: string | null
           account_type: string
-          brand_id: string
+          brand_id?: string | null
           created_at?: string
           current_balance?: number
           id?: string
@@ -1115,7 +1157,7 @@ export type Database = {
           account_number?: string | null
           account_subtype?: string | null
           account_type?: string
-          brand_id?: string
+          brand_id?: string | null
           created_at?: string
           current_balance?: number
           id?: string
@@ -2215,6 +2257,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "mkt_ad_accounts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_product_expense_allocations_mkt_ad_account_id_fkey"
+            columns: ["mkt_ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_ad_wallet_summary"
+            referencedColumns: ["ad_account_id"]
           },
           {
             foreignKeyName: "erp_product_expense_allocations_product_id_fkey"
@@ -4368,6 +4417,206 @@ export type Database = {
           },
         ]
       }
+      imp_cargo_bills: {
+        Row: {
+          attachment_url: string | null
+          bill_date: string
+          bill_number: string | null
+          brand_id: string
+          cargo_agent_id: string
+          created_at: string
+          created_by: string | null
+          customs_charge: number
+          id: string
+          local_delivery_charge: number
+          note: string | null
+          other_charge: number
+          paid_from_account_bdt: number
+          paid_from_balance_bdt: number
+          payable_bdt: number
+          payment_account_id: string | null
+          payment_source: string
+          po_id: string | null
+          service_charge: number
+          shipment_ref: string | null
+          shipping_charge: number
+          total_bdt: number
+          updated_at: string
+          weight_kg: number | null
+        }
+        Insert: {
+          attachment_url?: string | null
+          bill_date?: string
+          bill_number?: string | null
+          brand_id: string
+          cargo_agent_id: string
+          created_at?: string
+          created_by?: string | null
+          customs_charge?: number
+          id?: string
+          local_delivery_charge?: number
+          note?: string | null
+          other_charge?: number
+          paid_from_account_bdt?: number
+          paid_from_balance_bdt?: number
+          payable_bdt?: number
+          payment_account_id?: string | null
+          payment_source?: string
+          po_id?: string | null
+          service_charge?: number
+          shipment_ref?: string | null
+          shipping_charge?: number
+          total_bdt?: number
+          updated_at?: string
+          weight_kg?: number | null
+        }
+        Update: {
+          attachment_url?: string | null
+          bill_date?: string
+          bill_number?: string | null
+          brand_id?: string
+          cargo_agent_id?: string
+          created_at?: string
+          created_by?: string | null
+          customs_charge?: number
+          id?: string
+          local_delivery_charge?: number
+          note?: string | null
+          other_charge?: number
+          paid_from_account_bdt?: number
+          paid_from_balance_bdt?: number
+          payable_bdt?: number
+          payment_account_id?: string | null
+          payment_source?: string
+          po_id?: string | null
+          service_charge?: number
+          shipment_ref?: string | null
+          shipping_charge?: number
+          total_bdt?: number
+          updated_at?: string
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imp_cargo_bills_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_cargo_bills_cargo_agent_id_fkey"
+            columns: ["cargo_agent_id"]
+            isOneToOne: false
+            referencedRelation: "imp_cargo_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_cargo_bills_cargo_agent_id_fkey"
+            columns: ["cargo_agent_id"]
+            isOneToOne: false
+            referencedRelation: "imp_cargo_balances"
+            referencedColumns: ["cargo_agent_id"]
+          },
+          {
+            foreignKeyName: "imp_cargo_bills_payment_account_id_fkey"
+            columns: ["payment_account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_cargo_bills_po_id_fkey"
+            columns: ["po_id"]
+            isOneToOne: false
+            referencedRelation: "imp_purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      imp_cargo_ledger: {
+        Row: {
+          attachment_url: string | null
+          brand_id: string
+          cargo_agent_id: string
+          created_at: string
+          created_by: string | null
+          credit_bdt: number
+          debit_bdt: number
+          entry_date: string
+          entry_type: string
+          id: string
+          note: string | null
+          payment_account_id: string | null
+          ref_id: string | null
+          ref_label: string | null
+          ref_type: string | null
+        }
+        Insert: {
+          attachment_url?: string | null
+          brand_id: string
+          cargo_agent_id: string
+          created_at?: string
+          created_by?: string | null
+          credit_bdt?: number
+          debit_bdt?: number
+          entry_date?: string
+          entry_type: string
+          id?: string
+          note?: string | null
+          payment_account_id?: string | null
+          ref_id?: string | null
+          ref_label?: string | null
+          ref_type?: string | null
+        }
+        Update: {
+          attachment_url?: string | null
+          brand_id?: string
+          cargo_agent_id?: string
+          created_at?: string
+          created_by?: string | null
+          credit_bdt?: number
+          debit_bdt?: number
+          entry_date?: string
+          entry_type?: string
+          id?: string
+          note?: string | null
+          payment_account_id?: string | null
+          ref_id?: string | null
+          ref_label?: string | null
+          ref_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imp_cargo_ledger_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_cargo_ledger_cargo_agent_id_fkey"
+            columns: ["cargo_agent_id"]
+            isOneToOne: false
+            referencedRelation: "imp_cargo_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imp_cargo_ledger_cargo_agent_id_fkey"
+            columns: ["cargo_agent_id"]
+            isOneToOne: false
+            referencedRelation: "imp_cargo_balances"
+            referencedColumns: ["cargo_agent_id"]
+          },
+          {
+            foreignKeyName: "imp_cargo_ledger_payment_account_id_fkey"
+            columns: ["payment_account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       imp_carton_items: {
         Row: {
           carton_id: string
@@ -4868,6 +5117,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "imp_purchase_orders_cargo_agent_id_fkey"
+            columns: ["cargo_agent_id"]
+            isOneToOne: false
+            referencedRelation: "imp_cargo_balances"
+            referencedColumns: ["cargo_agent_id"]
+          },
+          {
             foreignKeyName: "imp_purchase_orders_supplier_id_fkey"
             columns: ["supplier_id"]
             isOneToOne: false
@@ -5228,6 +5484,408 @@ export type Database = {
           },
         ]
       }
+      meta_ad_wallet_ledger: {
+        Row: {
+          ad_account_id: string
+          balance_usd_after: number | null
+          bdt_value: number
+          conversion_source: string | null
+          created_at: string
+          created_by: string | null
+          entry_date: string
+          entry_type: string
+          id: string
+          note: string | null
+          rate_used: number | null
+          source_purchase_id: string | null
+          source_spend_ref: string | null
+          usd_delta: number
+        }
+        Insert: {
+          ad_account_id: string
+          balance_usd_after?: number | null
+          bdt_value?: number
+          conversion_source?: string | null
+          created_at?: string
+          created_by?: string | null
+          entry_date?: string
+          entry_type: string
+          id?: string
+          note?: string | null
+          rate_used?: number | null
+          source_purchase_id?: string | null
+          source_spend_ref?: string | null
+          usd_delta: number
+        }
+        Update: {
+          ad_account_id?: string
+          balance_usd_after?: number | null
+          bdt_value?: number
+          conversion_source?: string | null
+          created_at?: string
+          created_by?: string | null
+          entry_date?: string
+          entry_type?: string
+          id?: string
+          note?: string | null
+          rate_used?: number | null
+          source_purchase_id?: string | null
+          source_spend_ref?: string | null
+          usd_delta?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_ad_wallet_ledger_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_ad_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_ad_wallet_ledger_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_ad_wallet_summary"
+            referencedColumns: ["ad_account_id"]
+          },
+          {
+            foreignKeyName: "meta_ad_wallet_ledger_source_purchase_id_fkey"
+            columns: ["source_purchase_id"]
+            isOneToOne: false
+            referencedRelation: "meta_dollar_purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_capi_log: {
+        Row: {
+          brand_id: string | null
+          created_at: string
+          error: string | null
+          event_id: string | null
+          event_name: string
+          events_received: number | null
+          fbtrace_id: string | null
+          id: string
+          response: Json | null
+          source: string | null
+          status: string
+        }
+        Insert: {
+          brand_id?: string | null
+          created_at?: string
+          error?: string | null
+          event_id?: string | null
+          event_name: string
+          events_received?: number | null
+          fbtrace_id?: string | null
+          id?: string
+          response?: Json | null
+          source?: string | null
+          status: string
+        }
+        Update: {
+          brand_id?: string | null
+          created_at?: string
+          error?: string | null
+          event_id?: string | null
+          event_name?: string
+          events_received?: number | null
+          fbtrace_id?: string | null
+          id?: string
+          response?: Json | null
+          source?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_capi_log_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_dollar_purchases: {
+        Row: {
+          ad_account_id: string
+          attachment_url: string | null
+          bdt_amount: number | null
+          brand_id: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          created_by: string | null
+          effective_rate: number | null
+          fee_bdt: number
+          id: string
+          note: string | null
+          paid_from_account_id: string
+          payment_method: string | null
+          purchase_date: string
+          reference: string | null
+          status: string
+          supplier_name: string | null
+          total_bdt: number | null
+          updated_at: string
+          usd_amount: number
+          usd_rate: number
+        }
+        Insert: {
+          ad_account_id: string
+          attachment_url?: string | null
+          bdt_amount?: number | null
+          brand_id?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_rate?: number | null
+          fee_bdt?: number
+          id?: string
+          note?: string | null
+          paid_from_account_id: string
+          payment_method?: string | null
+          purchase_date?: string
+          reference?: string | null
+          status?: string
+          supplier_name?: string | null
+          total_bdt?: number | null
+          updated_at?: string
+          usd_amount: number
+          usd_rate: number
+        }
+        Update: {
+          ad_account_id?: string
+          attachment_url?: string | null
+          bdt_amount?: number | null
+          brand_id?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_rate?: number | null
+          fee_bdt?: number
+          id?: string
+          note?: string | null
+          paid_from_account_id?: string
+          payment_method?: string | null
+          purchase_date?: string
+          reference?: string | null
+          status?: string
+          supplier_name?: string | null
+          total_bdt?: number | null
+          updated_at?: string
+          usd_amount?: number
+          usd_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_dollar_purchases_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_ad_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_dollar_purchases_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_ad_wallet_summary"
+            referencedColumns: ["ad_account_id"]
+          },
+          {
+            foreignKeyName: "meta_dollar_purchases_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_dollar_purchases_paid_from_account_id_fkey"
+            columns: ["paid_from_account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_fifo_lots: {
+        Row: {
+          ad_account_id: string
+          created_at: string
+          effective_rate: number
+          id: string
+          is_active: boolean
+          lot_date: string
+          purchase_id: string | null
+          usd_remaining: number
+          usd_total: number
+        }
+        Insert: {
+          ad_account_id: string
+          created_at?: string
+          effective_rate: number
+          id?: string
+          is_active?: boolean
+          lot_date: string
+          purchase_id?: string | null
+          usd_remaining: number
+          usd_total: number
+        }
+        Update: {
+          ad_account_id?: string
+          created_at?: string
+          effective_rate?: number
+          id?: string
+          is_active?: boolean
+          lot_date?: string
+          purchase_id?: string | null
+          usd_remaining?: number
+          usd_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_fifo_lots_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_ad_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_fifo_lots_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_ad_wallet_summary"
+            referencedColumns: ["ad_account_id"]
+          },
+          {
+            foreignKeyName: "meta_fifo_lots_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "meta_dollar_purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_spend_consumptions: {
+        Row: {
+          ad_account_id: string
+          bdt_cost: number
+          conversion_source: string
+          created_at: string
+          id: string
+          insight_id: string | null
+          lots_used: Json
+          spend_ref: string
+          updated_at: string
+          usd_consumed: number
+          usd_spend_recorded: number
+        }
+        Insert: {
+          ad_account_id: string
+          bdt_cost?: number
+          conversion_source?: string
+          created_at?: string
+          id?: string
+          insight_id?: string | null
+          lots_used?: Json
+          spend_ref: string
+          updated_at?: string
+          usd_consumed?: number
+          usd_spend_recorded?: number
+        }
+        Update: {
+          ad_account_id?: string
+          bdt_cost?: number
+          conversion_source?: string
+          created_at?: string
+          id?: string
+          insight_id?: string | null
+          lots_used?: Json
+          spend_ref?: string
+          updated_at?: string
+          usd_consumed?: number
+          usd_spend_recorded?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_spend_consumptions_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_ad_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_spend_consumptions_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_ad_wallet_summary"
+            referencedColumns: ["ad_account_id"]
+          },
+          {
+            foreignKeyName: "meta_spend_consumptions_insight_id_fkey"
+            columns: ["insight_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_insights_daily"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_tracking_config: {
+        Row: {
+          brand_id: string
+          capi_access_token: string | null
+          capi_enabled: boolean
+          created_at: string
+          enabled_events: Json
+          pixel_id: string | null
+          test_event_code: string | null
+          token_secret_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          brand_id: string
+          capi_access_token?: string | null
+          capi_enabled?: boolean
+          created_at?: string
+          enabled_events?: Json
+          pixel_id?: string | null
+          test_event_code?: string | null
+          token_secret_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string
+          capi_access_token?: string | null
+          capi_enabled?: boolean
+          created_at?: string
+          enabled_events?: Json
+          pixel_id?: string | null
+          test_event_code?: string | null
+          token_secret_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_tracking_config_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: true
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mkt_ad_accounts: {
         Row: {
           access_token: string | null
@@ -5367,6 +6025,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "mkt_ads_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_ad_wallet_summary"
+            referencedColumns: ["ad_account_id"]
+          },
+          {
             foreignKeyName: "mkt_ads_adset_id_fkey"
             columns: ["adset_id"]
             isOneToOne: false
@@ -5445,6 +6110,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "mkt_ad_accounts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_adsets_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_ad_wallet_summary"
+            referencedColumns: ["ad_account_id"]
           },
           {
             foreignKeyName: "mkt_adsets_brand_id_fkey"
@@ -5578,6 +6250,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "mkt_campaigns_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_ad_wallet_summary"
+            referencedColumns: ["ad_account_id"]
+          },
+          {
             foreignKeyName: "mkt_campaigns_brand_id_fkey"
             columns: ["brand_id"]
             isOneToOne: false
@@ -5594,11 +6273,15 @@ export type Database = {
           brand_id: string
           campaign_id: string | null
           clicks: number
+          conversion_source: string | null
           cpc: number | null
           cpm: number | null
           created_at: string
           ctr: number | null
           date: string
+          estimated_bdt_cost: boolean
+          fifo_consumed_at: string | null
+          fifo_consumption_ref: string | null
           id: string
           impressions: number
           meta_add_to_cart: number
@@ -5609,6 +6292,7 @@ export type Database = {
           raw: Json | null
           reach: number
           spend: number
+          spend_bdt_fifo: number | null
           updated_at: string
         }
         Insert: {
@@ -5618,11 +6302,15 @@ export type Database = {
           brand_id: string
           campaign_id?: string | null
           clicks?: number
+          conversion_source?: string | null
           cpc?: number | null
           cpm?: number | null
           created_at?: string
           ctr?: number | null
           date: string
+          estimated_bdt_cost?: boolean
+          fifo_consumed_at?: string | null
+          fifo_consumption_ref?: string | null
           id?: string
           impressions?: number
           meta_add_to_cart?: number
@@ -5633,6 +6321,7 @@ export type Database = {
           raw?: Json | null
           reach?: number
           spend?: number
+          spend_bdt_fifo?: number | null
           updated_at?: string
         }
         Update: {
@@ -5642,11 +6331,15 @@ export type Database = {
           brand_id?: string
           campaign_id?: string | null
           clicks?: number
+          conversion_source?: string | null
           cpc?: number | null
           cpm?: number | null
           created_at?: string
           ctr?: number | null
           date?: string
+          estimated_bdt_cost?: boolean
+          fifo_consumed_at?: string | null
+          fifo_consumption_ref?: string | null
           id?: string
           impressions?: number
           meta_add_to_cart?: number
@@ -5657,6 +6350,7 @@ export type Database = {
           raw?: Json | null
           reach?: number
           spend?: number
+          spend_bdt_fifo?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -5666,6 +6360,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "mkt_ad_accounts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_insights_daily_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_ad_wallet_summary"
+            referencedColumns: ["ad_account_id"]
           },
           {
             foreignKeyName: "mkt_insights_daily_ad_id_fkey"
@@ -5786,6 +6487,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "mkt_ad_accounts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_manual_expenses_mkt_ad_account_id_fkey"
+            columns: ["mkt_ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_ad_wallet_summary"
+            referencedColumns: ["ad_account_id"]
           },
           {
             foreignKeyName: "mkt_manual_expenses_product_id_fkey"
@@ -5953,6 +6661,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "mkt_ad_accounts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_sync_log_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "v_meta_ad_wallet_summary"
+            referencedColumns: ["ad_account_id"]
           },
           {
             foreignKeyName: "mkt_sync_log_brand_id_fkey"
@@ -6267,6 +6982,7 @@ export type Database = {
           advance_txn_id: string | null
           alternate_phone: string | null
           assigned_to: string | null
+          attribution: Json | null
           attribution_landing_page: string | null
           auto_call_enabled: boolean | null
           brand_id: string | null
@@ -6328,6 +7044,9 @@ export type Database = {
           payment_source: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           pipeline_log: Json
+          preorder_converted_at: string | null
+          preorder_expected_date: string | null
+          preorder_ready_at: string | null
           priority: Database["public"]["Enums"]["order_priority"]
           reconciliation_status: string | null
           refund_amount: number
@@ -6378,6 +7097,7 @@ export type Database = {
           advance_txn_id?: string | null
           alternate_phone?: string | null
           assigned_to?: string | null
+          attribution?: Json | null
           attribution_landing_page?: string | null
           auto_call_enabled?: boolean | null
           brand_id?: string | null
@@ -6439,6 +7159,9 @@ export type Database = {
           payment_source?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           pipeline_log?: Json
+          preorder_converted_at?: string | null
+          preorder_expected_date?: string | null
+          preorder_ready_at?: string | null
           priority?: Database["public"]["Enums"]["order_priority"]
           reconciliation_status?: string | null
           refund_amount?: number
@@ -6489,6 +7212,7 @@ export type Database = {
           advance_txn_id?: string | null
           alternate_phone?: string | null
           assigned_to?: string | null
+          attribution?: Json | null
           attribution_landing_page?: string | null
           auto_call_enabled?: boolean | null
           brand_id?: string | null
@@ -6550,6 +7274,9 @@ export type Database = {
           payment_source?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           pipeline_log?: Json
+          preorder_converted_at?: string | null
+          preorder_expected_date?: string | null
+          preorder_ready_at?: string | null
           priority?: Database["public"]["Enums"]["order_priority"]
           reconciliation_status?: string | null
           refund_amount?: number
@@ -6819,6 +7546,7 @@ export type Database = {
       }
       products: {
         Row: {
+          age_group: string | null
           available_stock: number | null
           barcode: string | null
           benefits: Json
@@ -6834,8 +7562,11 @@ export type Database = {
           is_active: boolean
           is_featured: boolean
           is_new_arrival: boolean
+          is_preorder: boolean
           low_stock_threshold: number
           old_price: number | null
+          preorder_expected_date: string | null
+          preorder_note: string | null
           price: number
           rating: number
           reorder_point: number | null
@@ -6855,6 +7586,7 @@ export type Database = {
           weighted_avg_cost: number
         }
         Insert: {
+          age_group?: string | null
           available_stock?: number | null
           barcode?: string | null
           benefits?: Json
@@ -6870,8 +7602,11 @@ export type Database = {
           is_active?: boolean
           is_featured?: boolean
           is_new_arrival?: boolean
+          is_preorder?: boolean
           low_stock_threshold?: number
           old_price?: number | null
+          preorder_expected_date?: string | null
+          preorder_note?: string | null
           price: number
           rating?: number
           reorder_point?: number | null
@@ -6891,6 +7626,7 @@ export type Database = {
           weighted_avg_cost?: number
         }
         Update: {
+          age_group?: string | null
           available_stock?: number | null
           barcode?: string | null
           benefits?: Json
@@ -6906,8 +7642,11 @@ export type Database = {
           is_active?: boolean
           is_featured?: boolean
           is_new_arrival?: boolean
+          is_preorder?: boolean
           low_stock_threshold?: number
           old_price?: number | null
+          preorder_expected_date?: string | null
+          preorder_note?: string | null
           price?: number
           rating?: number
           reorder_point?: number | null
@@ -6960,6 +7699,7 @@ export type Database = {
           total_orders: number | null
           total_spent: number | null
           updated_at: string
+          username: string | null
         }
         Insert: {
           address?: string | null
@@ -6977,6 +7717,7 @@ export type Database = {
           total_orders?: number | null
           total_spent?: number | null
           updated_at?: string
+          username?: string | null
         }
         Update: {
           address?: string | null
@@ -6994,6 +7735,7 @@ export type Database = {
           total_orders?: number | null
           total_spent?: number | null
           updated_at?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -7541,6 +8283,27 @@ export type Database = {
         }
         Relationships: []
       }
+      imp_cargo_balances: {
+        Row: {
+          adjustment_net: number | null
+          brand_id: string | null
+          cargo_agent_id: string | null
+          current_balance: number | null
+          entry_count: number | null
+          last_entry_at: string | null
+          total_advance: number | null
+          total_deducted: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imp_cargo_agents_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews_public: {
         Row: {
           admin_note: string | null
@@ -7695,6 +8458,29 @@ export type Database = {
           },
         ]
       }
+      v_meta_ad_wallet_summary: {
+        Row: {
+          ad_account_id: string | null
+          ad_account_name: string | null
+          avg_effective_rate: number | null
+          brand_id: string | null
+          latest_purchase_rate: number | null
+          remaining_usd: number | null
+          total_bdt_paid: number | null
+          total_bdt_spent: number | null
+          total_usd_purchased: number | null
+          total_usd_spent: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mkt_ad_accounts_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_product_incoming: {
         Row: {
           brand_id: string | null
@@ -7841,8 +8627,86 @@ export type Database = {
         Returns: number
       }
       calculate_rfm_all_brands: { Args: never; Returns: undefined }
+      cancel_meta_dollar_purchase: {
+        Args: { _purchase_id: string; _reason?: string }
+        Returns: Json
+      }
+      cargo_advance_deposit: {
+        Args: {
+          p_amount: number
+          p_attachment_url: string
+          p_brand_id: string
+          p_cargo_agent_id: string
+          p_note: string
+          p_payment_account_id: string
+          p_payment_date: string
+          p_reference: string
+        }
+        Returns: Json
+      }
+      cargo_bill_create: {
+        Args: {
+          p_amount_from_account: number
+          p_amount_from_balance: number
+          p_attachment_url: string
+          p_bill_date: string
+          p_bill_number: string
+          p_brand_id: string
+          p_cargo_agent_id: string
+          p_customs_charge: number
+          p_local_delivery_charge: number
+          p_note: string
+          p_other_charge: number
+          p_payment_account_id: string
+          p_payment_source: string
+          p_po_id: string
+          p_service_charge: number
+          p_shipment_ref: string
+          p_shipping_charge: number
+          p_weight_kg: number
+        }
+        Returns: Json
+      }
+      cargo_manual_adjustment: {
+        Args: {
+          p_attachment_url: string
+          p_brand_id: string
+          p_cargo_agent_id: string
+          p_note: string
+          p_signed_amount: number
+        }
+        Returns: Json
+      }
+      cargo_po_payment: {
+        Args: {
+          p_amount_from_account: number
+          p_amount_from_balance: number
+          p_brand_id: string
+          p_cargo_agent_id: string
+          p_note: string
+          p_payment_account_id: string
+          p_payment_date: string
+          p_po_id: string
+          p_reference: string
+        }
+        Returns: Json
+      }
       check_reorder_triggers: { Args: { _brand_id: string }; Returns: number }
       check_reorder_triggers_all_brands: { Args: never; Returns: number }
+      confirm_meta_dollar_purchase: {
+        Args: { _purchase_id: string }
+        Returns: Json
+      }
+      consume_meta_spend_fifo: {
+        Args: {
+          _ad_account_id: string
+          _insight_id?: string
+          _spend_date: string
+          _spend_ref: string
+          _usd_spend: number
+        }
+        Returns: Json
+      }
       create_bill: {
         Args: {
           _amount: number
@@ -8162,6 +9026,7 @@ export type Database = {
           advance_txn_id: string | null
           alternate_phone: string | null
           assigned_to: string | null
+          attribution: Json | null
           attribution_landing_page: string | null
           auto_call_enabled: boolean | null
           brand_id: string | null
@@ -8223,6 +9088,9 @@ export type Database = {
           payment_source: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           pipeline_log: Json
+          preorder_converted_at: string | null
+          preorder_expected_date: string | null
+          preorder_ready_at: string | null
           priority: Database["public"]["Enums"]["order_priority"]
           reconciliation_status: string | null
           refund_amount: number
@@ -8282,6 +9150,7 @@ export type Database = {
           advance_txn_id: string | null
           alternate_phone: string | null
           assigned_to: string | null
+          attribution: Json | null
           attribution_landing_page: string | null
           auto_call_enabled: boolean | null
           brand_id: string | null
@@ -8343,6 +9212,9 @@ export type Database = {
           payment_source: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           pipeline_log: Json
+          preorder_converted_at: string | null
+          preorder_expected_date: string | null
+          preorder_ready_at: string | null
           priority: Database["public"]["Enums"]["order_priority"]
           reconciliation_status: string | null
           refund_amount: number
@@ -8387,6 +9259,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      map_courier_status_to_order: {
+        Args: { _raw: string }
+        Returns: Database["public"]["Enums"]["order_status"]
       }
       mark_abandoned_cart_converted: {
         Args: { _id: string; _order_id: string }
@@ -8681,6 +9557,7 @@ export type Database = {
       reserve_stock:
         | { Args: { _order_id: string }; Returns: undefined }
         | { Args: { _items: Json; _order_id: string }; Returns: undefined }
+      resolve_login_email: { Args: { p_identifier: string }; Returns: string }
       run_recurring_rules: { Args: { _brand_id?: string }; Returns: Json }
       seed_default_coa: { Args: { _brand_id: string }; Returns: number }
       set_product_stock: {
@@ -8697,6 +9574,10 @@ export type Database = {
       snapshot_order_item_profit_fields: {
         Args: { _order_id: string }
         Returns: undefined
+      }
+      track_order_public: {
+        Args: { _order_prefix: string; _phone: string }
+        Returns: Json
       }
       transition_order_status: {
         Args: {
