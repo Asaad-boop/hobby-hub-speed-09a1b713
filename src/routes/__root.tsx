@@ -80,12 +80,20 @@ export const Route = createRootRouteWithContext<RouterContext>()({
           // ---- stubs (queue early calls) ----
           window.dataLayer=window.dataLayer||[];
           window.gtag=function(){dataLayer.push(arguments);};
-          window.fbq=window.fbq||function(){(window.fbq.q=window.fbq.q||[]).push(arguments);};
-          window.fbq.loaded=true;window.fbq.version='2.0';window.fbq.queue=window.fbq.queue||[];
+          // Standard Meta Pixel stub — MUST push to fbq.queue (not fbq.q)
+          // so fbevents.js replays queued init/track calls after it loads.
+          if(!window.fbq){
+            var n=window.fbq=function(){
+              n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments);
+            };
+            if(!window._fbq)window._fbq=n;
+            n.push=n;n.loaded=true;n.version='2.0';n.queue=[];
+          }
           window.gtag('js',new Date());
           window.gtag('config','G-Q17CKC2FG1',{send_page_view:true});
           window.fbq('init','${META_PIXEL_ID}');
           window.fbq('track','PageView');
+
 
           // ---- defer real loaders until idle ----
           var loaded=false;
