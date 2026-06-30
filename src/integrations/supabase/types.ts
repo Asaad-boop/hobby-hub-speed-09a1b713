@@ -4370,7 +4370,7 @@ export type Database = {
       imp_cargo_agents: {
         Row: {
           address: string | null
-          brand_id: string
+          brand_id: string | null
           contact_person: string | null
           created_at: string
           created_by: string | null
@@ -4383,7 +4383,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
-          brand_id: string
+          brand_id?: string | null
           contact_person?: string | null
           created_at?: string
           created_by?: string | null
@@ -4396,7 +4396,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
-          brand_id?: string
+          brand_id?: string | null
           contact_person?: string | null
           created_at?: string
           created_by?: string | null
@@ -7488,6 +7488,8 @@ export type Database = {
       product_variants: {
         Row: {
           available_stock: number | null
+          color_hex: string | null
+          color_name: string | null
           created_at: string
           display_order: number
           id: string
@@ -7504,6 +7506,8 @@ export type Database = {
         }
         Insert: {
           available_stock?: number | null
+          color_hex?: string | null
+          color_name?: string | null
           created_at?: string
           display_order?: number
           id?: string
@@ -7520,6 +7524,8 @@ export type Database = {
         }
         Update: {
           available_stock?: number | null
+          color_hex?: string | null
+          color_name?: string | null
           created_at?: string
           display_order?: number
           id?: string
@@ -8982,6 +8988,7 @@ export type Database = {
       }
       hr_next_employee_code: { Args: never; Returns: string }
       imp_create_po: { Args: { _payload: Json }; Returns: Json }
+      imp_delete_po: { Args: { _po_id: string }; Returns: Json }
       imp_get_or_create_account: {
         Args: {
           _brand: string
