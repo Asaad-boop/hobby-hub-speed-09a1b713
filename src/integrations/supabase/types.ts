@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      abandoned_cart_messages: {
+        Row: {
+          brand_id: string | null
+          cart_id: string
+          channel: string
+          delivery_status: string
+          id: string
+          message_body: string | null
+          meta: Json
+          sent_at: string
+          sent_by: string | null
+        }
+        Insert: {
+          brand_id?: string | null
+          cart_id: string
+          channel: string
+          delivery_status?: string
+          id?: string
+          message_body?: string | null
+          meta?: Json
+          sent_at?: string
+          sent_by?: string | null
+        }
+        Update: {
+          brand_id?: string | null
+          cart_id?: string
+          channel?: string
+          delivery_status?: string
+          id?: string
+          message_body?: string | null
+          meta?: Json
+          sent_at?: string
+          sent_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "abandoned_cart_messages_cart_id_fkey"
+            columns: ["cart_id"]
+            isOneToOne: false
+            referencedRelation: "abandoned_carts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       abandoned_carts: {
         Row: {
           brand_id: string | null
@@ -23,8 +67,12 @@ export type Database = {
           customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
+          followup_count: number
+          followup_status: string
           id: string
           is_converted: boolean
+          last_followup_at: string | null
+          last_followup_channel: string | null
           last_step: string | null
           session_id: string | null
           shipping_address: string | null
@@ -43,8 +91,12 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          followup_count?: number
+          followup_status?: string
           id?: string
           is_converted?: boolean
+          last_followup_at?: string | null
+          last_followup_channel?: string | null
           last_step?: string | null
           session_id?: string | null
           shipping_address?: string | null
@@ -63,8 +115,12 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          followup_count?: number
+          followup_status?: string
           id?: string
           is_converted?: boolean
+          last_followup_at?: string | null
+          last_followup_channel?: string | null
           last_step?: string | null
           session_id?: string | null
           shipping_address?: string | null
@@ -87,6 +143,7 @@ export type Database = {
       }
       active_sessions: {
         Row: {
+          brand_id: string | null
           country: string | null
           first_seen_at: string
           last_seen_at: string
@@ -96,6 +153,7 @@ export type Database = {
           user_agent: string | null
         }
         Insert: {
+          brand_id?: string | null
           country?: string | null
           first_seen_at?: string
           last_seen_at?: string
@@ -105,6 +163,7 @@ export type Database = {
           user_agent?: string | null
         }
         Update: {
+          brand_id?: string | null
           country?: string | null
           first_seen_at?: string
           last_seen_at?: string
@@ -113,7 +172,15 @@ export type Database = {
           session_id?: string
           user_agent?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "active_sessions_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       activity_log: {
         Row: {
@@ -273,6 +340,7 @@ export type Database = {
       }
       analytics_events: {
         Row: {
+          brand_id: string | null
           created_at: string
           currency: string | null
           device_type: string | null
@@ -299,6 +367,7 @@ export type Database = {
           value: number | null
         }
         Insert: {
+          brand_id?: string | null
           created_at?: string
           currency?: string | null
           device_type?: string | null
@@ -325,6 +394,7 @@ export type Database = {
           value?: number | null
         }
         Update: {
+          brand_id?: string | null
           created_at?: string
           currency?: string | null
           device_type?: string | null
@@ -350,7 +420,15 @@ export type Database = {
           utm_term?: string | null
           value?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "analytics_events_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       app_settings: {
         Row: {
@@ -7348,6 +7426,7 @@ export type Database = {
       }
       page_views: {
         Row: {
+          brand_id: string | null
           country: string | null
           created_at: string
           device_type: string | null
@@ -7361,6 +7440,7 @@ export type Database = {
           utm_source: string | null
         }
         Insert: {
+          brand_id?: string | null
           country?: string | null
           created_at?: string
           device_type?: string | null
@@ -7374,6 +7454,7 @@ export type Database = {
           utm_source?: string | null
         }
         Update: {
+          brand_id?: string | null
           country?: string | null
           created_at?: string
           device_type?: string | null
@@ -7386,7 +7467,15 @@ export type Database = {
           user_id?: string | null
           utm_source?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "page_views_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_option_types: {
         Row: {
