@@ -28,11 +28,10 @@ export type Product = {
   video?: string | null;
 };
 
-type ProductRow = {
+type ProductInner = {
   id: string;
-  slug: string;
   title: string;
-  description: string;
+  description: string | null;
   price: number | string;
   old_price: number | string | null;
   image: string;
@@ -52,58 +51,78 @@ type ProductRow = {
   categories?: { name: string; slug: string } | null;
 };
 
+type ListingRow = {
+  price: number | string | null;
+  compare_at_price: number | string | null;
+  slug: string;
+  title_override: string | null;
+  image_override: string | null;
+  description_override: string | null;
+  display_order?: number | null;
+  products: ProductInner;
+};
+
 const FALLBACK_IMAGE =
   "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f1f5f9'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='20' fill='%2394a3b8' text-anchor='middle' dominant-baseline='middle'%3ENo image%3C/text%3E%3C/svg%3E";
 
-const toProduct = (r: ProductRow): Product => {
-  const gallery = Array.isArray(r.gallery)
-    ? (r.gallery as unknown[]).filter((g): g is string => typeof g === "string")
+const toProduct = (r: ListingRow): Product => {
+  const p = r.products;
+  const gallery = Array.isArray(p.gallery)
+    ? (p.gallery as unknown[]).filter((g): g is string => typeof g === "string")
     : [];
-  const benefits = Array.isArray(r.benefits)
-    ? (r.benefits as unknown[]).filter((b): b is string => typeof b === "string")
+  const benefits = Array.isArray(p.benefits)
+    ? (p.benefits as unknown[]).filter((b): b is string => typeof b === "string")
     : [];
-  const rawImage = r.image && r.image.trim() ? r.image : FALLBACK_IMAGE;
+  const rawImageSrc = r.image_override ?? p.image;
+  const rawImage = rawImageSrc && rawImageSrc.trim() ? rawImageSrc : FALLBACK_IMAGE;
   const image = cdnImage(rawImage);
   const proxiedGallery = cdnImages(gallery);
   const mergedGallery = proxiedGallery.includes(image) ? proxiedGallery : [image, ...proxiedGallery];
+  const price = Number(r.price ?? p.price) || 0;
+  const oldPrice = r.compare_at_price != null
+    ? Number(r.compare_at_price)
+    : p.old_price != null ? Number(p.old_price) : price;
   return {
-    id: r.id, // canonical: use UUID
+    id: p.id,
     slug: r.slug,
-    title: r.title,
-    price: Number(r.price) || 0,
-    oldPrice: r.old_price != null ? Number(r.old_price) : Number(r.price) || 0,
+    title: r.title_override ?? p.title,
+    price,
+    oldPrice,
     image,
     gallery: mergedGallery.length ? mergedGallery : [image],
-    rating: Number(r.rating) || 0,
-    reviews: r.reviews ?? 0,
-    stock: r.stock ?? 0,
-    category: r.categories?.name ?? "Other",
-    categorySlug: r.categories?.slug,
+    rating: Number(p.rating) || 0,
+    reviews: p.reviews ?? 0,
+    stock: p.stock ?? 0,
+    category: p.categories?.name ?? "Other",
+    categorySlug: p.categories?.slug,
     benefits,
-    description: r.description ?? "",
-    isNewArrival: r.is_new_arrival,
-    isFeatured: r.is_featured,
-    shippingFeeInside: r.shipping_fee_inside != null ? Number(r.shipping_fee_inside) : null,
-    shippingFeeOutside: r.shipping_fee_outside != null ? Number(r.shipping_fee_outside) : null,
-    video: r.video_url ?? null,
+    description: r.description_override ?? p.description ?? "",
+    isNewArrival: p.is_new_arrival,
+    isFeatured: p.is_featured,
+    shippingFeeInside: p.shipping_fee_inside != null ? Number(p.shipping_fee_inside) : null,
+    shippingFeeOutside: p.shipping_fee_outside != null ? Number(p.shipping_fee_outside) : null,
+    video: p.video_url ?? null,
   };
 };
 
 const SELECT_COLS =
-  "id,slug,title,description,price,old_price,image,gallery,benefits,rating,reviews,stock,is_new_arrival,is_featured,is_active,display_order,category_id,shipping_fee_inside,shipping_fee_outside,video_url,categories(name,slug)";
+  `price, compare_at_price, slug, title_override, image_override, description_override, display_order,
+    products!inner(id,title,description,price,old_price,image,gallery,benefits,rating,reviews,
+      stock,is_new_arrival,is_featured,is_active,display_order,category_id,
+      shipping_fee_inside,shipping_fee_outside,video_url,categories(name,slug))`;
 
 const HOBBYSHOP_BRAND_ID = "1f1f366d-ad85-4513-85ab-2dbb6b23c513";
 
 async function fetchProducts(): Promise<Product[]> {
   const { data, error } = await supabase
-    .from("products")
+    .from("product_brand_listings")
     .select(SELECT_COLS)
-    .eq("is_active", true)
     .eq("brand_id", HOBBYSHOP_BRAND_ID)
-    .order("display_order", { ascending: true })
-    .order("created_at", { ascending: false });
+    .eq("is_active", true)
+    .eq("products.is_active", true)
+    .order("display_order", { ascending: true });
   if (error) throw error;
-  return (data as unknown as ProductRow[]).map(toProduct);
+  return (data as unknown as ListingRow[]).map(toProduct);
 }
 
 export const productsQueryOptions = () =>
@@ -119,22 +138,25 @@ export function useProducts() {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+async function fetchOne(idOrSlug: string): Promise<Product | null> {
+  let query = supabase
+    .from("product_brand_listings")
+    .select(SELECT_COLS)
+    .eq("brand_id", HOBBYSHOP_BRAND_ID)
+    .eq("is_active", true)
+    .eq("products.is_active", true);
+  query = UUID_RE.test(idOrSlug)
+    ? query.or(`slug.eq.${idOrSlug},product_id.eq.${idOrSlug}`)
+    : query.eq("slug", idOrSlug);
+  const { data, error } = await query.maybeSingle();
+  if (error) throw error;
+  return data ? toProduct(data as unknown as ListingRow) : null;
+}
+
 export function useProduct(id: string | undefined) {
   return useQuery({
     queryKey: ["products", "one", id],
-    queryFn: async () => {
-      if (!id) return null;
-      const filter = UUID_RE.test(id) ? `id.eq.${id},slug.eq.${id}` : `slug.eq.${id}`;
-      const { data, error } = await supabase
-        .from("products")
-        .select(SELECT_COLS)
-        .eq("is_active", true)
-        .eq("brand_id", HOBBYSHOP_BRAND_ID)
-        .or(filter)
-        .maybeSingle();
-      if (error) throw error;
-      return data ? toProduct(data as unknown as ProductRow) : null;
-    },
+    queryFn: () => (id ? fetchOne(id) : Promise.resolve(null)),
     enabled: !!id,
     staleTime: 30_000,
   });
@@ -146,17 +168,7 @@ export async function fetchAllProducts(): Promise<Product[]> {
 }
 
 export async function fetchProductByIdOrSlug(idOrSlug: string): Promise<Product | null> {
-  const filter = UUID_RE.test(idOrSlug) ? `id.eq.${idOrSlug},slug.eq.${idOrSlug}` : `slug.eq.${idOrSlug}`;
-  const { data, error } = await supabase
-    .from("products")
-    .select(SELECT_COLS)
-    .eq("is_active", true)
-    .eq("brand_id", HOBBYSHOP_BRAND_ID)
-    .or(filter)
-    .maybeSingle();
-  if (error) throw error;
-  return data ? toProduct(data as unknown as ProductRow) : null;
-
+  return fetchOne(idOrSlug);
 }
 
 // Hardcoded testimonials — match products by slug fragments (best effort).
