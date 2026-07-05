@@ -14,6 +14,7 @@ import { clarityEvent, clarityTag, clarityUpgrade } from "@/lib/clarity";
 import { trackBeginCheckout, trackPurchase } from "@/lib/analytics-events";
 import { toast } from "sonner";
 import { cdnImage, handleImgError } from "@/lib/cdn-image";
+import { computeBundleDiscount } from "@/lib/product-tiers";
 import {
   Truck,
   ShieldCheck,
