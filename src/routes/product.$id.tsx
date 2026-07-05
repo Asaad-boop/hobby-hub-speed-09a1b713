@@ -552,8 +552,8 @@ function ProductPage() {
                   .sort((a, b) => a - b)
                   .map((q) => {
                     const total = custom[q];
-                    const base = product.price * q;
-                    const pct = base > 0 ? Math.round(((base - total) / base) * 100) : 0;
+                    const ref = (product.oldPrice && product.oldPrice > product.price ? product.oldPrice : product.price) * q;
+                    const pct = ref > 0 ? Math.round(((ref - total) / ref) * 100) : 0;
                     return { qty: q, total, label: `${q} PCS`, tag: pct > 0 ? `${pct}% OFF` : "Regular" };
                   })
               : [
@@ -572,7 +572,7 @@ function ProductPage() {
                 <div className={`grid gap-2 ${tiers.length >= 4 ? "grid-cols-4" : "grid-cols-3"}`}>
                   {tiers.map((t) => {
                     const unit = Math.round(t.total / t.qty);
-                    const base = product.price * t.qty;
+                    const base = (product.oldPrice && product.oldPrice > product.price ? product.oldPrice : product.price) * t.qty;
                     const active = qty === t.qty;
                     const hasDiscount = t.total < base;
                     return (
