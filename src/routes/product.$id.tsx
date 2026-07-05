@@ -19,6 +19,7 @@ import {
   variantPrice,
 } from "@/lib/variants";
 import { cdnImage, handleImgError } from "@/lib/cdn-image";
+import { getTiers, computeBundleDiscount } from "@/lib/product-tiers";
 import {
   Star,
   Truck,
