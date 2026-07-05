@@ -726,9 +726,9 @@ function CurtainBuckleLanding() {
                     const label = COMBO_LABEL[ck];
                     // parse counts from key for swatch row
                     const beigeCount =
-                      ck === "2b1br" ? 2 : ck === "1b2br" ? 1 : ck === "2b2br" ? 2 : 3;
+                      ck === "2b1br" ? 2 : ck === "1b2br" ? 1 : ck === "2b2br" ? 2 : 1;
                     const brownCount =
-                      ck === "2b1br" ? 1 : ck === "1b2br" ? 2 : ck === "2b2br" ? 2 : 3;
+                      ck === "2b1br" ? 1 : ck === "1b2br" ? 2 : ck === "2b2br" ? 2 : 1;
                     return (
                       <button
                         key={ck}
