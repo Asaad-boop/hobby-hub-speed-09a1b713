@@ -366,11 +366,10 @@ function Checkout() {
           : Math.min(Number(appliedCoupon.value), subtotal)
         : 0;
       // Auto bundle discount per line (qty >= 3 → 15%, qty === 2 → 10%).
-      const finalBundleDiscount = allItems.reduce((sum, i) => {
-        const pct = i.qty >= 3 ? 15 : i.qty === 2 ? 10 : 0;
-        if (!pct) return sum;
-        return sum + Math.round(i.product.price * i.qty * (pct / 100));
-      }, 0);
+      const finalBundleDiscount = allItems.reduce(
+        (sum, i) => sum + computeBundleDiscount(i.product.slug, i.product.price, i.qty),
+        0,
+      );
       const finalDiscount = finalCouponDiscount + finalBundleDiscount;
       const orderTotal = Math.max(0, subtotal + shippingFee - finalDiscount);
 
