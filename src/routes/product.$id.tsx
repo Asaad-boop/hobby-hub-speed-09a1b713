@@ -572,7 +572,7 @@ function ProductPage() {
                 <div className={`grid gap-2 ${tiers.length >= 4 ? "grid-cols-4" : "grid-cols-3"}`}>
                   {tiers.map((t) => {
                     const unit = Math.round(t.total / t.qty);
-                    const base = product.price * t.qty;
+                    const base = (product.oldPrice && product.oldPrice > product.price ? product.oldPrice : product.price) * t.qty;
                     const active = qty === t.qty;
                     const hasDiscount = t.total < base;
                     return (
