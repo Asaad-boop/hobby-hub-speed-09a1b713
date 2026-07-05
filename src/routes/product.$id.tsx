@@ -19,6 +19,7 @@ import {
   variantPrice,
 } from "@/lib/variants";
 import { cdnImage, handleImgError } from "@/lib/cdn-image";
+import { getTiers, computeBundleDiscount } from "@/lib/product-tiers";
 import {
   Star,
   Truck,
@@ -544,11 +545,22 @@ function ProductPage() {
 
           {/* Bundle offer */}
           {(() => {
-            const tiers = [
-              { qty: 1, discount: 0, label: "1 PCS", tag: "Regular" },
-              { qty: 2, discount: 10, label: "2 PCS", tag: "10% OFF" },
-              { qty: 3, discount: 15, label: "3 PCS", tag: "15% OFF" },
-            ];
+            const custom = getTiers(product.slug);
+            const tiers = custom
+              ? Object.keys(custom)
+                  .map(Number)
+                  .sort((a, b) => a - b)
+                  .map((q) => {
+                    const total = custom[q];
+                    const base = product.price * q;
+                    const pct = base > 0 ? Math.round(((base - total) / base) * 100) : 0;
+                    return { qty: q, total, label: `${q} PCS`, tag: pct > 0 ? `${pct}% OFF` : "Regular" };
+                  })
+              : [
+                  { qty: 1, total: product.price, label: "1 PCS", tag: "Regular" },
+                  { qty: 2, total: Math.round(product.price * 2 * 0.9), label: "2 PCS", tag: "10% OFF" },
+                  { qty: 3, total: Math.round(product.price * 3 * 0.85), label: "3 PCS", tag: "15% OFF" },
+                ];
             return (
               <div className="mt-4">
                 <div className="mb-2 flex items-center justify-between">
@@ -557,11 +569,12 @@ function ProductPage() {
                   </span>
                   <span className="text-[10px] font-bold text-muted-foreground">Select pack</span>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className={`grid gap-2 ${tiers.length >= 4 ? "grid-cols-4" : "grid-cols-3"}`}>
                   {tiers.map((t) => {
-                    const unit = Math.round(product.price * (1 - t.discount / 100));
-                    const total = unit * t.qty;
+                    const unit = Math.round(t.total / t.qty);
+                    const base = product.price * t.qty;
                     const active = qty === t.qty;
+                    const hasDiscount = t.total < base;
                     return (
                       <button
                         key={t.qty}
@@ -573,7 +586,7 @@ function ProductPage() {
                             : "border-border bg-card hover:border-primary/50"
                         }`}
                       >
-                        {t.discount > 0 && (
+                        {hasDiscount && (
                           <span className="absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary px-2 py-0.5 text-[9px] font-extrabold text-primary-foreground shadow">
                             {t.tag}
                           </span>
@@ -581,11 +594,9 @@ function ProductPage() {
                         <span className={`text-xs font-extrabold ${active ? "text-primary" : "text-foreground"}`}>
                           {t.label}
                         </span>
-                        <span className="mt-1 text-[13px] font-extrabold text-foreground">৳{total}</span>
-                        {t.discount > 0 ? (
-                          <span className="text-[10px] text-muted-foreground line-through">
-                            ৳{product.price * t.qty}
-                          </span>
+                        <span className="mt-1 text-[13px] font-extrabold text-foreground">৳{t.total}</span>
+                        {hasDiscount ? (
+                          <span className="text-[10px] text-muted-foreground line-through">৳{base}</span>
                         ) : (
                           <span className="text-[10px] text-muted-foreground">৳{unit}/pc</span>
                         )}
@@ -599,9 +610,9 @@ function ProductPage() {
 
           {/* CTA */}
           {(() => {
-            const discount = qty === 3 ? 15 : qty === 2 ? 10 : 0;
-            const unitPrice = Math.round(effectivePrice * (1 - discount / 100));
-            const totalPrice = unitPrice * qty;
+            const discountAmt = computeBundleDiscount(product.slug, effectivePrice, qty);
+            const totalPrice = Math.max(0, effectivePrice * qty - discountAmt);
+            const unitPrice = qty > 0 ? Math.round(totalPrice / qty) : effectivePrice;
             const variantOpts = selectedVariant
               ? { variantId: selectedVariant.id, variantLabel: variantSelectionLabel }
               : undefined;
