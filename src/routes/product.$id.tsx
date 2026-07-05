@@ -546,13 +546,19 @@ function ProductPage() {
           {/* Bundle offer */}
           {(() => {
             const custom = getTiers(product.slug);
+            const customBaseUnit = custom
+              ? (() => {
+                  const qtys = Object.keys(custom).map(Number).sort((a, b) => a - b);
+                  return custom[qtys[0]] / qtys[0];
+                })()
+              : 0;
             const tiers = custom
               ? Object.keys(custom)
                   .map(Number)
                   .sort((a, b) => a - b)
                   .map((q) => {
                     const total = custom[q];
-                    const ref = (product.oldPrice && product.oldPrice > product.price ? product.oldPrice : product.price) * q;
+                    const ref = customBaseUnit * q;
                     const pct = ref > 0 ? Math.round(((ref - total) / ref) * 100) : 0;
                     return { qty: q, total, label: `${q} PCS`, tag: pct > 0 ? `${pct}% OFF` : "Regular" };
                   })
@@ -561,6 +567,7 @@ function ProductPage() {
                   { qty: 2, total: Math.round(product.price * 2 * 0.9), label: "2 PCS", tag: "10% OFF" },
                   { qty: 3, total: Math.round(product.price * 3 * 0.85), label: "3 PCS", tag: "15% OFF" },
                 ];
+
             return (
               <div className="mt-4">
                 <div className="mb-2 flex items-center justify-between">
