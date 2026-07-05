@@ -610,9 +610,9 @@ function ProductPage() {
 
           {/* CTA */}
           {(() => {
-            const discount = qty === 3 ? 15 : qty === 2 ? 10 : 0;
-            const unitPrice = Math.round(effectivePrice * (1 - discount / 100));
-            const totalPrice = unitPrice * qty;
+            const discountAmt = computeBundleDiscount(product.slug, effectivePrice, qty);
+            const totalPrice = Math.max(0, effectivePrice * qty - discountAmt);
+            const unitPrice = qty > 0 ? Math.round(totalPrice / qty) : effectivePrice;
             const variantOpts = selectedVariant
               ? { variantId: selectedVariant.id, variantLabel: variantSelectionLabel }
               : undefined;
