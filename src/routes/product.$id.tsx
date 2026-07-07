@@ -19,7 +19,7 @@ import {
   variantPrice,
 } from "@/lib/variants";
 import { cdnImage, handleImgError } from "@/lib/cdn-image";
-import { getTiers, computeBundleDiscount } from "@/lib/product-tiers";
+import { getTiers, computeBundleDiscount, getTierLabel } from "@/lib/product-tiers";
 import {
   Star,
   Truck,
@@ -563,7 +563,8 @@ function ProductPage() {
                     const total = custom[q];
                     const ref = customBaseUnit * q;
                     const pct = ref > 0 ? Math.round(((ref - total) / ref) * 100) : 0;
-                    return { qty: q, total, label: `${q} PCS`, tag: pct > 0 ? `${pct}% OFF` : "Regular" };
+                    const label = getTierLabel(product.slug, q) ?? `${q} PCS`;
+                    return { qty: q, total, label, tag: pct > 0 ? `${pct}% OFF` : "Regular" };
                   })
               : [
                   { qty: 1, total: product.price, label: "1 PCS", tag: "Regular" },
