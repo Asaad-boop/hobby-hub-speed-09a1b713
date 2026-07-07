@@ -576,7 +576,7 @@ function ProductPage() {
                   </span>
                   <span className="text-[10px] font-bold text-muted-foreground">Select pack</span>
                 </div>
-                <div className={`grid gap-2 ${tiers.length >= 4 ? "grid-cols-4" : "grid-cols-3"}`}>
+                <div className={`grid gap-2 ${tiers.length >= 5 ? "grid-cols-5" : tiers.length >= 4 ? "grid-cols-4" : "grid-cols-3"}`}>
                   {tiers.map((t) => {
                     const unit = Math.round(t.total / t.qty);
                     const base = custom ? Math.round(customBaseUnit * t.qty) : (product.oldPrice && product.oldPrice > product.price ? product.oldPrice : product.price) * t.qty;
