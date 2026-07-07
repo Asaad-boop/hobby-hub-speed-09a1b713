@@ -340,13 +340,16 @@ function ProductPage() {
         <div className="md:sticky md:top-24 md:self-start">
           <div className="group relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-muted to-muted/50 shadow-[var(--shadow-card)]">
             <div className="absolute left-3 top-3 z-10 flex flex-col gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-extrabold text-primary-foreground shadow-lg">
-                <Flame className="h-3 w-3" /> -{off}% OFF
-              </span>
+              {off > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-extrabold text-primary-foreground shadow-lg">
+                  <Flame className="h-3 w-3" /> -{off}% OFF
+                </span>
+              )}
               <span className="inline-flex items-center gap-1 rounded-full bg-foreground px-3 py-1.5 text-xs font-bold text-background shadow-lg">
                 <BadgeCheck className="h-3 w-3" /> Best Seller
               </span>
             </div>
+
             <button
               onClick={() => wishToggle(product)}
               aria-label="Wishlist"
