@@ -12,6 +12,14 @@ export const PRODUCT_TIERS: Record<string, TierMap> = {
     4: 699,
     6: 899,
   },
+  "compressed-travel-towel-disposable-face-towel": {
+    10: 199,
+    20: 349,
+    30: 449,
+    50: 699,
+    100: 1199,
+  },
+
 };
 
 export function getTiers(slug?: string | null): TierMap | null {
