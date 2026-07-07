@@ -14,25 +14,16 @@ export const PRODUCT_TIERS: Record<string, TierMap> = {
   },
   // Product is sold as a 10pc pack; qty = number of packs.
   "compressed-travel-towel-disposable-face-towel": {
-    1: 199,
-    2: 349,
-    3: 449,
-    5: 699,
-    10: 1199,
+    10: 199,
+    20: 349,
+    30: 449,
+    50: 699,
+    100: 1199,
   },
 
 };
 
-/** Optional display labels for tier buttons, keyed by slug then qty. */
-export const PRODUCT_TIER_LABELS: Record<string, Record<number, string>> = {
-  "compressed-travel-towel-disposable-face-towel": {
-    1: "10 PCS",
-    2: "20 PCS",
-    3: "30 PCS",
-    5: "50 PCS",
-    10: "100 PCS",
-  },
-};
+export const PRODUCT_TIER_LABELS: Record<string, Record<number, string>> = {};
 
 export function getTierLabel(slug: string | null | undefined, qty: number): string | null {
   if (!slug) return null;
