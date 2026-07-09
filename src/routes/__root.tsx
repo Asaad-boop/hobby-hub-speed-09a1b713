@@ -59,7 +59,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     ],
     scripts: [
       {
-        src: "https://erp.hobbyshopbd.com/api/public/mkt/tracker.js",
+        src: "https://swus-erp.lovable.app/api/public/mkt/tracker.js",
         async: true,
         "data-site-key": "hobbyshop",
       },
