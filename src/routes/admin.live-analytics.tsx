@@ -172,8 +172,9 @@ function LiveBar() {
           .gte("created_at", since30m),
         // Pull session_id so we can count *distinct* viewers, not raw rows.
         supabase
-          .from("page_views")
+          .from("analytics_events")
           .select("session_id")
+          .eq("event_name", "page_view")
           .gte("created_at", since30m)
           .eq("page_type", "product")
           .limit(5000),
