@@ -476,7 +476,7 @@ function ActivityChart({ range }: { range: Range }) {
     refetchInterval: range === "live" ? 10_000 : 60_000,
     queryFn: async () => {
       const [views, orders] = await Promise.all([
-        supabase.from("analytics_events").select("session_id,created_at").gte("created_at", from.toISOString()).lte("created_at", to.toISOString()).limit(10000),
+        supabase.from("analytics_events").select("session_id,created_at").eq("event_name", "page_view").gte("created_at", from.toISOString()).lte("created_at", to.toISOString()).limit(10000),
         supabase.from("orders").select("created_at,total").gte("created_at", from.toISOString()).lte("created_at", to.toISOString()).limit(2000),
       ]);
 
