@@ -476,7 +476,7 @@ function ActivityChart({ range }: { range: Range }) {
     refetchInterval: range === "live" ? 10_000 : 60_000,
     queryFn: async () => {
       const [views, orders] = await Promise.all([
-        supabase.from("page_views").select("session_id,created_at").gte("created_at", from.toISOString()).lte("created_at", to.toISOString()).limit(10000),
+        supabase.from("analytics_events").select("session_id,created_at").gte("created_at", from.toISOString()).lte("created_at", to.toISOString()).limit(10000),
         supabase.from("orders").select("created_at,total").gte("created_at", from.toISOString()).lte("created_at", to.toISOString()).limit(2000),
       ]);
 
@@ -553,7 +553,7 @@ function DeviceBreakdown({ range }: { range: Range }) {
     refetchInterval: 60_000,
     queryFn: async () => {
       const { data: rows } = await supabase
-        .from("page_views")
+        .from("analytics_events")
         .select("session_id,device_type")
         .gte("created_at", from.toISOString())
         .lte("created_at", to.toISOString())
@@ -630,7 +630,7 @@ function TopProducts({ range }: { range: Range }) {
     refetchInterval: 60_000,
     queryFn: async () => {
       const { data: views } = await supabase
-        .from("page_views")
+        .from("analytics_events")
         .select("session_id,product_id")
         .eq("page_type", "product")
         .not("product_id", "is", null)
