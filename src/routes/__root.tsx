@@ -59,6 +59,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     ],
     scripts: [
       {
+        src: "https://erp.hobbyshopbd.com/api/public/mkt/tracker.js",
+        async: true,
+        "data-site-key": "hobbyshop",
+      },
+      {
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
