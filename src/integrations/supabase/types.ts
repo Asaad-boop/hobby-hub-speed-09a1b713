@@ -2364,6 +2364,7 @@ export type Database = {
           amount_diff: number | null
           applied_expense_txn_id: string | null
           applied_income_txn_id: string | null
+          brand_id: string | null
           cod_fee: number
           collected: number
           consignment_id: string | null
@@ -2394,6 +2395,7 @@ export type Database = {
           amount_diff?: number | null
           applied_expense_txn_id?: string | null
           applied_income_txn_id?: string | null
+          brand_id?: string | null
           cod_fee?: number
           collected?: number
           consignment_id?: string | null
@@ -2424,6 +2426,7 @@ export type Database = {
           amount_diff?: number | null
           applied_expense_txn_id?: string | null
           applied_income_txn_id?: string | null
+          brand_id?: string | null
           cod_fee?: number
           collected?: number
           consignment_id?: string | null
@@ -2463,6 +2466,13 @@ export type Database = {
             columns: ["applied_income_txn_id"]
             isOneToOne: false
             referencedRelation: "erp_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_reconciliation_rows_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
             referencedColumns: ["id"]
           },
           {
@@ -2856,6 +2866,8 @@ export type Database = {
           brand_id: string
           config: Json
           created_at: string
+          default_cod_fee_category_id: string | null
+          default_cod_wallet_id: string | null
           default_courier: string | null
           id: string
           invoice_footer: string | null
@@ -2868,6 +2880,8 @@ export type Database = {
           brand_id: string
           config?: Json
           created_at?: string
+          default_cod_fee_category_id?: string | null
+          default_cod_wallet_id?: string | null
           default_courier?: string | null
           id?: string
           invoice_footer?: string | null
@@ -2880,6 +2894,8 @@ export type Database = {
           brand_id?: string
           config?: Json
           created_at?: string
+          default_cod_fee_category_id?: string | null
+          default_cod_wallet_id?: string | null
           default_courier?: string | null
           id?: string
           invoice_footer?: string | null
@@ -2894,6 +2910,20 @@ export type Database = {
             columns: ["brand_id"]
             isOneToOne: true
             referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_settings_default_cod_fee_category_id_fkey"
+            columns: ["default_cod_fee_category_id"]
+            isOneToOne: false
+            referencedRelation: "erp_expense_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_settings_default_cod_wallet_id_fkey"
+            columns: ["default_cod_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "erp_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -4788,6 +4818,7 @@ export type Database = {
           id: string
           local_courier_bdt: number
           notes: string | null
+          paid_bdt: number
           po_id: string
           posted_at: string | null
           qc_at: string | null
@@ -4810,6 +4841,7 @@ export type Database = {
           id?: string
           local_courier_bdt?: number
           notes?: string | null
+          paid_bdt?: number
           po_id: string
           posted_at?: string | null
           qc_at?: string | null
@@ -4832,6 +4864,7 @@ export type Database = {
           id?: string
           local_courier_bdt?: number
           notes?: string | null
+          paid_bdt?: number
           po_id?: string
           posted_at?: string | null
           qc_at?: string | null
@@ -6404,8 +6437,6 @@ export type Database = {
           ctr: number | null
           date: string
           estimated_bdt_cost: boolean
-          fifo_consumed_at: string | null
-          fifo_consumption_ref: string | null
           id: string
           impressions: number
           meta_add_to_cart: number
@@ -6433,8 +6464,6 @@ export type Database = {
           ctr?: number | null
           date: string
           estimated_bdt_cost?: boolean
-          fifo_consumed_at?: string | null
-          fifo_consumption_ref?: string | null
           id?: string
           impressions?: number
           meta_add_to_cart?: number
@@ -6462,8 +6491,6 @@ export type Database = {
           ctr?: number | null
           date?: string
           estimated_bdt_cost?: boolean
-          fifo_consumed_at?: string | null
-          fifo_consumption_ref?: string | null
           id?: string
           impressions?: number
           meta_add_to_cart?: number
@@ -6902,7 +6929,6 @@ export type Database = {
       }
       order_items: {
         Row: {
-          cost_price: number | null
           courier_cost_allocated: number
           created_at: string
           delivery_charge_allocated: number
@@ -6929,7 +6955,6 @@ export type Database = {
           variant_label: string | null
         }
         Insert: {
-          cost_price?: number | null
           courier_cost_allocated?: number
           created_at?: string
           delivery_charge_allocated?: number
@@ -6956,7 +6981,6 @@ export type Database = {
           variant_label?: string | null
         }
         Update: {
-          cost_price?: number | null
           courier_cost_allocated?: number
           created_at?: string
           delivery_charge_allocated?: number
@@ -7120,6 +7144,7 @@ export type Database = {
           confirmed_by: string | null
           coupon_code: string | null
           courier_assigned_at: string | null
+          courier_fee: number
           courier_name: string | null
           created_at: string
           customer_ip: string | null
@@ -7152,6 +7177,7 @@ export type Database = {
           last_call_at: string | null
           last_called_by: string | null
           latest_note: string | null
+          net_collected: number | null
           notes: string | null
           order_tags: string[]
           packaged_at: string | null
@@ -7235,6 +7261,7 @@ export type Database = {
           confirmed_by?: string | null
           coupon_code?: string | null
           courier_assigned_at?: string | null
+          courier_fee?: number
           courier_name?: string | null
           created_at?: string
           customer_ip?: string | null
@@ -7267,6 +7294,7 @@ export type Database = {
           last_call_at?: string | null
           last_called_by?: string | null
           latest_note?: string | null
+          net_collected?: number | null
           notes?: string | null
           order_tags?: string[]
           packaged_at?: string | null
@@ -7350,6 +7378,7 @@ export type Database = {
           confirmed_by?: string | null
           coupon_code?: string | null
           courier_assigned_at?: string | null
+          courier_fee?: number
           courier_name?: string | null
           created_at?: string
           customer_ip?: string | null
@@ -7382,6 +7411,7 @@ export type Database = {
           last_call_at?: string | null
           last_called_by?: string | null
           latest_note?: string | null
+          net_collected?: number | null
           notes?: string | null
           order_tags?: string[]
           packaged_at?: string | null
@@ -7466,59 +7496,6 @@ export type Database = {
             columns: ["delivery_zone_id"]
             isOneToOne: false
             referencedRelation: "bd_zones"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      page_views: {
-        Row: {
-          brand_id: string | null
-          country: string | null
-          created_at: string
-          device_type: string | null
-          id: string
-          page_type: string | null
-          path: string
-          product_id: string | null
-          referrer: string | null
-          session_id: string
-          user_id: string | null
-          utm_source: string | null
-        }
-        Insert: {
-          brand_id?: string | null
-          country?: string | null
-          created_at?: string
-          device_type?: string | null
-          id?: string
-          page_type?: string | null
-          path: string
-          product_id?: string | null
-          referrer?: string | null
-          session_id: string
-          user_id?: string | null
-          utm_source?: string | null
-        }
-        Update: {
-          brand_id?: string | null
-          country?: string | null
-          created_at?: string
-          device_type?: string | null
-          id?: string
-          page_type?: string | null
-          path?: string
-          product_id?: string | null
-          referrer?: string | null
-          session_id?: string
-          user_id?: string | null
-          utm_source?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "page_views_brand_id_fkey"
-            columns: ["brand_id"]
-            isOneToOne: false
-            referencedRelation: "brands"
             referencedColumns: ["id"]
           },
         ]
@@ -8722,6 +8699,8 @@ export type Database = {
           ad_account_name: string | null
           avg_effective_rate: number | null
           brand_id: string | null
+          brand_name: string | null
+          external_id: string | null
           latest_purchase_rate: number | null
           remaining_usd: number | null
           total_bdt_paid: number | null
@@ -8798,6 +8777,10 @@ export type Database = {
           _user: string
         }
         Returns: string
+      }
+      _imp_recompute_carton_paid: {
+        Args: { _carton: string }
+        Returns: undefined
       }
       _imp_record_payment: {
         Args: {
@@ -9257,6 +9240,7 @@ export type Database = {
       }
       imp_mark_arrived: { Args: { _payload: Json }; Returns: Json }
       imp_next_po_number: { Args: { _brand: string }; Returns: string }
+      imp_pay_carton_due: { Args: { _payload: Json }; Returns: Json }
       imp_post_to_inventory: { Args: { _payload: Json }; Returns: Json }
       imp_quick_create_product: {
         Args: { _brand: string; _image?: string; _sku?: string; _title: string }
@@ -9303,6 +9287,7 @@ export type Database = {
           confirmed_by: string | null
           coupon_code: string | null
           courier_assigned_at: string | null
+          courier_fee: number
           courier_name: string | null
           created_at: string
           customer_ip: string | null
@@ -9335,6 +9320,7 @@ export type Database = {
           last_call_at: string | null
           last_called_by: string | null
           latest_note: string | null
+          net_collected: number | null
           notes: string | null
           order_tags: string[]
           packaged_at: string | null
@@ -9427,6 +9413,7 @@ export type Database = {
           confirmed_by: string | null
           coupon_code: string | null
           courier_assigned_at: string | null
+          courier_fee: number
           courier_name: string | null
           created_at: string
           customer_ip: string | null
@@ -9459,6 +9446,7 @@ export type Database = {
           last_call_at: string | null
           last_called_by: string | null
           latest_note: string | null
+          net_collected: number | null
           notes: string | null
           order_tags: string[]
           packaged_at: string | null
@@ -9710,14 +9698,6 @@ export type Database = {
           returned_orders: number
           status: string
         }[]
-      }
-      mkt_post_meta_spend_day: {
-        Args: { p_brand_id: string; p_day: string; p_force?: boolean }
-        Returns: Json
-      }
-      mkt_post_meta_spend_window: {
-        Args: { p_brand_id: string; p_days?: number; p_force?: boolean }
-        Returns: Json
       }
       mkt_product_campaign_report: {
         Args: { p_brand_id: string; p_from: string; p_to: string }

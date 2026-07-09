@@ -677,7 +677,7 @@ function ProductPage() {
               <Phone className="h-4 w-4 text-primary" /> Call Now
             </a>
             <a
-              href="https://wa.me/8801964437520"
+              href="https://wa.me/8801865230553"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-3 py-3 text-xs font-bold text-white transition hover:opacity-90 sm:text-sm"
