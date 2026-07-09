@@ -14,7 +14,7 @@ const FIELDS: { key: string; label: string; placeholder?: string; type?: "text" 
   { key: "favicon_url", label: "Favicon URL", placeholder: "https://…/favicon.ico" },
   { key: "contact_phone", label: "Contact phone", placeholder: "+8801XXXXXXXXX" },
   { key: "contact_email", label: "Contact email", placeholder: "hello@example.com" },
-  { key: "whatsapp_number", label: "WhatsApp number (digits only)", placeholder: "8801964437520" },
+  { key: "whatsapp_number", label: "WhatsApp number (digits only)", placeholder: "8801865230553" },
   { key: "address", label: "Address", type: "textarea" },
   { key: "social_facebook", label: "Facebook URL" },
   { key: "social_instagram", label: "Instagram URL" },
