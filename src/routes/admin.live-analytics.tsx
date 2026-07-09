@@ -555,6 +555,7 @@ function DeviceBreakdown({ range }: { range: Range }) {
       const { data: rows } = await supabase
         .from("analytics_events")
         .select("session_id,device_type")
+        .eq("event_name", "page_view")
         .gte("created_at", from.toISOString())
         .lte("created_at", to.toISOString())
         .limit(10000);
