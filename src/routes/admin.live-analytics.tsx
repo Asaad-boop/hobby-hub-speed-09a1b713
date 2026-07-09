@@ -633,6 +633,7 @@ function TopProducts({ range }: { range: Range }) {
       const { data: views } = await supabase
         .from("analytics_events")
         .select("session_id,product_id")
+        .eq("event_name", "page_view")
         .eq("page_type", "product")
         .not("product_id", "is", null)
         .gte("created_at", from.toISOString())
