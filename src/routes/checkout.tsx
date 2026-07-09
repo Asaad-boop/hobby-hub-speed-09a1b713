@@ -782,7 +782,7 @@ function Checkout() {
               <div className="space-y-2 rounded-lg bg-muted/50 p-3">
                 <p className="text-[11px] leading-relaxed">
                   Send <span className="font-extrabold text-primary">৳{grand}</span> to{" "}
-                  <span className="font-mono font-bold">01700-000000</span> (bKash Personal), then enter details below.
+                  <span className="font-mono font-bold">01865-230553</span> (bKash Personal), then enter details below.
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   <input
