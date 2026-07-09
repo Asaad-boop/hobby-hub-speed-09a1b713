@@ -6291,6 +6291,45 @@ export type Database = {
           },
         ]
       }
+      mkt_attribution_candidates: {
+        Row: {
+          brand_id: string
+          confidence: number
+          created_at: string
+          id: string
+          matched_signal: Json
+          order_id: string
+          source: string
+          status: string
+          suggested_campaign_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          brand_id: string
+          confidence: number
+          created_at?: string
+          id?: string
+          matched_signal?: Json
+          order_id: string
+          source: string
+          status?: string
+          suggested_campaign_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string
+          confidence?: number
+          created_at?: string
+          id?: string
+          matched_signal?: Json
+          order_id?: string
+          source?: string
+          status?: string
+          suggested_campaign_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       mkt_campaign_products: {
         Row: {
           brand_id: string
@@ -6437,6 +6476,8 @@ export type Database = {
           ctr: number | null
           date: string
           estimated_bdt_cost: boolean
+          fifo_consumed_at: string | null
+          fifo_consumption_ref: string | null
           id: string
           impressions: number
           meta_add_to_cart: number
@@ -6464,6 +6505,8 @@ export type Database = {
           ctr?: number | null
           date: string
           estimated_bdt_cost?: boolean
+          fifo_consumed_at?: string | null
+          fifo_consumption_ref?: string | null
           id?: string
           impressions?: number
           meta_add_to_cart?: number
@@ -6491,6 +6534,8 @@ export type Database = {
           ctr?: number | null
           date?: string
           estimated_bdt_cost?: boolean
+          fifo_consumed_at?: string | null
+          fifo_consumption_ref?: string | null
           id?: string
           impressions?: number
           meta_add_to_cart?: number
@@ -8718,6 +8763,92 @@ export type Database = {
           },
         ]
       }
+      v_meta_spend_reconciliation: {
+        Row: {
+          brand_id: string | null
+          date: string | null
+          fallback_rows: number | null
+          flat_fx_rate_used: number | null
+          gap_bdt: number | null
+          gap_pct: number | null
+          insight_rows: number | null
+          spend_bdt_fifo: number | null
+          spend_bdt_flat_fx: number | null
+          spend_usd: number | null
+          unenriched_rows: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mkt_insights_daily_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_mkt_attribution_possibly_overwritten: {
+        Row: {
+          age_delta: string | null
+          brand_id: string | null
+          campaign_id: string | null
+          confidence: number | null
+          created_at: string | null
+          order_id: string | null
+          source: Database["public"]["Enums"]["mkt_attribution_source"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          age_delta?: never
+          brand_id?: string | null
+          campaign_id?: string | null
+          confidence?: number | null
+          created_at?: string | null
+          order_id?: string | null
+          source?: Database["public"]["Enums"]["mkt_attribution_source"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          age_delta?: never
+          brand_id?: string | null
+          campaign_id?: string | null
+          confidence?: number | null
+          created_at?: string | null
+          order_id?: string | null
+          source?: Database["public"]["Enums"]["mkt_attribution_source"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mkt_order_attributions_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_order_attributions_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "mkt_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_order_attributions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mkt_order_attributions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "v_ar_outstanding"
+            referencedColumns: ["order_id"]
+          },
+        ]
+      }
       v_product_incoming: {
         Row: {
           brand_id: string | null
@@ -9142,6 +9273,18 @@ export type Database = {
       get_marketing_overview: {
         Args: { p_brand_id: string; p_from: string; p_to: string }
         Returns: Json
+      }
+      get_meta_spend_bdt: {
+        Args: { _brand_id: string; _from: string; _to: string }
+        Returns: {
+          brand_id: string
+          day: string
+          is_estimated: boolean
+          spend_bdt: number
+          spend_bdt_fallback: number
+          spend_bdt_fifo: number
+          spend_usd: number
+        }[]
       }
       get_order_courier_cost: { Args: { _order_id: string }; Returns: number }
       get_pl_v2: {
@@ -9699,6 +9842,10 @@ export type Database = {
           status: string
         }[]
       }
+      mkt_lock_order_attribution: {
+        Args: { _order_id: string }
+        Returns: undefined
+      }
       mkt_product_campaign_report: {
         Args: { p_brand_id: string; p_from: string; p_to: string }
         Returns: {
@@ -9715,6 +9862,25 @@ export type Database = {
       }
       mkt_rebuild_window: {
         Args: { p_brand_id: string; p_days?: number; p_trigger?: string }
+        Returns: Json
+      }
+      mkt_upsert_order_attribution: {
+        Args: {
+          _ad_id?: string
+          _adset_id?: string
+          _brand_id: string
+          _campaign_id?: string
+          _confidence?: number
+          _fbclid?: string
+          _note?: string
+          _order_id: string
+          _source?: string
+          _utm_campaign?: string
+          _utm_content?: string
+          _utm_medium?: string
+          _utm_source?: string
+          _utm_term?: string
+        }
         Returns: Json
       }
       next_invoice_no: { Args: { _brand_id: string }; Returns: string }
