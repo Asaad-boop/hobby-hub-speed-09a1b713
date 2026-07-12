@@ -501,7 +501,7 @@ export function InvoicePreviewDialog({
                   মার্চেন্টের অনুমতি ছাড়া প্রোডাক্ট খোলা সম্পূর্ণ নিষিদ্ধ, খুলে দেখতে চাইলে আগে কল করুন: {settings?.contact_phone ?? "09638779900"}
                 </div>
                 <div style={{ color: "#222" }}>
-                  WhatsApp: +{settings?.whatsapp_number ?? "8801865230553"}
+                  WhatsApp: +{settings?.whatsapp_number ?? "8801964437520"}
                 </div>
               </div>
 
