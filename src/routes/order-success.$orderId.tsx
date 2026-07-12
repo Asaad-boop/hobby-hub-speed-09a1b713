@@ -35,6 +35,10 @@ type Order = {
   shipping_district: string | null;
   discount_amount?: number | null;
   coupon_code?: string | null;
+  advance_source?: string | null;
+  advance_amount?: number | null;
+  advance_payment_number?: string | null;
+  advance_txn_id?: string | null;
   order_items: { id: string; product_id: string | null; name: string; image: string | null; price: number; quantity: number; variant_label: string | null }[];
 };
 
@@ -246,6 +250,21 @@ function OrderSuccessPage() {
               </p>
             </CardContent>
           </Card>
+
+          {/* Payment / advance details */}
+          {order.advance_source && order.advance_txn_id && (
+            <Card className="mb-6">
+              <CardContent className="p-6">
+                <h2 className="mb-3 font-bold">Payment Details ({order.advance_source})</h2>
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex justify-between"><span className="text-muted-foreground">Transaction ID</span><span className="font-mono font-semibold">{order.advance_txn_id}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Sender Number</span><span className="font-mono font-semibold">{order.advance_payment_number}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Amount Paid</span><span className="font-bold text-primary">৳{Number(order.advance_amount ?? 0).toFixed(0)}</span></div>
+                </div>
+                <p className="mt-3 text-[11px] text-muted-foreground">Admin verify korar por confirmation call pabon.</p>
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
 

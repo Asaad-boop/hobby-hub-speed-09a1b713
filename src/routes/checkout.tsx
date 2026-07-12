@@ -55,9 +55,10 @@ function Checkout() {
   const redirectingRef = useRef(false);
   const clientOrderIdRef = useRef<string | null>(null);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
-  const [payMethod, setPayMethod] = useState<"cod" | "bkash">("cod");
+  const [payMethod, setPayMethod] = useState<"COD" | "bKash" | "Nagad" | "Rocket">("COD");
   const [payNumber, setPayNumber] = useState("");
   const [trxId, setTrxId] = useState("");
+  const [advanceAmount, setAdvanceAmount] = useState<string>("");
   const [coupon, setCoupon] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
@@ -334,6 +335,29 @@ function Checkout() {
       releaseSubmit();
       return;
     }
+
+    // Digital payment validation
+    const isDigital = payMethod !== "COD";
+    const normalizedPayNumber = normalizePhone(payNumber);
+    const trimmedTrxId = trxId.trim().toLowerCase();
+    const parsedAdvance = Number(advanceAmount);
+    if (isDigital) {
+      if (!/^01[3-9]\d{8}$/.test(normalizedPayNumber)) {
+        toast.error("Please enter a valid 11-digit sender mobile number.");
+        releaseSubmit();
+        return;
+      }
+      if (trimmedTrxId.length < 6) {
+        toast.error("Please enter a valid Transaction ID (min 6 characters).");
+        releaseSubmit();
+        return;
+      }
+      if (!Number.isFinite(parsedAdvance) || parsedAdvance <= 0) {
+        toast.error("Please enter a valid paid amount.");
+        releaseSubmit();
+        return;
+      }
+    }
     const deliveryDistrict = form.district || (shipMethod === "inside" ? "Dhaka" : "Outside Dhaka");
     const deliveryCity = form.city.trim() || deliveryDistrict;
 
@@ -382,6 +406,11 @@ function Checkout() {
         coupon_code: appliedCoupon?.code ?? null,
         total: orderTotal,
         payment_method: payMethod,
+        advance_source: isDigital ? payMethod : null,
+        advance_amount: isDigital ? parsedAdvance : 0,
+        advance_payment_number: isDigital ? normalizedPayNumber : null,
+        advance_txn_id: isDigital ? trimmedTrxId : null,
+        transaction_id: isDigital ? trimmedTrxId : null,
         shipping_name: trimmedName,
         shipping_phone: normalizedPhone,
         shipping_address: trimmedAddress,
@@ -743,13 +772,18 @@ function Checkout() {
             </div>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { id: "cod", label: "Cash on Delivery", sub: "Pay on receive", color: "oklch(0.585 0.245 27.5)", badge: "POPULAR" },
-                { id: "bkash", label: "bKash", sub: "Send Money", color: "oklch(0.55 0.22 0)" },
+                { id: "COD" as const, label: "Cash on Delivery", sub: "Pay on receive", color: "oklch(0.585 0.245 27.5)", badge: "POPULAR" },
+                { id: "bKash" as const, label: "bKash", sub: "Send Money", color: "oklch(0.55 0.22 0)" },
+                { id: "Nagad" as const, label: "Nagad", sub: "Send Money", color: "oklch(0.6 0.22 30)" },
+                { id: "Rocket" as const, label: "Rocket", sub: "Send Money", color: "oklch(0.5 0.18 300)" },
               ].map((opt) => (
                 <button
                   key={opt.id}
                   type="button"
-                  onClick={() => setPayMethod(opt.id as typeof payMethod)}
+                  onClick={() => {
+                    setPayMethod(opt.id);
+                    if (opt.id !== "COD" && !advanceAmount) setAdvanceAmount(String(grand));
+                  }}
                   className={`relative rounded-lg border p-2.5 text-left transition ${
                     payMethod === opt.id
                       ? "border-primary bg-primary/5 ring-1 ring-primary"
@@ -778,23 +812,39 @@ function Checkout() {
               ))}
             </div>
 
-            {payMethod !== "cod" && (
+            {payMethod !== "COD" && (
               <div className="space-y-2 rounded-lg bg-muted/50 p-3">
                 <p className="text-[11px] leading-relaxed">
-                  Send <span className="font-extrabold text-primary">৳{grand}</span> to{" "}
-                  <span className="font-mono font-bold">01865-230553</span> (bKash Personal), then enter details below.
+                  <span className="font-bold">Send Money to:</span>{" "}
+                  <span className="font-mono font-bold">01865-230553</span> ({payMethod} Personal) — payment er por TrxID and sender number din.
                 </p>
-                <div className="grid grid-cols-2 gap-2">
+                <p className="text-[11px] leading-relaxed">
+                  Amount: <span className="font-extrabold text-primary">৳{grand}</span> (partial advance dile edit kore din)
+                </p>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                   <input
+                    required
+                    inputMode="tel"
                     value={payNumber}
                     onChange={(e) => setPayNumber(e.target.value)}
-                    placeholder="Your Number"
+                    placeholder="Sender Mobile (01XXXXXXXXX)"
                     className="h-10 w-full rounded-lg border border-border bg-background px-3 text-xs outline-none focus:border-primary"
                   />
                   <input
+                    required
                     value={trxId}
                     onChange={(e) => setTrxId(e.target.value)}
-                    placeholder="Transaction ID"
+                    placeholder="Transaction ID (TrxID)"
+                    className="h-10 w-full rounded-lg border border-border bg-background px-3 text-xs outline-none focus:border-primary"
+                  />
+                  <input
+                    required
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    value={advanceAmount}
+                    onChange={(e) => setAdvanceAmount(e.target.value)}
+                    placeholder={`Amount Paid (৳${grand})`}
                     className="h-10 w-full rounded-lg border border-border bg-background px-3 text-xs outline-none focus:border-primary"
                   />
                 </div>
