@@ -55,7 +55,7 @@ function Checkout() {
   const redirectingRef = useRef(false);
   const clientOrderIdRef = useRef<string | null>(null);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
-  const [payMethod, setPayMethod] = useState<"COD" | "bKash" | "Nagad" | "Rocket">("COD");
+  const [payMethod, setPayMethod] = useState<"COD" | "bKash">("COD");
   const [payNumber, setPayNumber] = useState("");
   const [trxId, setTrxId] = useState("");
   const [advanceAmount, setAdvanceAmount] = useState<string>("");
