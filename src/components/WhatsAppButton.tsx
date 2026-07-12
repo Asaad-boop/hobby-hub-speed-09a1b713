@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X, Facebook } from "lucide-react";
 import { useSiteSettings } from "@/lib/site-settings";
 
-const WHATSAPP_NUMBER_FALLBACK = "8801865230553";
+const WHATSAPP_NUMBER_FALLBACK = "8801964437520";
 const FACEBOOK_PAGE_URL = "https://www.facebook.com/hobbyshopbd.shop";
 const MESSENGER_URL = "https://m.me/hobbyshopbd.shop";
 
