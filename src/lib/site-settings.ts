@@ -7,7 +7,7 @@ export type SiteSettings = {
   logo_url: string;
   contact_email: string;
   contact_phone: string;
-  whatsapp_number: string; // digits only with country code, e.g. 8801865230553
+  whatsapp_number: string; // digits only with country code, e.g. 8801964437520
   whatsapp_message: string;
   address: string;
   social_facebook: string;
@@ -202,7 +202,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   logo_url: "",
   contact_email: "support@hobbyshopbd.com",
   contact_phone: "09638779900",
-  whatsapp_number: "8801865230553",
+  whatsapp_number: "8801964437520",
   whatsapp_message: "Hi HobbyShop! I have a question about your products.",
   address: "Dhaka, Bangladesh",
   social_facebook: "https://www.facebook.com/hobbyshopbd.shop",
