@@ -774,8 +774,6 @@ function Checkout() {
               {[
                 { id: "COD" as const, label: "Cash on Delivery", sub: "Pay on receive", color: "oklch(0.585 0.245 27.5)", badge: "POPULAR" },
                 { id: "bKash" as const, label: "bKash", sub: "Send Money", color: "oklch(0.55 0.22 0)" },
-                { id: "Nagad" as const, label: "Nagad", sub: "Send Money", color: "oklch(0.6 0.22 30)" },
-                { id: "Rocket" as const, label: "Rocket", sub: "Send Money", color: "oklch(0.5 0.18 300)" },
               ].map((opt) => (
                 <button
                   key={opt.id}
