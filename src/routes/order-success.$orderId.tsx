@@ -35,6 +35,10 @@ type Order = {
   shipping_district: string | null;
   discount_amount?: number | null;
   coupon_code?: string | null;
+  advance_source?: string | null;
+  advance_amount?: number | null;
+  advance_payment_number?: string | null;
+  advance_txn_id?: string | null;
   order_items: { id: string; product_id: string | null; name: string; image: string | null; price: number; quantity: number; variant_label: string | null }[];
 };
 
