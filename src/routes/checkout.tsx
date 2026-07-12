@@ -335,6 +335,29 @@ function Checkout() {
       releaseSubmit();
       return;
     }
+
+    // Digital payment validation
+    const isDigital = payMethod !== "COD";
+    const normalizedPayNumber = normalizePhone(payNumber);
+    const trimmedTrxId = trxId.trim().toLowerCase();
+    const parsedAdvance = Number(advanceAmount);
+    if (isDigital) {
+      if (!/^01[3-9]\d{8}$/.test(normalizedPayNumber)) {
+        toast.error("Please enter a valid 11-digit sender mobile number.");
+        releaseSubmit();
+        return;
+      }
+      if (trimmedTrxId.length < 6) {
+        toast.error("Please enter a valid Transaction ID (min 6 characters).");
+        releaseSubmit();
+        return;
+      }
+      if (!Number.isFinite(parsedAdvance) || parsedAdvance <= 0) {
+        toast.error("Please enter a valid paid amount.");
+        releaseSubmit();
+        return;
+      }
+    }
     const deliveryDistrict = form.district || (shipMethod === "inside" ? "Dhaka" : "Outside Dhaka");
     const deliveryCity = form.city.trim() || deliveryDistrict;
 
