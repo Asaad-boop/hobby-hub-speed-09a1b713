@@ -7,10 +7,10 @@ export type TierMap = Record<number, number>;
 
 export const PRODUCT_TIERS: Record<string, TierMap> = {
   "flower-pearl-curtain-buckle": {
-    2: 399,
-    3: 549,
-    4: 699,
-    6: 899,
+    4: 590,
+    6: 850,
+    8: 1090,
+    10: 1290,
   },
   // Product is sold as a 10pc pack; qty = number of packs.
   "compressed-travel-towel-disposable-face-towel": {
