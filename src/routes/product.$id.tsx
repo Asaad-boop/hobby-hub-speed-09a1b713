@@ -528,14 +528,45 @@ function ProductPage() {
             )}
           </div>
 
-          {/* Variant selector */}
-          {hasVariants && (
+          {/* Variant selector — mix mode replaces the Color selector */}
+          {mixEnabled && colorValues.length > 1 && (
+            <div className="mt-5">
+              <div className="mb-2 inline-flex rounded-full border border-border bg-muted p-1 text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => setMixMode(false)}
+                  className={`rounded-full px-3 py-1.5 transition ${!mixMode ? "bg-background text-foreground shadow" : "text-muted-foreground"}`}
+                >
+                  Single Color
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMixMode(true)}
+                  className={`rounded-full px-3 py-1.5 transition ${mixMode ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground"}`}
+                >
+                  Mix Colors ✨
+                </button>
+              </div>
+            </div>
+          )}
+
+          {hasVariants && !mixMode && (
             <VariantSelector
               optionTypes={optionTypes}
               optionValues={optionValues}
               variants={variants}
               selected={selectedValues}
               onChange={setSelectedValues}
+            />
+          )}
+
+          {mixMode && (
+            <MixColorPicker
+              colors={colorValues}
+              totalQty={qty}
+              step={2}
+              value={mixAlloc}
+              onChange={setMixAlloc}
             />
           )}
 
