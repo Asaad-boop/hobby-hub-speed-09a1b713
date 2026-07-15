@@ -859,24 +859,28 @@ function ProductPage() {
 
       {/* Sticky mobile buy bar */}
       {(() => {
-        const discount = qty === 3 ? 15 : qty === 2 ? 10 : 0;
-        const unitPrice = Math.round(product.price * (1 - discount / 100));
-        const totalPrice = unitPrice * qty;
-        const variantOpts = selectedVariant
+        const discountAmt = computeBundleDiscount(product.slug, effectivePrice, qty);
+        const totalPrice = Math.max(0, effectivePrice * qty - discountAmt);
+        const discount = effectivePrice * qty > 0
+          ? Math.round((discountAmt / (effectivePrice * qty)) * 100)
+          : 0;
+        const variantOpts = mixMode
+          ? { variantId: null as string | null, variantLabel: buildMixLabel(colorValues, mixAlloc) }
+          : selectedVariant
           ? { variantId: selectedVariant.id, variantLabel: variantSelectionLabel }
           : undefined;
+        const blocked = mixMode ? !mixReady : variantBlocksAddToCart;
+        const blockedMsg = mixMode
+          ? `Sob ${qty} pcs allocate korun (pair kore)`
+          : hasVariants && !allTypesSelected
+            ? "Select all options first"
+            : "Out of stock";
         const stickyAdd = () => {
-          if (variantBlocksAddToCart) {
-            toast.error(hasVariants && !allTypesSelected ? "Select all options first" : "Out of stock");
-            return;
-          }
+          if (blocked) { toast.error(blockedMsg); return; }
           add(product, qty, variantOpts);
         };
         const stickyBuy = () => {
-          if (variantBlocksAddToCart) {
-            toast.error(hasVariants && !allTypesSelected ? "Select all options first" : "Out of stock");
-            return;
-          }
+          if (blocked) { toast.error(blockedMsg); return; }
           add(product, qty, { silent: true, ...(variantOpts ?? {}) });
           setOpen(false);
           navigate({ to: "/checkout" });
@@ -895,7 +899,7 @@ function ProductPage() {
               <span className="font-bold">
                 <span className="text-foreground">৳{totalPrice}</span>
                 {discount > 0 && (
-                  <span className="ml-1.5 text-muted-foreground line-through">৳{product.price * qty}</span>
+                  <span className="ml-1.5 text-muted-foreground line-through">৳{effectivePrice * qty}</span>
                 )}
               </span>
             </div>
@@ -909,15 +913,15 @@ function ProductPage() {
               </button>
               <button
                 onClick={stickyAdd}
-                disabled={variantBlocksAddToCart}
-                className="flex-1 rounded-full border-2 border-foreground py-3 text-sm font-extrabold"
+                disabled={blocked}
+                className="flex-1 rounded-full border-2 border-foreground py-3 text-sm font-extrabold disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Add to Cart
               </button>
               <button
                 onClick={stickyBuy}
-                disabled={variantBlocksAddToCart}
-                className="buy-jiggle relative flex-[1.3] rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground"
+                disabled={blocked}
+                className="buy-jiggle relative flex-[1.3] rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Zap className="mr-1 inline-block h-4 w-4 fill-current align-[-2px]" />
                 Buy ৳{totalPrice}
