@@ -75,11 +75,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const variantLabel = opts?.variantLabel ?? null;
     setItems((cur) => {
       const found = cur.find(
-        (i) => i.product.id === p.id && (i.variantId ?? null) === variantId,
+        (i) =>
+          i.product.id === p.id &&
+          (i.variantId ?? null) === variantId &&
+          (variantId !== null || (i.variantLabel ?? null) === variantLabel),
       );
       if (found) {
         return cur.map((i) =>
-          i.product.id === p.id && (i.variantId ?? null) === variantId
+          i.product.id === p.id &&
+          (i.variantId ?? null) === variantId &&
+          (variantId !== null || (i.variantLabel ?? null) === variantLabel)
             ? { ...i, qty: i.qty + qty }
             : i,
         );
