@@ -918,6 +918,8 @@ function ProductPage() {
               >
                 Add to Cart
               </button>
+              <button
+                onClick={stickyBuy}
                 disabled={blocked}
                 className="buy-jiggle relative flex-[1.3] rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
               >
