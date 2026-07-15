@@ -12,6 +12,7 @@ import ProductCard from "@/components/ProductCard";
 import ReviewModal, { type NewReview } from "@/components/ReviewModal";
 import ReviewsList from "@/components/ReviewsList";
 import VariantSelector from "@/components/VariantSelector";
+import MixColorPicker, { buildMixLabel } from "@/components/MixColorPicker";
 import {
   fetchProductVariantData,
   findVariantByValues,
@@ -206,6 +207,21 @@ function ProductPage() {
         optionTypes.map((t) => selectedValues[t.id]),
       )
     : null;
+
+  // ---- Mix color mode (product-specific opt-in via slug) ----
+  const mixEnabled = product.slug === "flower-pearl-curtain-buckle";
+  const colorType = optionTypes.find((t) => t.name.toLowerCase() === "color");
+  const colorValues = colorType
+    ? optionValues.filter((v) => v.option_type_id === colorType.id)
+    : [];
+  const [mixMode, setMixMode] = useState(false);
+  const [mixAlloc, setMixAlloc] = useState<Record<string, number>>({});
+  // Reset allocation whenever qty changes so it never exceeds the pack size.
+  useEffect(() => {
+    if (mixMode) setMixAlloc({});
+  }, [qty, mixMode]);
+  const mixAllocated = Object.values(mixAlloc).reduce((s, n) => s + (n || 0), 0);
+  const mixReady = mixMode && mixAllocated === qty && qty > 0;
 
   // Variant images are kept OUT of the regular gallery and shown only
   // when the matching variant is selected.
@@ -512,14 +528,45 @@ function ProductPage() {
             )}
           </div>
 
-          {/* Variant selector */}
-          {hasVariants && (
+          {/* Variant selector — mix mode replaces the Color selector */}
+          {mixEnabled && colorValues.length > 1 && (
+            <div className="mt-5">
+              <div className="mb-2 inline-flex rounded-full border border-border bg-muted p-1 text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => setMixMode(false)}
+                  className={`rounded-full px-3 py-1.5 transition ${!mixMode ? "bg-background text-foreground shadow" : "text-muted-foreground"}`}
+                >
+                  Single Color
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMixMode(true)}
+                  className={`rounded-full px-3 py-1.5 transition ${mixMode ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground"}`}
+                >
+                  Mix Colors ✨
+                </button>
+              </div>
+            </div>
+          )}
+
+          {hasVariants && !mixMode && (
             <VariantSelector
               optionTypes={optionTypes}
               optionValues={optionValues}
               variants={variants}
               selected={selectedValues}
               onChange={setSelectedValues}
+            />
+          )}
+
+          {mixMode && (
+            <MixColorPicker
+              colors={colorValues}
+              totalQty={qty}
+              step={2}
+              value={mixAlloc}
+              onChange={setMixAlloc}
             />
           )}
 
@@ -625,24 +672,26 @@ function ProductPage() {
             const discountAmt = computeBundleDiscount(product.slug, effectivePrice, qty);
             const totalPrice = Math.max(0, effectivePrice * qty - discountAmt);
             const unitPrice = qty > 0 ? Math.round(totalPrice / qty) : effectivePrice;
-            const variantOpts = selectedVariant
+            const variantOpts = mixMode
+              ? { variantId: null, variantLabel: buildMixLabel(colorValues, mixAlloc) }
+              : selectedVariant
               ? { variantId: selectedVariant.id, variantLabel: variantSelectionLabel }
               : undefined;
+            const blocked = mixMode ? !mixReady : variantBlocksAddToCart;
+            const blockedMsg = mixMode
+              ? `Sob ${qty} pcs allocate korun (pair kore)`
+              : hasVariants && !allTypesSelected
+                ? "Select all options first"
+                : "Out of stock";
             // Add the product to cart at its ORIGINAL price. The bundle
             // (qty-based) discount is applied as a separate line at checkout
             // so it appears as a real "Discount" in the order/billing.
             const handleAdd = () => {
-              if (variantBlocksAddToCart) {
-                toast.error(hasVariants && !allTypesSelected ? "Select all options first" : "Out of stock");
-                return;
-              }
+              if (blocked) { toast.error(blockedMsg); return; }
               add(product, qty, variantOpts);
             };
             const handleBuy = () => {
-              if (variantBlocksAddToCart) {
-                toast.error(hasVariants && !allTypesSelected ? "Select all options first" : "Out of stock");
-                return;
-              }
+              if (blocked) { toast.error(blockedMsg); return; }
               add(product, qty, { silent: true, ...(variantOpts ?? {}) });
               setOpen(false);
               navigate({ to: "/checkout" });
@@ -651,14 +700,14 @@ function ProductPage() {
               <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <button
                   onClick={handleAdd}
-                  disabled={variantBlocksAddToCart}
+                  disabled={blocked}
                   className="group inline-flex items-center justify-center gap-2 rounded-full border-2 border-foreground bg-background px-4 py-4 text-sm font-extrabold text-foreground transition hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-background disabled:hover:text-foreground"
                 >
                   <ShoppingBag className="h-4 w-4 transition group-hover:scale-110" /> Add to Cart
                 </button>
                 <button
                   onClick={handleBuy}
-                  disabled={variantBlocksAddToCart}
+                  disabled={blocked}
                   className="buy-jiggle group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-primary px-4 py-4 text-sm font-extrabold text-primary-foreground transition hover:shadow-2xl disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
