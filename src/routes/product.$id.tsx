@@ -208,6 +208,21 @@ function ProductPage() {
       )
     : null;
 
+  // ---- Mix color mode (product-specific opt-in via slug) ----
+  const mixEnabled = product.slug === "flower-pearl-curtain-buckle";
+  const colorType = optionTypes.find((t) => t.name.toLowerCase() === "color");
+  const colorValues = colorType
+    ? optionValues.filter((v) => v.option_type_id === colorType.id)
+    : [];
+  const [mixMode, setMixMode] = useState(false);
+  const [mixAlloc, setMixAlloc] = useState<Record<string, number>>({});
+  // Reset allocation whenever qty changes so it never exceeds the pack size.
+  useEffect(() => {
+    if (mixMode) setMixAlloc({});
+  }, [qty, mixMode]);
+  const mixAllocated = Object.values(mixAlloc).reduce((s, n) => s + (n || 0), 0);
+  const mixReady = mixMode && mixAllocated === qty && qty > 0;
+
   // Variant images are kept OUT of the regular gallery and shown only
   // when the matching variant is selected.
   const variantImages = useMemo(
