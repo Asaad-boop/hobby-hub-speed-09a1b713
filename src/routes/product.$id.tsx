@@ -885,7 +885,39 @@ function ProductPage() {
           setOpen(false);
           navigate({ to: "/checkout" });
         };
-...
+        return (
+          <div className="fixed inset-x-0 bottom-[64px] z-40 border-t border-border bg-background/95 shadow-2xl backdrop-blur md:hidden">
+            <div className="flex items-center justify-between gap-3 px-4 pt-2 pb-1 text-[11px]">
+              <span className="font-bold text-muted-foreground">
+                {qty} {qty > 1 ? "PCS" : "PC"}
+                {discount > 0 && (
+                  <span className="ml-1.5 rounded-full bg-primary/10 px-1.5 py-0.5 font-extrabold text-primary">
+                    {discount}% OFF
+                  </span>
+                )}
+              </span>
+              <span className="font-bold">
+                <span className="text-foreground">৳{totalPrice}</span>
+                {discount > 0 && (
+                  <span className="ml-1.5 text-muted-foreground line-through">৳{effectivePrice * qty}</span>
+                )}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 p-3 pt-2">
+              <button
+                onClick={() => wishToggle(product)}
+                className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-border"
+                aria-label="Wishlist"
+              >
+                <Heart className={`h-5 w-5 ${wished ? "fill-primary text-primary" : ""}`} />
+              </button>
+              <button
+                onClick={stickyAdd}
+                disabled={blocked}
+                className="flex-1 rounded-full border-2 border-foreground py-3 text-sm font-extrabold disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Add to Cart
+              </button>
                 disabled={blocked}
                 className="buy-jiggle relative flex-[1.3] rounded-full bg-primary py-3 text-sm font-extrabold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
               >
