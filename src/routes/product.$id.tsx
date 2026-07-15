@@ -700,7 +700,7 @@ function ProductPage() {
               <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <button
                   onClick={handleAdd}
-                  disabled={variantBlocksAddToCart}
+                  disabled={blocked}
                   className="group inline-flex items-center justify-center gap-2 rounded-full border-2 border-foreground bg-background px-4 py-4 text-sm font-extrabold text-foreground transition hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-background disabled:hover:text-foreground"
                 >
                   <ShoppingBag className="h-4 w-4 transition group-hover:scale-110" /> Add to Cart
