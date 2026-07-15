@@ -672,24 +672,26 @@ function ProductPage() {
             const discountAmt = computeBundleDiscount(product.slug, effectivePrice, qty);
             const totalPrice = Math.max(0, effectivePrice * qty - discountAmt);
             const unitPrice = qty > 0 ? Math.round(totalPrice / qty) : effectivePrice;
-            const variantOpts = selectedVariant
+            const variantOpts = mixMode
+              ? { variantId: null, variantLabel: buildMixLabel(colorValues, mixAlloc) }
+              : selectedVariant
               ? { variantId: selectedVariant.id, variantLabel: variantSelectionLabel }
               : undefined;
+            const blocked = mixMode ? !mixReady : variantBlocksAddToCart;
+            const blockedMsg = mixMode
+              ? `Sob ${qty} pcs allocate korun (pair kore)`
+              : hasVariants && !allTypesSelected
+                ? "Select all options first"
+                : "Out of stock";
             // Add the product to cart at its ORIGINAL price. The bundle
             // (qty-based) discount is applied as a separate line at checkout
             // so it appears as a real "Discount" in the order/billing.
             const handleAdd = () => {
-              if (variantBlocksAddToCart) {
-                toast.error(hasVariants && !allTypesSelected ? "Select all options first" : "Out of stock");
-                return;
-              }
+              if (blocked) { toast.error(blockedMsg); return; }
               add(product, qty, variantOpts);
             };
             const handleBuy = () => {
-              if (variantBlocksAddToCart) {
-                toast.error(hasVariants && !allTypesSelected ? "Select all options first" : "Out of stock");
-                return;
-              }
+              if (blocked) { toast.error(blockedMsg); return; }
               add(product, qty, { silent: true, ...(variantOpts ?? {}) });
               setOpen(false);
               navigate({ to: "/checkout" });
