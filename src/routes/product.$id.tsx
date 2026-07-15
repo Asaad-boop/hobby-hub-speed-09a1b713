@@ -12,6 +12,7 @@ import ProductCard from "@/components/ProductCard";
 import ReviewModal, { type NewReview } from "@/components/ReviewModal";
 import ReviewsList from "@/components/ReviewsList";
 import VariantSelector from "@/components/VariantSelector";
+import MixColorPicker, { buildMixLabel } from "@/components/MixColorPicker";
 import {
   fetchProductVariantData,
   findVariantByValues,
