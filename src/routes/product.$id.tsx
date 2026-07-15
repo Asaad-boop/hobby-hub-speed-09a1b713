@@ -707,7 +707,7 @@ function ProductPage() {
                 </button>
                 <button
                   onClick={handleBuy}
-                  disabled={variantBlocksAddToCart}
+                  disabled={blocked}
                   className="buy-jiggle group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-primary px-4 py-4 text-sm font-extrabold text-primary-foreground transition hover:shadow-2xl disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
