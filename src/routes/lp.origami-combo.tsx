@@ -284,6 +284,8 @@ function LandingPage() {
       const variantLabel =
         variant === "combo"
           ? "Car + Plane Combo (1x Car Kit + 1x Plane Kit)"
+          : variant === "plane"
+          ? "Single Plane Kit (10 designs)"
           : "Single Car Kit (10 designs)";
 
       const baseOrder = {
