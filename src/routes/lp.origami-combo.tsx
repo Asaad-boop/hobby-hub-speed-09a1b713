@@ -250,6 +250,10 @@ function LandingPage() {
       toast.error("Plane kit ekhono load hoyni — page reload korun.");
       return;
     }
+    if (variant === "plane" && !plane) {
+      toast.error("Plane kit ekhono load hoyni — page reload korun.");
+      return;
+    }
 
     const trimmedName = form.name.trim();
     const trimmedAddress = form.address.trim();
