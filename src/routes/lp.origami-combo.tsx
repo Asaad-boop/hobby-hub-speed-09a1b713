@@ -197,7 +197,7 @@ function LandingPage() {
   const navigate = useNavigate();
   const placeOrderFn = useServerFn(placeOrder);
 
-  const [variant, setVariant] = useState<"single" | "combo">("combo");
+  const [variant, setVariant] = useState<"single" | "plane" | "combo">("combo");
   const [qty, setQty] = useState(1);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [submitting, setSubmitting] = useState(false);
@@ -205,14 +205,19 @@ function LandingPage() {
   const orderRef = useRef<HTMLDivElement | null>(null);
 
   const SINGLE_PRICE = 695;
+  const PLANE_PRICE = 695;
   const COMBO_PRICE = 1290;
   const SINGLE_OLD = 795;
+  const PLANE_OLD = 795;
   const COMBO_OLD = 1390;
 
-  const activeProduct: Product | null = car;
+  const activeProduct: Product | null =
+    variant === "plane" ? plane ?? car : car;
 
-  const unitPrice = variant === "combo" ? COMBO_PRICE : SINGLE_PRICE;
-  const oldPrice = variant === "combo" ? COMBO_OLD : SINGLE_OLD;
+  const unitPrice =
+    variant === "combo" ? COMBO_PRICE : variant === "plane" ? PLANE_PRICE : SINGLE_PRICE;
+  const oldPrice =
+    variant === "combo" ? COMBO_OLD : variant === "plane" ? PLANE_OLD : SINGLE_OLD;
 
   useEffect(() => {
     if (!activeProduct) return;
