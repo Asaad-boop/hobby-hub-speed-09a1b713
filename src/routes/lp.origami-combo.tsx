@@ -197,7 +197,7 @@ function LandingPage() {
   const navigate = useNavigate();
   const placeOrderFn = useServerFn(placeOrder);
 
-  const [variant, setVariant] = useState<"single" | "combo">("combo");
+  const [variant, setVariant] = useState<"single" | "plane" | "combo">("combo");
   const [qty, setQty] = useState(1);
   const [shipMethod, setShipMethod] = useState<"inside" | "outside">("inside");
   const [submitting, setSubmitting] = useState(false);
@@ -205,14 +205,19 @@ function LandingPage() {
   const orderRef = useRef<HTMLDivElement | null>(null);
 
   const SINGLE_PRICE = 695;
+  const PLANE_PRICE = 695;
   const COMBO_PRICE = 1290;
   const SINGLE_OLD = 795;
+  const PLANE_OLD = 795;
   const COMBO_OLD = 1390;
 
-  const activeProduct: Product | null = car;
+  const activeProduct: Product | null =
+    variant === "plane" ? plane ?? car : car;
 
-  const unitPrice = variant === "combo" ? COMBO_PRICE : SINGLE_PRICE;
-  const oldPrice = variant === "combo" ? COMBO_OLD : SINGLE_OLD;
+  const unitPrice =
+    variant === "combo" ? COMBO_PRICE : variant === "plane" ? PLANE_PRICE : SINGLE_PRICE;
+  const oldPrice =
+    variant === "combo" ? COMBO_OLD : variant === "plane" ? PLANE_OLD : SINGLE_OLD;
 
   useEffect(() => {
     if (!activeProduct) return;
@@ -242,6 +247,10 @@ function LandingPage() {
       return;
     }
     if (variant === "combo" && !plane) {
+      toast.error("Plane kit ekhono load hoyni — page reload korun.");
+      return;
+    }
+    if (variant === "plane" && !plane) {
       toast.error("Plane kit ekhono load hoyni — page reload korun.");
       return;
     }
@@ -275,6 +284,8 @@ function LandingPage() {
       const variantLabel =
         variant === "combo"
           ? "Car + Plane Combo (1x Car Kit + 1x Plane Kit)"
+          : variant === "plane"
+          ? "Single Plane Kit (10 designs)"
           : "Single Car Kit (10 designs)";
 
       const baseOrder = {
@@ -777,7 +788,7 @@ function LandingPage() {
             <div className="flex items-center gap-3 border-b border-border bg-muted/50 p-4">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-foreground">
-                  {variant === "combo" ? "Car + Plane Combo" : "Single — Car Kit"}
+                  {variant === "combo" ? "Car + Plane Combo" : variant === "plane" ? "Single — Plane Kit" : "Single — Car Kit"}
                 </p>
                 <p className="mt-0.5 text-base font-extrabold text-primary">
                   ৳ {unitPrice.toLocaleString()}
@@ -810,10 +821,11 @@ function LandingPage() {
                 <Label className="mb-2 block text-sm font-semibold">কোনটা নিতে চান?</Label>
                 <RadioGroup
                   value={variant}
-                  onValueChange={(v) => setVariant(v as "single" | "combo")}
-                  className="grid grid-cols-2 gap-2.5"
+                  onValueChange={(v) => setVariant(v as "single" | "plane" | "combo")}
+                  className="grid grid-cols-1 gap-2.5 sm:grid-cols-3"
                 >
-                  <VariantOption id="v-single" value="single" current={variant} title="Single — ৳৬৯৫" sub="১টি Car Kit" />
+                  <VariantOption id="v-single" value="single" current={variant} title="Car — ৳৬৯৫" sub="১টি Car Kit" />
+                  <VariantOption id="v-plane" value="plane" current={variant} title="Plane — ৳৬৯৫" sub="১টি Plane Kit" />
                   <VariantOption id="v-combo" value="combo" current={variant} title="Combo — ৳১২৯০" sub={`Car + Plane · ৳${savings} off`} />
                 </RadioGroup>
               </div>
