@@ -821,10 +821,11 @@ function LandingPage() {
                 <Label className="mb-2 block text-sm font-semibold">কোনটা নিতে চান?</Label>
                 <RadioGroup
                   value={variant}
-                  onValueChange={(v) => setVariant(v as "single" | "combo")}
-                  className="grid grid-cols-2 gap-2.5"
+                  onValueChange={(v) => setVariant(v as "single" | "plane" | "combo")}
+                  className="grid grid-cols-1 gap-2.5 sm:grid-cols-3"
                 >
-                  <VariantOption id="v-single" value="single" current={variant} title="Single — ৳৬৯৫" sub="১টি Car Kit" />
+                  <VariantOption id="v-single" value="single" current={variant} title="Car — ৳৬৯৫" sub="১টি Car Kit" />
+                  <VariantOption id="v-plane" value="plane" current={variant} title="Plane — ৳৬৯৫" sub="১টি Plane Kit" />
                   <VariantOption id="v-combo" value="combo" current={variant} title="Combo — ৳১২৯০" sub={`Car + Plane · ৳${savings} off`} />
                 </RadioGroup>
               </div>
