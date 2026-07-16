@@ -186,6 +186,22 @@ function ProductPage() {
   const variants = (variantData?.variants ?? []).filter((v) => v.is_active);
   const hasVariants = optionTypes.length > 0;
   const [selectedValues, setSelectedValues] = useState<Record<string, string>>({});
+  // Auto-select the first in-stock variant so customers see a chosen color by default.
+  useEffect(() => {
+    if (!hasVariants) return;
+    if (Object.keys(selectedValues).length > 0) return;
+    const firstInStock = variants.find((v) => v.stock > 0) ?? variants[0];
+    if (!firstInStock) return;
+    const next: Record<string, string> = {};
+    for (const t of optionTypes) {
+      const val = optionValues.find(
+        (ov) => ov.option_type_id === t.id && firstInStock.value_ids.includes(ov.id),
+      );
+      if (val) next[t.id] = val.id;
+    }
+    if (Object.keys(next).length === optionTypes.length) setSelectedValues(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasVariants, variants.length, optionTypes.length, optionValues.length]);
   const allTypesSelected = hasVariants && optionTypes.every((t) => !!selectedValues[t.id]);
   const selectedVariant = useMemo(
     () =>
